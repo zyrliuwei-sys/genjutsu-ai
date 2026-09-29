@@ -7,8 +7,12 @@ import { m } from '@/paraglide/messages.js';
 
 import '@/styles/hotel-lobby.css';
 
-const image = '/imgs/generated/hotel-lobby-duet.png';
-const storyImage = '/imgs/generated/hotel-lobby-sisters.png';
+const heroImage = '/imgs/generated/hotel-lobby-duet.png';
+const mobileHeroImage = '/imgs/generated/duet-hero-mobile.jpg';
+const previewImage = '/imgs/generated/duet-scene-preview.jpg';
+const friendsImage = '/imgs/generated/duet-friends.jpg';
+const siblingsImage = '/imgs/generated/duet-siblings.jpg';
+const coupleImage = '/imgs/generated/duet-couple.jpg';
 const basePrompt =
   'Turn TWO separate authorized adult portraits into a vertical 9:16 duet in a warm matte-orange recording booth. Preserve both faces and outfits. Keep person A full body on the LEFT and person B full body on the RIGHT, with one black microphone hanging at center. Person A performs first while B reacts, then switch. Use a locked centered camera, soft even light and restrained natural gestures. No face blending, side swaps, extra people, cuts, zooms, captions, logos or watermarks.';
 
@@ -118,13 +122,16 @@ export function HotelLobbyPage() {
       <main>
         <section className="hl-hero">
           <div className="hl-hero-frame">
-            <img
-              src={image}
-              alt={m['hotel.hero.image_alt']()}
-              width={1672}
-              height={941}
-              fetchPriority="high"
-            />
+            <picture>
+              <source media="(max-width: 600px)" srcSet={mobileHeroImage} />
+              <img
+                src={heroImage}
+                alt={m['hotel.hero.image_alt']()}
+                width={1672}
+                height={941}
+                fetchPriority="high"
+              />
+            </picture>
           </div>
           <div className="hl-hero-copy">
             <p className="hl-kicker">{m['hotel.hero.eyebrow']()}</p>
@@ -227,10 +234,10 @@ export function HotelLobbyPage() {
             <aside className="hl-preview">
               <div className="hl-preview-media">
                 <img
-                  src={image}
+                  src={previewImage}
                   alt={m['hotel.hero.image_alt']()}
-                  width={1672}
-                  height={941}
+                  width={1024}
+                  height={1536}
                 />
               </div>
               <div className="hl-preview-caption">
@@ -272,10 +279,10 @@ export function HotelLobbyPage() {
           <div className="hl-ideas-grid">
             <article>
               <img
-                src={storyImage}
+                src={friendsImage}
                 alt={m['hotel.ideas.image_alt']()}
-                width={1448}
-                height={1086}
+                width={1536}
+                height={1024}
                 loading="lazy"
               />
               <h3>{m['hotel.ideas.friends.title']()}</h3>
@@ -283,10 +290,10 @@ export function HotelLobbyPage() {
             </article>
             <article>
               <img
-                src={storyImage}
+                src={siblingsImage}
                 alt={m['hotel.ideas.siblings.image_alt']()}
-                width={1448}
-                height={1086}
+                width={1536}
+                height={1024}
                 loading="lazy"
               />
               <h3>{m['hotel.ideas.siblings.title']()}</h3>
@@ -294,10 +301,10 @@ export function HotelLobbyPage() {
             </article>
             <article>
               <img
-                src={image}
+                src={coupleImage}
                 alt={m['hotel.ideas.couples.image_alt']()}
-                width={1672}
-                height={941}
+                width={1536}
+                height={1024}
                 loading="lazy"
               />
               <h3>{m['hotel.ideas.couples.title']()}</h3>
@@ -335,6 +342,9 @@ export function HotelLobbyPage() {
           <div className="hl-section-intro">
             <p className="hl-kicker">{m['hotel.prompt.eyebrow']()}</p>
             <h2 id="prompt-heading">{m['hotel.prompt.title']()}</h2>
+            <div className="hl-prompt-ratio" aria-hidden="true">
+              <span>9:16</span>
+            </div>
           </div>
           <div className="hl-prose">
             <p>{m['hotel.prompt.one']()}</p>
