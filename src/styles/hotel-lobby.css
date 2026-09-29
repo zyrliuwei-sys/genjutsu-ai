@@ -400,6 +400,24 @@
 .hl-create textarea::placeholder {
   color: #a39589;
 }
+.hl-starter-label {
+  margin: 22px 0 9px;
+  color: var(--hl-cream);
+  font-size: 12px;
+  font-weight: 750;
+}
+.hl-starter-prompt {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--hl-line);
+  background: var(--hl-bg);
+  color: var(--hl-muted);
+  font:
+    12px/1.65 'DM Sans Variable',
+    sans-serif;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .hl-consent {
   display: flex;
   align-items: flex-start;
@@ -544,6 +562,14 @@
   justify-content: center;
   padding: 22px 0;
   border-top: 1px solid var(--hl-line);
+}
+.hl-ideas-grid article:not(:first-child) img {
+  display: block;
+  width: 100%;
+  height: 145px;
+  margin-bottom: 16px;
+  object-fit: cover;
+  object-position: center 42%;
 }
 .hl-ideas-grid article:last-child {
   border-bottom: 1px solid var(--hl-line);

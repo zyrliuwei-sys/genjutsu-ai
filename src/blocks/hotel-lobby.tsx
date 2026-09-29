@@ -182,6 +182,10 @@ export function HotelLobbyPage() {
                 maxLength={400}
                 placeholder={m['hotel.create.placeholder']()}
               />
+              <p className="hl-starter-label">
+                {m['hotel.create.starter_label']()}
+              </p>
+              <pre className="hl-starter-prompt">{basePrompt}</pre>
               <label className="hl-consent">
                 <input
                   type="checkbox"
@@ -278,10 +282,24 @@ export function HotelLobbyPage() {
               <p>{m['hotel.ideas.friends.text']()}</p>
             </article>
             <article>
+              <img
+                src={storyImage}
+                alt={m['hotel.ideas.siblings.image_alt']()}
+                width={1448}
+                height={1086}
+                loading="lazy"
+              />
               <h3>{m['hotel.ideas.siblings.title']()}</h3>
               <p>{m['hotel.ideas.siblings.text']()}</p>
             </article>
             <article>
+              <img
+                src={image}
+                alt={m['hotel.ideas.couples.image_alt']()}
+                width={1672}
+                height={941}
+                loading="lazy"
+              />
               <h3>{m['hotel.ideas.couples.title']()}</h3>
               <p>{m['hotel.ideas.couples.text']()}</p>
             </article>
@@ -330,7 +348,18 @@ export function HotelLobbyPage() {
             <h2 id="faq-heading">{m['hotel.faq.title']()}</h2>
           </div>
           <div className="hl-faq-list">
-            {(['one', 'two', 'three', 'four', 'five'] as const).map((item) => (
+            {(
+              [
+                'one',
+                'two',
+                'three',
+                'four',
+                'five',
+                'six',
+                'seven',
+                'eight',
+              ] as const
+            ).map((item) => (
               <details key={item}>
                 <summary>{m[`hotel.faq.${item}.question`]()}</summary>
                 <p>{m[`hotel.faq.${item}.answer`]()}</p>

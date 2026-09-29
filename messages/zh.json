@@ -862,6 +862,7 @@
   "hotel.create.left": "画面左侧",
   "hotel.create.right": "画面右侧",
   "hotel.create.direction": "想让他们如何表演？",
+  "hotel.create.starter_label": "可复制的基础提示词",
   "hotel.create.placeholder": "例如：主角 A 先唱，主角 B 在副歌加入。始终保持两人的面部清晰。",
   "hotel.create.consent": "我已获得照片使用许可，且照片中的人物均为成年人。",
   "hotel.create.copy": "复制提示词",
@@ -894,6 +895,8 @@
   "hotel.bottom.text": "选好两位主角，让这一幕变成你们的故事。",
   "hotel.footer.line": "用 Hotel Lobby AI 创作 AI 双人对唱视频。",
   "hotel.ideas.image_alt": "两位女性在橙色录音棚中对唱",
+  "hotel.ideas.siblings.image_alt": "两位女性在橙色录音棚的悬挂麦克风前轮流接唱",
+  "hotel.ideas.couples.image_alt": "两位成年人站在橙色录音棚悬挂麦克风的两侧",
   "hotel.explainer.eyebrow": "认识这个画面",
   "hotel.explainer.title": "什么是 Hotel Lobby AI Filter？",
   "hotel.explainer.one": "Hotel Lobby AI Filter 是一种双人 AI 视频创意：两位主角站在暖橙色录音棚的两侧，中间是一支悬挂的麦克风。镜头保持稳定，一人先唱，另一人回应，再交换主导。简洁的舞台让观众把注意力放在人物关系上，即使原始照片并非一起拍摄，也能构思出同框互动。",
@@ -924,5 +927,11 @@
   "hotel.faq.four.answer": "当参考图不够清楚，或者要求的动作过于复杂时，视频模型可能出现偏差。试试面部完整的照片，删掉额外的镜头运动，缩短对唱动作，并要求单一连续镜头。获得可用片段可能需要多次尝试。",
   "hotel.faq.five.question": "可以用情侣或朋友的照片吗？",
   "hotel.faq.five.answer": "可以。相同的橙色录音棚场景适合情侣、朋友或成年的家人。你可以调整人物关系和表演细节，同时保留两人的独立身份。请获得照片中人物的许可，分享时也不要把 AI 生成的表演说成真实录制。",
+  "hotel.faq.six.question": "Hotel Lobby AI 滤镜可以免费使用吗？",
+  "hotel.faq.six.answer": "可以。本页面的本地照片预览和提示词编辑功能免费。第三方视频生成工具可能对生成步骤收费，请在上传照片或开始生成前查看其价格。",
+  "hotel.faq.seven.question": "Hotel Lobby AI 流行视频是什么？",
+  "hotel.faq.seven.answer": "它是一段暖橙色录音棚里的双人对唱：两人站在一支悬挂麦克风两侧，一人唱一句，另一人回应。创作者通常用两张分开的照片构思同框的 AI 视频。",
+  "hotel.faq.eight.question": "可以使用 Dreamina 以外的工具吗？",
+  "hotel.faq.eight.answer": "可以。提示词不依赖特定工具。只要图生视频工具支持两张参考图和 9:16 竖版视频，就可以尝试。若使用 Higgsfield AI，请先确认其当前流程提供这些选项。",
   "hotel.logo_alt": "Hotel Lobby AI 麦克风标志"
 }
