@@ -9,7 +9,11 @@ export function Tawk({
   propertyId: string;
   widgetId: string;
 }) {
-  if (!propertyId || !widgetId) return null;
+  if (
+    !/^[A-Za-z0-9_-]{1,64}$/.test(propertyId) ||
+    !/^[A-Za-z0-9_-]{1,64}$/.test(widgetId)
+  )
+    return null;
   return (
     <script
       id="tawk-widget"

@@ -8,5 +8,5 @@ export function Header() {
     { href: '/blog', label: m['landing.nav.blog']() },
   ];
 
-  return <SiteHeader navLinks={navLinks} />;
+  return <SiteHeader navLinks={navLinks} logoAlt={m['hotel.logo_alt']()} />;
 }

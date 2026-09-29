@@ -32,6 +32,9 @@ export const Route = createFileRoute('/blog/$slug')({
       meta: [
         { title: `${post.title} | ${envConfigs.app_name}` },
         { name: 'description', content: post.description },
+        ...(post.source === 'local'
+          ? [{ name: 'robots', content: 'noindex,follow' }]
+          : []),
       ],
       links: [{ rel: 'canonical', href: canonical }],
     };

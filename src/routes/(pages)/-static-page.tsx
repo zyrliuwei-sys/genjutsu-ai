@@ -3,7 +3,12 @@ import { notFound, useLoaderData } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
 import { m } from '@/paraglide/messages.js';
-import { baseLocale, getLocale, localizeUrl } from '@/paraglide/runtime.js';
+import {
+  baseLocale,
+  getLocale,
+  locales,
+  localizeUrl,
+} from '@/paraglide/runtime.js';
 
 type PageMeta = {
   title: string;
@@ -55,7 +60,15 @@ export function staticPageRouteOptions(slug: string) {
           { title: meta.title },
           { name: 'description', content: meta.description },
         ],
-        links: [{ rel: 'canonical', href: canonical }],
+        links: [
+          { rel: 'canonical', href: canonical },
+          ...locales.map((loc) => ({
+            rel: 'alternate',
+            hrefLang: loc,
+            href: localizeUrl(`${envConfigs.app_url}/${slug}`, { locale: loc })
+              .href,
+          })),
+        ],
       };
     },
     component: StaticPage,

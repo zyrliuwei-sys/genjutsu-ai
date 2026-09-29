@@ -1,0 +1,15 @@
+allowBuilds:
+  esbuild: false
+  msw: false
+  sharp: false
+  workerd: false
+overrides:
+  next: 16.3.3
+  qs: 6.16.0
+  linkify-it: 5.0.2
+  'kysely@^0.28.0': 0.28.17
+  'nanoid@^3.0.0': 3.3.18
+  ws: 8.21.0
+  js-yaml: 4.3.2
+  postcss: 8.5.23
+  browserslist: 4.28.7

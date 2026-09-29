@@ -1,42 +1,50 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
-import { baseLocale } from '@/paraglide/runtime.js';
-import { getLocalPosts, mergePosts } from '@/content/posts';
+import { m } from '@/paraglide/messages.js';
 
 const STATIC_PAGES: { path: string; title: string; description: string }[] = [
-  { path: '', title: 'Home', description: 'Landing page' },
-  { path: '/pricing', title: 'Pricing', description: 'Pricing plans' },
-  { path: '/blog', title: 'Blog', description: 'Blog posts and articles' },
+  {
+    path: '',
+    title: 'Hotel Lobby AI Filter',
+    description: 'Two-person duet planning and prompt guide',
+  },
+  {
+    path: '/privacy-policy',
+    title: 'Privacy Policy',
+    description: 'Privacy information',
+  },
+  {
+    path: '/terms-of-service',
+    title: 'Terms of Service',
+    description: 'Terms of use',
+  },
 ];
 
 export const Route = createFileRoute('/llms.txt')({
   server: {
     handlers: {
       GET: async () => {
-        const { app_url, app_name, app_description } = envConfigs;
+        const { app_url, app_name } = envConfigs;
 
-        let posts = getLocalPosts(baseLocale);
+        let posts: { slug: string; title: string; description: string }[] = [];
         try {
           const { listPublishedArticles } =
             await import('@/modules/posts/service');
           const rows = await listPublishedArticles().catch(() => []);
-          const dbPosts = rows.map((row) => ({
+          posts = rows.map((row) => ({
             slug: row.slug,
             title: row.title || row.slug,
             description: row.description || '',
-            createdAt: new Date(row.createdAt).toISOString(),
-            source: 'db' as const,
           }));
-          posts = mergePosts(dbPosts, posts);
         } catch {
-          // Database unreachable — local posts still listed.
+          // Database unreachable — static project pages still listed.
         }
 
         const lines: string[] = [
           `# ${app_name}`,
           '',
-          `> ${app_description}`,
+          `> ${m['common.metadata.description']({}, { locale: 'en' })}`,
           '',
           '## Pages',
           '',

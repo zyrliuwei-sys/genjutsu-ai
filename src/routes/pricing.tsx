@@ -19,6 +19,7 @@ export const Route = createFileRoute('/pricing')({
       ? [
           { title: loaderData.title },
           { name: 'description', content: loaderData.description },
+          { name: 'robots', content: 'noindex,follow' },
         ]
       : [],
   }),

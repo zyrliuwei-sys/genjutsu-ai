@@ -30,6 +30,12 @@ export default {
   async fetch(req: Request): Promise<Response> {
     await ensureCloudflareEnv();
     const response = await paraglideMiddleware(req, () => handler.fetch(req));
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    response.headers.set(
+      'Permissions-Policy',
+      'camera=(), microphone=(), geolocation=()'
+    );
     const utmSource = new URL(req.url).searchParams.get('utm_source');
     const existing = getCookieFromHeader(
       req.headers.get('cookie'),
@@ -40,7 +46,7 @@ export default {
       if (sanitized) {
         response.headers.append(
           'Set-Cookie',
-          `utm_source=${sanitized}; Max-Age=2592000; Path=/; SameSite=Lax`
+          `utm_source=${sanitized}; Max-Age=2592000; Path=/; SameSite=Lax${new URL(req.url).protocol === 'https:' ? '; Secure' : ''}`
         );
       }
     }

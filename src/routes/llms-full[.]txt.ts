@@ -1,25 +1,36 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
-import { baseLocale } from '@/paraglide/runtime.js';
-import { getLocalPosts, mergePosts } from '@/content/posts';
+import { m } from '@/paraglide/messages.js';
 
 const STATIC_PAGES: { path: string; title: string; description: string }[] = [
-  { path: '', title: 'Home', description: 'Landing page' },
-  { path: '/pricing', title: 'Pricing', description: 'Pricing plans' },
-  { path: '/blog', title: 'Blog', description: 'Blog posts and articles' },
+  {
+    path: '',
+    title: 'Hotel Lobby AI Filter',
+    description: 'Two-person duet planning and prompt guide',
+  },
+  {
+    path: '/privacy-policy',
+    title: 'Privacy Policy',
+    description: 'Privacy information',
+  },
+  {
+    path: '/terms-of-service',
+    title: 'Terms of Service',
+    description: 'Terms of use',
+  },
 ];
 
 export const Route = createFileRoute('/llms-full.txt')({
   server: {
     handlers: {
       GET: async () => {
-        const { app_url, app_name, app_description } = envConfigs;
+        const { app_url, app_name } = envConfigs;
 
         const lines: string[] = [
           `# ${app_name}`,
           '',
-          `> ${app_description}`,
+          `> ${m['common.metadata.description']({}, { locale: 'en' })}`,
           '',
           '## Pages',
           '',
@@ -28,7 +39,12 @@ export const Route = createFileRoute('/llms-full.txt')({
           ),
         ];
 
-        let posts = getLocalPosts(baseLocale);
+        let posts: {
+          slug: string;
+          title: string;
+          description: string;
+          source: 'db';
+        }[] = [];
         try {
           const { listPublishedArticles, findPublishedBySlug } =
             await import('@/modules/posts/service');
@@ -40,7 +56,7 @@ export const Route = createFileRoute('/llms-full.txt')({
             createdAt: new Date(row.createdAt).toISOString(),
             source: 'db' as const,
           }));
-          posts = mergePosts(dbPosts, posts);
+          posts = dbPosts;
 
           if (posts.length > 0) {
             lines.push('', '## Blog Posts', '');
@@ -65,17 +81,7 @@ export const Route = createFileRoute('/llms-full.txt')({
             }
           }
         } catch {
-          // Database unreachable — list local posts without content.
-          if (posts.length > 0) {
-            lines.push('', '## Blog Posts', '');
-            for (const post of posts) {
-              lines.push(`### ${post.title}`, '');
-              lines.push(`URL: ${app_url}/blog/${post.slug}`);
-              if (post.description)
-                lines.push(`Description: ${post.description}`);
-              lines.push('', '---', '');
-            }
-          }
+          // Database unreachable — static project pages still listed.
         }
 
         lines.push('');

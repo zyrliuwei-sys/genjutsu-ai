@@ -23,17 +23,30 @@ export interface NavLink {
 /** Off-site URLs render as plain <a>; internal paths use the locale-aware Link. */
 const isExternalHref = (href: string) => /^https?:\/\//.test(href);
 
-export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
+export function SiteHeader({
+  navLinks,
+  logoAlt,
+}: {
+  navLinks?: NavLink[];
+  logoAlt: string;
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: session } = useSession();
   const user = session?.user;
 
   return (
-    <header className="bg-background/80 sticky top-0 z-50 w-full backdrop-blur-sm">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+    <header className="bg-background/95 border-border sticky top-0 z-50 w-full border-b backdrop-blur-sm">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6">
         {/* Brand */}
-        <Link href="/" className="flex items-center">
-          <span className="font-serif text-lg italic">
+        <Link href="/" className="flex items-center gap-2.5">
+          <img
+            src={envConfigs.app_logo}
+            alt={logoAlt}
+            width={512}
+            height={512}
+            className="size-8 rounded-full"
+          />
+          <span className="text-base font-bold tracking-tight">
             {envConfigs.app_name}
           </span>
         </Link>

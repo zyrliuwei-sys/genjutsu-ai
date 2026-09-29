@@ -3,13 +3,13 @@
  * @see https://docs.crisp.chat/
  */
 export function Crisp({ websiteId }: { websiteId: string }) {
-  if (!websiteId) return null;
+  if (!/^[A-Za-z0-9-]{1,64}$/.test(websiteId)) return null;
   return (
     <script
       id="crisp-widget"
       async
       dangerouslySetInnerHTML={{
-        __html: `window.$crisp=[];window.CRISP_WEBSITE_ID="${websiteId}";(function(){var d=document;var s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();`,
+        __html: `window.$crisp=[];window.CRISP_WEBSITE_ID=${JSON.stringify(websiteId)};(function(){var d=document;var s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();`,
       }}
     />
   );

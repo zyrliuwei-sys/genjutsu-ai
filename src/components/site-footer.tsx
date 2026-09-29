@@ -3,7 +3,6 @@ import type { ComponentType, SVGProps } from 'react';
 import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
 import { cn } from '@/lib/utils';
-import { BuiltWithShipAny } from '@/components/built-with-shipany';
 import { LocaleSelector } from '@/components/locale-selector';
 
 export interface FooterColumn {
@@ -13,7 +12,7 @@ export interface FooterColumn {
 }
 
 /** Off-site URLs render as plain <a>; internal paths use the locale-aware Link. */
-const isExternalHref = (href: string) => /^https?:\/\//.test(href);
+const isExternalHref = (href: string) => /^(https?:\/\/|mailto:)/.test(href);
 
 export interface FooterSocial {
   icon: ComponentType<SVGProps<SVGSVGElement>>;
@@ -35,10 +34,10 @@ export function SiteFooter({
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-neutral-950 text-neutral-100">
+    <footer className="bg-background text-foreground border-border border-t">
       <div className="mx-auto max-w-7xl px-6 pt-14 pb-6 sm:px-10 sm:pt-16 lg:px-16">
         {tagline && (
-          <p className="mb-12 max-w-2xl font-serif text-3xl leading-[1.15] tracking-tight text-neutral-100 italic sm:text-4xl">
+          <p className="mb-12 max-w-2xl font-serif text-4xl leading-[1] tracking-wide sm:text-5xl">
             {tagline}
           </p>
         )}
@@ -56,7 +55,7 @@ export function SiteFooter({
           >
             {columns.map((col) => (
               <div key={col.title} className="space-y-5">
-                <p className="text-[13px] font-semibold tracking-wide text-neutral-100">
+                <p className="text-foreground text-[13px] font-semibold tracking-wide">
                   {col.title}
                 </p>
                 <ul className="space-y-2">
@@ -65,9 +64,13 @@ export function SiteFooter({
                       {isExternalHref(link.href) ? (
                         <a
                           href={link.href}
-                          target="_blank"
+                          target={
+                            link.href.startsWith('mailto:')
+                              ? undefined
+                              : '_blank'
+                          }
                           rel="noopener noreferrer"
-                          className="text-sm text-neutral-400 transition-colors hover:text-neutral-100"
+                          className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                         >
                           {link.label}
                         </a>
@@ -75,7 +78,7 @@ export function SiteFooter({
                         <Link
                           href={link.href}
                           target={link.external ? '_blank' : undefined}
-                          className="text-sm text-neutral-400 transition-colors hover:text-neutral-100"
+                          className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                         >
                           {link.label}
                         </Link>
@@ -99,7 +102,7 @@ export function SiteFooter({
                   aria-label={s.label}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-300 transition-colors hover:text-neutral-100"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <s.icon className="size-[18px]" />
                 </a>
@@ -110,14 +113,13 @@ export function SiteFooter({
           )}
           <LocaleSelector
             variant="pill"
-            className="border-neutral-700 text-neutral-200 hover:bg-white/5 hover:text-neutral-50"
+            className="border-border text-foreground hover:bg-accent hover:text-accent-foreground"
           />
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-6 flex flex-col gap-3 border-t border-neutral-800 pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <BuiltWithShipAny />
-          <span className="text-sm text-neutral-400">
+        <div className="border-border mt-6 flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-muted-foreground text-sm">
             {copyright ||
               `© ${year} ${envConfigs.app_name}. All rights reserved.`}
           </span>

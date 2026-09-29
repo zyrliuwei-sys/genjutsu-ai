@@ -29,8 +29,20 @@ FROM deps AS builder
 
 WORKDIR /app
 
-# NODE_ENV=production so loadEnvFiles() in vite.config.ts reads .env.production
+# Only public VITE_* values are available during the build. Runtime secrets
+# such as AUTH_SECRET and DATABASE_URL must be supplied to the running container.
 ENV NODE_ENV=production
+
+ARG VITE_APP_URL=https://hotel-lobby.org
+ARG VITE_APP_NAME="Hotel Lobby AI"
+ARG VITE_APP_DESCRIPTION="Plan a two-person Hotel Lobby AI filter video and copy a prompt for an image-to-video studio."
+ARG VITE_APP_LOGO=/logo.svg
+ARG VITE_DEFAULT_LOCALE=en
+ENV VITE_APP_URL=${VITE_APP_URL} \
+    VITE_APP_NAME=${VITE_APP_NAME} \
+    VITE_APP_DESCRIPTION=${VITE_APP_DESCRIPTION} \
+    VITE_APP_LOGO=${VITE_APP_LOGO} \
+    VITE_DEFAULT_LOCALE=${VITE_DEFAULT_LOCALE}
 
 COPY . .
 RUN pnpm build
