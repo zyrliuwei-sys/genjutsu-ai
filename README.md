@@ -99,6 +99,18 @@ All admin pages include:
 | `pnpm rbac:init`   | Create roles + permissions + optional admin user |
 | `pnpm rbac:assign` | Assign role to user                              |
 
+## Cloudflare deployment
+
+The `hotel-lobby-ai` Worker builds and deploys automatically when `main` is
+pushed. Cloudflare Workers Builds runs `pnpm cf:ci:build`, then
+`pnpm exec wrangler deploy`.
+
+[`wrangler.production.json`](./wrangler.production.json) is the tracked source
+for the Worker name, D1 binding, domain, and public app settings. The CI build
+recreates the ignored `wrangler.jsonc` and `.env.production` files from it.
+Keep credentials in Cloudflare runtime secrets; never add them to this file.
+Database migrations still require a separate review and apply step.
+
 ## Claude Code Skills
 
 | Skill              | What it does                                        |
