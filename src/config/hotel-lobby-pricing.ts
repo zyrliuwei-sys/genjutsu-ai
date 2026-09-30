@@ -23,7 +23,9 @@ export function falCostUsd(referenceSeconds: number) {
 
 export function duetCredits(referenceSeconds = DEFAULT_REFERENCE_SECONDS) {
   const seconds = Math.min(Math.max(referenceSeconds, 1), 30);
-  return Math.ceil((falCostUsd(seconds) * PRICE_MARKUP) / USD_PER_CREDIT);
+  const credits = (falCostUsd(seconds) * PRICE_MARKUP) / USD_PER_CREDIT;
+  // Round off float noise (0.6 × 7 / 0.01 = 420.00000000000006) before ceil.
+  return Math.ceil(Number(credits.toFixed(6)));
 }
 
 /**

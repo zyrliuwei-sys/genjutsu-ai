@@ -891,6 +891,7 @@
   "hotel.create.person_b": "Add person B",
   "hotel.create.left": "LEFT SIDE",
   "hotel.create.right": "RIGHT SIDE",
+  "hotel.create.size": "Video size",
   "hotel.create.direction": "What should happen?",
   "hotel.create.starter_label": "Starter prompt to copy",
   "hotel.create.placeholder": "Optional, e.g. both wearing sunglasses. Keep faces clearly visible.",

@@ -402,6 +402,47 @@
   font-size: 13px;
   font-weight: 750;
 }
+.hl-sizes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.hl-size {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  height: 84px;
+  padding: 12px 8px 10px;
+  border: 1px solid #66584d;
+  border-radius: 2px;
+  background: var(--hl-surface);
+  color: var(--hl-muted);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.hl-size[aria-checked='true'] {
+  border-color: var(--hl-copper);
+  color: var(--hl-cream);
+}
+.hl-size:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.hl-size-shape {
+  display: block;
+  height: 38px;
+  max-width: 64px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+}
+.hl-size[aria-checked='true'] .hl-size-shape {
+  border-color: var(--hl-copper);
+  background: color-mix(in oklab, var(--hl-copper) 18%, transparent);
+}
 .hl-create textarea {
   display: block;
   width: 100%;

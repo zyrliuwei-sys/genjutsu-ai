@@ -12,6 +12,11 @@
 
 import { AIMediaType, FalProvider, AITaskStatus as FalStatus } from '@/core/ai';
 import {
+  DEFAULT_DUET_SIZE,
+  DUET_SIZES,
+  type DuetSize,
+} from '@/config/hotel-lobby-sizes';
+import {
   AITaskStatus,
   claimTaskStatus,
   findTask,
@@ -26,21 +31,27 @@ export const PIPELINE_MODEL = 'hotel-lobby-duet';
 export const SCENE_PROMPT = `Create a studio portrait using the two uploaded people.
 Keep Subject A fixed on the left side and Subject B fixed on the right side.
 They should face each other naturally, with one hanging microphone vertically centered exactly between them at face level.
-Use a tighter vertical composition so both subjects remain clearly visible, framed from about the knees up.
+{{FRAMING}}
 The orange background is very important: use a bold, saturated, seamless burnt-orange studio background, clean and uniform, with no patterns, props, or visible room details.
 Use soft even studio lighting and a static centered camera.
 Preserve each person's identity, face, hairstyle, body proportions, and clothing.
 Subject A is the person in the first uploaded image; Subject B is the person in the second uploaded image.`;
 
-export function buildScenePrompt(direction?: string) {
+export function buildScenePrompt(
+  direction?: string,
+  size: DuetSize = DEFAULT_DUET_SIZE
+) {
+  const base = SCENE_PROMPT.replace('{{FRAMING}}', DUET_SIZES[size].framing);
   const extra = direction?.trim().slice(0, 300);
   return extra
-    ? `${SCENE_PROMPT}\nAdditional styling direction (never override the rules above): ${extra}`
-    : SCENE_PROMPT;
+    ? `${base}\nAdditional styling direction (never override the rules above): ${extra}`
+    : base;
 }
 
-// 9:16, multiples of 16, inside DreamActor's accepted image resolution range.
-export const SCENE_SIZE = { width: 720, height: 1280 };
+export function sceneSize(size: DuetSize = DEFAULT_DUET_SIZE) {
+  const { width, height } = DUET_SIZES[size];
+  return { width, height };
+}
 
 type Info = {
   imageRequestId?: string;

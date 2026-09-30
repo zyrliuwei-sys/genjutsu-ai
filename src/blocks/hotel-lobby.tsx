@@ -6,6 +6,11 @@ import { toast } from 'sonner';
 import { useSession } from '@/core/auth/client';
 import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
+import {
+  DEFAULT_DUET_SIZE,
+  DUET_SIZES,
+  type DuetSize,
+} from '@/config/hotel-lobby-sizes';
 import { apiGet, apiPost } from '@/lib/api-client';
 import { m } from '@/paraglide/messages.js';
 import { Pricing } from '@/blocks/pricing';
@@ -89,6 +94,7 @@ export function HotelLobbyPage() {
   const [photoA, setPhotoA] = useState<File | null>(null);
   const [photoB, setPhotoB] = useState<File | null>(null);
   const [direction, setDirection] = useState('');
+  const [size, setSize] = useState<DuetSize>(DEFAULT_DUET_SIZE);
   const [taskId, setTaskId] = useState<string>();
   const [consent, setConsent] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -102,6 +108,7 @@ export function HotelLobbyPage() {
         photoA: await toDataUrl(photoA!),
         photoB: await toDataUrl(photoB!),
         direction: direction.trim() || undefined,
+        size,
       }),
     onSuccess: (task) => setTaskId(task.id),
   });
@@ -251,6 +258,34 @@ export function HotelLobbyPage() {
                   side={m['hotel.create.right']()}
                   onFile={setPhotoB}
                 />
+              </div>
+              <p className="hl-field-label" id="duet-size-label">
+                {m['hotel.create.size']()}
+              </p>
+              <div
+                className="hl-sizes"
+                role="radiogroup"
+                aria-labelledby="duet-size-label"
+              >
+                {(Object.keys(DUET_SIZES) as DuetSize[]).map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    role="radio"
+                    aria-checked={size === key}
+                    className="hl-size"
+                    disabled={running}
+                    onClick={() => setSize(key)}
+                  >
+                    <span
+                      className="hl-size-shape"
+                      style={{
+                        aspectRatio: `${DUET_SIZES[key].width} / ${DUET_SIZES[key].height}`,
+                      }}
+                    />
+                    <span>{key}</span>
+                  </button>
+                ))}
               </div>
               <label className="hl-field-label" htmlFor="direction">
                 {m['hotel.create.direction']()}

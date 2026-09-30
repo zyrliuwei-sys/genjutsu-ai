@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { AIMediaType, FalProvider } from '@/core/ai';
 import { getAuth } from '@/core/auth';
 import { resolveDuetCredits } from '@/config/hotel-lobby-pricing';
+import { DEFAULT_DUET_SIZE, isDuetSize } from '@/config/hotel-lobby-sizes';
 import {
   AITaskStatus,
   createTask,
@@ -17,7 +18,7 @@ import {
   buildScenePrompt,
   IMAGE_MODEL,
   PIPELINE_MODEL,
-  SCENE_SIZE,
+  sceneSize,
   taskView,
 } from './-pipeline';
 
@@ -44,6 +45,7 @@ async function POST({ request }: { request: Request }) {
     }
     const direction =
       typeof body?.direction === 'string' ? body.direction : undefined;
+    const size = isDuetSize(body?.size) ? body.size : DEFAULT_DUET_SIZE;
 
     const configs = await getAllConfigs();
     if (!configs.fal_api_key) return respErr('Generation is not configured');
@@ -54,7 +56,7 @@ async function POST({ request }: { request: Request }) {
     const isAdmin = await hasPermission(session.user.id, 'admin.*');
     const price = resolveDuetCredits(configs);
 
-    const prompt = buildScenePrompt(direction);
+    const prompt = buildScenePrompt(direction, size);
     const task = await createTask({
       userId: session.user.id,
       mediaType: AIMediaType.VIDEO,
@@ -73,7 +75,7 @@ async function POST({ request }: { request: Request }) {
           prompt,
           options: {
             image_urls: photos,
-            image_size: SCENE_SIZE,
+            image_size: sceneSize(size),
             quality: 'high',
             output_format: 'jpeg',
           },

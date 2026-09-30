@@ -891,6 +891,7 @@
   "hotel.create.person_b": "上传主角 B",
   "hotel.create.left": "画面左侧",
   "hotel.create.right": "画面右侧",
+  "hotel.create.size": "视频尺寸",
   "hotel.create.direction": "想让他们如何表演？",
   "hotel.create.starter_label": "可复制的基础提示词",
   "hotel.create.placeholder": "可选，例如：两人都戴墨镜。请保持面部清晰可见。",
