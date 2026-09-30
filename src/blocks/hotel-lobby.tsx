@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ArrowRight, Download, Loader2, Upload, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { useSession } from '@/core/auth/client';
 import { Link } from '@/core/i18n/navigation';
@@ -127,6 +128,10 @@ export function HotelLobbyPage() {
     generate.error?.message ??
     (task?.status === 'failed' ? task.error : null) ??
     null;
+  // The inline status line is easy to miss below the button; also toast.
+  useEffect(() => {
+    if (error) toast.error(`${m['hotel.create.failed']()}: ${error}`);
+  }, [error]);
   const reset = () => {
     generate.reset();
     setTaskId(undefined);
