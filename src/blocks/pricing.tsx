@@ -51,7 +51,7 @@ export function Pricing({ title }: { title?: string } = {}) {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const { data: configsData } = usePublicConfig();
+  const { data: configsData, refetch: refetchConfigs } = usePublicConfig();
   const configs = configsData ?? {};
   const [modalOpen, setModalOpen] = useState(false);
   const [pendingPlan, setPendingPlan] = useState<PricingPlan | null>(null);
@@ -219,7 +219,7 @@ export function Pricing({ title }: { title?: string } = {}) {
       provider,
     }: {
       plan: PricingPlan;
-      provider: PaymentProvider;
+      provider?: PaymentProvider;
     }) =>
       apiPost<{ checkout_url?: string }>('/api/payment/checkout', {
         product_id: plan.productId,
@@ -250,8 +250,8 @@ export function Pricing({ title }: { title?: string } = {}) {
     },
   });
 
-  function startCheckout(plan: PricingPlan, provider: PaymentProvider) {
-    setLoadingProvider(provider);
+  function startCheckout(plan: PricingPlan, provider?: PaymentProvider) {
+    setLoadingProvider(provider ?? null);
     checkoutMutation.mutate({ plan, provider });
   }
 
@@ -262,12 +262,17 @@ export function Pricing({ title }: { title?: string } = {}) {
       return;
     }
 
-    const selectEnabled = configs.select_payment_enabled === 'true';
-    const defaultProvider = (configs.default_payment_provider ||
-      enabledProviders[0] ||
-      'stripe') as PaymentProvider;
+    // A click can land before public config has loaded — fetch it first
+    // instead of guessing a provider that may not be configured.
+    const cfg = configsData ?? (await refetchConfigs()).data ?? {};
+    const enabled = ALL_PROVIDERS.filter((p) => cfg[`${p}_enabled`] === 'true');
+    const selectEnabled = cfg.select_payment_enabled === 'true';
+    // Unknown → omit it; the server falls back to the admin default provider.
+    const defaultProvider = (cfg.default_payment_provider || enabled[0]) as
+      | PaymentProvider
+      | undefined;
 
-    if (selectEnabled && enabledProviders.length > 1) {
+    if (selectEnabled && enabled.length > 1) {
       setPendingPlan(plan);
       setModalOpen(true);
       return;
