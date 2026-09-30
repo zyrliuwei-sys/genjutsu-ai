@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, Check, Copy, Upload, X } from 'lucide-react';
 
+import { useSession } from '@/core/auth/client';
 import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
 import { m } from '@/paraglide/messages.js';
+import { SiteUserMenu } from '@/components/site-user-menu';
 
 import '@/styles/hotel-lobby.css';
 
@@ -67,6 +69,8 @@ export function HotelLobbyPage() {
   const [copied, setCopied] = useState(false);
   const [consent, setConsent] = useState(false);
   const [menu, setMenu] = useState(false);
+  const { data: session } = useSession();
+  const user = session?.user;
   const canOpen = consent && !!photoA && !!photoB;
   const prompt = `${basePrompt}${direction.trim() ? ` Additional direction: ${direction.trim().slice(0, 400)}.` : ''}`;
   const generatorUrl = `https://dreamina.capcut.com/ai-tool/home?need_login=true&type=video&prompt=${encodeURIComponent(prompt)}`;
@@ -106,9 +110,17 @@ export function HotelLobbyPage() {
           </a>
         </nav>
         <div className="hl-header-actions">
-          <a className="hl-nav-cta" href="#create">
-            {m['hotel.hero.cta']()} <ArrowRight size={16} />
-          </a>
+          {user ? (
+            <SiteUserMenu
+              name={user.name || user.email}
+              email={user.email}
+              image={user.image}
+            />
+          ) : (
+            <Link className="hl-nav-cta" href="/sign-in">
+              {m['common.sign.sign_in_title']()} <ArrowRight size={16} />
+            </Link>
+          )}
           <button
             className="hl-menu"
             onClick={() => setMenu(!menu)}
