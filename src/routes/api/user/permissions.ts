@@ -10,8 +10,11 @@ async function GET({ request }: { request: Request }) {
     const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user) return respErr('Unauthorized');
 
-    const isAdmin = await hasPermission(session.user.id, 'admin.*');
-    return respData({ isAdmin });
+    const [isAdmin, isSuperAdmin] = await Promise.all([
+      hasPermission(session.user.id, 'admin.*'),
+      hasPermission(session.user.id, '*'),
+    ]);
+    return respData({ isAdmin, isSuperAdmin });
   } catch (error: any) {
     return respErr(error.message || 'Internal error');
   }

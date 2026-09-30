@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 import {
+  BadgeCheck,
   CreditCard,
   FolderOpen,
   Home,
@@ -10,6 +11,7 @@ import {
 
 import { envConfigs } from '@/config';
 import { m } from '@/paraglide/messages.js';
+import { useUserPermissions } from '@/hooks/use-user-permissions';
 import { AppLayout } from '@/components/app-layout';
 
 export const Route = createFileRoute('/admin')({
@@ -19,6 +21,9 @@ export const Route = createFileRoute('/admin')({
 
 function AdminLayout() {
   const group = m['common.systems.admin']();
+  // Footer badges are super-admin only (the API enforces `*`); hide the
+  // entry from regular admins instead of showing a page that 403s.
+  const { data: permissions } = useUserPermissions();
   const navItems = [
     {
       href: '/admin',
@@ -63,6 +68,15 @@ function AdminLayout() {
   ];
 
   const footerNavItems = [
+    ...(permissions?.isSuperAdmin
+      ? [
+          {
+            href: '/admin/footer-badges',
+            label: m['admin.nav.footer_badges'](),
+            icon: BadgeCheck,
+          },
+        ]
+      : []),
     {
       href: '/admin/settings',
       label: m['admin.nav.settings'](),

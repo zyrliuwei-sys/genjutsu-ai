@@ -4,6 +4,7 @@ import { apiGet } from '@/lib/api-client';
 
 export interface UserPermissions {
   isAdmin: boolean;
+  isSuperAdmin?: boolean;
   permissions?: string[];
 }
 

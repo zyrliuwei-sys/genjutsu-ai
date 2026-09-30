@@ -977,5 +977,22 @@
   "hotel.faq.seven.answer": "它是一段暖橙色录音棚里的双人对唱：两人站在一支悬挂麦克风两侧，一人唱一句，另一人回应。创作者通常用两张分开的照片构思同框的 AI 视频。",
   "hotel.faq.eight.question": "还能用 Dreamina 或其他工具吗？",
   "hotel.faq.eight.answer": "可以。这种效果不依赖特定工具，任何支持两张参考图和 9:16 竖屏视频的图生视频工具都能做出来。在这里生成只是帮你省去手动步骤。",
-  "hotel.logo_alt": "Hotel Lobby AI 麦克风标志"
+  "hotel.logo_alt": "Hotel Lobby AI 麦克风标志",
+  "admin.nav.footer_badges": "页脚徽章",
+  "admin.footer_badges.title": "页脚徽章",
+  "admin.footer_badges.description": "管理网站页脚中展示的徽章链接。",
+  "admin.footer_badges.add_title": "添加徽章",
+  "admin.footer_badges.code_label": "徽章嵌入代码",
+  "admin.footer_badges.code_placeholder": "<a href=\"https://example.com\" target=\"_blank\"><img src=\"https://example.com/badge.svg\" width=250 alt=\"Featured badge\" /></a>",
+  "admin.footer_badges.code_help": "粘贴一个或多个链接/图片徽章代码。仅接受 HTTPS 链接和图片，最多展示 {max} 个徽章。",
+  "admin.footer_badges.invalid_code": "代码格式不支持。请只粘贴包含一个 <img> 的 <a> 标签，并使用 HTTPS 地址。",
+  "admin.footer_badges.add_button": "添加到页脚",
+  "admin.footer_badges.adding": "添加中...",
+  "admin.footer_badges.current_title": "当前展示的徽章",
+  "admin.footer_badges.empty": "还没有添加徽章。",
+  "admin.footer_badges.loading": "正在加载徽章...",
+  "admin.footer_badges.load_error": "无法加载页脚徽章。",
+  "admin.footer_badges.remove": "移除",
+  "admin.footer_badges.saved": "页脚徽章已更新。",
+  "admin.footer_badges.save_error": "无法更新页脚徽章。"
 }
