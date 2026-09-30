@@ -9,10 +9,12 @@ import { getSettings } from './settings';
 
 export type ConfigMap = Record<string, string>;
 
-// In-memory cache
+// In-memory cache, per server instance. Saving settings only invalidates the
+// instance that handled the save (Workers run many), so keep this short or
+// other instances serve stale settings.
 let cachedConfigs: ConfigMap | null = null;
 let cacheTime = 0;
-const CACHE_TTL = 3600_000; // 1 hour
+const CACHE_TTL = 60_000; // 1 minute
 
 /**
  * Get all configs from database.

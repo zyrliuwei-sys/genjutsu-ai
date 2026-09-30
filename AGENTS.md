@@ -76,7 +76,7 @@ src/
 │   ├── credits/service.ts       # FIFO consumption, expiration, revocation, auto-grant
 │   ├── apikeys/service.ts       # API key CRUD + validation
 │   ├── rbac/service.ts          # Role/permission checks, wildcard matching
-│   ├── config/service.ts        # DB key-value config with 1h cache
+│   ├── config/service.ts        # DB key-value config with 1min per-instance cache
 │   └── ai-tasks/service.ts      # AI task tracking with credit deduction/revocation
 │
 ├── config/

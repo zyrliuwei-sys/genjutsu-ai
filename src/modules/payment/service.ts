@@ -5,6 +5,7 @@ import {
   AlipayProvider,
   CreemProvider,
   PaymentManager,
+  PayPalProvider,
   StripeProvider,
   WechatPayProvider,
 } from '@/core/payment';
@@ -55,6 +56,11 @@ async function getPaymentManager(): Promise<PaymentManager> {
     c('creem_api_key'),
     c('alipay_app_id'),
     c('wechat_mch_id'),
+    c('paypal_enabled'),
+    c('paypal_client_id'),
+    c('paypal_client_secret'),
+    c('paypal_webhook_id'),
+    c('paypal_environment'),
     c('default_payment_provider'),
   ]);
   if (manager && hash === managerConfigHash) return manager;
@@ -88,6 +94,24 @@ async function getPaymentManager(): Promise<PaymentManager> {
         signingSecret: c('creem_signing_secret') || undefined,
         environment:
           c('creem_environment') === 'production' ? 'production' : 'sandbox',
+      }),
+      isDefault
+    );
+  }
+
+  if (
+    c('paypal_enabled') === 'true' &&
+    c('paypal_client_id') &&
+    c('paypal_client_secret')
+  ) {
+    const isDefault = c('default_payment_provider') === 'paypal';
+    manager.addProvider(
+      new PayPalProvider({
+        clientId: c('paypal_client_id'),
+        clientSecret: c('paypal_client_secret'),
+        environment:
+          c('paypal_environment') === 'live' ? 'production' : 'sandbox',
+        webhookId: c('paypal_webhook_id') || undefined,
       }),
       isDefault
     );
