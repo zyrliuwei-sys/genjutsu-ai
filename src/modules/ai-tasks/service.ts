@@ -113,6 +113,57 @@ export async function updateTask(params: {
 }
 
 /**
+ * Record the provider-side task id (e.g. fal request_id) for later polling.
+ */
+export async function setProviderTaskId(
+  taskId: string,
+  providerTaskId: string
+) {
+  await db()
+    .update(aiTask)
+    .set({ taskId: providerTaskId })
+    .where(eq(aiTask.id, taskId));
+}
+
+/**
+ * Merge fields into a task's taskInfo JSON (keeps creditId for revocation).
+ */
+export async function mergeTaskInfo(
+  taskId: string,
+  patch: Record<string, unknown>
+) {
+  const task = await findTask(taskId);
+  if (!task) throw new Error('Task not found');
+  let info: Record<string, unknown> = {};
+  try {
+    info = task.taskInfo ? JSON.parse(task.taskInfo as string) : {};
+  } catch {
+    // Ignore parse errors
+  }
+  await db()
+    .update(aiTask)
+    .set({ taskInfo: JSON.stringify({ ...info, ...patch }) })
+    .where(eq(aiTask.id, taskId));
+}
+
+/**
+ * Atomically move a task from one status to another. Returns false if another
+ * caller already moved it — use it to make multi-step pipelines idempotent.
+ */
+export async function claimTaskStatus(
+  taskId: string,
+  from: AITaskStatus,
+  to: AITaskStatus
+): Promise<boolean> {
+  const rows = await db()
+    .update(aiTask)
+    .set({ status: to })
+    .where(and(eq(aiTask.id, taskId), eq(aiTask.status, from)))
+    .returning({ id: aiTask.id });
+  return rows.length > 0;
+}
+
+/**
  * Get tasks for a user.
  */
 export async function getTasks(params: {

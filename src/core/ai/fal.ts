@@ -68,10 +68,6 @@ export class FalProvider implements AIProvider {
       throw new Error('model is required');
     }
 
-    if (!prompt) {
-      throw new Error('prompt is required');
-    }
-
     const input = this.formatInput({ mediaType, model, prompt, options });
 
     let apiUrl = `${this.baseUrl}/${model}`;
@@ -97,7 +93,10 @@ export class FalProvider implements AIProvider {
     });
 
     if (!resp.ok) {
-      throw new Error(`request failed with status: ${resp.status}`);
+      const detail = await resp.text().catch(() => '');
+      throw new Error(
+        `request failed with status: ${resp.status} ${detail.slice(0, 300)}`
+      );
     }
 
     const data = await resp.json();
@@ -303,7 +302,8 @@ export class FalProvider implements AIProvider {
     prompt: string;
     options: any;
   }): any {
-    let input: any = { prompt };
+    // Some models (e.g. motion transfer) take no prompt at all.
+    let input: any = prompt ? { prompt } : {};
 
     if (!options) {
       return input;

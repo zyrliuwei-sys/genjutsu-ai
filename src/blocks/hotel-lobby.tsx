@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Check, Copy, Upload, X } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { ArrowRight, Download, Loader2, Upload, X } from 'lucide-react';
 
 import { useSession } from '@/core/auth/client';
 import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
+import { apiGet, apiPost } from '@/lib/api-client';
 import { m } from '@/paraglide/messages.js';
+import { Pricing } from '@/blocks/pricing';
 import { SiteUserMenu } from '@/components/site-user-menu';
 
 import '@/styles/hotel-lobby.css';
@@ -15,8 +18,27 @@ const previewImage = '/imgs/generated/duet-scene-preview.jpg';
 const friendsImage = '/imgs/generated/duet-friends.jpg';
 const siblingsImage = '/imgs/generated/duet-siblings.jpg';
 const coupleImage = '/imgs/generated/duet-couple.jpg';
-const basePrompt =
-  'Turn TWO separate authorized adult portraits into a vertical 9:16 duet in a warm matte-orange recording booth. Preserve both faces and outfits. Keep person A full body on the LEFT and person B full body on the RIGHT, with one black microphone hanging at center. Person A performs first while B reacts, then switch. Use a locked centered camera, soft even light and restrained natural gestures. No face blending, side swaps, extra people, cuts, zooms, captions, logos or watermarks.';
+
+type DuetTask = {
+  id: string;
+  status: 'pending' | 'processing' | 'success' | 'failed';
+  stage: 'scene' | 'motion' | null;
+  sceneImageUrl: string | null;
+  videoUrl: string | null;
+  error: string | null;
+};
+
+// Downscale to ≤1536px JPEG so uploads stay small; fal accepts data URIs.
+async function toDataUrl(file: File, maxSide = 1536): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return canvas.toDataURL('image/jpeg', 0.9);
+}
 
 function PhotoInput({
   label,
@@ -66,19 +88,50 @@ export function HotelLobbyPage() {
   const [photoA, setPhotoA] = useState<File | null>(null);
   const [photoB, setPhotoB] = useState<File | null>(null);
   const [direction, setDirection] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [taskId, setTaskId] = useState<string>();
   const [consent, setConsent] = useState(false);
   const [menu, setMenu] = useState(false);
   const { data: session } = useSession();
   const user = session?.user;
-  const canOpen = consent && !!photoA && !!photoB;
-  const prompt = `${basePrompt}${direction.trim() ? ` Additional direction: ${direction.trim().slice(0, 400)}.` : ''}`;
-  const generatorUrl = `https://dreamina.capcut.com/ai-tool/home?need_login=true&type=video&prompt=${encodeURIComponent(prompt)}`;
-  const copyPrompt = async () => {
-    await navigator.clipboard.writeText(prompt);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
+  const canGenerate = consent && !!photoA && !!photoB;
+
+  const generate = useMutation({
+    mutationFn: async () =>
+      apiPost<DuetTask>('/api/hotel-lobby/generate', {
+        photoA: await toDataUrl(photoA!),
+        photoB: await toDataUrl(photoB!),
+        direction: direction.trim() || undefined,
+      }),
+    onSuccess: (task) => setTaskId(task.id),
+  });
+
+  const taskQuery = useQuery({
+    queryKey: ['hotel-lobby-task', taskId],
+    queryFn: () => apiGet<DuetTask>(`/api/hotel-lobby/task?id=${taskId}`),
+    enabled: !!taskId,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === 'success' || status === 'failed' ? false : 5000;
+    },
+  });
+  const task = taskQuery.data;
+  const priceQuery = useQuery({
+    queryKey: ['hotel-lobby-price'],
+    queryFn: () => apiGet<{ credits: number }>('/api/hotel-lobby/price'),
+    staleTime: 10 * 60_000,
+  });
+  const running =
+    generate.isPending ||
+    (!!taskId && task?.status !== 'success' && task?.status !== 'failed');
+  const error =
+    generate.error?.message ??
+    (task?.status === 'failed' ? task.error : null) ??
+    null;
+  const reset = () => {
+    generate.reset();
+    setTaskId(undefined);
   };
+
   return (
     <div className="hotel-page">
       <header className="hl-header">
@@ -107,6 +160,9 @@ export function HotelLobbyPage() {
           </a>
           <a href="#faq" onClick={() => setMenu(false)}>
             {m['hotel.nav.faq']()}
+          </a>
+          <a href="#pricing" onClick={() => setMenu(false)}>
+            {m['hotel.nav.pricing']()}
           </a>
         </nav>
         <div className="hl-header-actions">
@@ -201,10 +257,6 @@ export function HotelLobbyPage() {
                 maxLength={400}
                 placeholder={m['hotel.create.placeholder']()}
               />
-              <p className="hl-starter-label">
-                {m['hotel.create.starter_label']()}
-              </p>
-              <pre className="hl-starter-prompt">{basePrompt}</pre>
               <label className="hl-consent">
                 <input
                   type="checkbox"
@@ -214,43 +266,82 @@ export function HotelLobbyPage() {
                 <span>{m['hotel.create.consent']()}</span>
               </label>
               <div className="hl-form-actions">
-                <button
-                  className="hl-button"
-                  type="button"
-                  onClick={copyPrompt}
-                >
-                  {copied ? <Check size={17} /> : <Copy size={17} />}{' '}
-                  {copied
-                    ? m['hotel.create.copied']()
-                    : m['hotel.create.copy']()}
-                </button>
-                <a
-                  className={`hl-outline ${!canOpen ? 'hl-disabled' : ''}`}
-                  href={canOpen ? generatorUrl : undefined}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-disabled={!canOpen}
-                  onClick={(e) => {
-                    if (!canOpen) e.preventDefault();
-                  }}
-                >
-                  {m['hotel.create.open']()} <ArrowRight size={17} />
-                </a>
+                {!user ? (
+                  <Link className="hl-button" href="/sign-in">
+                    {m['hotel.create.sign_in']()} <ArrowRight size={17} />
+                  </Link>
+                ) : task?.status === 'success' || task?.status === 'failed' ? (
+                  <button className="hl-button" type="button" onClick={reset}>
+                    {m['hotel.create.again']()} <ArrowRight size={17} />
+                  </button>
+                ) : (
+                  <button
+                    className={`hl-button ${!canGenerate || running ? 'hl-disabled' : ''}`}
+                    type="button"
+                    disabled={!canGenerate || running}
+                    onClick={() => generate.mutate()}
+                  >
+                    {running ? (
+                      <Loader2 size={17} className="animate-spin" />
+                    ) : null}
+                    {m['hotel.create.generate']()}
+                    {!running && <ArrowRight size={17} />}
+                  </button>
+                )}
+                {task?.videoUrl && (
+                  <a
+                    className="hl-outline"
+                    href={task.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                  >
+                    {m['hotel.create.download']()} <Download size={17} />
+                  </a>
+                )}
               </div>
-              <p className="hl-hint">
-                {photoA && photoB
-                  ? m['hotel.create.ready']()
-                  : m['hotel.create.hint']()}
+              {priceQuery.data && (
+                <p className="hl-hint">
+                  {m['hotel.create.cost']({
+                    credits: priceQuery.data.credits.toLocaleString('en-US'),
+                  })}{' '}
+                  <a href="#pricing">{m['hotel.create.buy_credits']()}</a>
+                </p>
+              )}
+              <p className="hl-hint" role="status" aria-live="polite">
+                {error
+                  ? `${m['hotel.create.failed']()}: ${error}`
+                  : task?.status === 'success'
+                    ? m['hotel.create.done']()
+                    : generate.isPending
+                      ? m['hotel.create.submitting']()
+                      : task?.stage === 'motion'
+                        ? `${m['hotel.create.stage_motion']()} ${m['hotel.create.keep_open']()}`
+                        : taskId
+                          ? `${m['hotel.create.stage_scene']()} ${m['hotel.create.keep_open']()}`
+                          : photoA && photoB
+                            ? m['hotel.create.ready']()
+                            : m['hotel.create.hint']()}
               </p>
             </div>
             <aside className="hl-preview">
               <div className="hl-preview-media">
-                <img
-                  src={previewImage}
-                  alt={m['hotel.hero.image_alt']()}
-                  width={1024}
-                  height={1536}
-                />
+                {task?.videoUrl ? (
+                  <video
+                    src={task.videoUrl}
+                    poster={task.sceneImageUrl ?? undefined}
+                    controls
+                    autoPlay
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={task?.sceneImageUrl ?? previewImage}
+                    alt={m['hotel.hero.image_alt']()}
+                    width={1024}
+                    height={1536}
+                  />
+                )}
               </div>
               <div className="hl-preview-caption">
                 <span>{m['hotel.create.preview']()}</span>
@@ -363,6 +454,8 @@ export function HotelLobbyPage() {
             <p>{m['hotel.prompt.two']()}</p>
           </div>
         </section>
+
+        <Pricing />
 
         <section id="faq" className="hl-faq" aria-labelledby="faq-heading">
           <div className="hl-section-intro">

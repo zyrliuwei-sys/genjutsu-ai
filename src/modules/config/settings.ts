@@ -172,6 +172,19 @@ export function getSettingGroups(): SettingGroup[] {
       tab: 'ai',
     },
     { name: 'fal', title: 'Fal', description: 'Fal AI API', tab: 'ai' },
+    {
+      name: 'evolink',
+      title: 'Evolink',
+      description: 'Evolink AI API (image, video, chat)',
+      tab: 'ai',
+    },
+    {
+      name: 'hotel_lobby',
+      title: 'Hotel Lobby duet',
+      description:
+        'Two photos → GPT Image 2 scene → DreamActor motion transfer (uses the Fal key)',
+      tab: 'ai',
+    },
 
     // Analytics
     {
@@ -822,6 +835,50 @@ export function getSettings(): Setting[] {
       type: 'password',
       placeholder: 'xxx',
       group: 'fal',
+      tab: 'ai',
+    },
+
+    // ─── AI / Hotel Lobby duet ───────────────────────────────────────
+    {
+      name: 'hotel_lobby_motion_video_url',
+      title: 'Reference video URL',
+      type: 'text',
+      placeholder: 'https://…/hotel-lobby-reference.mp4 (MP4, ≤30s, 9:16)',
+      group: 'hotel_lobby',
+      tab: 'ai',
+    },
+    {
+      name: 'hotel_lobby_video_seconds',
+      title: 'Reference video length (seconds)',
+      type: 'number',
+      placeholder: '30 (used to price each video at 7× fal cost)',
+      group: 'hotel_lobby',
+      tab: 'ai',
+    },
+    {
+      name: 'hotel_lobby_credits',
+      title: 'Credits per video (override)',
+      type: 'number',
+      placeholder: 'Leave empty = auto (7× fal cost, 1 credit = $0.01)',
+      group: 'hotel_lobby',
+      tab: 'ai',
+    },
+
+    // ─── AI / Evolink ────────────────────────────────────────────────
+    {
+      name: 'evolink_base_url',
+      title: 'Base URL',
+      type: 'text',
+      placeholder: 'https://api.evolink.ai',
+      group: 'evolink',
+      tab: 'ai',
+    },
+    {
+      name: 'evolink_api_key',
+      title: 'API Key',
+      type: 'password',
+      placeholder: 'sk-xxx',
+      group: 'evolink',
       tab: 'ai',
     },
 

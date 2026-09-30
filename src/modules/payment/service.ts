@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNull, ne } from 'drizzle-orm';
 
 import { db } from '@/core/db';
 import {
@@ -17,6 +17,7 @@ import {
   type PaymentOrder,
 } from '@/core/payment/types';
 import { credit, order, subscription } from '@/config/db/schema';
+import { resolveDuetCredits } from '@/config/hotel-lobby-pricing';
 import { getAllConfigs } from '@/modules/config/service';
 import { calculateCreditExpirationTime } from '@/modules/credits/service';
 import {
@@ -397,7 +398,41 @@ async function handleCheckoutSuccess(session: any, provider: string) {
         });
       }
 
-      // 3. Update order
+      // 3. First paid order: bonus credits worth one extra duet video
+      const [previousPaid] = await tx
+        .select({ id: order.id })
+        .from(order)
+        .where(
+          and(
+            eq(order.userId, existingOrder.userId),
+            eq(order.status, OrderStatus.PAID),
+            ne(order.id, existingOrder.id)
+          )
+        )
+        .limit(1);
+      if (!previousPaid) {
+        const bonus = resolveDuetCredits(await getAllConfigs());
+        await tx.insert(credit).values({
+          id: getUuid(),
+          userId: existingOrder.userId,
+          userEmail: existingOrder.userEmail || '',
+          orderNo: existingOrder.orderNo,
+          subscriptionNo: orderUpdate.subscriptionNo || '',
+          transactionNo: getSnowId(),
+          transactionType: 'grant',
+          transactionScene: 'reward',
+          credits: bonus,
+          remainingCredits: bonus,
+          description: 'First purchase bonus: 1 free video',
+          expiresAt: calculateCreditExpirationTime({
+            creditsValidDays: existingOrder.creditsValidDays || 0,
+            currentPeriodEnd: subscriptionInfo?.currentPeriodEnd,
+          }),
+          status: 'active',
+        });
+      }
+
+      // 4. Update order
       await tx
         .update(order)
         .set(orderUpdate)
