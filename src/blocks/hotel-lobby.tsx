@@ -421,35 +421,41 @@ export function HotelLobbyPage() {
           </div>
           <div className="hl-ideas-grid">
             <article>
-              <img
-                src={friendsImage}
-                alt={m['hotel.ideas.image_alt']()}
-                width={1536}
-                height={1024}
-                loading="lazy"
-              />
+              <div className="hl-idea-media">
+                <img
+                  src={friendsImage}
+                  alt={m['hotel.ideas.image_alt']()}
+                  width={1536}
+                  height={1024}
+                  loading="lazy"
+                />
+              </div>
               <h3>{m['hotel.ideas.friends.title']()}</h3>
               <p>{m['hotel.ideas.friends.text']()}</p>
             </article>
             <article>
-              <img
-                src={siblingsImage}
-                alt={m['hotel.ideas.siblings.image_alt']()}
-                width={1536}
-                height={1024}
-                loading="lazy"
-              />
+              <div className="hl-idea-media">
+                <img
+                  src={siblingsImage}
+                  alt={m['hotel.ideas.siblings.image_alt']()}
+                  width={1536}
+                  height={1024}
+                  loading="lazy"
+                />
+              </div>
               <h3>{m['hotel.ideas.siblings.title']()}</h3>
               <p>{m['hotel.ideas.siblings.text']()}</p>
             </article>
             <article>
-              <img
-                src={coupleImage}
-                alt={m['hotel.ideas.couples.image_alt']()}
-                width={1536}
-                height={1024}
-                loading="lazy"
-              />
+              <div className="hl-idea-media">
+                <img
+                  src={coupleImage}
+                  alt={m['hotel.ideas.couples.image_alt']()}
+                  width={1536}
+                  height={1024}
+                  loading="lazy"
+                />
+              </div>
               <h3>{m['hotel.ideas.couples.title']()}</h3>
               <p>{m['hotel.ideas.couples.text']()}</p>
             </article>

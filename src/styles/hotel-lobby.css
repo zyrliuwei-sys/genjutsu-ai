@@ -606,51 +606,59 @@
 }
 .hl-ideas-grid {
   display: grid;
-  grid-template-columns: 1.25fr 0.75fr;
-  grid-template-rows: 1fr 1fr;
-  column-gap: 60px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px;
+  counter-reset: idea;
 }
-.hl-ideas-grid article:first-child {
-  grid-row: span 2;
-}
-.hl-ideas-grid article:first-child img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 3 / 2;
-}
-.hl-ideas-grid article:not(:first-child) {
+.hl-ideas-grid article {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 22px 0;
-  border-top: 1px solid var(--hl-line);
+  counter-increment: idea;
 }
-.hl-ideas-grid article:not(:first-child) img {
+.hl-idea-media {
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  background: #82442b;
+}
+.hl-idea-media img {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 3 / 2;
-  margin-bottom: 16px;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.hl-ideas-grid article:last-child {
-  border-bottom: 1px solid var(--hl-line);
+.hl-ideas-grid article:hover .hl-idea-media img {
+  transform: scale(1.04);
+}
+.hl-ideas-grid article::before {
+  content: counter(idea, decimal-leading-zero);
+  order: 1;
+  display: block;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hl-line);
+  color: var(--hl-copper);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  transition: border-color 0.3s ease;
+}
+.hl-ideas-grid article:hover::before {
+  border-color: var(--hl-copper);
 }
 .hl-ideas-grid h3 {
-  margin: 22px 0 7px;
-  font-size: 21px;
+  order: 2;
+  margin: 14px 0 10px;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.04em;
-}
-.hl-ideas-grid article:not(:first-child) h3 {
-  margin-top: 0;
+  letter-spacing: -0.03em;
 }
 .hl-ideas-grid p {
-  max-width: 380px;
+  order: 3;
   margin: 0;
   color: var(--hl-muted);
   font-size: 13px;
-  line-height: 1.65;
+  line-height: 1.7;
 }
 .hl-bottom {
   padding: 150px 28px 160px;
@@ -762,7 +770,10 @@
     position: static;
   }
   .hl-ideas-grid {
-    column-gap: 30px;
+    gap: 24px;
+  }
+  .hl-ideas-grid h3 {
+    font-size: 19px;
   }
 }
 @media (max-width: 600px) {
@@ -871,14 +882,7 @@
   }
   .hl-ideas-grid {
     grid-template-columns: 1fr;
-    grid-template-rows: auto;
-  }
-  .hl-ideas-grid article:first-child {
-    grid-row: auto;
-    margin-bottom: 30px;
-  }
-  .hl-ideas-grid article:not(:first-child) {
-    padding: 28px 0;
+    gap: 44px;
   }
   .hl-bottom {
     padding: 94px 20px 104px;
