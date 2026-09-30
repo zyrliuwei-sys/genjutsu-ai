@@ -11,6 +11,7 @@ import {
   updateTask,
 } from '@/modules/ai-tasks/service';
 import { getAllConfigs } from '@/modules/config/service';
+import { getBalance } from '@/modules/credits/service';
 import { hasPermission } from '@/modules/rbac/service';
 import { respData, respErr } from '@/lib/resp';
 
@@ -48,13 +49,18 @@ async function POST({ request }: { request: Request }) {
     const size = isDuetSize(body?.size) ? body.size : DEFAULT_DUET_SIZE;
 
     const configs = await getAllConfigs();
+
+    // Admins generate free; everyone else pays 7× the fal cost in credits.
+    // Checked first so an unpaid user always lands on the paywall.
+    const isAdmin = await hasPermission(session.user.id, 'admin.*');
+    const price = resolveDuetCredits(configs);
+    if (!isAdmin && (await getBalance(session.user.id)) < price) {
+      return respErr('Insufficient credits');
+    }
+
     if (!configs.fal_api_key) return respErr('Generation is not configured');
     const motionVideoUrl = configs.hotel_lobby_motion_video_url;
     if (!motionVideoUrl) return respErr('Reference video is not configured');
-
-    // Admins generate free; everyone else pays 7× the fal cost in credits.
-    const isAdmin = await hasPermission(session.user.id, 'admin.*');
-    const price = resolveDuetCredits(configs);
 
     const prompt = buildScenePrompt(direction, size);
     const task = await createTask({

@@ -47,7 +47,14 @@ const ALL_PROVIDERS: PaymentProvider[] = [
   'wechat',
 ];
 
-export function Pricing({ title }: { title?: string } = {}) {
+export function Pricing({
+  title,
+  variant = 'section',
+}: {
+  title?: string;
+  /** `dialog` drops the page-section chrome for use inside a modal. */
+  variant?: 'section' | 'dialog';
+} = {}) {
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -286,14 +293,25 @@ export function Pricing({ title }: { title?: string } = {}) {
     startCheckout(pendingPlan, provider);
   }
 
+  const dialog = variant === 'dialog';
+  const Wrapper = dialog ? 'div' : 'section';
+
   return (
-    <section
-      id="pricing"
-      className="border-border border-t px-4 py-24 sm:py-32"
+    <Wrapper
+      id={dialog ? undefined : 'pricing'}
+      className={
+        dialog ? undefined : 'border-border border-t px-4 py-24 sm:py-32'
+      }
     >
       <div className="mx-auto max-w-5xl">
-        <div className="mb-20 text-center">
-          <h2 className="font-serif text-4xl font-normal tracking-tight sm:text-5xl">
+        <div className={dialog ? 'mb-8 pr-8 text-center' : 'mb-20 text-center'}>
+          <h2
+            className={
+              dialog
+                ? 'font-serif text-2xl font-normal tracking-tight sm:text-3xl'
+                : 'font-serif text-4xl font-normal tracking-tight sm:text-5xl'
+            }
+          >
             {title ?? m['landing.pricing.title']()}
           </h2>
           <p className="text-muted-foreground mt-5">
@@ -323,6 +341,6 @@ export function Pricing({ title }: { title?: string } = {}) {
         planName={pendingPlan?.name}
         price={pendingPlan?.price}
       />
-    </section>
+    </Wrapper>
   );
 }

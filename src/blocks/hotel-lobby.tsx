@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, Download, Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -13,8 +13,10 @@ import {
 } from '@/config/hotel-lobby-sizes';
 import { apiGet, apiPost } from '@/lib/api-client';
 import { m } from '@/paraglide/messages.js';
+import { useUserPermissions } from '@/hooks/use-user-permissions';
 import { Pricing } from '@/blocks/pricing';
 import { SiteUserMenu } from '@/components/site-user-menu';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 import '@/styles/hotel-lobby.css';
 
@@ -24,6 +26,8 @@ const previewImage = '/imgs/generated/duet-scene-preview.jpg';
 const friendsImage = '/imgs/generated/duet-friends.jpg';
 const siblingsImage = '/imgs/generated/duet-siblings.jpg';
 const coupleImage = '/imgs/generated/duet-couple.jpg';
+
+const INSUFFICIENT_CREDITS = 'Insufficient credits';
 
 type DuetTask = {
   id: string;
@@ -101,6 +105,8 @@ export function HotelLobbyPage() {
   const { data: session } = useSession();
   const user = session?.user;
   const canGenerate = consent && !!photoA && !!photoB;
+  const queryClient = useQueryClient();
+  const [paywall, setPaywall] = useState(false);
 
   const generate = useMutation({
     mutationFn: async () =>
@@ -110,7 +116,14 @@ export function HotelLobbyPage() {
         direction: direction.trim() || undefined,
         size,
       }),
-    onSuccess: (task) => setTaskId(task.id),
+    onSuccess: (task) => {
+      setTaskId(task.id);
+      queryClient.invalidateQueries({ queryKey: ['credits'] });
+    },
+    // Server is the source of truth: out of credits → show the paywall.
+    onError: (e: Error) => {
+      if (e.message === INSUFFICIENT_CREDITS) setPaywall(true);
+    },
   });
 
   const taskQuery = useQuery({
@@ -128,11 +141,34 @@ export function HotelLobbyPage() {
     queryFn: () => apiGet<{ credits: number }>('/api/hotel-lobby/price'),
     staleTime: 10 * 60_000,
   });
+  const creditsQuery = useQuery({
+    queryKey: ['credits'],
+    queryFn: () => apiGet<{ balance: number }>('/api/credits'),
+    enabled: !!user,
+  });
+  const { data: permissions } = useUserPermissions(!!user);
+  // Pre-check so an unpaid user sees the plans before uploading photos.
+  const startGenerate = () => {
+    const balance = creditsQuery.data?.balance;
+    const price = priceQuery.data?.credits;
+    if (
+      !permissions?.isAdmin &&
+      balance !== undefined &&
+      price !== undefined &&
+      balance < price
+    ) {
+      setPaywall(true);
+      return;
+    }
+    generate.mutate();
+  };
   const running =
     generate.isPending ||
     (!!taskId && task?.status !== 'success' && task?.status !== 'failed');
   const error =
-    generate.error?.message ??
+    (generate.error?.message === INSUFFICIENT_CREDITS
+      ? null
+      : generate.error?.message) ??
     (task?.status === 'failed' ? task.error : null) ??
     null;
   // The inline status line is easy to miss below the button; also toast.
@@ -319,7 +355,7 @@ export function HotelLobbyPage() {
                     className={`hl-button ${!canGenerate || running ? 'hl-disabled' : ''}`}
                     type="button"
                     disabled={!canGenerate || running}
-                    onClick={() => generate.mutate()}
+                    onClick={startGenerate}
                   >
                     {running ? (
                       <Loader2 size={17} className="animate-spin" />
@@ -502,6 +538,12 @@ export function HotelLobbyPage() {
         </section>
 
         <Pricing />
+
+        <Dialog open={paywall} onOpenChange={setPaywall}>
+          <DialogContent className="max-h-[90vh] overflow-y-auto p-6 sm:max-w-5xl">
+            <Pricing variant="dialog" title={m['hotel.paywall.title']()} />
+          </DialogContent>
+        </Dialog>
 
         <section id="faq" className="hl-faq" aria-labelledby="faq-heading">
           <div className="hl-section-intro">
