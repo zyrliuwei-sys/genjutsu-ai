@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   CalendarClock,
-  CalendarRange,
   Film,
   Infinity as InfinityIcon,
   MonitorPlay,
@@ -149,13 +148,6 @@ export function Pricing({
     },
     { icon: XCircle, label: m['landing.pricing.feature_cancel']() },
   ];
-  const yearlyExtra = [
-    {
-      icon: CalendarRange,
-      label: m['landing.pricing.feature_yearly_upfront'](),
-    },
-    { icon: XCircle, label: m['landing.pricing.feature_cancel']() },
-  ];
   const tiers = [
     ['basic', m['landing.pricing.basic'](), m['landing.pricing.basic_desc']()],
     ['pro', m['landing.pricing.pro'](), m['landing.pricing.pro_desc']()],
@@ -178,20 +170,6 @@ export function Pricing({
           featured: tier === 'pro',
           badge: tier === 'pro' ? m['landing.pricing.popular']() : undefined,
           extra: monthlyExtra,
-        })
-      ),
-    },
-    {
-      key: 'yearly',
-      label: m['landing.pricing.yearly'](),
-      plans: tiers.map(([tier, name, description]) =>
-        plan(`${tier}_yearly`, {
-          name,
-          description,
-          featured: tier === 'pro',
-          badge: tier === 'pro' ? m['landing.pricing.best_value']() : undefined,
-          originalPrice: usd(pricingCatalog[`${tier}_monthly`].priceInCents),
-          extra: yearlyExtra,
         })
       ),
     },

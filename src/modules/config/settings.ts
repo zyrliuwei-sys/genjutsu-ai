@@ -851,7 +851,8 @@ export function getSettings(): Setting[] {
       name: 'hotel_lobby_video_seconds',
       title: 'Reference video length (seconds)',
       type: 'number',
-      placeholder: '30 (used to price each video at 7× fal cost)',
+      placeholder:
+        '8 (default; set the real length if you change the video — prices each video at 7× fal cost)',
       group: 'hotel_lobby',
       tab: 'ai',
     },

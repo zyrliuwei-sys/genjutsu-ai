@@ -30,10 +30,13 @@ export type PricingProduct = {
 };
 
 /**
- * Hotel Lobby AI catalog. 1 credit ≈ $0.01 at one-time pack rates; a duet
- * video costs 7× its fal cost in credits (see ./hotel-lobby-pricing.ts).
- * Subscriptions add volume bonuses; yearly = 12 months of credits upfront
- * at 20% off (whole-dollar monthly equivalent).
+ * Hotel Lobby AI catalog. A duet video costs a fixed number of credits
+ * (see ./hotel-lobby-pricing.ts — 440 at the default 8s reference video), and
+ * every pack holds a whole number of videos.
+ *
+ * Pricing floor: no product may sell credits below $0.01 each, so every
+ * video is sold at ≥ 7× its fal cost. That is why there are no discounted
+ * yearly plans — check priceInCents / credits ≥ 0.01 before adding a product.
  * Keys MUST match what the pricing UI sends as product_id.
  */
 export const pricingCatalog: Record<string, PricingProduct> = {
@@ -43,9 +46,9 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Starter Pack',
     description: 'Starter Pack',
     type: PaymentType.ONE_TIME,
-    priceInCents: 1300,
+    priceInCents: 499,
     currency: 'usd',
-    credits: 1300,
+    credits: 440,
   },
   pack_standard: {
     productId: 'pack_standard',
@@ -53,9 +56,9 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Standard Pack',
     description: 'Standard Pack',
     type: PaymentType.ONE_TIME,
-    priceInCents: 3000,
+    priceInCents: 2299,
     currency: 'usd',
-    credits: 3000,
+    credits: 2200,
   },
   pack_pro: {
     productId: 'pack_pro',
@@ -63,9 +66,9 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Pro Pack',
     description: 'Pro Pack',
     type: PaymentType.ONE_TIME,
-    priceInCents: 8000,
+    priceInCents: 4399,
     currency: 'usd',
-    credits: 8000,
+    credits: 4400,
   },
   basic_monthly: {
     productId: 'basic_monthly',
@@ -73,9 +76,9 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Basic Monthly',
     description: 'Basic Monthly',
     type: PaymentType.SUBSCRIPTION,
-    priceInCents: 2000,
+    priceInCents: 2299,
     currency: 'usd',
-    credits: 2000,
+    credits: 2200,
     plan: {
       name: 'Basic',
       interval: PaymentInterval.MONTH,
@@ -88,9 +91,9 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Pro Monthly',
     description: 'Pro Monthly',
     type: PaymentType.SUBSCRIPTION,
-    priceInCents: 5000,
+    priceInCents: 4399,
     currency: 'usd',
-    credits: 5500,
+    credits: 4400,
     plan: {
       name: 'Pro',
       interval: PaymentInterval.MONTH,
@@ -103,57 +106,12 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Studio Monthly',
     description: 'Studio Monthly',
     type: PaymentType.SUBSCRIPTION,
-    priceInCents: 10000,
+    priceInCents: 8799,
     currency: 'usd',
-    credits: 11500,
+    credits: 8800,
     plan: {
       name: 'Studio',
       interval: PaymentInterval.MONTH,
-      intervalCount: 1,
-    },
-  },
-  basic_yearly: {
-    productId: 'basic_yearly',
-    productName: 'Basic',
-    planName: 'Basic Yearly',
-    description: 'Basic Yearly',
-    type: PaymentType.SUBSCRIPTION,
-    priceInCents: 19200,
-    currency: 'usd',
-    credits: 24000,
-    plan: {
-      name: 'Basic',
-      interval: PaymentInterval.YEAR,
-      intervalCount: 1,
-    },
-  },
-  pro_yearly: {
-    productId: 'pro_yearly',
-    productName: 'Pro',
-    planName: 'Pro Yearly',
-    description: 'Pro Yearly',
-    type: PaymentType.SUBSCRIPTION,
-    priceInCents: 48000,
-    currency: 'usd',
-    credits: 66000,
-    plan: {
-      name: 'Pro',
-      interval: PaymentInterval.YEAR,
-      intervalCount: 1,
-    },
-  },
-  studio_yearly: {
-    productId: 'studio_yearly',
-    productName: 'Studio',
-    planName: 'Studio Yearly',
-    description: 'Studio Yearly',
-    type: PaymentType.SUBSCRIPTION,
-    priceInCents: 96000,
-    currency: 'usd',
-    credits: 138000,
-    plan: {
-      name: 'Studio',
-      interval: PaymentInterval.YEAR,
       intervalCount: 1,
     },
   },
