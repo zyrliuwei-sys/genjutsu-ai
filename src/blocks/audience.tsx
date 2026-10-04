@@ -15,7 +15,7 @@ export function Audience() {
             <div className="eg-screen aspect-[4/5] overflow-hidden rounded-md">
               <img
                 src="/imgs/showcase/show-talking.jpg"
-                alt=""
+                alt={m['landing.alt.audience']()}
                 width={576}
                 height={942}
                 loading="lazy"

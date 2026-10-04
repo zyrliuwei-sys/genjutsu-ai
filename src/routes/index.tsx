@@ -9,6 +9,7 @@ import { CTA } from '@/blocks/cta';
 import { FAQ, FAQ_KEYS } from '@/blocks/faq';
 import { Features } from '@/blocks/features';
 import { Footer } from '@/blocks/footer';
+import { Compare, Guide } from '@/blocks/guide';
 import { Header } from '@/blocks/header';
 import { Hero } from '@/blocks/hero';
 import { Models } from '@/blocks/models';
@@ -108,6 +109,8 @@ function HomePage() {
         <Models />
         <Showcase />
         <About />
+        <Guide />
+        <Compare />
         <Audience />
         <Pricing />
         <FAQ />

@@ -10,7 +10,7 @@ export function CTA() {
         <div className="eg-screen relative overflow-hidden rounded-lg">
           <img
             src="/imgs/showcase/show-space.jpg"
-            alt=""
+            alt={m['landing.alt.cta']()}
             width={576}
             height={942}
             loading="lazy"

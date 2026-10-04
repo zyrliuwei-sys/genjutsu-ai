@@ -9,6 +9,8 @@ import {
 
 export const FAQ_KEYS = [
   'what',
+  'higgsfield',
+  'free',
   'shorts',
   'prompt',
   'ads',

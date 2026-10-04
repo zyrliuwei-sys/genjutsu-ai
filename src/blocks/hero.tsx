@@ -128,7 +128,9 @@ export function Hero() {
               >
                 <img
                   src={item.image}
-                  alt=""
+                  alt={m['landing.alt.hero_thumb']({
+                    label: tDynamic(`landing.hero.card_${item.key}`),
+                  })}
                   width={576}
                   height={942}
                   loading="lazy"

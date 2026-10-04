@@ -11,6 +11,7 @@ export function Footer() {
         { label: m['landing.footer.image'](), href: '/create?kind=image' },
         { label: m['landing.footer.duet'](), href: '/ai-livestream' },
         { label: m['landing.nav.pricing'](), href: '/pricing' },
+        { label: m['landing.footer.guide'](), href: '/#guide' },
       ],
     },
     {
