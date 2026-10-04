@@ -6,8 +6,20 @@ import { m } from '@/paraglide/messages.js';
 const STATIC_PAGES: { path: string; title: string; description: string }[] = [
   {
     path: '',
-    title: 'Hotel Lobby AI Filter',
-    description: 'Two-person duet planning and prompt guide',
+    title: 'Genjutsu AI',
+    description:
+      'AI video and image generator for creators, short-video teams and marketers',
+  },
+  {
+    path: '/create',
+    title: 'Create',
+    description:
+      'Text-to-video (Seedance) and text-to-image (GPT Image 2) studio',
+  },
+  {
+    path: '/pricing',
+    title: 'Pricing',
+    description: 'Credit packs and monthly plans',
   },
   {
     path: '/privacy-policy',
@@ -39,50 +51,16 @@ export const Route = createFileRoute('/llms-full.txt')({
           ),
         ];
 
-        let posts: {
-          slug: string;
-          title: string;
-          description: string;
-          source: 'db';
-        }[] = [];
-        try {
-          const { listPublishedArticles, findPublishedBySlug } =
-            await import('@/modules/posts/service');
-          const rows = await listPublishedArticles().catch(() => []);
-          const dbPosts = rows.map((row) => ({
-            slug: row.slug,
-            title: row.title || row.slug,
-            description: row.description || '',
-            createdAt: new Date(row.createdAt).toISOString(),
-            source: 'db' as const,
-          }));
-          posts = dbPosts;
-
-          if (posts.length > 0) {
-            lines.push('', '## Blog Posts', '');
-
-            for (const post of posts) {
-              lines.push(`### ${post.title}`, '');
-              lines.push(`URL: ${app_url}/blog/${post.slug}`);
-              if (post.description)
-                lines.push(`Description: ${post.description}`);
-              lines.push('');
-
-              if (post.source === 'db') {
-                const detail = await findPublishedBySlug(post.slug).catch(
-                  () => null
-                );
-                if (detail?.content) {
-                  lines.push(detail.content, '');
-                }
-              }
-
-              lines.push('---', '');
-            }
-          }
-        } catch {
-          // Database unreachable — static project pages still listed.
-        }
+        lines.push(
+          '',
+          '## About',
+          '',
+          m['landing.about.p1']({}, { locale: 'en' }),
+          '',
+          m['landing.about.p2']({}, { locale: 'en' }),
+          '',
+          m['landing.about.p3']({}, { locale: 'en' })
+        );
 
         lines.push('');
 

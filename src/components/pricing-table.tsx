@@ -109,7 +109,7 @@ export function PricingTable({
                 key={group.key}
                 onClick={() => setActiveGroup(group.key)}
                 className={cn(
-                  'rounded-full px-5 py-1.5 text-sm font-medium transition-colors',
+                  'rounded-sm px-5 py-1.5 text-sm font-medium transition-colors',
                   activeGroup === group.key
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -137,10 +137,10 @@ export function PricingTable({
           <div
             key={plan.id}
             className={cn(
-              'border-border relative flex flex-col rounded-2xl border p-8 transition-all',
+              'relative flex flex-col rounded-lg border p-8 transition-all',
               plan.featured
-                ? 'bg-card ring-foreground/10 shadow-md ring-1'
-                : 'bg-background hover:border-foreground/30'
+                ? 'bg-card border-primary/70 shadow-[0_30px_60px_-40px_rgb(0_0_0/0.6)]'
+                : 'bg-background border-border hover:border-foreground/30'
             )}
           >
             {/* Plan name */}
@@ -152,7 +152,7 @@ export function PricingTable({
 
             {/* Price */}
             <div className="mb-2 flex items-baseline gap-1">
-              <span className="font-serif text-5xl tracking-tight">
+              <span className="font-serif text-6xl leading-none">
                 {plan.price}
               </span>
               {plan.interval && (
@@ -177,7 +177,7 @@ export function PricingTable({
             {/* CTA — full-width pill */}
             <Button
               variant={plan.featured ? 'default' : 'outline'}
-              className="h-10 w-full rounded-full text-sm font-medium"
+              className="h-10 w-full rounded-md text-sm font-medium"
               onClick={() => handleCheckout(plan)}
               disabled={loadingId === plan.id}
             >

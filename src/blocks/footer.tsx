@@ -5,18 +5,20 @@ import { SiteFooter, type FooterColumn } from '@/components/site-footer';
 export function Footer() {
   const columns: FooterColumn[] = [
     {
-      title: m['landing.footer.feature'](),
+      title: m['landing.footer.product'](),
       links: [
-        { label: m['hotel.nav.create'](), href: '/#create' },
-        { label: m['hotel.nav.how'](), href: '/#how' },
+        { label: m['landing.footer.video'](), href: '/create?kind=video' },
+        { label: m['landing.footer.image'](), href: '/create?kind=image' },
+        { label: m['landing.footer.duet'](), href: '/ai-livestream' },
+        { label: m['landing.nav.pricing'](), href: '/pricing' },
       ],
     },
     {
       title: m['landing.footer.resources'](),
       links: [
         {
-          label: 'support@hotel-lobby.org',
-          href: 'mailto:support@hotel-lobby.org',
+          label: 'support@genjutsu-ai.org',
+          href: 'mailto:support@genjutsu-ai.org',
         },
       ],
     },
@@ -31,7 +33,7 @@ export function Footer() {
 
   return (
     <SiteFooter
-      tagline={m['hotel.footer.line']()}
+      tagline={m['landing.footer.tagline']()}
       columns={columns}
       badges={<FooterBadgeList className="mt-10" />}
     />

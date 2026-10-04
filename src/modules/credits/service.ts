@@ -236,6 +236,21 @@ export async function revoke(consumeCreditId: string) {
   const items = JSON.parse(consumeRecord.consumedDetail);
 
   await db().transaction(async (tx: any) => {
+    // Claim the consumption record first (ACTIVE -> DELETED). Concurrent
+    // revokes of the same record (e.g. two polls both seeing a failed task)
+    // race here, and only the one that flips the row may refund.
+    const claimed = await tx
+      .update(credit)
+      .set({ status: CreditStatus.DELETED })
+      .where(
+        and(
+          eq(credit.id, consumeCreditId),
+          eq(credit.status, CreditStatus.ACTIVE)
+        )
+      )
+      .returning({ id: credit.id });
+    if (!claimed?.length) return;
+
     // Atomic increment per source grant — no read-modify-write race.
     for (const item of items) {
       await tx
@@ -245,12 +260,6 @@ export async function revoke(consumeCreditId: string) {
         })
         .where(eq(credit.id, item.creditId));
     }
-
-    // Mark consumption record as deleted
-    await tx
-      .update(credit)
-      .set({ status: CreditStatus.DELETED })
-      .where(eq(credit.id, consumeCreditId));
   });
 }
 

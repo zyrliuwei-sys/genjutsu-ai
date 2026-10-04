@@ -7,33 +7,39 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 
-const FAQ_KEYS = [
-  'stack',
-  'payment',
-  'database',
-  'customize',
-  'license',
+export const FAQ_KEYS = [
+  'what',
+  'shorts',
+  'prompt',
+  'ads',
+  'models',
+  'credits',
+  'commercial',
+  'formats',
 ] as const;
 
 export function FAQ() {
   return (
-    <section id="faq" className="px-4 py-24 sm:py-32">
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-16 text-center">
-          <h2 className="font-serif text-4xl font-medium tracking-tight sm:text-5xl">
+    <section
+      id="faq"
+      className="border-border scroll-mt-20 border-t px-4 py-24 sm:py-32"
+    >
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <h2 className="eg-heading text-4xl leading-[1.05] sm:text-5xl">
             {m['landing.faq.title']()}
           </h2>
-          <p className="text-muted-foreground mt-5">
+          <p className="text-muted-foreground mt-5 text-lg">
             {m['landing.faq.description']()}
           </p>
         </div>
-        <Accordion className="w-full">
+        <Accordion className="border-border w-full border-t">
           {FAQ_KEYS.map((key) => (
             <AccordionItem key={key} value={key}>
-              <AccordionTrigger className="cursor-pointer py-6 text-left text-base font-medium hover:no-underline">
+              <AccordionTrigger className="cursor-pointer py-6 text-left text-lg font-medium tracking-tight hover:no-underline">
                 {tDynamic(`landing.faq.${key}.question`)}
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
+              <AccordionContent className="text-muted-foreground max-w-2xl pb-6 text-base leading-relaxed">
                 {tDynamic(`landing.faq.${key}.answer`)}
               </AccordionContent>
             </AccordionItem>

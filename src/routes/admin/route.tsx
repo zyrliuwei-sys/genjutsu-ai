@@ -2,9 +2,9 @@ import { createFileRoute, Outlet } from '@tanstack/react-router';
 import {
   BadgeCheck,
   CreditCard,
-  FolderOpen,
   Home,
   LayoutDashboard,
+  LifeBuoy,
   Settings,
   Shield,
 } from 'lucide-react';
@@ -55,15 +55,10 @@ function AdminLayout() {
       ],
     },
     {
-      href: '/admin/categories',
-      label: m['admin.nav.content'](),
-      icon: FolderOpen,
+      href: '/admin/tickets',
+      label: m['admin.nav.tickets'](),
+      icon: LifeBuoy,
       group,
-      items: [
-        { href: '/admin/categories', label: m['admin.nav.categories']() },
-        { href: '/admin/posts', label: m['admin.nav.posts']() },
-        { href: '/admin/tickets', label: m['admin.nav.tickets']() },
-      ],
     },
   ];
 

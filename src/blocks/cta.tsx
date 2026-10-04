@@ -1,35 +1,41 @@
-import { ArrowRight } from 'lucide-react';
-
 import { Link } from '@/core/i18n/navigation';
-import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
-import { buttonVariants } from '@/components/ui/button';
+import { Reveal } from '@/components/reveal';
 
+/** Closing frame: a widescreen still with the pitch set as its subtitle. */
 export function CTA() {
   return (
-    <section className="px-4 pb-24 sm:pb-24">
-      <div className="mx-auto max-w-5xl">
-        <div className="rounded-3xl border border-dashed px-6 py-12 text-center sm:px-10 sm:py-16">
-          <h2 className="mx-auto max-w-3xl font-serif text-4xl leading-[1.1] font-medium tracking-tight sm:text-5xl lg:text-5xl">
-            {m['landing.cta.headline']()}
-          </h2>
-          <p className="text-muted-foreground mx-auto mt-6 max-w-4xl text-base leading-relaxed sm:text-lg">
-            {m['landing.cta.subheadline']()}
-          </p>
-          <div className="mt-8 flex justify-center">
+    <section className="px-4 pb-24 sm:pb-32">
+      <Reveal className="mx-auto max-w-7xl">
+        <div className="eg-screen relative overflow-hidden rounded-lg">
+          <img
+            src="/imgs/showcase/show-space.jpg"
+            alt=""
+            width={576}
+            height={942}
+            loading="lazy"
+            className="absolute inset-0 size-full object-cover object-[50%_35%] opacity-60"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/60" />
+          <div className="relative flex min-h-[460px] flex-col items-center justify-end px-6 pt-24 pb-14 text-center text-white sm:min-h-[520px] sm:pb-16">
+            <p className="font-mono text-[11px] tracking-[0.18em] text-white/60 uppercase">
+              {m['landing.cta.eyebrow']()}
+            </p>
+            <h2 className="eg-heading mt-4 max-w-3xl text-4xl leading-[1.04] text-balance sm:text-6xl">
+              {m['landing.cta.headline']()}
+            </h2>
+            <p className="mt-5 max-w-xl text-white/75 sm:text-lg">
+              {m['landing.cta.subheadline']()}
+            </p>
             <Link
-              href="/settings"
-              className={cn(
-                buttonVariants({ size: 'lg' }),
-                'h-12 gap-2 rounded-full px-8'
-              )}
+              href="/create"
+              className="eg-pill-primary mt-9 px-7 py-3 text-base"
             >
               {m['landing.cta.button']()}
-              <ArrowRight className="size-4" />
             </Link>
           </div>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

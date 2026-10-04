@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import {
   CalendarClock,
   Film,
+  Image as ImageIcon,
   Infinity as InfinityIcon,
   MonitorPlay,
   Sparkles,
@@ -14,9 +15,9 @@ import { toast } from 'sonner';
 
 import { useSession } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
-import { duetCredits } from '@/config/hotel-lobby-pricing';
 import { pricingCatalog } from '@/config/pricing';
-import { apiGet, apiPost } from '@/lib/api-client';
+import { STUDIO_MODELS, studioCredits } from '@/config/studio-models';
+import { apiPost } from '@/lib/api-client';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { m } from '@/paraglide/messages.js';
 import { usePublicConfig } from '@/hooks/use-public-config';
@@ -49,8 +50,11 @@ const ALL_PROVIDERS: PaymentProvider[] = [
 export function Pricing({
   title,
   variant = 'section',
+  headingAs: Heading = 'h2',
 }: {
   title?: string;
+  /** `h1` when the block is the page's main content (the /pricing route). */
+  headingAs?: 'h1' | 'h2';
   /** `dialog` drops the page-section chrome for use inside a modal. */
   variant?: 'section' | 'dialog';
 } = {}) {
@@ -69,13 +73,18 @@ export function Pricing({
     [configs]
   );
 
-  // Live per-video price so "≈ N videos" matches what generation charges.
-  const { data: priceData } = useQuery({
-    queryKey: ['hotel-lobby-price'],
-    queryFn: () => apiGet<{ credits: number }>('/api/hotel-lobby/price'),
-    staleTime: 10 * 60_000,
+  // Base studio price: a 5s 720p Seedance Lite clip (same math the
+  // generate API charges with).
+  const perVideo = studioCredits(STUDIO_MODELS[0], {
+    aspect: '9:16',
+    resolution: '720p',
+    duration: 5,
   });
-  const perVideo = priceData?.credits ?? duetCredits();
+  const perImage = studioCredits(STUDIO_MODELS[2], {
+    aspect: '9:16',
+    resolution: '720p',
+    duration: 5,
+  });
 
   function features(credits: number, extra: PricingFeature[]) {
     return [
@@ -89,6 +98,12 @@ export function Pricing({
         icon: Film,
         label: m['landing.pricing.feature_videos']({
           count: Math.floor(credits / perVideo),
+        }),
+      },
+      {
+        icon: ImageIcon,
+        label: m['landing.pricing.feature_images']({
+          count: Math.floor(credits / perImage),
         }),
       },
       { icon: MonitorPlay, label: m['landing.pricing.feature_hd']() },
@@ -283,21 +298,22 @@ export function Pricing({
     >
       <div className="mx-auto max-w-5xl">
         <div className={dialog ? 'mb-8 pr-8 text-center' : 'mb-20 text-center'}>
-          <h2
+          <Heading
             className={
               dialog
-                ? 'font-serif text-2xl font-normal tracking-tight sm:text-3xl'
-                : 'font-serif text-4xl font-normal tracking-tight sm:text-5xl'
+                ? 'eg-heading text-2xl sm:text-3xl'
+                : 'eg-heading text-4xl sm:text-5xl'
             }
           >
             {title ?? m['landing.pricing.title']()}
-          </h2>
+          </Heading>
           <p className="text-muted-foreground mt-5">
             {m['landing.pricing.description']()}
           </p>
           <p className="text-muted-foreground mt-2 text-sm">
             {m['landing.pricing.per_video']({
               credits: perVideo.toLocaleString('en-US'),
+              image: perImage.toLocaleString('en-US'),
             })}
           </p>
         </div>

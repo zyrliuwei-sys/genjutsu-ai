@@ -29,6 +29,12 @@ function ensureCloudflareEnv(): Promise<void> {
 export default {
   async fetch(req: Request): Promise<Response> {
     await ensureCloudflareEnv();
+    // English-only site: permanently redirect legacy /zh URLs to their English path.
+    const reqUrl = new URL(req.url);
+    if (reqUrl.pathname === '/zh' || reqUrl.pathname.startsWith('/zh/')) {
+      reqUrl.pathname = reqUrl.pathname.slice(3) || '/';
+      return Response.redirect(reqUrl.toString(), 301);
+    }
     const response = await paraglideMiddleware(req, () => handler.fetch(req));
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');

@@ -6,8 +6,20 @@ import { m } from '@/paraglide/messages.js';
 const STATIC_PAGES: { path: string; title: string; description: string }[] = [
   {
     path: '',
-    title: 'Hotel Lobby AI Filter',
-    description: 'Two-person duet planning and prompt guide',
+    title: 'Genjutsu AI',
+    description:
+      'AI video and image generator for creators, short-video teams and marketers',
+  },
+  {
+    path: '/create',
+    title: 'Create',
+    description:
+      'Text-to-video (Seedance) and text-to-image (GPT Image 2) studio',
+  },
+  {
+    path: '/pricing',
+    title: 'Pricing',
+    description: 'Credit packs and monthly plans',
   },
   {
     path: '/privacy-policy',
@@ -27,20 +39,6 @@ export const Route = createFileRoute('/llms.txt')({
       GET: async () => {
         const { app_url, app_name } = envConfigs;
 
-        let posts: { slug: string; title: string; description: string }[] = [];
-        try {
-          const { listPublishedArticles } =
-            await import('@/modules/posts/service');
-          const rows = await listPublishedArticles().catch(() => []);
-          posts = rows.map((row) => ({
-            slug: row.slug,
-            title: row.title || row.slug,
-            description: row.description || '',
-          }));
-        } catch {
-          // Database unreachable — static project pages still listed.
-        }
-
         const lines: string[] = [
           `# ${app_name}`,
           '',
@@ -52,15 +50,6 @@ export const Route = createFileRoute('/llms.txt')({
             (p) => `- [${p.title}](${app_url}${p.path}): ${p.description}`
           ),
         ];
-
-        if (posts.length > 0) {
-          lines.push('', '## Blog Posts', '');
-          for (const post of posts) {
-            lines.push(
-              `- [${post.title}](${app_url}/blog/${post.slug}): ${post.description}`
-            );
-          }
-        }
 
         lines.push('');
 

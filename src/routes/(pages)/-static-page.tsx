@@ -86,8 +86,8 @@ function StaticPage() {
   return (
     <article>
       <header className="border-border mb-6 border-b pb-5">
-        <h1 className="text-foreground text-3xl font-semibold tracking-tight md:text-4xl">
-          {meta.title}
+        <h1 className="eg-heading text-foreground text-4xl md:text-5xl">
+          {meta.title.split(' | ')[0]}
         </h1>
         <p className="text-muted-foreground mt-2 text-sm">{meta.description}</p>
         <p className="text-muted-foreground mt-2 text-xs">

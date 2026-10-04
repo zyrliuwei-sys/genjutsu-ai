@@ -18,6 +18,8 @@ export function LocaleSelector({
   className?: string;
 }) {
   const locale = getLocale();
+  // Single-locale site: nothing to switch between.
+  if (locales.length <= 1) return null;
 
   function handleSwitch(newLocale: string) {
     // Writes the locale cookie and reloads on the localized URL.

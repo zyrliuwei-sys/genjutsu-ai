@@ -24,7 +24,10 @@ import { SandboxPreviewBridge } from '@/components/sandbox-preview-bridge';
 import { Toaster } from '@/components/ui/sonner';
 
 import '@fontsource-variable/dm-sans';
-import '@fontsource/bebas-neue/400.css';
+import '@fontsource-variable/inter-tight';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource/instrument-serif/latin-400.css';
+import '@fontsource/instrument-serif/latin-400-italic.css';
 import '@/styles/globals.css';
 
 // Analytics IDs live in the DB config (1h-cached service). Fetched via a
@@ -127,7 +130,8 @@ function RootDocument({ children }: { children: ReactNode }) {
 function NotFound() {
   return (
     <div className="bg-background text-foreground flex min-h-screen flex-col items-center justify-center gap-4">
-      <h1 className="text-6xl font-bold">404</h1>
+      <p className="eg-eyebrow">Scene not found</p>
+      <h1 className="eg-heading text-7xl">404</h1>
       <p className="text-muted-foreground">Page not found</p>
       <a href="/" className="text-sm underline underline-offset-4">
         Back to home

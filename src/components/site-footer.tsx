@@ -40,7 +40,7 @@ export function SiteFooter({
     <footer className="bg-background text-foreground border-border border-t">
       <div className="mx-auto max-w-7xl px-6 pt-14 pb-6 sm:px-10 sm:pt-16 lg:px-16">
         {tagline && (
-          <p className="mb-12 max-w-2xl font-serif text-4xl leading-[1] tracking-wide sm:text-5xl">
+          <p className="eg-heading mb-12 max-w-2xl text-4xl leading-[1.05] sm:text-5xl">
             {tagline}
           </p>
         )}

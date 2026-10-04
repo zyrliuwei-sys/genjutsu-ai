@@ -1,17 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight, Menu, X } from 'lucide-react';
+import { LogIn, Menu, ShieldIcon, X } from 'lucide-react';
 
 import { useSession } from '@/core/auth/client';
 import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
-import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
+import { useUserPermissions } from '@/hooks/use-user-permissions';
 import { LocaleSelector } from '@/components/locale-selector';
 import { SiteUserMenu } from '@/components/site-user-menu';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { buttonVariants } from '@/components/ui/button';
 
 export interface NavLink {
   href: string;
@@ -33,10 +32,12 @@ export function SiteHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: session } = useSession();
   const user = session?.user;
+  const { data: permissions } = useUserPermissions(!!user);
+  const isAdmin = !!user && permissions?.isAdmin === true;
 
   return (
-    <header className="bg-background/95 border-border sticky top-0 z-50 w-full border-b backdrop-blur-sm">
-      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6">
+    <header className="bg-background/85 border-border sticky top-0 z-50 w-full border-b backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2.5">
           <img
@@ -44,9 +45,9 @@ export function SiteHeader({
             alt={logoAlt}
             width={512}
             height={512}
-            className="size-8 rounded-full"
+            className="size-7 rounded-md"
           />
-          <span className="text-base font-bold tracking-tight">
+          <span className="font-serif text-[22px] leading-none">
             {envConfigs.app_name}
           </span>
         </Link>
@@ -81,6 +82,15 @@ export function SiteHeader({
         <div className="hidden items-center gap-3 md:flex">
           <LocaleSelector />
           <ThemeToggle />
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="border-border text-foreground hover:bg-accent inline-flex h-9 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors"
+            >
+              <ShieldIcon className="size-4" />
+              {m['common.systems.admin']()}
+            </Link>
+          )}
           {user ? (
             <SiteUserMenu
               name={user.name || 'User'}
@@ -88,16 +98,16 @@ export function SiteHeader({
               image={user.image}
             />
           ) : (
-            <Link href="/settings" className={cn(buttonVariants(), 'gap-1.5')}>
-              {m['common.nav.get_started']()}
-              <ArrowRight className="size-4" />
+            <Link href="/sign-in" className="eg-pill-primary">
+              <LogIn className="size-4" />
+              {m['common.nav.sign_in']()}
             </Link>
           )}
         </div>
 
         {/* Mobile toggle */}
         <button
-          className="p-2 md:hidden"
+          className="-mr-2 p-2 md:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileOpen}
@@ -108,7 +118,7 @@ export function SiteHeader({
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-border border-t px-4 pt-2 pb-4 md:hidden">
+        <div className="border-border mx-auto max-w-7xl border-t px-4 pt-2 pb-4 md:hidden">
           <nav className="flex flex-col gap-2">
             {navLinks?.map((link) =>
               isExternalHref(link.href) ? (
@@ -139,6 +149,16 @@ export function SiteHeader({
             <LocaleSelector />
             <ThemeToggle />
             <div className="flex-1" />
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="border-border text-foreground hover:bg-accent inline-flex h-9 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors"
+                onClick={() => setMobileOpen(false)}
+              >
+                <ShieldIcon className="size-4" />
+                {m['common.systems.admin']()}
+              </Link>
+            )}
             {user ? (
               <SiteUserMenu
                 name={user.name || 'User'}
@@ -147,11 +167,12 @@ export function SiteHeader({
               />
             ) : (
               <Link
-                href="/settings"
-                className={cn(buttonVariants(), 'gap-1.5')}
+                href="/sign-in"
+                className="eg-pill-primary"
                 onClick={() => setMobileOpen(false)}
               >
-                {m['common.nav.get_started']()}
+                <LogIn className="size-4" />
+                {m['common.nav.sign_in']()}
               </Link>
             )}
           </div>

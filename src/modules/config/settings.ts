@@ -180,7 +180,7 @@ export function getSettingGroups(): SettingGroup[] {
     },
     {
       name: 'hotel_lobby',
-      title: 'Hotel Lobby duet',
+      title: 'Duet video template',
       description:
         'Two photos → GPT Image 2 scene → DreamActor motion transfer (uses the Fal key)',
       tab: 'ai',
