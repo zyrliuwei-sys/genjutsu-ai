@@ -1,23 +1,30 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "everygenai",
+  "name": "genjutsu-ai",
   "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true },
+  "observability": {
+    "enabled": true
+  },
   "vars": {
     "DATABASE_PROVIDER": "d1",
-    "VITE_APP_URL": "https://everygenai.org",
+    "VITE_APP_URL": "https://genjutsu-ai.org",
     "VITE_APP_NAME": "Genjutsu AI",
-    "VITE_APP_DESCRIPTION": "Genjutsu AI is an AI video generator and AI image generator for creators, short-video teams and marketers.",
+    "VITE_APP_DESCRIPTION": "Genjutsu AI is an online AI video generator and AI image generator built for people who publish every day.",
     "VITE_APP_LOGO": "/logo.svg",
     "VITE_DEFAULT_LOCALE": "en"
   },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "everygenai",
-      "database_id": "4403c8fc-9fab-4703-8bb3-3b843ad0ad55",
+      "database_name": "genjutsu-ai",
+      "database_id": "b2a482d2-5552-4a46-9a65-67bc3f0b69b7",
       "migrations_dir": "drizzle"
     }
   ],
-  "routes": [{ "pattern": "everygenai.org", "custom_domain": true }]
+  "routes": [
+    {
+      "pattern": "genjutsu-ai.org",
+      "custom_domain": true
+    }
+  ]
 }
