@@ -5,6 +5,7 @@ import {
   Home,
   LayoutDashboard,
   LifeBuoy,
+  Radar,
   Settings,
   Shield,
 } from 'lucide-react';
@@ -72,6 +73,11 @@ function AdminLayout() {
           },
         ]
       : []),
+    {
+      href: '/admin/indexnow',
+      label: m['admin.nav.indexnow'](),
+      icon: Radar,
+    },
     {
       href: '/admin/settings',
       label: m['admin.nav.settings'](),
