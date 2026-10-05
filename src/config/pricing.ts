@@ -30,14 +30,16 @@ export type PricingProduct = {
 };
 
 /**
- * Hotel Lobby AI catalog. A duet video costs a fixed number of credits
- * (see ./hotel-lobby-pricing.ts — 440 at the default 8s reference video), and
- * every pack holds a whole number of videos.
+ * Credit catalog. Generation is priced in ./studio-models.ts (Seedance 2.0
+ * via Evolink: 700 credits for a 5s 720p clip) and ./hotel-lobby-pricing.ts.
  *
  * Pricing floor: no product may sell credits below $0.01 each, so every
- * video is sold at ≥ 7× its fal cost. That is why there are no discounted
- * yearly plans — check priceInCents / credits ≥ 0.01 before adding a product.
+ * generation is sold at ≥ 7× its provider cost. That is why packs carry no
+ * volume bonus — check priceInCents / credits ≥ 0.01 before adding a product.
  * Keys MUST match what the pricing UI sends as product_id.
+ *
+ * The monthly plans are no longer shown on the pricing page; they stay here
+ * so existing subscriptions keep resolving.
  */
 export const pricingCatalog: Record<string, PricingProduct> = {
   pack_starter: {
@@ -46,19 +48,19 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Starter Pack',
     description: 'Starter Pack',
     type: PaymentType.ONE_TIME,
-    priceInCents: 500,
+    priceInCents: 1000,
     currency: 'usd',
-    credits: 440,
+    credits: 1000,
   },
-  pack_standard: {
-    productId: 'pack_standard',
-    productName: 'Standard Pack',
-    planName: 'Standard Pack',
-    description: 'Standard Pack',
+  pack_creator: {
+    productId: 'pack_creator',
+    productName: 'Creator Pack',
+    planName: 'Creator Pack',
+    description: 'Creator Pack',
     type: PaymentType.ONE_TIME,
-    priceInCents: 2300,
+    priceInCents: 2500,
     currency: 'usd',
-    credits: 2200,
+    credits: 2500,
   },
   pack_pro: {
     productId: 'pack_pro',
@@ -66,9 +68,19 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Pro Pack',
     description: 'Pro Pack',
     type: PaymentType.ONE_TIME,
-    priceInCents: 4400,
+    priceInCents: 5000,
     currency: 'usd',
-    credits: 4400,
+    credits: 5000,
+  },
+  pack_studio: {
+    productId: 'pack_studio',
+    productName: 'Studio Pack',
+    planName: 'Studio Pack',
+    description: 'Studio Pack',
+    type: PaymentType.ONE_TIME,
+    priceInCents: 10000,
+    currency: 'usd',
+    credits: 10000,
   },
   basic_monthly: {
     productId: 'basic_monthly',

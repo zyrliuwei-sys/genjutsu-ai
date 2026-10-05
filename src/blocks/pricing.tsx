@@ -3,20 +3,19 @@
 import { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
-  CalendarClock,
   Film,
   Image as ImageIcon,
   Infinity as InfinityIcon,
   MonitorPlay,
   Sparkles,
-  XCircle,
+  Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useSession } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
 import { pricingCatalog } from '@/config/pricing';
-import { STUDIO_MODELS, studioCredits } from '@/config/studio-models';
+import { getStudioModel, studioCredits } from '@/config/studio-models';
 import { apiPost } from '@/lib/api-client';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { m } from '@/paraglide/messages.js';
@@ -73,20 +72,22 @@ export function Pricing({
     [configs]
   );
 
-  // Base studio price: a 5s 720p Seedance Lite clip (same math the
-  // generate API charges with).
-  const perVideo = studioCredits(STUDIO_MODELS[0], {
-    aspect: '9:16',
+  // Reference prices — the same math the generate API charges with.
+  const clip = { aspect: '9:16', duration: 5 } as const;
+  const perVideo = studioCredits(getStudioModel('seedance-2')!, {
+    ...clip,
     resolution: '720p',
-    duration: 5,
   });
-  const perImage = studioCredits(STUDIO_MODELS[2], {
-    aspect: '9:16',
+  const perFastVideo = studioCredits(getStudioModel('seedance-2-fast')!, {
+    ...clip,
+    resolution: '480p',
+  });
+  const perImage = studioCredits(getStudioModel('gpt-image-2')!, {
+    ...clip,
     resolution: '720p',
-    duration: 5,
   });
 
-  function features(credits: number, extra: PricingFeature[]) {
+  function features(credits: number): PricingFeature[] {
     return [
       {
         icon: Sparkles,
@@ -101,113 +102,62 @@ export function Pricing({
         }),
       },
       {
+        icon: Zap,
+        label: m['landing.pricing.feature_fast_videos']({
+          count: Math.floor(credits / perFastVideo),
+        }),
+      },
+      {
         icon: ImageIcon,
         label: m['landing.pricing.feature_images']({
           count: Math.floor(credits / perImage),
         }),
       },
       { icon: MonitorPlay, label: m['landing.pricing.feature_hd']() },
-      ...extra,
+      {
+        icon: InfinityIcon,
+        label: m['landing.pricing.feature_no_subscription'](),
+      },
     ];
   }
 
   // Display data comes from the same catalog the checkout API trusts.
   function plan(
     productId: string,
-    opts: {
-      name: string;
-      description: string;
-      featured?: boolean;
-      badge?: string;
-      extra?: PricingFeature[];
-      originalPrice?: string;
-    }
+    opts: { name: string; featured?: boolean; badge?: string }
   ): PricingPlan {
     const product = pricingCatalog[productId];
-    const interval = product.plan?.interval;
-    // Yearly plans are shown as their monthly equivalent, billed yearly.
-    const yearly = interval === 'year';
     return {
       id: productId,
       name: opts.name,
-      description: yearly
-        ? `${opts.description} · ${m['landing.pricing.billed_yearly']({ price: usd(product.priceInCents) })}`
-        : opts.description,
-      price: usd(
-        yearly ? Math.round(product.priceInCents / 12) : product.priceInCents
-      ),
-      originalPrice: opts.originalPrice,
-      interval: interval ? m['landing.pricing.per_month']() : undefined,
+      description: m['landing.pricing.pack_desc'](),
+      price: usd(product.priceInCents),
       featured: opts.featured,
       badge: opts.badge,
-      features: features(product.credits, opts.extra ?? []),
+      features: features(product.credits),
       productId,
       priceInCents: product.priceInCents,
       currency: product.currency,
       credits: product.credits,
-      plan: product.plan,
-      buttonText: product.plan ? undefined : m['landing.pricing.buy_now'](),
+      buttonText: m['landing.pricing.buy_now'](),
     };
   }
 
-  const packExtra = [
-    {
-      icon: InfinityIcon,
-      label: m['landing.pricing.feature_no_subscription'](),
-    },
-  ];
-  const monthlyExtra = [
-    {
-      icon: CalendarClock,
-      label: m['landing.pricing.feature_monthly_refill'](),
-    },
-    { icon: XCircle, label: m['landing.pricing.feature_cancel']() },
-  ];
-  const tiers = [
-    ['basic', m['landing.pricing.basic'](), m['landing.pricing.basic_desc']()],
-    ['pro', m['landing.pricing.pro'](), m['landing.pricing.pro_desc']()],
-    [
-      'studio',
-      m['landing.pricing.studio'](),
-      m['landing.pricing.studio_desc'](),
-    ],
-  ] as const;
-
   const groups: PricingGroup[] = [
-    // Monthly first — it's the tab shown by default.
-    {
-      key: 'monthly',
-      label: m['landing.pricing.monthly'](),
-      plans: tiers.map(([tier, name, description]) =>
-        plan(`${tier}_monthly`, {
-          name,
-          description,
-          featured: tier === 'pro',
-          badge: tier === 'pro' ? m['landing.pricing.popular']() : undefined,
-          extra: monthlyExtra,
-        })
-      ),
-    },
     {
       key: 'one-time',
       label: m['landing.pricing.one_time'](),
       plans: [
-        plan('pack_starter', {
-          name: m['landing.pricing.pack_starter'](),
-          description: m['landing.pricing.pack_desc'](),
-          extra: packExtra,
-        }),
-        plan('pack_standard', {
-          name: m['landing.pricing.pack_standard'](),
-          description: m['landing.pricing.pack_desc'](),
+        plan('pack_starter', { name: m['landing.pricing.pack_starter']() }),
+        plan('pack_creator', {
+          name: m['landing.pricing.pack_creator'](),
           featured: true,
           badge: m['landing.pricing.popular'](),
-          extra: packExtra,
         }),
-        plan('pack_pro', {
-          name: m['landing.pricing.pack_pro'](),
-          description: m['landing.pricing.pack_desc'](),
-          extra: packExtra,
+        plan('pack_pro', { name: m['landing.pricing.pack_pro']() }),
+        plan('pack_studio', {
+          name: m['landing.pricing.pack_studio'](),
+          badge: m['landing.pricing.best_value'](),
         }),
       ],
     },
@@ -296,7 +246,7 @@ export function Pricing({
         dialog ? undefined : 'border-border border-t px-4 py-24 sm:py-32'
       }
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-6xl">
         <div className={dialog ? 'mb-8 pr-8 text-center' : 'mb-20 text-center'}>
           <Heading
             className={
@@ -313,6 +263,7 @@ export function Pricing({
           <p className="text-muted-foreground mt-2 text-sm">
             {m['landing.pricing.per_video']({
               credits: perVideo.toLocaleString('en-US'),
+              fast: perFastVideo.toLocaleString('en-US'),
               image: perImage.toLocaleString('en-US'),
             })}
           </p>

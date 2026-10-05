@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { AIMediaType, FalProvider } from '@/core/ai';
+import { AIMediaType, EvolinkProvider, FalProvider } from '@/core/ai';
 import { getAuth } from '@/core/auth';
 import {
   getStudioModel,
@@ -50,14 +50,18 @@ async function POST({ request }: { request: Request }) {
     }
 
     const configs = await getAllConfigs();
-    if (!configs.fal_api_key) return respErr('Generation is not configured');
+    const configured =
+      model.provider === 'evolink'
+        ? configs.evolink_api_key
+        : configs.fal_api_key;
+    if (!configured) return respErr('Generation is not configured');
 
     const mediaType =
       model.kind === 'video' ? AIMediaType.VIDEO : AIMediaType.IMAGE;
     const task = await createTask({
       userId: session.user.id,
       mediaType,
-      provider: 'fal',
+      provider: model.provider,
       model: model.id,
       prompt,
       costCredits: isAdmin ? 0 : price,
@@ -65,30 +69,36 @@ async function POST({ request }: { request: Request }) {
     });
 
     try {
-      const provider = new FalProvider({ apiKey: configs.fal_api_key });
-      const falOptions =
-        model.kind === 'video'
-          ? {
+      const providerTaskId =
+        model.provider === 'evolink'
+          ? await new EvolinkProvider({
+              apiKey: configs.evolink_api_key,
+              baseUrl: configs.evolink_base_url,
+            }).createVideo({
+              model: model.endpoint,
+              prompt,
+              duration: options.duration,
+              quality: options.resolution,
               aspect_ratio: options.aspect,
-              resolution: options.resolution,
-              duration: String(options.duration),
-              enable_safety_checker: true,
-            }
-          : {
-              image_size: IMAGE_SIZES[options.aspect],
-              quality: 'high',
-              num_images: 1,
-              output_format: 'jpeg',
-            };
-      const result = await provider.generate({
-        params: {
-          mediaType,
-          model: model.endpoint,
-          prompt,
-          options: falOptions,
-        },
-      });
-      await setProviderTaskId(task.id, result.taskId);
+              generate_audio: true,
+              content_filter: true,
+            })
+          : (
+              await new FalProvider({ apiKey: configs.fal_api_key }).generate({
+                params: {
+                  mediaType,
+                  model: model.endpoint,
+                  prompt,
+                  options: {
+                    image_size: IMAGE_SIZES[options.aspect],
+                    quality: 'high',
+                    num_images: 1,
+                    output_format: 'jpeg',
+                  },
+                },
+              })
+            ).taskId;
+      await setProviderTaskId(task.id, providerTaskId);
     } catch (error: any) {
       await updateTask({
         taskId: task.id,

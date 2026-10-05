@@ -1,5 +1,6 @@
 import { tDynamic } from '@/core/i18n/dynamic';
 import { m } from '@/paraglide/messages.js';
+import { LoopVideo } from '@/components/loop-video';
 import { Reveal } from '@/components/reveal';
 
 const AUDIENCES = ['creators', 'shorts', 'marketers'] as const;
@@ -13,13 +14,13 @@ export function Audience() {
         <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
           <Reveal className="order-2 lg:order-1">
             <div className="eg-screen aspect-[4/5] overflow-hidden rounded-md">
-              <img
-                src="/imgs/showcase/show-talking.jpg"
-                alt={m['landing.alt.audience']()}
+              <LoopVideo
+                src="/videos/show-talking.mp4"
+                poster="/imgs/showcase/show-talking.jpg"
+                label={m['landing.alt.audience']()}
                 width={576}
                 height={942}
-                loading="lazy"
-                className="size-full object-cover"
+                className="size-full"
               />
             </div>
           </Reveal>

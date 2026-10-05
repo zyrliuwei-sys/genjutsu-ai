@@ -4,6 +4,7 @@ import { tDynamic } from '@/core/i18n/dynamic';
 import { Link, useRouter } from '@/core/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
+import { LoopVideo } from '@/components/loop-video';
 import { PromptBox } from '@/components/prompt-box';
 
 import { createHref, HERO_CARDS } from './showcase-items';
@@ -86,14 +87,15 @@ export function Hero() {
             href={createHref(card)}
             className="eg-screen group relative block aspect-[9/14] overflow-hidden rounded-lg"
           >
-            <img
+            <LoopVideo
               key={card.key}
-              src={card.image}
-              alt={label}
+              src={card.video}
+              poster={card.image}
+              label={label}
               width={576}
               height={942}
-              fetchPriority={active === 0 ? 'high' : undefined}
-              className="eg-fade-in absolute inset-0 size-full object-cover"
+              eager
+              className="eg-fade-in absolute inset-0 size-full"
             />
             {/* letterbox bars carry the timecode and the subtitle */}
             <div className="absolute inset-x-0 top-0 flex h-11 items-center justify-between bg-gradient-to-b from-black/70 to-transparent px-4 font-mono text-[11px] tracking-[0.14em] text-white/80 uppercase">

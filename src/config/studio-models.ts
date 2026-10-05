@@ -4,78 +4,86 @@
  * client can only pick options — never set what it pays.
  *
  * Same rule as the duet video (./hotel-lobby-pricing.ts): every run is
- * charged at ≥ 7× its fal cost, 1 credit = $0.01, rounded up to 10 credits.
+ * charged at ≥ 7× its provider cost, 1 credit = $0.01, rounded up to 10
+ * credits.
  *
- * fal costs (fal.ai model pages, 2026-10-01):
- *   - Seedance 1.0 Lite: $1.80 / 1M video tokens  (720p 5s ≈ $0.18)
- *   - Seedance 1.0 Pro:  $2.50 / 1M video tokens  (1080p 5s ≈ $0.62)
- *     tokens = width × height × 24fps × seconds / 1024
- *   - GPT Image 2 (high): ≤ $0.22 per image (largest canonical size)
+ * Evolink Seedance 2.0 list prices (evolink.ai/seedance-2-0, 2026-10-06),
+ * billed per second of output, audio included:
+ *   - Standard: 480p $0.093/s · 720p $0.199/s · 1080p $0.497/s
+ *   - Fast:     25% off Standard, 480p / 720p only
+ * fal GPT Image 2 (high): ≤ $0.22 per image (largest canonical size).
  */
 
 import { PRICE_MARKUP, USD_PER_CREDIT } from './hotel-lobby-pricing';
 
 export type StudioKind = 'video' | 'image';
+export type StudioProvider = 'evolink' | 'fal';
 
 export const STUDIO_ASPECTS = ['9:16', '16:9', '1:1'] as const;
 export type StudioAspect = (typeof STUDIO_ASPECTS)[number];
 
-export const VIDEO_RESOLUTIONS = ['720p', '1080p'] as const;
+export const VIDEO_RESOLUTIONS = ['480p', '720p', '1080p'] as const;
 export type VideoResolution = (typeof VIDEO_RESOLUTIONS)[number];
 
-export const VIDEO_DURATIONS = [5, 10] as const;
+export const VIDEO_DURATIONS = [5, 10, 15] as const;
 export type VideoDuration = (typeof VIDEO_DURATIONS)[number];
 
 export type StudioModel = {
   id: string;
   kind: StudioKind;
   name: string;
-  /** fal endpoint id */
+  provider: StudioProvider;
+  /** Provider model / endpoint id */
   endpoint: string;
-  /** Video: USD per 1M video tokens. Image: USD per image. */
-  usdRate: number;
+  /** Video: USD per output second, by resolution. */
+  usdPerSecond?: Partial<Record<VideoResolution, number>>;
+  /** Image: USD per image. */
+  usdPerImage?: number;
   resolutions?: readonly VideoResolution[];
 };
 
+const SEEDANCE_2_USD_PER_SECOND = {
+  '480p': 0.093,
+  '720p': 0.199,
+  '1080p': 0.497,
+};
+const FAST_DISCOUNT = 0.75;
+
 export const STUDIO_MODELS: StudioModel[] = [
   {
-    id: 'seedance-lite',
+    id: 'seedance-2',
     kind: 'video',
-    name: 'Seedance Lite',
-    endpoint: 'fal-ai/bytedance/seedance/v1/lite/text-to-video',
-    usdRate: 1.8,
-    resolutions: ['720p', '1080p'],
+    name: 'Seedance 2.0',
+    provider: 'evolink',
+    endpoint: 'seedance-2.0-text-to-video',
+    usdPerSecond: SEEDANCE_2_USD_PER_SECOND,
+    resolutions: ['480p', '720p', '1080p'],
   },
   {
-    id: 'seedance-pro',
+    id: 'seedance-2-fast',
     kind: 'video',
-    name: 'Seedance Pro',
-    endpoint: 'fal-ai/bytedance/seedance/v1/pro/text-to-video',
-    usdRate: 2.5,
-    resolutions: ['720p', '1080p'],
+    name: 'Seedance 2.0 Fast',
+    provider: 'evolink',
+    endpoint: 'seedance-2.0-fast-text-to-video',
+    usdPerSecond: {
+      '480p': SEEDANCE_2_USD_PER_SECOND['480p'] * FAST_DISCOUNT,
+      '720p': SEEDANCE_2_USD_PER_SECOND['720p'] * FAST_DISCOUNT,
+    },
+    resolutions: ['480p', '720p'],
   },
   {
     id: 'gpt-image-2',
     kind: 'image',
     name: 'GPT Image 2',
+    provider: 'fal',
     endpoint: 'openai/gpt-image-2',
-    usdRate: 0.22,
+    usdPerImage: 0.22,
   },
 ];
 
 export function getStudioModel(id: unknown): StudioModel | undefined {
   return STUDIO_MODELS.find((model) => model.id === id);
 }
-
-export function isStudioEndpoint(endpoint: string) {
-  return STUDIO_MODELS.some((model) => model.endpoint === endpoint);
-}
-
-// Pixel area per resolution (aspect ratio barely changes the token count).
-const RESOLUTION_PIXELS: Record<VideoResolution, number> = {
-  '720p': 1280 * 720,
-  '1080p': 1920 * 1080,
-};
 
 // gpt-image-2 output sizes: multiples of 16, ~1024² pixels so the cost
 // stays within the $0.22 the price above assumes.
@@ -100,10 +108,12 @@ export type StudioOptions = {
 };
 
 export function studioCredits(model: StudioModel, options: StudioOptions) {
-  if (model.kind === 'image') return toCredits(model.usdRate);
-  const tokens =
-    (RESOLUTION_PIXELS[options.resolution] * 24 * options.duration) / 1024;
-  return toCredits((tokens / 1_000_000) * model.usdRate);
+  if (model.kind === 'image') return toCredits(model.usdPerImage ?? 0);
+  const rate = model.usdPerSecond?.[options.resolution];
+  if (rate === undefined) {
+    throw new Error(`${model.name} does not support ${options.resolution}`);
+  }
+  return toCredits(rate * options.duration);
 }
 
 /** Coerce untrusted input into valid options (falls back to defaults). */

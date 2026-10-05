@@ -10,13 +10,13 @@ const MODELS = [
   {
     key: 'seedance_pro',
     type: 'video',
-    href: '/create?kind=video&model=seedance-pro',
+    href: '/create?kind=video&model=seedance-2',
     isNew: true,
   },
   {
     key: 'seedance_lite',
     type: 'video',
-    href: '/create?kind=video&model=seedance-lite',
+    href: '/create?kind=video&model=seedance-2-fast',
   },
   { key: 'gpt_image', type: 'image', href: '/create?kind=image', isNew: true },
   { key: 'duet', type: 'template', href: '/ai-livestream' },

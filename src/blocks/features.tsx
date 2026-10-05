@@ -3,6 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { tDynamic } from '@/core/i18n/dynamic';
 import { Link } from '@/core/i18n/navigation';
 import { m } from '@/paraglide/messages.js';
+import { LoopVideo } from '@/components/loop-video';
 import { Reveal } from '@/components/reveal';
 
 const AD_PROMPT =
@@ -14,21 +15,25 @@ const TOOLS = [
   {
     key: 'video',
     image: '/imgs/showcase/tool-video.jpg',
+    video: '/videos/tool-video.mp4',
     href: '/create?kind=video',
   },
   {
     key: 'image',
     image: '/imgs/showcase/tool-image.jpg',
+    video: undefined,
     href: '/create?kind=image',
   },
   {
     key: 'ads',
     image: '/imgs/showcase/tool-ads.jpg',
+    video: '/videos/tool-ads.mp4',
     href: `/create?kind=video&prompt=${encodeURIComponent(AD_PROMPT)}`,
   },
   {
     key: 'shorts',
     image: '/imgs/showcase/tool-shorts.jpg',
+    video: '/videos/tool-shorts.mp4',
     href: `/create?kind=video&prompt=${encodeURIComponent(SHORTS_PROMPT)}`,
   },
 ] as const;
@@ -54,14 +59,25 @@ export function Features() {
             <Reveal key={tool.key} delay={(i % 2) * 90}>
               <Link href={tool.href} className="group block">
                 <div className="eg-screen relative aspect-[21/9] overflow-hidden rounded-md">
-                  <img
-                    src={tool.image}
-                    alt={tDynamic(`landing.tools.${tool.key}.title`)}
-                    width={1024}
-                    height={529}
-                    loading="lazy"
-                    className="size-full object-cover object-top opacity-90 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-100"
-                  />
+                  {tool.video ? (
+                    <LoopVideo
+                      src={tool.video}
+                      poster={tool.image}
+                      label={tDynamic(`landing.tools.${tool.key}.title`)}
+                      width={1024}
+                      height={439}
+                      className="size-full opacity-90 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-100"
+                    />
+                  ) : (
+                    <img
+                      src={tool.image}
+                      alt={tDynamic(`landing.tools.${tool.key}.title`)}
+                      width={1024}
+                      height={529}
+                      loading="lazy"
+                      className="size-full object-cover object-top opacity-90 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-100"
+                    />
+                  )}
                 </div>
                 <p className="eg-eyebrow mt-6">
                   {tDynamic(`landing.tools.${tool.key}.tag`)}

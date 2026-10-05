@@ -21,7 +21,6 @@ import {
   STUDIO_MODELS,
   studioCredits,
   VIDEO_DURATIONS,
-  VIDEO_RESOLUTIONS,
   type StudioAspect,
   type StudioKind,
   type VideoDuration,
@@ -190,7 +189,16 @@ function CreatePage() {
 
   const models = STUDIO_MODELS.filter((model) => model.kind === kind);
   const model = getStudioModel(modelId) ?? models[0]!;
-  const price = studioCredits(model, { aspect, resolution, duration });
+  // Fast tops out at 720p — fall back to the best resolution it offers.
+  const resolutions = model.resolutions ?? [];
+  const activeResolution = resolutions.includes(resolution)
+    ? resolution
+    : (resolutions[resolutions.length - 1] ?? resolution);
+  const price = studioCredits(model, {
+    aspect,
+    resolution: activeResolution,
+    duration,
+  });
 
   function switchKind(next: StudioKind) {
     setKind(next);
@@ -238,7 +246,7 @@ function CreatePage() {
         model: model.id,
         prompt: prompt.trim(),
         aspect,
-        resolution,
+        resolution: activeResolution,
         duration,
       }),
     onSuccess: (created) => {
@@ -364,12 +372,12 @@ function CreatePage() {
               </Field>
 
               {kind === 'video' && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-6">
                   <Field label={m['create.resolution']()}>
-                    {VIDEO_RESOLUTIONS.map((value) => (
+                    {resolutions.map((value) => (
                       <Chip
                         key={value}
-                        active={resolution === value}
+                        active={activeResolution === value}
                         onClick={() => setResolution(value)}
                       >
                         {value}
@@ -464,6 +472,12 @@ function CreatePage() {
                 )}
               </div>
 
+              {task?.status === 'success' && task.kind === 'video' && (
+                <p className="text-muted-foreground -mt-3 text-sm">
+                  {m['create.expire_note']()}
+                </p>
+              )}
+
               {user && history.length > 0 && (
                 <div>
                   <h2 className="mb-3 text-lg font-medium tracking-tight">
@@ -515,7 +529,7 @@ function CreatePage() {
         </div>
 
         <Dialog open={paywall} onOpenChange={setPaywall}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto p-6 sm:max-w-5xl">
+          <DialogContent className="max-h-[90vh] overflow-y-auto p-6 sm:max-w-6xl">
             <Pricing variant="dialog" title={m['create.paywall_title']()} />
           </DialogContent>
         </Dialog>

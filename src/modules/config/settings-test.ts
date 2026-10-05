@@ -8,6 +8,7 @@
  * import it without pulling provider SDKs.
  */
 
+import { normalizeEvolinkBaseUrl } from '@/core/ai/evolink';
 import { FalProvider } from '@/core/ai/fal';
 import { ReplicateProvider } from '@/core/ai/replicate';
 import { AIMediaType } from '@/core/ai/types';
@@ -464,9 +465,7 @@ async function testEvolink(
   const missing = need(configs, ['evolink_api_key']);
   if (missing) return { success: false, message: missing };
 
-  const baseUrl = (
-    configs.evolink_base_url || 'https://api.evolink.ai'
-  ).replace(/\/+$/, '');
+  const baseUrl = normalizeEvolinkBaseUrl(configs.evolink_base_url);
   const resp = await fetch(`${baseUrl}/v1/credits`, {
     headers: { Authorization: `Bearer ${configs.evolink_api_key}` },
   });

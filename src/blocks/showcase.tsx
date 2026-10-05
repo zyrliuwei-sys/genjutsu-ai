@@ -1,6 +1,7 @@
 import { tDynamic } from '@/core/i18n/dynamic';
 import { Link } from '@/core/i18n/navigation';
 import { m } from '@/paraglide/messages.js';
+import { LoopVideo } from '@/components/loop-video';
 import { Reveal } from '@/components/reveal';
 
 import { createHref, SHOWCASE_ITEMS } from './showcase-items';
@@ -34,13 +35,13 @@ export function Showcase() {
             className="group w-48 shrink-0 sm:w-56"
           >
             <div className="eg-screen aspect-[9/14] overflow-hidden rounded-md">
-              <img
-                src={item.image}
-                alt={tDynamic(`landing.showcase.${item.key}`)}
+              <LoopVideo
+                src={item.video}
+                poster={item.image}
+                label={tDynamic(`landing.showcase.${item.key}`)}
                 width={576}
                 height={942}
-                loading="lazy"
-                className="size-full object-cover transition duration-700 group-hover:scale-[1.04]"
+                className="size-full transition duration-700 group-hover:scale-[1.04]"
               />
             </div>
             <div className="mt-3 flex items-baseline justify-between gap-2">

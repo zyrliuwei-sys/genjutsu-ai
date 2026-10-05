@@ -871,6 +871,7 @@ export function getSettings(): Setting[] {
       title: 'Base URL',
       type: 'text',
       placeholder: 'https://api.evolink.ai',
+      tip: 'Leave empty to use https://api.evolink.ai',
       group: 'evolink',
       tab: 'ai',
     },
