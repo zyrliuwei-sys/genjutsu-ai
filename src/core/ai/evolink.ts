@@ -1,8 +1,9 @@
 /**
- * Evolink provider (async video tasks).
+ * Evolink provider (async video + image tasks).
  * @docs https://evolink.ai/docs/en/api-manual/video-series/seedance2.0/seedance-2.0-text-to-video
  *
  * POST /v1/videos/generations → { id, status }
+ * POST /v1/images/generations → { id, status }
  * GET  /v1/tasks/{id}         → { status, progress, results: [url], error }
  * Result URLs expire after 24 hours.
  */
@@ -72,6 +73,16 @@ export class EvolinkProvider {
   /** Submit a video generation; returns the Evolink task id. */
   async createVideo(body: Record<string, unknown>): Promise<string> {
     const data = await this.request('/v1/videos/generations', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+    if (!data.id) throw new Error('Evolink returned no task id');
+    return data.id as string;
+  }
+
+  /** Submit an image generation; returns the Evolink task id. */
+  async createImage(body: Record<string, unknown>): Promise<string> {
+    const data = await this.request('/v1/images/generations', {
       method: 'POST',
       body: JSON.stringify(body),
     });

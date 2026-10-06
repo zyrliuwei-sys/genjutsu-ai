@@ -11,7 +11,8 @@
  * billed per second of output, audio included:
  *   - Standard: 480p $0.093/s · 720p $0.199/s · 1080p $0.497/s
  *   - Fast:     25% off Standard, 480p / 720p only
- * fal GPT Image 2 (high): ≤ $0.22 per image (largest canonical size).
+ * Evolink GPT Image 2 (high, 1K): $0.027 / 1K output tokens, ~3.95K tokens
+ *   per image (measured $0.10 on 2026-10-06) — budgeted at $0.12.
  */
 
 import { PRICE_MARKUP, USD_PER_CREDIT } from './hotel-lobby-pricing';
@@ -75,9 +76,9 @@ export const STUDIO_MODELS: StudioModel[] = [
     id: 'gpt-image-2',
     kind: 'image',
     name: 'GPT Image 2',
-    provider: 'fal',
-    endpoint: 'openai/gpt-image-2',
-    usdPerImage: 0.22,
+    provider: 'evolink',
+    endpoint: 'gpt-image-2',
+    usdPerImage: 0.12,
   },
 ];
 

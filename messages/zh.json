@@ -1046,7 +1046,7 @@
   "landing.faq.prompt.question": "怎样给 Genjutsu AI 写好提示词？",
   "landing.faq.prompt.answer": "写清主体、动作、场景和光线，再加一个运镜指令，比如“镜头缓慢推进”或“手持特写”。简短具体的提示词通常比一长串形容词效果更好。",
   "landing.pricing.meta_title": "Genjutsu AI 价格：积分包与月度套餐",
-  "landing.pricing.meta_description": "Genjutsu AI 价格：一次性积分包 $10 起，无需订阅。只在生成时消耗积分，生成失败自动退回。",
+  "landing.pricing.meta_description": "Genjutsu AI 价格：一次性积分包 $9.90 起，无需订阅，大包额外赠送积分。只在生成时消耗积分，生成失败自动退回。",
   "landing.guide.eyebrow": "One name, two tools",
   "landing.guide.title": "Genjutsu AI vs Higgsfield Genjutsu",
   "landing.guide.p1": "Many people searching for genjutsu are looking for Higgsfield Genjutsu, a video-to-video tool Higgsfield released in September 2026. It rebuilds a clip you already have. Motion Transfer keeps the acting, lip sync and camera movement while swapping in a new character, location or look. Object Swap replaces a single element, such as an outfit or a product, and leaves the rest of the shot untouched. It accepts source videos of 3 to 30 seconds and outputs up to 1080p.",
@@ -1129,5 +1129,6 @@
   "landing.pricing.feature_fast_videos": "或约 {count} 条 Fast 草稿（5 秒 · 480p）",
   "landing.pricing.pack_creator": "创作者包",
   "landing.pricing.pack_studio": "工作室包",
-  "create.expire_note": "请尽快下载视频——文件链接只保留 24 小时。"
+  "create.expire_note": "请尽快下载视频——文件链接只保留 24 小时。",
+  "landing.pricing.feature_bonus": "含赠送 {credits} 积分"
 }

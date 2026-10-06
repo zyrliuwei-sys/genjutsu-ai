@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   Film,
+  Gift,
   Image as ImageIcon,
   Infinity as InfinityIcon,
   MonitorPlay,
@@ -87,7 +88,7 @@ export function Pricing({
     resolution: '720p',
   });
 
-  function features(credits: number): PricingFeature[] {
+  function features(credits: number, bonus = 0): PricingFeature[] {
     return [
       {
         icon: Sparkles,
@@ -95,6 +96,16 @@ export function Pricing({
           credits: credits.toLocaleString('en-US'),
         }),
       },
+      ...(bonus > 0
+        ? [
+            {
+              icon: Gift,
+              label: m['landing.pricing.feature_bonus']({
+                credits: bonus.toLocaleString('en-US'),
+              }),
+            },
+          ]
+        : []),
       {
         icon: Film,
         label: m['landing.pricing.feature_videos']({
@@ -134,7 +145,7 @@ export function Pricing({
       price: usd(product.priceInCents),
       featured: opts.featured,
       badge: opts.badge,
-      features: features(product.credits),
+      features: features(product.credits, product.bonusCredits),
       productId,
       priceInCents: product.priceInCents,
       currency: product.currency,

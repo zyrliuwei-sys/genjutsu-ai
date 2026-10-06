@@ -25,17 +25,21 @@ export type PricingProduct = {
   priceInCents: number;
   currency: string;
   credits: number;
+  /** Part of `credits` given on top of the 1 credit = $0.01 base (display). */
+  bonusCredits?: number;
   creditsValidDays?: number;
   plan?: PricingPlanInfo;
 };
 
 /**
- * Credit catalog. Generation is priced in ./studio-models.ts (Seedance 2.0
- * via Evolink: 700 credits for a 5s 720p clip) and ./hotel-lobby-pricing.ts.
+ * Credit catalog. Generation is priced in ./studio-models.ts (provider list
+ * price × 7, e.g. 700 credits for a 5s 720p Seedance 2.0 clip) and
+ * ./hotel-lobby-pricing.ts.
  *
- * Pricing floor: no product may sell credits below $0.01 each, so every
- * generation is sold at ≥ 7× its provider cost. That is why packs carry no
- * volume bonus — check priceInCents / credits ≥ 0.01 before adding a product.
+ * Base rate is 1 credit = $0.01; bigger packs add bonus credits (0 / 10% /
+ * 20% / 25%). At the 25% top bonus a generation still sells at 5.6× the
+ * Evolink list price (and ~8× the VIP price we actually pay). Don't push
+ * bonuses past that without re-checking provider costs.
  * Keys MUST match what the pricing UI sends as product_id.
  *
  * The monthly plans are no longer shown on the pricing page; they stay here
@@ -48,9 +52,10 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Starter Pack',
     description: 'Starter Pack',
     type: PaymentType.ONE_TIME,
-    priceInCents: 1000,
+    priceInCents: 990,
     currency: 'usd',
-    credits: 1000,
+    credits: 990,
+    bonusCredits: 0,
   },
   pack_creator: {
     productId: 'pack_creator',
@@ -58,9 +63,10 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Creator Pack',
     description: 'Creator Pack',
     type: PaymentType.ONE_TIME,
-    priceInCents: 2500,
+    priceInCents: 2490,
     currency: 'usd',
-    credits: 2500,
+    credits: 2740,
+    bonusCredits: 250,
   },
   pack_pro: {
     productId: 'pack_pro',
@@ -68,9 +74,10 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Pro Pack',
     description: 'Pro Pack',
     type: PaymentType.ONE_TIME,
-    priceInCents: 5000,
+    priceInCents: 4990,
     currency: 'usd',
-    credits: 5000,
+    credits: 5990,
+    bonusCredits: 1000,
   },
   pack_studio: {
     productId: 'pack_studio',
@@ -78,9 +85,10 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Studio Pack',
     description: 'Studio Pack',
     type: PaymentType.ONE_TIME,
-    priceInCents: 10000,
+    priceInCents: 7900,
     currency: 'usd',
-    credits: 10000,
+    credits: 9900,
+    bonusCredits: 2000,
   },
   basic_monthly: {
     productId: 'basic_monthly',

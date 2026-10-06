@@ -1046,7 +1046,7 @@
   "landing.faq.prompt.question": "How do I write a good prompt?",
   "landing.faq.prompt.answer": "Name the subject, the action, the setting and the light, then add one camera instruction such as a slow dolly-in or a handheld close-up. Short, concrete prompts usually beat long lists of adjectives.",
   "landing.pricing.meta_title": "Genjutsu AI Pricing: Credit Packs and Monthly Plans",
-  "landing.pricing.meta_description": "Genjutsu AI pricing: one-time credit packs from $10, no subscription. Credits are only spent when you generate, and failed runs are refunded.",
+  "landing.pricing.meta_description": "Genjutsu AI pricing: one-time credit packs from $9.90, no subscription. Bigger packs include bonus credits; credits are only spent when you generate, and failed runs are refunded.",
   "landing.guide.eyebrow": "One name, two tools",
   "landing.guide.title": "Genjutsu AI vs Higgsfield Genjutsu",
   "landing.guide.p1": "Many people searching for genjutsu are looking for Higgsfield Genjutsu, a video-to-video tool Higgsfield released in September 2026. It rebuilds a clip you already have. Motion Transfer keeps the acting, lip sync and camera movement while swapping in a new character, location or look. Object Swap replaces a single element, such as an outfit or a product, and leaves the rest of the shot untouched. It accepts source videos of 3 to 30 seconds and outputs up to 1080p.",
@@ -1129,5 +1129,6 @@
   "landing.pricing.feature_fast_videos": "or ≈ {count} Fast drafts (5s · 480p)",
   "landing.pricing.pack_creator": "Creator Pack",
   "landing.pricing.pack_studio": "Studio Pack",
-  "create.expire_note": "Download your video soon — the file link is kept for 24 hours."
+  "create.expire_note": "Download your video soon — the file link is kept for 24 hours.",
+  "landing.pricing.feature_bonus": "Includes {credits} bonus credits"
 }

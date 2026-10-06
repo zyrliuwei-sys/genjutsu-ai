@@ -6,6 +6,7 @@ import {
 } from '@/core/ai';
 import { getStudioModel, STUDIO_MODELS } from '@/config/studio-models';
 import { AITaskStatus, findTask, updateTask } from '@/modules/ai-tasks/service';
+import { getStorage } from '@/modules/storage/service';
 
 // Retired fal models — still listed in history, never polled again.
 const LEGACY_MODEL_IDS = ['seedance-lite', 'seedance-pro'];
@@ -52,6 +53,24 @@ type Outcome =
   | { status: 'success'; taskResult: any }
   | { status: 'failed'; error: string };
 
+/**
+ * Evolink result links expire after 24 hours — copy the file into our R2
+ * bucket. Falls back to the original link when storage is not configured or
+ * the copy fails, so a finished result is never lost to a storage hiccup.
+ */
+async function archive(url: string, key: string, contentType: string) {
+  try {
+    const storage = await getStorage();
+    if (!storage) return url;
+    const res = await storage.downloadAndUpload({ url, key, contentType });
+    if (res.success && res.url?.startsWith('https://')) return res.url;
+    console.error('archive failed:', res.error ?? res.url);
+  } catch (error) {
+    console.error('archive failed:', error);
+  }
+  return url;
+}
+
 async function pollEvolink(
   task: any,
   configs: Record<string, string>
@@ -65,8 +84,13 @@ async function pollEvolink(
     return { status: 'failed', error: res.error || 'Generation failed' };
   }
   if (res.status === 'completed') {
-    if (!res.url) return { status: 'failed', error: 'No video returned' };
-    return { status: 'success', taskResult: { video: { url: res.url } } };
+    if (!res.url) return { status: 'failed', error: 'No result returned' };
+    if (task.mediaType === AIMediaType.IMAGE) {
+      const url = await archive(res.url, `studio/${task.id}.png`, 'image/png');
+      return { status: 'success', taskResult: { images: [{ url }] } };
+    }
+    const url = await archive(res.url, `studio/${task.id}.mp4`, 'video/mp4');
+    return { status: 'success', taskResult: { video: { url } } };
   }
   return { status: 'running' };
 }

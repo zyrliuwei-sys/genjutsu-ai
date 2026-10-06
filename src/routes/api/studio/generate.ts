@@ -69,35 +69,48 @@ async function POST({ request }: { request: Request }) {
     });
 
     try {
-      const providerTaskId =
-        model.provider === 'evolink'
-          ? await new EvolinkProvider({
-              apiKey: configs.evolink_api_key,
-              baseUrl: configs.evolink_base_url,
-            }).createVideo({
-              model: model.endpoint,
-              prompt,
-              duration: options.duration,
-              quality: options.resolution,
-              aspect_ratio: options.aspect,
-              generate_audio: true,
-              content_filter: true,
-            })
-          : (
-              await new FalProvider({ apiKey: configs.fal_api_key }).generate({
-                params: {
-                  mediaType,
-                  model: model.endpoint,
-                  prompt,
-                  options: {
-                    image_size: IMAGE_SIZES[options.aspect],
-                    quality: 'high',
-                    num_images: 1,
-                    output_format: 'jpeg',
-                  },
-                },
+      let providerTaskId: string;
+      if (model.provider === 'evolink') {
+        const evolink = new EvolinkProvider({
+          apiKey: configs.evolink_api_key,
+          baseUrl: configs.evolink_base_url,
+        });
+        providerTaskId =
+          model.kind === 'video'
+            ? await evolink.createVideo({
+                model: model.endpoint,
+                prompt,
+                duration: options.duration,
+                quality: options.resolution,
+                aspect_ratio: options.aspect,
+                generate_audio: true,
+                content_filter: true,
               })
-            ).taskId;
+            : await evolink.createImage({
+                model: model.endpoint,
+                prompt,
+                size: options.aspect,
+                quality: 'high',
+                n: 1,
+              });
+      } else {
+        const result = await new FalProvider({
+          apiKey: configs.fal_api_key,
+        }).generate({
+          params: {
+            mediaType,
+            model: model.endpoint,
+            prompt,
+            options: {
+              image_size: IMAGE_SIZES[options.aspect],
+              quality: 'high',
+              num_images: 1,
+              output_format: 'jpeg',
+            },
+          },
+        });
+        providerTaskId = result.taskId;
+      }
       await setProviderTaskId(task.id, providerTaskId);
     } catch (error: any) {
       await updateTask({
