@@ -5,6 +5,7 @@ import {
   Clapperboard,
   Coins,
   Download,
+  Eye,
   ImageIcon,
   Loader2,
   Sparkles,
@@ -46,6 +47,19 @@ type StudioTask = {
   credits: number;
   url: string | null;
   error: string | null;
+};
+
+type Preview = {
+  id: string;
+  status: 'processing' | 'success' | 'failed';
+  url: string | null;
+};
+
+type PreviewQuota = { remaining: number; siteCapReached: boolean };
+
+const PREVIEW_ERRORS: Record<string, () => string> = {
+  PREVIEW_LIMIT: () => m['create.preview_limit'](),
+  PREVIEW_BUSY: () => m['create.preview_busy'](),
 };
 
 type Search = { kind?: StudioKind; prompt?: string; model?: string };
@@ -186,6 +200,9 @@ function CreatePage() {
   const [duration, setDuration] = useState<VideoDuration>(5);
   const [taskId, setTaskId] = useState<string>();
   const [paywall, setPaywall] = useState(false);
+  const [previewId, setPreviewId] = useState<string>();
+  // Which result the output panel shows: the last thing the user started.
+  const [output, setOutput] = useState<'task' | 'preview'>('task');
 
   const models = STUDIO_MODELS.filter((model) => model.kind === kind);
   const model = getStudioModel(modelId) ?? models[0]!;
@@ -252,6 +269,7 @@ function CreatePage() {
     onSuccess: (created) => {
       queryClient.setQueryData(['studio-task', created.id], created);
       setTaskId(created.id);
+      setOutput('task');
       queryClient.invalidateQueries({ queryKey: ['credits'] });
       queryClient.invalidateQueries({ queryKey: ['studio-tasks'] });
     },
@@ -262,6 +280,56 @@ function CreatePage() {
   });
 
   const running = generate.isPending || (!!taskId && !!task && !isDone(task));
+
+  // Free low-res still: no sign-in, no credits, a few per day.
+  const quotaQuery = useQuery({
+    queryKey: ['preview-quota'],
+    queryFn: () => apiGet<PreviewQuota>('/api/studio/preview'),
+  });
+  const previewQuery = useQuery({
+    queryKey: ['preview', previewId],
+    queryFn: () => apiGet<Preview>(`/api/studio/preview?id=${previewId}`),
+    enabled: !!previewId,
+    refetchInterval: (query) =>
+      query.state.data?.status === 'processing' ? 3000 : false,
+  });
+  const preview = previewQuery.data;
+
+  useEffect(() => {
+    if (preview?.status === 'failed') toast.error(m['create.preview_failed']());
+  }, [preview?.id, preview?.status]);
+
+  const startPreview = useMutation({
+    mutationFn: () =>
+      apiPost<Preview & { remaining: number }>('/api/studio/preview', {
+        prompt: prompt.trim(),
+        aspect,
+        kind,
+      }),
+    onSuccess: (created) => {
+      queryClient.setQueryData(['preview', created.id], created);
+      setPreviewId(created.id);
+      setOutput('preview');
+      queryClient.invalidateQueries({ queryKey: ['preview-quota'] });
+    },
+    onError: (e: Error) => {
+      toast.error(PREVIEW_ERRORS[e.message]?.() ?? e.message);
+      queryClient.invalidateQueries({ queryKey: ['preview-quota'] });
+    },
+  });
+
+  const previewing = startPreview.isPending || preview?.status === 'processing';
+  const quota = quotaQuery.data;
+  const noPreviewsLeft =
+    !!quota && (quota.remaining <= 0 || quota.siteCapReached);
+
+  function previewFrame() {
+    if (!prompt.trim()) {
+      toast.error(m['create.prompt_required']());
+      return;
+    }
+    startPreview.mutate();
+  }
 
   function start() {
     if (!prompt.trim()) {
@@ -429,13 +497,70 @@ function CreatePage() {
                       ? m['create.generate']()
                       : m['create.sign_in_to_generate']()}
                 </button>
+                <button
+                  type="button"
+                  onClick={previewFrame}
+                  disabled={previewing || noPreviewsLeft}
+                  className="eg-pill-light h-11 w-full border text-sm disabled:opacity-60"
+                >
+                  {previewing ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                  {tDynamic(`create.preview_button_${kind}`)}
+                </button>
+                <p className="text-muted-foreground text-center text-xs">
+                  {quota?.siteCapReached
+                    ? m['create.preview_busy']()
+                    : m['create.preview_hint']({
+                        count: quota?.remaining ?? 3,
+                      })}
+                </p>
               </div>
             </section>
 
             {/* Output */}
             <section className="space-y-6">
               <div className="eg-screen flex aspect-video items-center justify-center overflow-hidden rounded-lg text-white/80 lg:aspect-auto lg:h-[560px]">
-                {task?.status === 'success' && task.url ? (
+                {output === 'preview' &&
+                preview?.status === 'success' &&
+                preview.url ? (
+                  <div className="relative size-full bg-black/90">
+                    <img
+                      src={preview.url}
+                      alt={prompt}
+                      className="size-full object-contain"
+                    />
+                    <span className="absolute top-4 left-4 rounded-md bg-black/60 px-3 py-1.5 text-xs text-white">
+                      {m['create.preview_badge']()}
+                    </span>
+                    <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-2 bg-gradient-to-t from-black/80 to-transparent p-6 pt-16">
+                      <button
+                        type="button"
+                        onClick={start}
+                        disabled={running || sessionPending}
+                        className="eg-pill-primary px-6 py-2.5 text-sm disabled:opacity-60"
+                      >
+                        <Sparkles className="size-4" />
+                        {tDynamic(`create.preview_cta_${kind}`)}
+                      </button>
+                      <p className="text-xs text-white/70">
+                        {m['create.cost']({ credits: price })}
+                      </p>
+                    </div>
+                  </div>
+                ) : output === 'preview' && previewing ? (
+                  <div className="flex flex-col items-center gap-3 p-8 text-center text-white/60">
+                    <Loader2 className="text-primary size-8 animate-spin" />
+                    <p className="eg-heading text-2xl text-white">
+                      {m['create.preview_generating']()}
+                    </p>
+                    <p className="max-w-sm text-sm">
+                      {m['create.preview_wait']()}
+                    </p>
+                  </div>
+                ) : task?.status === 'success' && task.url ? (
                   <div className="relative size-full bg-black/90">
                     <Media task={task} />
                     <a
@@ -471,12 +596,6 @@ function CreatePage() {
                   </div>
                 )}
               </div>
-
-              {task?.status === 'success' && task.kind === 'video' && (
-                <p className="text-muted-foreground -mt-3 text-sm">
-                  {m['create.expire_note']()}
-                </p>
-              )}
 
               {user && history.length > 0 && (
                 <div>

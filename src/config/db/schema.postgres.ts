@@ -635,3 +635,25 @@ export type InviteCode = typeof inviteCode.$inferSelect;
 export type NewInviteCode = typeof inviteCode.$inferInsert;
 export type UserInvite = typeof userInvite.$inferSelect;
 export type NewUserInvite = typeof userInvite.$inferInsert;
+
+/** Free, sign-in-free low-res image previews (rate-limited per IP). */
+export const preview = table(
+  'preview',
+  {
+    id: text('id').primaryKey(),
+    ipHash: text('ip_hash').notNull(),
+    prompt: text('prompt').notNull(),
+    aspect: text('aspect').notNull(),
+    status: text('status').notNull(),
+    taskId: text('task_id'),
+    url: text('url'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => [
+    index('idx_preview_ip_created').on(t.ipHash, t.createdAt),
+    index('idx_preview_created').on(t.createdAt),
+  ]
+);
+
+export type Preview = typeof preview.$inferSelect;
+export type NewPreview = typeof preview.$inferInsert;

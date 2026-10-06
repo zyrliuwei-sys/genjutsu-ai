@@ -1129,6 +1129,16 @@
   "landing.pricing.feature_fast_videos": "or ≈ {count} Fast drafts (5s · 480p)",
   "landing.pricing.pack_creator": "Creator Pack",
   "landing.pricing.pack_studio": "Studio Pack",
-  "create.expire_note": "Download your video soon — the file link is kept for 24 hours.",
-  "landing.pricing.feature_bonus": "Includes {credits} bonus credits"
+  "landing.pricing.feature_bonus": "Includes {credits} bonus credits",
+  "create.preview_button_video": "Free preview of the first frame",
+  "create.preview_button_image": "Free low-res preview",
+  "create.preview_hint": "No sign-in needed · {count} free previews left today",
+  "create.preview_limit": "You've used today's free previews. Sign in to generate the full result.",
+  "create.preview_busy": "Free previews are busy today. Sign in to generate the full result.",
+  "create.preview_failed": "The preview didn't work this time. Try rewording the prompt.",
+  "create.preview_badge": "Free low-res preview",
+  "create.preview_cta_video": "Like it? Generate the video",
+  "create.preview_cta_image": "Like it? Generate it in HD",
+  "create.preview_generating": "Drawing a preview…",
+  "create.preview_wait": "A quick low-res still, usually ready in under a minute."
 }

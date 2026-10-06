@@ -1129,6 +1129,16 @@
   "landing.pricing.feature_fast_videos": "或约 {count} 条 Fast 草稿（5 秒 · 480p）",
   "landing.pricing.pack_creator": "创作者包",
   "landing.pricing.pack_studio": "工作室包",
-  "create.expire_note": "请尽快下载视频——文件链接只保留 24 小时。",
-  "landing.pricing.feature_bonus": "含赠送 {credits} 积分"
+  "landing.pricing.feature_bonus": "含赠送 {credits} 积分",
+  "create.preview_button_video": "免费预览首帧画面",
+  "create.preview_button_image": "免费低清预览",
+  "create.preview_hint": "无需登录 · 今天还剩 {count} 次免费预览",
+  "create.preview_limit": "今天的免费预览次数已用完，登录后可生成完整作品。",
+  "create.preview_busy": "今天的免费预览名额已满，登录后可生成完整作品。",
+  "create.preview_failed": "这次预览没有成功，换个说法再试试。",
+  "create.preview_badge": "免费低清预览",
+  "create.preview_cta_video": "满意？生成完整视频",
+  "create.preview_cta_image": "满意？生成高清图片",
+  "create.preview_generating": "正在画预览…",
+  "create.preview_wait": "一张快速出的低清画面，通常一分钟内完成。"
 }

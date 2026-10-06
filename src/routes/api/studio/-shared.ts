@@ -58,7 +58,7 @@ type Outcome =
  * bucket. Falls back to the original link when storage is not configured or
  * the copy fails, so a finished result is never lost to a storage hiccup.
  */
-async function archive(url: string, key: string, contentType: string) {
+export async function archive(url: string, key: string, contentType: string) {
   try {
     const storage = await getStorage();
     if (!storage) return url;
