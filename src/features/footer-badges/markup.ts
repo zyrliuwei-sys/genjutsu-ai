@@ -22,7 +22,7 @@ function hasOnlyWhitespaceText(element: Element) {
  * accepted; the server validates the extracted values again before saving.
  */
 export function parseFooterBadgeMarkup(markup: string): FooterBadge[] {
-  if (!markup.trim() || markup.length > 20_000) {
+  if (!markup.trim() || markup.length > 100_000) {
     throw new Error('invalid_markup');
   }
 
