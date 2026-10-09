@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState, type Ref } from 'react';
 import { ArrowUp, Clapperboard, ImageIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
 export type PromptKind = 'video' | 'image';
+export type PromptBoxValue = { prompt: string; kind: PromptKind };
 
 /** The hero prompt composer: free text + video/image switch + send. */
 export function PromptBox({
@@ -12,17 +13,35 @@ export function PromptBox({
   imageLabel,
   submitLabel,
   onSubmit,
+  onChange,
+  inputRef,
   className,
 }: {
   placeholder: string;
   videoLabel: string;
   imageLabel: string;
   submitLabel: string;
-  onSubmit: (value: { prompt: string; kind: PromptKind }) => void;
+  onSubmit: (value: PromptBoxValue) => void;
+  onChange?: (value: PromptBoxValue) => void;
+  inputRef?: Ref<HTMLTextAreaElement>;
   className?: string;
 }) {
   const [prompt, setPrompt] = useState('');
   const [kind, setKind] = useState<PromptKind>('video');
+  const promptRef = useRef('');
+  const kindRef = useRef<PromptKind>('video');
+
+  function updatePrompt(value: string) {
+    promptRef.current = value;
+    setPrompt(value);
+    onChange?.({ prompt: value, kind: kindRef.current });
+  }
+
+  function updateKind(value: PromptKind) {
+    kindRef.current = value;
+    setKind(value);
+    onChange?.({ prompt: promptRef.current, kind: value });
+  }
 
   function submit(form?: HTMLFormElement | null) {
     // Read the live form value at submit time as well as React state. This
@@ -30,13 +49,13 @@ export function PromptBox({
     // typing and the state update has not committed yet.
     const field = form?.elements.namedItem('prompt');
     const value = field instanceof HTMLTextAreaElement ? field.value : prompt;
-    onSubmit({ prompt: value.trim(), kind });
+    onSubmit({ prompt: value.trim(), kind: kindRef.current });
   }
 
   const chip = (value: PromptKind, label: string, Icon: typeof ImageIcon) => (
     <button
       type="button"
-      onClick={() => setKind(value)}
+      onClick={() => updateKind(value)}
       aria-pressed={kind === value}
       className={cn(
         'inline-flex h-9 items-center gap-1.5 rounded-md border px-3 text-sm transition',
@@ -63,8 +82,9 @@ export function PromptBox({
     >
       <textarea
         name="prompt"
+        ref={inputRef}
         value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
+        onChange={(e) => updatePrompt(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
             e.preventDefault();

@@ -18,6 +18,7 @@ import {
   CreemProvider,
   PayPalProvider,
   StripeProvider,
+  WaffoProvider,
   WechatPayProvider,
 } from '@/core/payment';
 import { PaymentType, type PaymentOrder } from '@/core/payment/types';
@@ -49,6 +50,8 @@ export async function runTest(
         return await testAlipay(inputs, configs);
       case 'wechat':
         return await testWechat(inputs, configs);
+      case 'waffo':
+        return await testWaffo(inputs, configs);
       case 'r2':
         return await testR2(inputs, configs);
       case 'openai':
@@ -311,6 +314,55 @@ async function testWechat(
     message: 'Checkout created',
     details: {
       'Order No': session.checkoutInfo.sessionId,
+      'Checkout URL': session.checkoutInfo.checkoutUrl,
+    },
+  };
+}
+
+// --- Waffo Pancake --------------------------------------------------------
+
+async function testWaffo(
+  inputs: Record<string, string>,
+  configs: Record<string, string>
+): Promise<TestResult> {
+  const missing = need(configs, [
+    'waffo_merchant_id',
+    'waffo_private_key',
+    'waffo_store_id',
+  ]);
+  if (missing) return { success: false, message: missing };
+
+  const provider = new WaffoProvider({
+    merchantId: configs.waffo_merchant_id,
+    privateKey: configs.waffo_private_key,
+    storeId: configs.waffo_store_id,
+    environment: configs.waffo_environment === 'test' ? 'test' : 'prod',
+    taxCategory: configs.waffo_tax_category || 'saas',
+    webhookPublicKey: configs.waffo_webhook_public_key || undefined,
+  });
+
+  const currency = (inputs.currency || 'USD').toUpperCase();
+  const session = await provider.createPayment({
+    order: {
+      type: PaymentType.ONE_TIME,
+      orderNo: getUniSeq('TEST'),
+      productId: inputs.productId,
+      price: {
+        amount: Number(inputs.amount) || 100,
+        currency,
+      },
+      description: 'Waffo settings test',
+      successUrl: configuredSuccessUrl('waffo', configs),
+      customer: { email: 'settings-test@example.com' },
+      metadata: { settingsTest: 'true' },
+    },
+  });
+
+  return {
+    success: true,
+    message: 'Waffo checkout session created',
+    details: {
+      'Session ID': session.checkoutInfo.sessionId,
       'Checkout URL': session.checkoutInfo.checkoutUrl,
     },
   };

@@ -19,6 +19,13 @@ function ackSuccess(provider: string) {
     return Response.json({ code: 'SUCCESS', message: 'OK' });
   }
 
+  if (provider === 'waffo') {
+    return new Response('OK', {
+      status: 200,
+      headers: { 'Content-Type': 'text/plain' },
+    });
+  }
+
   return respOk();
 }
 

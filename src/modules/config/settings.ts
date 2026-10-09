@@ -123,6 +123,12 @@ export function getSettingGroups(): SettingGroup[] {
       description: 'WeChat Pay gateway (native)',
       tab: 'payment',
     },
+    {
+      name: 'waffo',
+      title: 'Waffo',
+      description: 'Waffo Pancake payment gateway',
+      tab: 'payment',
+    },
 
     // Email
     {
@@ -413,6 +419,7 @@ export function getSettings(): Setting[] {
         { label: 'PayPal', value: 'paypal' },
         { label: 'Alipay', value: 'alipay' },
         { label: 'WeChat Pay', value: 'wechat' },
+        { label: 'Waffo', value: 'waffo' },
       ],
       group: 'basic_payment',
       tab: 'payment',
@@ -668,6 +675,82 @@ export function getSettings(): Setting[] {
       type: 'number',
       placeholder: '留空使用实际金额，填 1 则支付 ¥0.01',
       group: 'wechat',
+      tab: 'payment',
+    },
+
+    // ─── Payment / Waffo Pancake ────────────────────────────────────
+    {
+      name: 'waffo_enabled',
+      title: 'Enable Waffo',
+      type: 'switch',
+      group: 'waffo',
+      tab: 'payment',
+    },
+    {
+      name: 'waffo_environment',
+      title: 'Environment',
+      type: 'select',
+      options: [
+        { label: 'Test', value: 'test' },
+        { label: 'Production', value: 'prod' },
+      ],
+      group: 'waffo',
+      tab: 'payment',
+      defaultValue: 'prod',
+    },
+    {
+      name: 'waffo_merchant_id',
+      title: 'Merchant ID',
+      type: 'text',
+      placeholder: 'MER_xxx',
+      group: 'waffo',
+      tab: 'payment',
+    },
+    {
+      name: 'waffo_private_key',
+      title: 'Private Key (RSA PEM)',
+      type: 'textarea',
+      placeholder: '-----BEGIN PRIVATE KEY-----\\n...',
+      group: 'waffo',
+      tab: 'payment',
+    },
+    {
+      name: 'waffo_store_id',
+      title: 'Store ID',
+      type: 'text',
+      placeholder: 'STO_xxx',
+      group: 'waffo',
+      tab: 'payment',
+    },
+    {
+      name: 'waffo_product_ids_mapping',
+      title: 'Product IDs Mapping',
+      type: 'textarea',
+      placeholder: '{"pack_starter":"PROD_xxx"}',
+      tip: 'Map each local product_id to its Waffo product ID. Values must be valid JSON.',
+      group: 'waffo',
+      tab: 'payment',
+    },
+    {
+      name: 'waffo_tax_category',
+      title: 'Tax Category',
+      type: 'select',
+      options: [
+        { label: 'SaaS', value: 'saas' },
+        { label: 'Software', value: 'software' },
+        { label: 'Digital goods', value: 'digital_goods' },
+        { label: 'Professional service', value: 'professional_service' },
+      ],
+      group: 'waffo',
+      tab: 'payment',
+      defaultValue: 'saas',
+    },
+    {
+      name: 'waffo_webhook_public_key',
+      title: 'Webhook Public Key (optional)',
+      type: 'textarea',
+      placeholder: 'Leave empty to use the official SDK key',
+      group: 'waffo',
       tab: 'payment',
     },
 

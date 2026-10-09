@@ -94,6 +94,9 @@ importers:
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.14
+      '@waffo/pancake-ts':
+        specifier: ^0.25.0
+        version: 0.25.0
       aws4fetch:
         specifier: ^1.0.0
         version: 1.0.20
@@ -2852,6 +2855,10 @@ packages:
         optional: true
       babel-plugin-react-compiler:
         optional: true
+
+  '@waffo/pancake-ts@0.25.0':
+    resolution: {integrity: sha512-6Zye8je5nhTh2tuu7XBZycqdgg3CwEiS0DLDGvbPZQiSwmraqPBRdy4qMDCJ5IbdZhjRRFlDcNSZSmEr3BE0dg==}
+    engines: {node: '>=20.0.0'}
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -7861,6 +7868,8 @@ snapshots:
     dependencies:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.0.16(@types/node@22.19.17)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.0)
+
+  '@waffo/pancake-ts@0.25.0': {}
 
   abort-controller@3.0.0:
     dependencies:

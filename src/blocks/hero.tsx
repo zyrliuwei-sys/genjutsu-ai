@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { tDynamic } from '@/core/i18n/dynamic';
 import { Link, useRouter } from '@/core/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
 import { LoopVideo } from '@/components/loop-video';
-import { PromptBox } from '@/components/prompt-box';
+import { PromptBox, type PromptKind } from '@/components/prompt-box';
 
 import { createHref, HERO_CARDS } from './showcase-items';
 
@@ -18,6 +18,8 @@ const TAKE_MS = 5200;
  */
 export function Hero() {
   const router = useRouter();
+  const promptInputRef = useRef<HTMLTextAreaElement>(null);
+  const promptKindRef = useRef<PromptKind>('video');
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -33,6 +35,12 @@ export function Hero() {
 
   const card = HERO_CARDS[active];
   const label = tDynamic(`landing.hero.card_${card.key}`);
+
+  function openStudio() {
+    const prompt = promptInputRef.current?.value.trim() ?? '';
+    const kind = promptKindRef.current;
+    router.push(prompt ? createHref({ kind, prompt }) : `/create?kind=${kind}`);
+  }
 
   return (
     <section className="relative overflow-hidden px-4 pt-12 pb-20 sm:pt-16 lg:pt-14 lg:pb-28">
@@ -57,6 +65,10 @@ export function Hero() {
             videoLabel={m['landing.hero.kind_video']()}
             imageLabel={m['landing.hero.kind_image']()}
             submitLabel={m['landing.hero.cta']()}
+            inputRef={promptInputRef}
+            onChange={({ kind }) => {
+              promptKindRef.current = kind;
+            }}
             onSubmit={({ prompt, kind }) =>
               router.push(
                 prompt ? createHref({ kind, prompt }) : `/create?kind=${kind}`
@@ -65,9 +77,13 @@ export function Hero() {
           />
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <Link href="/create" className="eg-pill-primary px-6">
+            <button
+              type="button"
+              onClick={openStudio}
+              className="eg-pill-primary px-6"
+            >
               {m['landing.hero.cta']()}
-            </Link>
+            </button>
             <Link href="/pricing" className="eg-pill-light px-6">
               {m['landing.hero.secondary']()}
             </Link>

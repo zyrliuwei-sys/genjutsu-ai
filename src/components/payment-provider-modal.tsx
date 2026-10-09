@@ -17,7 +17,8 @@ export type PaymentProvider =
   | 'creem'
   | 'paypal'
   | 'alipay'
-  | 'wechat';
+  | 'wechat'
+  | 'waffo';
 
 interface Props {
   open: boolean;
@@ -35,6 +36,7 @@ const providerLabel: Record<PaymentProvider, string> = {
   paypal: 'PayPal',
   alipay: 'Alipay',
   wechat: 'WeChat Pay',
+  waffo: 'Waffo',
 };
 
 export function PaymentProviderModal({

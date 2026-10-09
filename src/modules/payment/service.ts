@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, ne } from 'drizzle-orm';
+import { and, desc, eq, isNull, ne, or } from 'drizzle-orm';
 
 import { db } from '@/core/db';
 import {
@@ -7,6 +7,7 @@ import {
   PaymentManager,
   PayPalProvider,
   StripeProvider,
+  WaffoProvider,
   WechatPayProvider,
 } from '@/core/payment';
 import {
@@ -56,6 +57,14 @@ async function getPaymentManager(): Promise<PaymentManager> {
     c('creem_api_key'),
     c('alipay_app_id'),
     c('wechat_mch_id'),
+    c('waffo_enabled'),
+    c('waffo_merchant_id'),
+    c('waffo_store_id'),
+    c('waffo_private_key'),
+    c('waffo_environment'),
+    c('waffo_product_ids_mapping'),
+    c('waffo_tax_category'),
+    c('waffo_webhook_public_key'),
     c('paypal_enabled'),
     c('paypal_client_id'),
     c('paypal_client_secret'),
@@ -146,6 +155,25 @@ async function getPaymentManager(): Promise<PaymentManager> {
     );
   }
 
+  if (
+    c('waffo_enabled') === 'true' &&
+    c('waffo_merchant_id') &&
+    c('waffo_private_key')
+  ) {
+    const isDefault = c('default_payment_provider') === 'waffo';
+    manager.addProvider(
+      new WaffoProvider({
+        merchantId: c('waffo_merchant_id'),
+        privateKey: c('waffo_private_key'),
+        storeId: c('waffo_store_id') || undefined,
+        environment: c('waffo_environment') === 'test' ? 'test' : 'prod',
+        taxCategory: c('waffo_tax_category') || 'saas',
+        webhookPublicKey: c('waffo_webhook_public_key') || undefined,
+      }),
+      isDefault
+    );
+  }
+
   return manager;
 }
 
@@ -189,6 +217,19 @@ export async function createCheckout(params: {
         }
       } catch {
         // invalid JSON — fall through with original productId
+      }
+    }
+  }
+  if (resolvedProvider === 'waffo' && paymentOrder.productId) {
+    const mapping = configs.waffo_product_ids_mapping;
+    if (mapping) {
+      try {
+        const map = JSON.parse(mapping) as Record<string, string>;
+        if (map[paymentOrder.productId]) {
+          resolvedProductId = map[paymentOrder.productId];
+        }
+      } catch {
+        // invalid JSON — the provider will return a useful product error
       }
     }
   }
@@ -255,7 +296,12 @@ export async function handlePaymentCallback(orderNo: string) {
   if (!provider) return;
 
   const session = await provider.getPaymentSession({
-    sessionId: existingOrder.paymentSessionId || existingOrder.orderNo,
+    // Waffo's GraphQL lookup is keyed by our orderMerchantExternalId because
+    // its checkout session ID is not the same as its eventual order ID.
+    sessionId:
+      existingOrder.paymentProvider === 'waffo'
+        ? existingOrder.orderNo
+        : existingOrder.paymentSessionId || existingOrder.orderNo,
   });
 
   // Reuse the same atomic success handler as the webhook so that
@@ -314,13 +360,25 @@ async function handleCheckoutSuccess(session: any, provider: string) {
     result.out_trade_no ||
     result.outTradeNo ||
     '';
-  if (!sessionId) return;
+  const externalOrderNo =
+    session.metadata?.orderMerchantExternalId ||
+    result.orderMerchantExternalId ||
+    '';
+  if (!sessionId && !externalOrderNo) return;
 
   // Find order by session ID
   const [existingOrder] = await db()
     .select()
     .from(order)
-    .where(and(eq(order.paymentSessionId, sessionId), isNull(order.deletedAt)))
+    .where(
+      and(
+        isNull(order.deletedAt),
+        or(
+          sessionId ? eq(order.paymentSessionId, sessionId) : undefined,
+          externalOrderNo ? eq(order.orderNo, externalOrderNo) : undefined
+        )
+      )
+    )
     .limit(1);
 
   if (!existingOrder) return;

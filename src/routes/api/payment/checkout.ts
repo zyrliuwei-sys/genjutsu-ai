@@ -103,6 +103,9 @@ async function POST({ request }: { request: Request }) {
               intervalCount: product.plan.intervalCount,
             }
           : undefined,
+        metadata: {
+          userId: session.user.id,
+        },
       },
       provider: payment_provider,
     });

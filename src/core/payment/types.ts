@@ -277,7 +277,7 @@ export interface PaymentProvider {
     sessionId,
   }: {
     sessionId: string;
-  }): Promise<PaymentSession>;
+  }): Promise<PaymentSession | null>;
 
   // get payment event from webhook notification
   getPaymentEvent({ req }: { req: Request }): Promise<PaymentEvent>;

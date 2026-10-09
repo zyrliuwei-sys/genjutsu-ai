@@ -29,6 +29,7 @@ const publicKeys = [
   'paypal_enabled',
   'alipay_enabled',
   'wechat_enabled',
+  'waffo_enabled',
   'google_analytics_id',
   'plausible_domain',
   'plausible_src',

@@ -45,6 +45,7 @@ const ALL_PROVIDERS: PaymentProvider[] = [
   'paypal',
   'alipay',
   'wechat',
+  'waffo',
 ];
 
 export function Pricing({
