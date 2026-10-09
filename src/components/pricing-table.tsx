@@ -143,6 +143,12 @@ export function PricingTable({
                 : 'bg-background border-border hover:border-foreground/30'
             )}
           >
+            {plan.badge && (
+              <span className="bg-primary text-primary-foreground absolute -top-3 left-6 rounded-full px-3 py-1 text-xs font-medium">
+                {plan.badge}
+              </span>
+            )}
+
             {/* Plan name */}
             {plan.name && (
               <p className="text-foreground mb-2 text-sm font-medium">

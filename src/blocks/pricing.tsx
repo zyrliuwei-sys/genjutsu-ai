@@ -169,7 +169,6 @@ export function Pricing({
         plan('pack_pro', { name: m['landing.pricing.pack_pro']() }),
         plan('pack_studio', {
           name: m['landing.pricing.pack_studio'](),
-          badge: m['landing.pricing.best_value'](),
         }),
       ],
     },

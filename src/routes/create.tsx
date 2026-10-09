@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import {
   Clapperboard,
   Coins,
   Download,
-  Eye,
   ImageIcon,
   Loader2,
   Sparkles,
@@ -16,6 +15,7 @@ import { useSession } from '@/core/auth/client';
 import { tDynamic } from '@/core/i18n/dynamic';
 import { useRouter } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
+import { USD_PER_CREDIT } from '@/config/hotel-lobby-pricing';
 import {
   getStudioModel,
   STUDIO_ASPECTS,
@@ -49,20 +49,15 @@ type StudioTask = {
   error: string | null;
 };
 
-type Preview = {
-  id: string;
-  status: 'processing' | 'success' | 'failed';
-  url: string | null;
+type Search = {
+  kind?: StudioKind;
+  prompt?: string;
+  model?: string;
+  aspect?: StudioAspect;
+  resolution?: VideoResolution;
+  duration?: VideoDuration;
+  intent?: 'generate';
 };
-
-type PreviewQuota = { remaining: number; siteCapReached: boolean };
-
-const PREVIEW_ERRORS: Record<string, () => string> = {
-  PREVIEW_LIMIT: () => m['create.preview_limit'](),
-  PREVIEW_BUSY: () => m['create.preview_busy'](),
-};
-
-type Search = { kind?: StudioKind; prompt?: string; model?: string };
 
 const INSUFFICIENT_CREDITS = 'Insufficient credits';
 const isDone = (t?: StudioTask) =>
@@ -79,6 +74,20 @@ export const Route = createFileRoute('/create')({
         ? search.prompt.slice(0, 2000)
         : undefined,
     model: typeof search.model === 'string' ? search.model : undefined,
+    aspect: STUDIO_ASPECTS.includes(search.aspect as StudioAspect)
+      ? (search.aspect as StudioAspect)
+      : undefined,
+    resolution:
+      search.resolution === '480p' ||
+      search.resolution === '720p' ||
+      search.resolution === '1080p'
+        ? search.resolution
+        : undefined,
+    duration:
+      search.duration === 5 || search.duration === 10 || search.duration === 15
+        ? search.duration
+        : undefined,
+    intent: search.intent === 'generate' ? 'generate' : undefined,
   }),
   loader: () => {
     const locale = getLocale();
@@ -195,14 +204,14 @@ function CreatePage() {
   const [kind, setKind] = useState<StudioKind>(initialModel.kind);
   const [modelId, setModelId] = useState(initialModel.id);
   const [prompt, setPrompt] = useState(search.prompt ?? '');
-  const [aspect, setAspect] = useState<StudioAspect>('9:16');
-  const [resolution, setResolution] = useState<VideoResolution>('720p');
-  const [duration, setDuration] = useState<VideoDuration>(5);
+  const [aspect, setAspect] = useState<StudioAspect>(search.aspect ?? '9:16');
+  const [resolution, setResolution] = useState<VideoResolution>(
+    search.resolution ?? '720p'
+  );
+  const [duration, setDuration] = useState<VideoDuration>(search.duration ?? 5);
   const [taskId, setTaskId] = useState<string>();
   const [paywall, setPaywall] = useState(false);
-  const [previewId, setPreviewId] = useState<string>();
-  // Which result the output panel shows: the last thing the user started.
-  const [output, setOutput] = useState<'task' | 'preview'>('task');
+  const autoGenerateStarted = useRef(false);
 
   // Keep deep-link values authoritative when TanStack Router reuses this
   // route component for another /create?prompt=... navigation. The prompt is
@@ -222,6 +231,12 @@ function CreatePage() {
         : STUDIO_MODELS.find((item) => item.kind === nextKind)!.id
     );
   }, [search.kind, search.model]);
+
+  useEffect(() => {
+    setAspect(search.aspect ?? '9:16');
+    setResolution(search.resolution ?? '720p');
+    setDuration(search.duration ?? 5);
+  }, [search.aspect, search.resolution, search.duration]);
 
   const models = STUDIO_MODELS.filter((model) => model.kind === kind);
   const model = getStudioModel(modelId) ?? models[0]!;
@@ -288,67 +303,74 @@ function CreatePage() {
     onSuccess: (created) => {
       queryClient.setQueryData(['studio-task', created.id], created);
       setTaskId(created.id);
-      setOutput('task');
       queryClient.invalidateQueries({ queryKey: ['credits'] });
       queryClient.invalidateQueries({ queryKey: ['studio-tasks'] });
     },
     onError: (e: Error) => {
-      if (e.message === INSUFFICIENT_CREDITS) setPaywall(true);
+      if (e.message === INSUFFICIENT_CREDITS) openPaywall();
       else toast.error(e.message);
     },
   });
 
   const running = generate.isPending || (!!taskId && !!task && !isDone(task));
 
-  // Free low-res still: no sign-in, no credits, a few per day.
-  const quotaQuery = useQuery({
-    queryKey: ['preview-quota'],
-    queryFn: () => apiGet<PreviewQuota>('/api/studio/preview'),
-  });
-  const previewQuery = useQuery({
-    queryKey: ['preview', previewId],
-    queryFn: () => apiGet<Preview>(`/api/studio/preview?id=${previewId}`),
-    enabled: !!previewId,
-    refetchInterval: (query) =>
-      query.state.data?.status === 'processing' ? 3000 : false,
-  });
-  const preview = previewQuery.data;
+  function createReturnHref(intent?: 'generate') {
+    const params = new URLSearchParams({
+      kind,
+      prompt: prompt.trim(),
+      model: model.id,
+      aspect,
+      resolution: activeResolution,
+      duration: String(duration),
+    });
+    if (intent) params.set('intent', intent);
+    return `/create?${params.toString()}`;
+  }
 
+  function openPaywall() {
+    router.replace(createReturnHref('generate'));
+    setPaywall(true);
+  }
+
+  // When a payment callback returns to /create?intent=generate, continue the
+  // exact render the user originally requested after the newly granted credits
+  // are visible in the balance query.
   useEffect(() => {
-    if (preview?.status === 'failed') toast.error(m['create.preview_failed']());
-  }, [preview?.id, preview?.status]);
-
-  const startPreview = useMutation({
-    mutationFn: () =>
-      apiPost<Preview & { remaining: number }>('/api/studio/preview', {
-        prompt: prompt.trim(),
-        aspect,
-        kind,
-      }),
-    onSuccess: (created) => {
-      queryClient.setQueryData(['preview', created.id], created);
-      setPreviewId(created.id);
-      setOutput('preview');
-      queryClient.invalidateQueries({ queryKey: ['preview-quota'] });
-    },
-    onError: (e: Error) => {
-      toast.error(PREVIEW_ERRORS[e.message]?.() ?? e.message);
-      queryClient.invalidateQueries({ queryKey: ['preview-quota'] });
-    },
-  });
-
-  const previewing = startPreview.isPending || preview?.status === 'processing';
-  const quota = quotaQuery.data;
-  const noPreviewsLeft =
-    !!quota && (quota.remaining <= 0 || quota.siteCapReached);
-
-  function previewFrame() {
-    if (!prompt.trim()) {
-      toast.error(m['create.prompt_required']());
+    if (
+      search.intent !== 'generate' ||
+      !user ||
+      sessionPending ||
+      !prompt.trim() ||
+      !creditsQuery.isSuccess ||
+      !permissions ||
+      autoGenerateStarted.current ||
+      running
+    ) {
       return;
     }
-    startPreview.mutate();
-  }
+    const balance = creditsQuery.data.balance;
+    if (!permissions.isAdmin && balance < price) {
+      setPaywall(true);
+      return;
+    }
+    autoGenerateStarted.current = true;
+    router.replace(createReturnHref());
+    generate.mutate();
+  }, [
+    search.intent,
+    user?.id,
+    sessionPending,
+    prompt,
+    creditsQuery.isSuccess,
+    creditsQuery.data?.balance,
+    permissions,
+    running,
+    price,
+    model.id,
+    aspect,
+    activeResolution,
+    duration,
+  ]);
 
   function start() {
     if (!prompt.trim()) {
@@ -356,14 +378,13 @@ function CreatePage() {
       return;
     }
     if (!user) {
-      const params = new URLSearchParams({ kind, prompt: prompt.trim() });
-      const back = `/create?${params.toString()}`;
+      const back = createReturnHref('generate');
       router.push(`/sign-in?callbackUrl=${encodeURIComponent(back)}`);
       return;
     }
     const balance = creditsQuery.data?.balance;
     if (!permissions?.isAdmin && balance !== undefined && balance < price) {
-      setPaywall(true);
+      openPaywall();
       return;
     }
     generate.mutate();
@@ -489,7 +510,10 @@ function CreatePage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <Coins className="size-4" />
-                    {m['create.cost']({ credits: price })}
+                    {m['create.cost']({
+                      credits: price,
+                      usd: `$${(price * USD_PER_CREDIT).toFixed(2)}`,
+                    })}
                   </span>
                   {user && creditsQuery.data && (
                     <span className="text-muted-foreground">
@@ -516,70 +540,13 @@ function CreatePage() {
                       ? m['create.generate']()
                       : m['create.sign_in_to_generate']()}
                 </button>
-                <button
-                  type="button"
-                  onClick={previewFrame}
-                  disabled={previewing || noPreviewsLeft}
-                  className="eg-pill-light h-11 w-full border text-sm disabled:opacity-60"
-                >
-                  {previewing ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                  {tDynamic(`create.preview_button_${kind}`)}
-                </button>
-                <p className="text-muted-foreground text-center text-xs">
-                  {quota?.siteCapReached
-                    ? m['create.preview_busy']()
-                    : m['create.preview_hint']({
-                        count: quota?.remaining ?? 3,
-                      })}
-                </p>
               </div>
             </section>
 
             {/* Output */}
             <section className="space-y-6">
               <div className="eg-screen flex aspect-video items-center justify-center overflow-hidden rounded-lg text-white/80 lg:aspect-auto lg:h-[560px]">
-                {output === 'preview' &&
-                preview?.status === 'success' &&
-                preview.url ? (
-                  <div className="relative size-full bg-black/90">
-                    <img
-                      src={preview.url}
-                      alt={prompt}
-                      className="size-full object-contain"
-                    />
-                    <span className="absolute top-4 left-4 rounded-md bg-black/60 px-3 py-1.5 text-xs text-white">
-                      {m['create.preview_badge']()}
-                    </span>
-                    <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-2 bg-gradient-to-t from-black/80 to-transparent p-6 pt-16">
-                      <button
-                        type="button"
-                        onClick={start}
-                        disabled={running || sessionPending}
-                        className="eg-pill-primary px-6 py-2.5 text-sm disabled:opacity-60"
-                      >
-                        <Sparkles className="size-4" />
-                        {tDynamic(`create.preview_cta_${kind}`)}
-                      </button>
-                      <p className="text-xs text-white/70">
-                        {m['create.cost']({ credits: price })}
-                      </p>
-                    </div>
-                  </div>
-                ) : output === 'preview' && previewing ? (
-                  <div className="flex flex-col items-center gap-3 p-8 text-center text-white/60">
-                    <Loader2 className="text-primary size-8 animate-spin" />
-                    <p className="eg-heading text-2xl text-white">
-                      {m['create.preview_generating']()}
-                    </p>
-                    <p className="max-w-sm text-sm">
-                      {m['create.preview_wait']()}
-                    </p>
-                  </div>
-                ) : task?.status === 'success' && task.url ? (
+                {task?.status === 'success' && task.url ? (
                   <div className="relative size-full bg-black/90">
                     <Media task={task} />
                     <a
