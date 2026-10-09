@@ -2,6 +2,10 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { AIMediaType, FalProvider } from '@/core/ai';
 import { getAuth } from '@/core/auth';
+import {
+  promptSafetyError,
+  scanPromptWithWaffo,
+} from '@/core/content-safety/waffo';
 import { resolveDuetCredits } from '@/config/hotel-lobby-pricing';
 import { DEFAULT_DUET_SIZE, isDuetSize } from '@/config/hotel-lobby-sizes';
 import {
@@ -63,6 +67,20 @@ async function POST({ request }: { request: Request }) {
     if (!motionVideoUrl) return respErr('Reference video is not configured');
 
     const prompt = buildScenePrompt(direction, size);
+    const safetyResult = await scanPromptWithWaffo(
+      prompt,
+      configs,
+      typeof body?.locale === 'string' ? body.locale : undefined
+    );
+    if (safetyResult && safetyResult.action !== 'allow') {
+      console.warn('[prompt-safety] Duet generation blocked', {
+        action: safetyResult.action,
+        reasonCode: safetyResult.reasonCode,
+        requestId: safetyResult.requestId,
+      });
+      return respErr(promptSafetyError(safetyResult));
+    }
+
     const task = await createTask({
       userId: session.user.id,
       mediaType: AIMediaType.VIDEO,

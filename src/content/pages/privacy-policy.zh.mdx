@@ -2,7 +2,7 @@ export const meta = {
   title: '隐私政策 | Genjutsu AI',
   description:
     '了解 Genjutsu AI 如何处理提示词、上传照片、生成内容、账户和支付信息。',
-  updated_at: '2026-10-04',
+  updated_at: '2026-10-09',
 };
 
 ## 关于本政策
@@ -23,7 +23,7 @@ Genjutsu AI（genjutsu-ai.org）是一款专为每天发布内容的人士打造
 
 ## AI 服务提供方
 
-生成内容时，您的提示词和上传照片会发送给所选模型的服务提供方（例如托管 Seedance 和 GPT Image 2 的 fal.ai）。这些服务方仅为返回结果而处理数据，并适用其自身的条款和隐私政策。
+生成前，您的提示词和语言提示会发送给 Waffo Pancake 的 Prompt Screening API 进行安全判断。该扫描服务设计为无状态处理，并返回 `allow`、`review` 或 `block` 结果。被复核或拦截的提示词不会发送给所选模型服务商；扫描允许后，您的提示词和上传照片才会发送给所选模型的服务提供方（例如托管 Seedance 和 GPT Image 2 的 fal.ai）。这些服务方仅为返回结果而处理数据，并适用其自身的条款和隐私政策。
 
 ## 保存期限与您的权利
 

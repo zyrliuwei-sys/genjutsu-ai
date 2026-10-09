@@ -3,6 +3,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import { AIMediaType, EvolinkProvider, FalProvider } from '@/core/ai';
 import { getAuth } from '@/core/auth';
 import {
+  promptSafetyError,
+  scanPromptWithWaffo,
+} from '@/core/content-safety/waffo';
+import {
   getStudioModel,
   IMAGE_SIZES,
   normalizeStudioOptions,
@@ -42,6 +46,21 @@ async function POST({ request }: { request: Request }) {
       return respErr('Unsupported resolution');
     }
 
+    const configs = await getAllConfigs();
+    const safetyResult = await scanPromptWithWaffo(
+      prompt,
+      configs,
+      typeof body?.locale === 'string' ? body.locale : undefined
+    );
+    if (safetyResult && safetyResult.action !== 'allow') {
+      console.warn('[prompt-safety] Generation blocked', {
+        action: safetyResult.action,
+        reasonCode: safetyResult.reasonCode,
+        requestId: safetyResult.requestId,
+      });
+      return respErr(promptSafetyError(safetyResult));
+    }
+
     // Price is always computed server-side from the catalog.
     const isAdmin = await hasPermission(session.user.id, 'admin.*');
     const price = studioCredits(model, options);
@@ -49,7 +68,6 @@ async function POST({ request }: { request: Request }) {
       return respErr('Insufficient credits');
     }
 
-    const configs = await getAllConfigs();
     const configured =
       model.provider === 'evolink'
         ? configs.evolink_api_key

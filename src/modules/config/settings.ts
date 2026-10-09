@@ -191,6 +191,13 @@ export function getSettingGroups(): SettingGroup[] {
         'Two photos → GPT Image 2 scene → DreamActor motion transfer (uses the Fal key)',
       tab: 'ai',
     },
+    {
+      name: 'prompt_safety',
+      title: 'Prompt Safety',
+      description:
+        'Screen prompts before sending them to an AI generation provider',
+      tab: 'ai',
+    },
 
     // Analytics
     {
@@ -965,6 +972,29 @@ export function getSettings(): Setting[] {
       placeholder: 'sk-xxx',
       group: 'evolink',
       tab: 'ai',
+    },
+
+    // ─── AI / Prompt Safety ─────────────────────────────────────────
+    {
+      name: 'waffo_prompt_safety_enabled',
+      title: 'Enable Waffo prompt screening',
+      type: 'switch',
+      group: 'prompt_safety',
+      tab: 'ai',
+      defaultValue: 'true',
+    },
+    {
+      name: 'waffo_prompt_safety_semantic',
+      title: 'Semantic screening mode',
+      type: 'select',
+      options: [
+        { label: 'Enforce', value: 'enforce' },
+        { label: 'Shadow', value: 'shadow' },
+        { label: 'Rules only', value: 'off' },
+      ],
+      group: 'prompt_safety',
+      tab: 'ai',
+      defaultValue: 'enforce',
     },
 
     // ─── Analytics / Google Analytics ────────────────────────────────

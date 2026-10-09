@@ -19,7 +19,7 @@ const STATIC_PAGES: { path: string; title: string; description: string }[] = [
   {
     path: '/pricing',
     title: 'Pricing',
-    description: 'Credit packs and monthly plans',
+    description: 'One-time credit packs with no automatic renewal',
   },
   {
     path: '/privacy-policy',

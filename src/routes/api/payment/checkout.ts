@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { getAuth } from '@/core/auth';
+import { PaymentType } from '@/core/payment/types';
 import { getPricingProduct } from '@/config/pricing';
 import { getAllConfigs } from '@/modules/config/service';
 import { createCheckout } from '@/modules/payment/service';
@@ -50,6 +51,12 @@ async function POST({ request }: { request: Request }) {
     const product = getPricingProduct(product_id);
     if (!product) {
       return respErr('Unknown product');
+    }
+
+    if (product.type === PaymentType.SUBSCRIPTION) {
+      return respErr(
+        'Monthly subscriptions are not currently available. Please choose a one-time credit pack.'
+      );
     }
 
     // Optional per-provider "test amount" override (admin-configured).

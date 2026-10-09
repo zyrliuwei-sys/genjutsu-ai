@@ -2,7 +2,7 @@ export const meta = {
   title: 'Privacy Policy | Genjutsu AI',
   description:
     'How Genjutsu AI handles prompts, uploaded photos, generated media, account and payment information.',
-  updated_at: '2026-10-04',
+  updated_at: '2026-10-09',
 };
 
 ## About this policy
@@ -23,7 +23,7 @@ We use your information to run your generations, show your creation history, man
 
 ## AI providers
 
-To generate content, your prompt and any uploaded photos are sent to the AI model provider that runs the selected model (for example fal.ai, which hosts Seedance and GPT Image 2). These providers process the data only to return your result, under their own terms and privacy policies.
+Before generation, your prompt and language hint are sent to Waffo Pancake's Prompt Screening API for a safety decision. The screening service is designed to be stateless and returns an `allow`, `review`, or `block` result. Prompts that are reviewed or blocked are not sent to the selected model provider. If the scan allows the request, your prompt and any uploaded photos are sent to the AI model provider that runs the selected model (for example fal.ai, which hosts Seedance and GPT Image 2). These providers process the data only to return your result, under their own terms and privacy policies.
 
 ## Retention and your choices
 

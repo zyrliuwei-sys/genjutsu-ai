@@ -67,7 +67,7 @@ Do not email or upload CSAM. If a report concerns an immediate threat to life, i
 
 Genjutsu AI uses a risk-based moderation process that may include:
 
-1. **Pre-generation checks.** Prompts and relevant uploads may be screened using automated safety classifiers, rule-based checks, and provider safety systems. High-risk requests may be refused before an AI task starts.
+1. **Pre-generation checks.** Every free-text prompt is screened by Waffo Pancake's Prompt Screening API before it is sent to an image or video provider. Only an `allow` verdict starts a task; `review` and `block` verdicts stop generation before credits are used. Waffo describes this scan as stateless, and blocked or reviewed prompts are not sent to the selected model provider. Relevant uploads may also be screened using automated classifiers, rule-based checks, and provider safety systems.
 2. **Post-generation checks.** We may review generated media and metadata when automated systems flag risk, when a user reports content, or when required to investigate abuse, legal claims, or safety incidents.
 3. **Report triage.** We prioritize reports involving CSAM, credible threats, non-consensual intimate imagery, targeted harassment, and ongoing fraud. We may temporarily restrict access while we investigate.
 4. **Enforcement.** Depending on the finding, we may reject a generation, remove or disable access to content, limit account features, suspend or terminate accounts, cancel related tasks, or cooperate with lawful requests from rights holders and authorities.

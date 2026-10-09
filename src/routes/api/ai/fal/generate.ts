@@ -1,11 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import {
+  promptSafetyError,
+  scanPromptWithWaffo,
+} from '@/core/content-safety/waffo';
+import {
   AITaskStatus,
   createTask,
   setProviderTaskId,
   updateTask,
 } from '@/modules/ai-tasks/service';
+import { getAllConfigs } from '@/modules/config/service';
 import { respData, respErr } from '@/lib/resp';
 
 import {
@@ -32,6 +37,21 @@ async function POST({ request }: { request: Request }) {
     if (missing.length) return respErr(`Missing: ${missing.join(', ')}`);
 
     const prompt: string = typeof body.prompt === 'string' ? body.prompt : '';
+    if (prompt) {
+      const safetyResult = await scanPromptWithWaffo(
+        prompt,
+        await getAllConfigs(),
+        typeof body?.locale === 'string' ? body.locale : undefined
+      );
+      if (safetyResult && safetyResult.action !== 'allow') {
+        console.warn('[prompt-safety] Fal generation blocked', {
+          action: safetyResult.action,
+          reasonCode: safetyResult.reasonCode,
+          requestId: safetyResult.requestId,
+        });
+        return respErr(promptSafetyError(safetyResult));
+      }
+    }
     const options: Record<string, unknown> = {};
     for (const key of FAL_INPUT_FIELDS) {
       if (body[key] !== undefined) options[key] = body[key];
