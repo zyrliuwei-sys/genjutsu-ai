@@ -24,8 +24,13 @@ export function PromptBox({
   const [prompt, setPrompt] = useState('');
   const [kind, setKind] = useState<PromptKind>('video');
 
-  function submit() {
-    onSubmit({ prompt: prompt.trim(), kind });
+  function submit(form?: HTMLFormElement | null) {
+    // Read the live form value at submit time as well as React state. This
+    // avoids dropping the last keystroke when a user clicks immediately after
+    // typing and the state update has not committed yet.
+    const field = form?.elements.namedItem('prompt');
+    const value = field instanceof HTMLTextAreaElement ? field.value : prompt;
+    onSubmit({ prompt: value.trim(), kind });
   }
 
   const chip = (value: PromptKind, label: string, Icon: typeof ImageIcon) => (
@@ -53,16 +58,17 @@ export function PromptBox({
       )}
       onSubmit={(e) => {
         e.preventDefault();
-        submit();
+        submit(e.currentTarget);
       }}
     >
       <textarea
+        name="prompt"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
             e.preventDefault();
-            submit();
+            submit(e.currentTarget.form);
           }
         }}
         rows={2}

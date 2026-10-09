@@ -204,6 +204,25 @@ function CreatePage() {
   // Which result the output panel shows: the last thing the user started.
   const [output, setOutput] = useState<'task' | 'preview'>('task');
 
+  // Keep deep-link values authoritative when TanStack Router reuses this
+  // route component for another /create?prompt=... navigation. The prompt is
+  // intentionally only synced when the URL value changes, so typing in the
+  // studio afterwards is never overwritten by unrelated renders.
+  useEffect(() => {
+    setPrompt(search.prompt ?? '');
+  }, [search.prompt]);
+
+  useEffect(() => {
+    const nextModel = getStudioModel(search.model);
+    const nextKind = search.kind ?? nextModel?.kind ?? 'video';
+    setKind(nextKind);
+    setModelId(
+      nextModel?.kind === nextKind
+        ? nextModel.id
+        : STUDIO_MODELS.find((item) => item.kind === nextKind)!.id
+    );
+  }, [search.kind, search.model]);
+
   const models = STUDIO_MODELS.filter((model) => model.kind === kind);
   const model = getStudioModel(modelId) ?? models[0]!;
   // Fast tops out at 720p — fall back to the best resolution it offers.
