@@ -4,6 +4,7 @@
 // path; GA's enhanced measurement picks up History API navigations on its
 // own in App Router.
 export function GoogleAnalytics({ measurementId }: { measurementId: string }) {
+  if (import.meta.env.DEV) return null;
   if (!/^[A-Za-z0-9_-]{1,64}$/.test(measurementId)) return null;
   return (
     <>

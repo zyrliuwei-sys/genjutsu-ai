@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { getAuth } from '@/core/auth';
 import { envConfigs } from '@/config';
+import { GENJUTSU_MAX_SECONDS } from '@/config/genjutsu';
 import { getStorage } from '@/modules/storage/service';
 import { md5 } from '@/lib/hash';
 import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
@@ -90,7 +91,7 @@ async function POST({ request }: { request: Request }) {
       return respErr('Invalid video file');
     }
     const duration = mp4Duration(body);
-    if (duration < 3 || duration > 10.05)
+    if (duration < 3 || duration > GENJUTSU_MAX_SECONDS + 0.05)
       return respErr('Reference video must be 3–10 seconds long');
 
     const objectKey = `${md5(body)}.${ext}`;

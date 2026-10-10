@@ -201,6 +201,12 @@ export function getSettingGroups(): SettingGroup[] {
 
     // Analytics
     {
+      name: 'clarity',
+      title: 'Microsoft Clarity',
+      description: 'Session recordings and heatmaps with Microsoft Clarity',
+      tab: 'analytics',
+    },
+    {
       name: 'google_analytics',
       title: 'Google Analytics',
       description: 'Inject gtag.js with the configured Measurement ID',
@@ -998,6 +1004,14 @@ export function getSettings(): Setting[] {
     },
 
     // ─── Analytics / Google Analytics ────────────────────────────────
+    {
+      name: 'clarity_project_id',
+      title: 'Project ID',
+      type: 'text',
+      placeholder: 'abcdefghij',
+      group: 'clarity',
+      tab: 'analytics',
+    },
     {
       name: 'google_analytics_id',
       title: 'Measurement ID',

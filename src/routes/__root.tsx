@@ -15,7 +15,9 @@ import { ThemeProvider } from 'next-themes';
 import { envConfigs } from '@/config';
 import { getQueryClient } from '@/lib/query-client';
 import { getLocale } from '@/paraglide/runtime.js';
+import { PurchaseReturnObserver } from '@/blocks/purchase-return-observer';
 import { Ads } from '@/components/analytics/ads';
+import { Clarity } from '@/components/analytics/clarity';
 import { GoogleAnalytics } from '@/components/analytics/google-analytics';
 import { Plausible } from '@/components/analytics/plausible';
 import { CustomerService } from '@/components/customer-service';
@@ -37,6 +39,7 @@ const getAnalyticsConfigs = createServerFn().handler(async () => {
   const configs = await getAllConfigs();
   return {
     gaId: configs.google_analytics_id?.trim() || '',
+    clarityProjectId: configs.clarity_project_id?.trim() || '',
     plausibleDomain: configs.plausible_domain?.trim() || '',
     plausibleSrc: configs.plausible_src?.trim() || '',
     adsenseCode: configs.adsense_code?.trim() || '',
@@ -85,6 +88,7 @@ function RootComponent() {
       <ThemeProvider
         attribute="class"
         defaultTheme="dark"
+        forcedTheme="dark"
         enableSystem={false}
         disableTransitionOnChange
       >
@@ -92,6 +96,10 @@ function RootComponent() {
         <SandboxPreviewBridge />
         <Toaster position="top-center" richColors />
         <GoogleOneTap />
+        <PurchaseReturnObserver />
+        {analytics?.clarityProjectId ? (
+          <Clarity projectId={analytics.clarityProjectId} />
+        ) : null}
         {analytics?.gaId ? (
           <GoogleAnalytics measurementId={analytics.gaId} />
         ) : null}
@@ -115,7 +123,7 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: ReactNode }) {
   return (
-    <html lang={getLocale()} suppressHydrationWarning>
+    <html lang={getLocale()} className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

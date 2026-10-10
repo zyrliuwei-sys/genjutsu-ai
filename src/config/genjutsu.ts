@@ -6,13 +6,22 @@
 export const GENJUTSU_MODEL_ID = 'genjutsu-storm';
 export const GENJUTSU_ENDPOINT = 'fal-ai/kling-video/o1/video-to-video/edit';
 export const GENJUTSU_EVOLINK_MODEL = 'kling-o1-video-edit';
+export const GENJUTSU_DURATION_TIERS = [5, 10] as const;
+export const GENJUTSU_MAX_SECONDS = 10;
+export function genjutsuDurationTier(seconds: number) {
+  return genjutsuGenerations(seconds) * 5;
+}
 // EvoLink Kling O1 Video Edit: $0.177/input second, billed 3–10s.
 // Verified in the hydrated model-specific pricing panel on 2026-10-10:
 // https://evolink.ai/kling-o1?model=kling-o1-video-edit#pricing
 export const GENJUTSU_USD_PER_SECOND = 0.177;
 export const GENJUTSU_CREDITS_PER_GENERATION = 620;
 export function genjutsuGenerations(seconds = 5) {
-  if (!Number.isFinite(seconds) || seconds < 3 || seconds > 10.05)
+  if (
+    !Number.isFinite(seconds) ||
+    seconds < 3 ||
+    seconds > GENJUTSU_MAX_SECONDS + 0.05
+  )
     throw new Error('Reference video must be 3–10 seconds long');
   return seconds <= 5 ? 1 : 2;
 }
@@ -45,7 +54,7 @@ export const GENJUTSU_DIRECTIONS: Record<string, string> = {
     'Recast the main subject with the supplied image while maintaining the source shot and action beat for beat. Keep the surrounding composition and physical interactions stable; use coherent live-action lighting and clean temporal edges.',
 };
 
-export const GENJUTSU_ASPECTS = ['16:9', '4:3', '9:16'] as const;
+export const GENJUTSU_ASPECTS = ['16:9', '9:16'] as const;
 export type GenjutsuAspect = (typeof GENJUTSU_ASPECTS)[number];
 
 export function isGenjutsuAspect(value: unknown): value is GenjutsuAspect {
@@ -60,6 +69,7 @@ export type GenjutsuReadiness = {
   ready: boolean;
   aspects: GenjutsuAspect[];
   maxVideoMB: number;
+  maxVideoSeconds: number;
 };
 
 export function genjutsuReadiness(
@@ -90,18 +100,27 @@ export function genjutsuReadiness(
     ready: Boolean(provider && storageReady && safetyReady),
     aspects: provider === 'evolink' ? ['16:9', '9:16'] : [...GENJUTSU_ASPECTS],
     maxVideoMB: provider === 'evolink' ? 100 : 200,
+    maxVideoSeconds: provider === 'evolink' ? GENJUTSU_MAX_SECONDS : 10,
   };
 }
 
 export function buildGenjutsuPrompt(
   prompt: unknown,
   hasCrowd: boolean,
-  provider: 'evolink' | 'fal'
+  provider: 'evolink' | 'fal',
+  background?: { mode: 'keep' | 'change'; description: string },
+  sampleDirection = ''
 ) {
   const character =
     provider === 'fal' ? '@Element1' : 'the person in reference image 1';
   const crowd = provider === 'fal' ? '@Image1' : 'reference image 2';
-  const extra = typeof prompt === 'string' ? prompt.trim().slice(0, 500) : '';
+  const extra = background
+    ? background.mode === 'change'
+      ? `Replace the background environment with: ${background.description.trim().slice(0, 500)}. Preserve the main action, camera motion and timing; adapt lighting and contact shadows coherently.`
+      : 'Preserve the original background, scene, objects, lighting and all non-target people. Do not restage or transform the surroundings.'
+    : typeof prompt === 'string'
+      ? prompt.trim().slice(0, 500)
+      : '';
   const base = [
     'Edit the input video, do not invent an unrelated new shot.',
     `Replace only the main performer with ${character}. Preserve the original choreography, action trajectory, timing, cuts, camera path and perspective.`,
@@ -110,5 +129,9 @@ export function buildGenjutsuPrompt(
       : 'Keep all non-target people, objects and background motion unchanged unless the additional direction explicitly transforms the scene.',
     'Photoreal live-action reality manipulation, grounded physical contact, consistent face and wardrobe across frames, coherent occlusion and lighting. No extra limbs, identity drift, flicker or unrelated cuts.',
   ].join(' ');
-  return extra ? `${base}\nAdditional direction: ${extra}` : base;
+  // Curated motion guidance is separate from background instructions. The
+  // user's keep/change choice always takes precedence over sample styling.
+  return [base, sampleDirection.trim().slice(0, 500), extra]
+    .filter(Boolean)
+    .join('\nAdditional direction: ');
 }

@@ -73,6 +73,20 @@ export async function apiUpload<T>(url: string, file: File, field = 'files') {
   return request<T>(url, { method: 'POST', body });
 }
 
+/** Same-origin public practice files. Components still use the shared client. */
+export async function apiPublicFile(path: string, name: string, type: string) {
+  if (
+    !['/videos/genjutsu-samples/', '/videos/genjutsu-practice/'].some(
+      (prefix) => path.startsWith(prefix)
+    ) ||
+    path.includes('..')
+  )
+    throw new Error('Invalid practice media path');
+  const response = await fetch(path);
+  if (!response.ok) throw new Error('Practice media could not be loaded');
+  return new File([await response.blob()], name, { type });
+}
+
 // Query-string builder for paginated list endpoints.
 export function pageQuery(base: string, p: PageParams) {
   const params = new URLSearchParams({

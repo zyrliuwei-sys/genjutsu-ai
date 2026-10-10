@@ -11,6 +11,7 @@ type Search = {
   kind?: 'video' | 'image';
   prompt?: string;
   model?: string;
+  checkout_order?: string;
 };
 
 export const Route = createFileRoute('/create')({
@@ -24,6 +25,11 @@ export const Route = createFileRoute('/create')({
         ? search.prompt.slice(0, 2000)
         : undefined,
     model: typeof search.model === 'string' ? search.model : undefined,
+    checkout_order:
+      typeof search.checkout_order === 'string' &&
+      /^[A-Za-z0-9_-]{1,100}$/.test(search.checkout_order)
+        ? search.checkout_order
+        : undefined,
   }),
   loader: () => {
     const locale = getLocale();

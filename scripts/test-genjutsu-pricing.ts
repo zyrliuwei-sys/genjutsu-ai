@@ -3,8 +3,10 @@ import { readFile } from 'node:fs/promises';
 
 import {
   GENJUTSU_CREDITS_PER_GENERATION,
+  GENJUTSU_DURATION_TIERS,
   GENJUTSU_USD_PER_SECOND,
   genjutsuCredits,
+  genjutsuDurationTier,
   genjutsuGenerations,
 } from '../src/config/genjutsu';
 import { getPricingProduct, pricingCatalog } from '../src/config/pricing';
@@ -15,6 +17,11 @@ import { mp4Duration } from '../src/lib/video-duration';
 assert.equal(genjutsuCredits(3), 620);
 assert.equal(genjutsuCredits(5), 620);
 assert.equal(genjutsuCredits(10), 1240);
+assert.deepEqual(GENJUTSU_DURATION_TIERS, [5, 10]);
+assert.equal(genjutsuDurationTier(3), 5);
+assert.equal(genjutsuDurationTier(5), 5);
+assert.equal(genjutsuDurationTier(5.01), 10);
+assert.equal(genjutsuDurationTier(10.05), 10);
 assert.throws(() => genjutsuCredits(NaN));
 assert.throws(() => genjutsuCredits(2.9));
 assert.throws(() => genjutsuCredits(11));

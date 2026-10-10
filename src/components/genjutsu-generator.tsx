@@ -1,7 +1,7 @@
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Check,
+  AlertCircle,
   Download,
   ImageIcon,
   Loader2,
@@ -9,6 +9,7 @@ import {
   Upload,
   Volume2,
   VolumeX,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -17,35 +18,33 @@ import { useRouter } from '@/core/i18n/navigation';
 import {
   GENJUTSU_ASPECTS,
   GENJUTSU_CREDITS_PER_GENERATION,
-  GENJUTSU_DIRECTIONS,
+  GENJUTSU_DURATION_TIERS,
   genjutsuCredits,
+  genjutsuDurationTier,
   genjutsuGenerations,
   type GenjutsuAspect,
   type GenjutsuReadiness,
 } from '@/config/genjutsu';
-import { REFERENCE_VIDEOS } from '@/config/reference-videos';
-import { apiGet, apiPost, apiUpload } from '@/lib/api-client';
+import { PRACTICE_SAMPLES } from '@/config/practice-media';
+import { apiGet, apiPost, apiPublicFile, apiUpload } from '@/lib/api-client';
 import {
   loadGenjutsuDraft,
   saveGenjutsuDraft,
   type DraftAsset,
 } from '@/lib/genjutsu-draft';
+import { hasFreshVideoReceipt } from '@/lib/genjutsu-media';
 import { readMediaMetadata } from '@/lib/media-metadata';
 import { cn } from '@/lib/utils';
+import { useFunnel } from '@/hooks/use-funnel';
 import { useUserPermissions } from '@/hooks/use-user-permissions';
 import { Pricing } from '@/blocks/pricing';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-
-type Template = {
-  id: string;
-  name: string;
-  image: string;
-  video: string;
-  duration: number;
-  ratios: string;
-  tag?: 'Trending' | 'New';
-  prompt: string;
-};
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { VideoComparison } from '@/components/video-comparison';
 
 type Asset = {
   kind: 'image' | 'video';
@@ -65,145 +64,6 @@ type GenjutsuTask = {
   url: string | null;
   error: string | null;
 };
-
-const ART = REFERENCE_VIDEOS;
-
-const TEMPLATE_NAMES = [
-  'Genjutsu STORM',
-  'Smalltown Boy',
-  'Burning Bridges',
-  'Thriller Dance',
-  'Alors On Danse',
-  'Toc Toc',
-  'Knight Cat',
-  'Knight Cat & Gym Bro',
-  'Car Dance Duo',
-  'Hotel Lobby',
-  'Rumpelstiltskin',
-  'Clapping Cat',
-  'Gas Station Dance',
-  'Car Jump',
-  'Vikas Edit',
-  'Turn the Lights Off',
-  'Cheba Man',
-  'Raindance',
-  'Zombie Love Story',
-] as const;
-
-const TEMPLATE_META = [
-  ['28', '16:9 / 4:3 / 9:16', 'Trending'],
-  ['22', '9:16', 'Trending'],
-  ['18', '16:9', 'Trending'],
-  ['21', '9:16', 'New'],
-  ['20', '16:9 / 9:16', 'Trending'],
-  ['11', '9:16', 'Trending'],
-  ['5', '9:16', 'New'],
-  ['9', '4:3', 'New'],
-  ['15', '16:9', 'New'],
-  ['15', '16:9', 'New'],
-  ['15', '16:9', 'Trending'],
-  ['11', '9:16', 'New'],
-  ['18', '9:16', 'Trending'],
-  ['12', '9:16', 'New'],
-  ['28', '1:1', 'New'],
-  ['11', '16:9', 'New'],
-  ['15', '9:16', 'New'],
-  ['15', '16:9 / 4:3 / 9:16', undefined],
-  ['15', '9:16 / 16:9', undefined],
-] as const;
-
-const TEMPLATE_PROMPTS = [
-  'Turn the reference performance into a storm-lit Genjutsu reality with dramatic wind, rain, practical light streaks, and a controlled cinematic push-in.',
-  'Keep the exact motion and camera timing while rebuilding the scene as a quiet small-town night with natural street light and restrained film grain.',
-  'Preserve the source choreography and transform the environment into a tense cinematic bridge at dusk with wet surfaces and deep atmospheric contrast.',
-  'Maintain every dance beat and camera move, restaging the performance as a high-contrast monochrome music video with crisp silhouette separation.',
-  'Keep the original performance locked to the timeline and shift the world into an energetic European dance-film look with bold color and clean motion.',
-  'Preserve the subject identity and timing while adding a playful close-up reaction, expressive lighting, and a polished short-form comedy finish.',
-  'Keep the action unchanged and transform the character into a small armored cat hero in a miniature cinematic world with believable scale.',
-  'Preserve the two performers and camera path while creating a clean gym-bro transformation with punchy lighting and stable anatomy.',
-  'Keep the vehicle, choreography, and camera timing coherent while turning the source into a stylized car-dance sequence with controlled reflections.',
-  'Preserve the motion and framing while rebuilding the environment as a warm hotel lobby with elegant practical lights and premium commercial polish.',
-  'Keep the source movement and subject identity while transforming the world into a dark fairytale with theatrical shadows and subtle magic.',
-  'Maintain the original timing and camera motion while turning the main subject into a charming clapping cat with clean paws and no flicker.',
-  'Preserve the source choreography while restaging it at a cinematic gas station at night with reflective pavement and practical neon accents.',
-  'Keep the original motion and camera path while creating a believable airborne car jump with controlled dust, scale, and cinematic impact.',
-  'Preserve the exact edit rhythm and transform the subject into a polished creator-style fashion sequence with confident color grading.',
-  'Keep movement, framing, and timing fixed while shifting the scene into a dramatic lights-off reveal with a precise final beat.',
-  'Preserve the performance and create a playful surreal character treatment with stable facial identity, soft shadows, and editorial timing.',
-  'Keep the original motion and restage the scene as a rain-driven cinematic performance with wet highlights, atmospheric depth, and natural physics.',
-  'Preserve the source performance while creating a tender cinematic zombie love story with restrained makeup, soft moonlight, and stable expressions.',
-] as const;
-
-const TEMPLATE_CANDIDATES: Template[] = TEMPLATE_NAMES.map((name, index) => {
-  const art = ART[index % ART.length];
-  const meta = TEMPLATE_META[index];
-  return {
-    id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-    name,
-    image: art.image,
-    video: art.video,
-    duration: art.duration,
-    ratios: art.ratios,
-    tag: meta[2] as Template['tag'],
-    prompt: TEMPLATE_PROMPTS[index],
-  };
-});
-
-// Original third-party reference clips; provenance is recorded alongside assets.
-// Keep generation directions and the other effects unchanged.
-const REFERENCE_EXAMPLES: Record<
-  string,
-  { asset: string; duration: number; prompt: string }
-> = {
-  'genjutsu-storm': {
-    asset: 'crowd',
-    duration: 14,
-    prompt:
-      'Keep the central performer still and use the reference image for their appearance. Introduce identical copies in separate rows behind them, performing a synchronized arm raise. Preserve the source camera path, timing and realistic physical scale. Blue-hour cinematic lighting, clean silhouettes, consistent faces and wardrobe, no overlapping bodies or extra limbs.',
-  },
-  'alors-on-danse': {
-    asset: 'dream',
-    duration: 9,
-    prompt:
-      'Preserve the source performance, camera movement and timing. Use the reference image for the main character and seamlessly transform the surroundings into a dreamlike island above pastel clouds with giant sculptural flowers and floating lanterns. Photoreal skin and fabric, grounded feet, soft moonlight, stable identity and fluid motion, no cartoon rendering or flicker.',
-  },
-  raindance: {
-    asset: 'motion',
-    duration: 10,
-    prompt:
-      'Preserve the source choreography, camera movement and timing. Use the reference image for the main character and transform the surroundings into a rain-soaked Tokyo street at night with red and cyan practical lighting reflected in puddles. Natural rain, realistic shadows and skin, coherent silhouettes, stable face and clothing, no extra limbs or flicker.',
-  },
-};
-
-const SAMPLE_PLAYLIST = [
-  'genjutsu-storm',
-  'smalltown-boy',
-  'burning-bridges',
-] as const;
-
-for (const template of TEMPLATE_CANDIDATES) {
-  const sample = REFERENCE_EXAMPLES[template.id];
-  if (!sample) continue;
-  template.image = `/videos/higgsfield-reference/${sample.asset}.webp`;
-  template.video = `/videos/higgsfield-reference/${sample.asset}.mp4`;
-  template.duration = sample.duration;
-  template.ratios = '16:9';
-  template.prompt = sample.prompt;
-}
-
-// A source clip appears only once in Select Effect, even if multiple names
-// were previously mapped to it. Keep the first card's existing copy.
-const seenVideos = new Set<string>();
-const TEMPLATES = TEMPLATE_CANDIDATES.filter((template) => {
-  if (seenVideos.has(template.video)) return false;
-  seenVideos.add(template.video);
-  return true;
-});
-for (const template of TEMPLATES) {
-  const assetId = template.video.split('/').pop()?.replace('.mp4', '');
-  if (assetId && GENJUTSU_DIRECTIONS[assetId])
-    template.prompt = GENJUTSU_DIRECTIONS[assetId];
-}
 
 const isDone = (task?: GenjutsuTask) =>
   task?.status === 'success' ||
@@ -252,6 +112,9 @@ function UploadSlot({
   disabled,
   onFile,
   testId,
+  formats,
+  onClear,
+  clearLabel,
 }: {
   label: string;
   hint: string;
@@ -261,6 +124,9 @@ function UploadSlot({
   disabled: boolean;
   onFile: (file: File | undefined) => void;
   testId: string;
+  formats: string;
+  onClear: () => void;
+  clearLabel: string;
 }) {
   const inputId = useId();
   return (
@@ -271,98 +137,175 @@ function UploadSlot({
         </label>
         <span className="text-muted-foreground truncate text-xs">{hint}</span>
       </div>
-      <div
-        className={cn(
-          'group hover:border-primary/70 border-border bg-muted relative aspect-[3/4] overflow-hidden rounded-xl border border-dashed transition-colors',
-          disabled && 'opacity-70'
-        )}
-      >
-        <input
-          id={inputId}
-          aria-label={kind === 'video' ? 'Upload video' : 'Upload photo'}
-          disabled={disabled}
-          data-testid={testId}
-          data-filled={assetIsReady(asset)}
-          type="file"
-          accept={accept}
-          className="absolute inset-0 z-20 size-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
-          onChange={(event) => {
-            onFile(event.target.files?.[0]);
-            event.currentTarget.value = '';
-          }}
-        />
-        {asset ? (
-          <>
-            <PreviewAsset
-              asset={asset}
-              className="pointer-events-none absolute inset-0"
-            />
-            <span className="pointer-events-none absolute inset-x-2 bottom-2 rounded-md bg-black/70 px-2 py-1 text-[10px] text-white backdrop-blur">
-              {asset.uploading ? 'Uploading…' : asset.file?.name || 'Ready'}
-            </span>
-          </>
-        ) : null}
+      <div className="overflow-hidden rounded-xl">
         <div
           className={cn(
-            'pointer-events-none absolute inset-0 flex size-full flex-col items-center justify-center gap-3 p-3 text-center',
-            asset &&
-              'bg-black/20 opacity-0 transition-opacity hover:opacity-100'
+            'group hover:border-primary/70 border-border bg-muted relative aspect-[3/4] overflow-hidden rounded-xl border border-dashed transition-colors',
+            disabled && 'opacity-70'
           )}
         >
-          {!asset && (
+          <input
+            id={inputId}
+            aria-label={kind === 'video' ? 'Upload video' : 'Upload photo'}
+            disabled={disabled}
+            data-testid={testId}
+            data-filled={assetIsReady(asset)}
+            type="file"
+            accept={accept}
+            className="absolute inset-0 z-20 size-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+            onChange={(event) => {
+              onFile(event.target.files?.[0]);
+              event.currentTarget.value = '';
+            }}
+          />
+          {asset ? (
             <>
-              <span className="bg-primary/15 text-primary ring-primary/40 relative flex size-11 items-center justify-center rounded-full ring-1 transition-transform duration-300 group-hover:scale-110">
-                {kind === 'video' ? (
-                  <Upload className="size-5" />
-                ) : (
-                  <ImageIcon className="size-5" />
-                )}
-              </span>
-              <span className="relative text-sm font-medium">
-                {kind === 'video' ? 'Upload video' : 'Upload photo'}
-              </span>
-              <span className="text-muted-foreground relative text-[11px]">
-                {kind === 'video'
-                  ? 'MP4, MOV · 200MB'
-                  : 'JPG, PNG, WEBP · 10MB'}
-              </span>
+              <button
+                type="button"
+                aria-label={clearLabel}
+                data-testid={`clear-${testId}`}
+                disabled={disabled}
+                onClick={onClear}
+                className="absolute top-1 right-1 z-30 flex size-9 items-center justify-center rounded-full bg-black/70 text-white shadow-sm transition-colors hover:bg-black/90 focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
+              >
+                <X className="size-4" />
+              </button>
+              <PreviewAsset
+                asset={asset}
+                className="pointer-events-none absolute inset-0"
+              />
             </>
-          )}
+          ) : null}
+          <div
+            className={cn(
+              'pointer-events-none absolute inset-0 flex size-full flex-col items-center justify-center gap-3 p-3 text-center',
+              asset &&
+                'bg-black/20 opacity-0 transition-opacity hover:opacity-100'
+            )}
+          >
+            {!asset && (
+              <>
+                <span className="bg-primary/15 text-primary ring-primary/40 relative flex size-11 items-center justify-center rounded-full ring-1 transition-transform duration-300 group-hover:scale-110">
+                  {kind === 'video' ? (
+                    <Upload className="size-5" />
+                  ) : (
+                    <ImageIcon className="size-5" />
+                  )}
+                </span>
+                <span className="relative text-sm font-medium">
+                  {kind === 'video' ? 'Upload video' : 'Upload photo'}
+                </span>
+                <span className="text-muted-foreground relative text-[11px]">
+                  {formats}
+                </span>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-export function GenjutsuGenerator({
-  copy,
-}: {
-  copy: {
-    generationCost: (count: number) => string;
-    remainingGenerations: (count: number) => string;
-    generationRules: string;
-    legacyBalance: string;
-    referenceDisclaimer: string;
-  };
-}) {
+export type GeneratorCopy = {
+  uploadTitle: string;
+  backgroundLabel: string;
+  keepBackground: string;
+  changeBackground: string;
+  backgroundDescription: string;
+  backgroundPlaceholder: string;
+  backgroundRequired: string;
+  backgroundPresets: { id: string; label: string; description: string }[];
+  moreSettings: string;
+  originalLabel: string;
+  previewTitle: string;
+  previewEmpty: string;
+  generationCost: (count: number) => string;
+  remainingGenerations: (count: number) => string;
+  generationRules: string;
+  legacyBalance: string;
+  referenceDisclaimer: string;
+  intro: string;
+  steps: string;
+  buy: string;
+  from: (price: string) => string;
+  sample: string;
+  sampleLoading: string;
+  sampleDisclaimer: string;
+  sampleError: string;
+  sampleReplace: string;
+  sampleReplaceHint: string;
+  samplePickerTitle: string;
+  sampleNames: Record<string, string>;
+  removeVideo: string;
+  removePhoto: string;
+  keepFiles: string;
+  videoFormats: (max: number) => string;
+  videoRequirements: (max: number) => string;
+  imageRequirements: string;
+  draftWarning: string;
+  generate: string;
+  clipCost: (seconds: string, count: number) => string;
+  referenceLabel: string;
+  workLabel: string;
+  compareLabel: string;
+  compareHint: string;
+  before: string;
+  after: string;
+  compareEmpty: string;
+  compareMissing: string;
+  comparePlay: string;
+  referenceDuration: string;
+  durationLabel: string;
+  durationHint: string;
+  durationOption: (seconds: number, count: number) => string;
+  durationMismatch: string;
+};
+
+export function GenjutsuGenerator({ copy }: { copy: GeneratorCopy }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session, isPending: sessionPending } = useSession();
   const user = session?.user;
   const { data: permissions } = useUserPermissions(Boolean(user));
-  const [selectedId, setSelectedId] = useState(TEMPLATES[0].id);
-  const [exampleId, setExampleId] = useState(TEMPLATES[0].id);
+  const { track, enabled: trackingEnabled } = useFunnel();
+  const studioTracked = useRef(false);
+  const completedTasks = useRef(new Set<string>());
+  const samplePending = useRef(false);
+  const [loadingSample, setLoadingSample] = useState(false);
+  const [sampleId, setSampleId] = useState<string>();
+  const [draftSaveFailed, setDraftSaveFailed] = useState(false);
+  const [comparison, setComparison] = useState<{
+    taskId: string;
+    source: Asset;
+  }>();
+  const [backgroundMode, setBackgroundMode] = useState<'keep' | 'change'>(
+    'keep'
+  );
+  const [backgroundDescription, setBackgroundDescription] = useState('');
   const [validatingMedia, setValidatingMedia] = useState(false);
   const [aspect, setAspect] = useState<GenjutsuAspect>('16:9');
+  const [durationTier, setDurationTier] = useState(5);
   const [lead, setLead] = useState<Asset>();
   const [referenceVideo, setReferenceVideo] = useState<Asset>();
   const [taskId, setTaskId] = useState<string>();
-  const [previewMode, setPreviewMode] = useState<'example' | 'work'>('example');
+  const [previewMode, setPreviewMode] = useState<
+    'example' | 'work' | 'compare'
+  >('example');
   const [muted, setMuted] = useState(true);
   const [paywall, setPaywall] = useState(false);
   const [draftReady, setDraftReady] = useState(false);
   const [draftOwner, setDraftOwner] = useState<string>();
   const [savingDraft, setSavingDraft] = useState(false);
+  useEffect(() => {
+    if (
+      !studioTracked.current &&
+      track('studio_view', {
+        surface: window.location.pathname === '/' ? 'home' : 'create',
+      })
+    )
+      studioTracked.current = true;
+  }, [track, trackingEnabled]);
   useEffect(() => {
     if (sessionPending) return;
     let active = true;
@@ -380,10 +323,27 @@ export function GenjutsuGenerator({
         };
         setLead(restore(draft?.lead));
         setReferenceVideo(restore(draft?.referenceVideo));
-        if (draft && TEMPLATES.some((t) => t.id === draft.selectedId)) {
-          setSelectedId(draft.selectedId);
-          setExampleId(draft.selectedId);
-        }
+        setDurationTier(
+          draft?.durationTier &&
+            GENJUTSU_DURATION_TIERS.includes(draft.durationTier as 5 | 10)
+            ? draft.durationTier
+            : draft?.referenceVideo?.duration
+              ? genjutsuDurationTier(draft.referenceVideo.duration)
+              : 5
+        );
+        const source = restore(draft?.comparison?.source);
+        setComparison(
+          source && draft?.comparison
+            ? { taskId: draft.comparison.taskId, source }
+            : undefined
+        );
+        setBackgroundMode(
+          draft?.backgroundMode === 'change' ? 'change' : 'keep'
+        );
+        setBackgroundDescription(draft?.backgroundDescription || '');
+        setSampleId(
+          PRACTICE_SAMPLES.find((sample) => sample.id === draft?.sampleId)?.id
+        );
         if (draft && GENJUTSU_ASPECTS.includes(draft.aspect as GenjutsuAspect))
           setAspect(draft.aspect as GenjutsuAspect);
       })
@@ -420,11 +380,18 @@ export function GenjutsuGenerator({
       };
     return saveGenjutsuDraft({
       owner: user?.id,
-      selectedId,
+      selectedId: 'video-edit',
+      sampleId,
+      backgroundMode,
+      backgroundDescription,
       aspect,
+      durationTier,
       lead: store(lead),
       referenceVideo: store(referenceVideo),
       savedAt: Date.now(),
+      comparison: comparison
+        ? { taskId: comparison.taskId, source: store(comparison.source)! }
+        : undefined,
     });
   }
   useEffect(() => {
@@ -434,11 +401,10 @@ export function GenjutsuGenerator({
       draftOwner !== (user?.id || 'anonymous')
     )
       return;
-    // A committed binary save is required before the checkout dialog opens.
-    // Autosave also covers ordinary navigation and reloads.
-    void persistDraft().catch(() =>
-      toast.error('Could not save media for your return')
-    );
+    // Local storage is best-effort; a failure must not silently block payment.
+    void persistDraft()
+      .then(() => setDraftSaveFailed(false))
+      .catch(() => setDraftSaveFailed(true));
   }, [
     draftReady,
     draftOwner,
@@ -446,8 +412,12 @@ export function GenjutsuGenerator({
     user?.id,
     lead,
     referenceVideo,
-    selectedId,
+    backgroundMode,
+    backgroundDescription,
+    sampleId,
     aspect,
+    durationTier,
+    comparison,
   ]);
   useEffect(
     () => () => {
@@ -457,39 +427,45 @@ export function GenjutsuGenerator({
   );
   useEffect(
     () => () => {
+      if (comparison?.source.preview.startsWith('blob:'))
+        URL.revokeObjectURL(comparison.source.preview);
+    },
+    [comparison?.source.preview]
+  );
+  useEffect(
+    () => () => {
       if (referenceVideo?.preview.startsWith('blob:'))
         URL.revokeObjectURL(referenceVideo.preview);
     },
     [referenceVideo?.preview]
   );
 
-  const selected = useMemo(
-    () =>
-      TEMPLATES.find((template) => template.id === selectedId) ?? TEMPLATES[0],
-    [selectedId]
-  );
-  const example =
-    TEMPLATES.find((template) => template.id === exampleId) ?? TEMPLATES[0];
   const readinessQuery = useQuery({
     queryKey: ['genjutsu-readiness'],
     queryFn: () => apiGet<GenjutsuReadiness>('/api/genjutsu/generate'),
     staleTime: 30000,
   });
   const readiness = readinessQuery.data;
-  const costCredits = genjutsuCredits(referenceVideo?.duration || 5);
-  const requiredGenerations = genjutsuGenerations(
-    referenceVideo?.duration || 5
-  );
+  const maxVideoMB = readiness?.maxVideoMB || 100;
+  const costCredits = genjutsuCredits(durationTier);
+  const requiredGenerations = genjutsuGenerations(durationTier);
   useEffect(() => {
-    const saved = user
-      ? sessionStorage.getItem(`genjutsu-task:${user.id}`)
-      : null;
+    let saved: string | null = null;
+    try {
+      saved = user ? sessionStorage.getItem(`genjutsu-task:${user.id}`) : null;
+    } catch {
+      /* Private browsers may block storage. */
+    }
     setTaskId(saved || undefined);
     if (saved) setPreviewMode('work');
   }, [user?.id]);
   useEffect(() => {
-    if (taskId && user)
-      sessionStorage.setItem(`genjutsu-task:${user.id}`, taskId);
+    try {
+      if (taskId && user)
+        sessionStorage.setItem(`genjutsu-task:${user.id}`, taskId);
+    } catch {
+      /* Generation still works without local recovery. */
+    }
   }, [taskId, user?.id]);
   const creditsQuery = useQuery({
     queryKey: ['credits'],
@@ -504,12 +480,79 @@ export function GenjutsuGenerator({
   });
   const task = taskQuery.data;
 
+  async function loadPracticeMedia(sample: (typeof PRACTICE_SAMPLES)[number]) {
+    if (samplePending.current || running) return;
+    samplePending.current = true;
+    setLoadingSample(true);
+    try {
+      const [video, image] = await Promise.all([
+        apiPublicFile(
+          sample.video,
+          `practice-${sample.id}-5s.mp4`,
+          'video/mp4'
+        ),
+        apiPublicFile(
+          sample.image,
+          `practice-${sample.id}-character.jpg`,
+          'image/jpeg'
+        ),
+      ]);
+      const videoPreview = URL.createObjectURL(video);
+      const imagePreview = URL.createObjectURL(image);
+      try {
+        const [videoMetadata, imageMetadata] = await Promise.all([
+          readMediaMetadata(videoPreview, 'video'),
+          readMediaMetadata(imagePreview, 'image'),
+        ]);
+        if (
+          videoMetadata.duration < 3 ||
+          videoMetadata.duration > 5 ||
+          video.size > maxVideoMB * 1024 * 1024
+        )
+          throw new Error('Invalid practice clip');
+        setReferenceVideo({
+          kind: 'video',
+          file: video,
+          preview: videoPreview,
+          uploading: false,
+          ...videoMetadata,
+        });
+        setDurationTier(5);
+        setLead({
+          kind: 'image',
+          file: image,
+          preview: imagePreview,
+          uploading: false,
+          ...imageMetadata,
+        });
+        setAspect(sample.aspect);
+        setSampleId(sample.id);
+        setPreviewMode('example');
+        track('sample_loaded', { outcome: 'success', required_generations: 1 });
+      } catch (error) {
+        URL.revokeObjectURL(videoPreview);
+        URL.revokeObjectURL(imagePreview);
+        throw error;
+      }
+    } catch {
+      toast.error(copy.sampleError);
+      track('sample_loaded', { outcome: 'request_failed' });
+    } finally {
+      samplePending.current = false;
+      setLoadingSample(false);
+    }
+  }
+
   const selectAsset = async (
     file: File | undefined,
     type: 'image' | 'video',
     setAsset: (asset: Asset | undefined) => void
   ) => {
     if (!file) return;
+    const rejectFile = (message: string) => {
+      toast.error(message);
+      track('upload_result', { media_kind: type, outcome: 'invalid' });
+    };
     const isVideo = ['video/mp4', 'video/quicktime', 'video/x-m4v'].includes(
       file.type
     );
@@ -517,17 +560,19 @@ export function GenjutsuGenerator({
       type === 'image' &&
       !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
     ) {
-      toast.error('Only image files are supported');
+      rejectFile(
+        'Only JPG, PNG and WEBP photos are supported. Convert HEIC before uploading.'
+      );
       return;
     }
     if (type === 'video' && !isVideo) {
-      toast.error('Only video files are supported');
+      rejectFile('Only MP4 and MOV videos are supported');
       return;
     }
     const maxMB = isVideo ? readiness?.maxVideoMB || 100 : 10;
     const maxBytes = maxMB * 1024 * 1024;
     if (file.size > maxBytes) {
-      toast.error(`File exceeds the ${maxMB}MB limit`);
+      rejectFile(`File exceeds the ${maxMB}MB limit`);
       return;
     }
 
@@ -539,9 +584,11 @@ export function GenjutsuGenerator({
         isVideo &&
         (!Number.isFinite(metadata.duration) ||
           metadata.duration < 3 ||
-          metadata.duration > 10.05)
+          metadata.duration > (readiness?.maxVideoSeconds || 10) + 0.05)
       )
-        throw new Error('Reference video must be 3–10 seconds long');
+        throw new Error(
+          `Reference video must be 3–${readiness?.maxVideoSeconds || 10} seconds long`
+        );
       if (
         isVideo &&
         (metadata.width < 720 ||
@@ -567,16 +614,39 @@ export function GenjutsuGenerator({
         uploading: false,
         ...metadata,
       });
+      // A custom source must not inherit unrelated practice choreography.
+      if (isVideo) setSampleId(undefined);
+      if (isVideo) {
+        setDurationTier(genjutsuDurationTier(metadata.duration));
+        const ratios = readiness?.aspects || GENJUTSU_ASPECTS;
+        const closest = [...ratios].sort((a, b) => {
+          const ratio = (x: string) => {
+            const [w, h] = x.split(':').map(Number);
+            return w / h;
+          };
+          return (
+            Math.abs(ratio(a) - metadata.width / metadata.height) -
+            Math.abs(ratio(b) - metadata.width / metadata.height)
+          );
+        })[0];
+        if (closest) setAspect(closest);
+      }
+      track('upload_result', { media_kind: type, outcome: 'success' });
     } catch (error) {
       URL.revokeObjectURL(preview);
       toast.error(error instanceof Error ? error.message : 'Invalid media');
+      track('upload_result', { media_kind: type, outcome: 'invalid' });
     } finally {
       setValidatingMedia(false);
     }
   };
 
   const uploadAsset = async (asset: Asset) => {
-    if (asset.url && (asset.kind === 'image' || asset.videoReceipt))
+    if (
+      asset.url &&
+      (asset.kind === 'image' ||
+        hasFreshVideoReceipt(asset.videoReceipt, asset.url))
+    )
       return { url: asset.url, videoReceipt: asset.videoReceipt };
     if (!asset.file) throw new Error('Select a file before generating');
     const response = await apiUpload<{
@@ -606,6 +676,11 @@ export function GenjutsuGenerator({
     mutationFn: async () => {
       if (!lead || !referenceVideo)
         throw new Error('Upload a main character image and a reference video');
+      if (
+        !referenceVideo.duration ||
+        genjutsuDurationTier(referenceVideo.duration) !== durationTier
+      )
+        throw new Error(copy.durationMismatch);
       const current = await readinessQuery.refetch();
       if (!current.data?.provider)
         throw new Error(
@@ -619,6 +694,8 @@ export function GenjutsuGenerator({
         throw new Error(
           'Configure prompt safety screening in Admin Settings before generating'
         );
+      if (referenceVideo.duration > current.data.maxVideoSeconds + 0.05)
+        throw new Error('Reference video must be 3–10 seconds long');
       if (!current.data.aspects.includes(aspect))
         throw new Error('This API does not support the selected video size');
       if (
@@ -661,7 +738,11 @@ export function GenjutsuGenerator({
       }
       return apiPost<GenjutsuTask>('/api/genjutsu/generate', {
         aspect,
-        prompt: selected.prompt,
+        durationTier,
+        sampleId,
+        backgroundMode,
+        backgroundDescription:
+          backgroundMode === 'change' ? backgroundDescription.trim() : '',
         leadImage,
         referenceVideo: videoUrl,
         videoReceipt,
@@ -672,6 +753,19 @@ export function GenjutsuGenerator({
     onSuccess: (created) => {
       setTaskId(created.id);
       setPreviewMode('work');
+      if (referenceVideo)
+        setComparison({
+          taskId: created.id,
+          source: {
+            ...referenceVideo,
+            preview: referenceVideo.file
+              ? URL.createObjectURL(referenceVideo.file)
+              : referenceVideo.preview,
+          },
+        });
+      track('generation_started', {
+        required_generations: requiredGenerations,
+      });
       queryClient.setQueryData(['genjutsu-task', created.id], created);
       queryClient.invalidateQueries({ queryKey: ['credits'] });
     },
@@ -686,7 +780,14 @@ export function GenjutsuGenerator({
     queryClient.invalidateQueries({ queryKey: ['credits'] });
     if (task.status === 'failed')
       toast.error(task.error || 'Generation failed');
-  }, [queryClient, task]);
+    if (
+      !completedTasks.current.has(task.id) &&
+      track(
+        task.status === 'success' ? 'generation_complete' : 'generation_failed'
+      )
+    )
+      completedTasks.current.add(task.id);
+  }, [queryClient, task, track]);
 
   const running = generate.isPending || Boolean(taskId && !isDone(task));
   const uploading = Boolean(lead?.uploading || referenceVideo?.uploading);
@@ -697,15 +798,28 @@ export function GenjutsuGenerator({
     !savingDraft &&
     !uploading &&
     !running &&
-    !validatingMedia;
+    !validatingMedia &&
+    !loadingSample;
 
   async function startGeneration() {
+    track('generate_click', { required_generations: requiredGenerations });
+    if (
+      referenceVideo?.duration &&
+      genjutsuDurationTier(referenceVideo.duration) !== durationTier
+    ) {
+      toast.error(copy.durationMismatch);
+      return;
+    }
+    if (backgroundMode === 'change' && !backgroundDescription.trim()) {
+      toast.error(copy.backgroundRequired);
+      return;
+    }
     setSavingDraft(true);
     try {
       await persistDraft();
     } catch {
-      toast.error('Could not save media for your return');
-      return;
+      setDraftSaveFailed(true);
+      track('draft_save_failed', { outcome: 'storage_unavailable' });
     } finally {
       setSavingDraft(false);
     }
@@ -714,6 +828,10 @@ export function GenjutsuGenerator({
       return;
     }
     if (!assetIsReady(lead) || !assetIsReady(referenceVideo)) {
+      track('generate_blocked', {
+        outcome: 'missing_media',
+        required_generations: requiredGenerations,
+      });
       toast.error('Upload a main character image and a reference video');
       return;
     }
@@ -723,6 +841,10 @@ export function GenjutsuGenerator({
       creditsQuery.data.balance < costCredits
     ) {
       setPaywall(true);
+      track('generate_blocked', {
+        outcome: 'insufficient_credits',
+        required_generations: requiredGenerations,
+      });
       return;
     }
     generate.mutate();
@@ -735,125 +857,279 @@ export function GenjutsuGenerator({
     <>
       <div
         id="generator"
-        className="border-border bg-muted text-foreground grid scroll-mt-24 gap-3 rounded-3xl border p-3 lg:grid-cols-[300px_minmax(0,340px)_minmax(0,1fr)]"
+        className="border-border bg-muted text-foreground grid scroll-mt-24 gap-3 rounded-3xl border p-3 lg:grid-cols-[360px_minmax(0,1fr)]"
       >
         <section
           aria-label="Create"
-          className="bg-card order-2 flex min-h-0 flex-col gap-4 rounded-2xl p-4 lg:order-1"
+          className="bg-card order-1 flex min-h-0 flex-col gap-4 rounded-2xl p-4"
         >
-          <h2 className="text-lg font-semibold">AI Effects</h2>
-          <div className="border-primary/40 bg-primary/10 flex items-center gap-3 rounded-xl border p-2">
-            <img
-              src={selected.image}
-              alt=""
-              aria-hidden="true"
-              className="size-11 rounded-lg object-cover"
-            />
-            <div className="min-w-0 flex-1">
-              <p
-                data-testid="selected-template"
-                className="truncate text-sm font-semibold"
-              >
-                {selected.name}
-              </p>
-              <p className="text-muted-foreground text-xs">
-                {referenceVideo?.duration
-                  ? Number(referenceVideo.duration.toFixed(2))
-                  : 5}
-                s · {copy.generationCost(requiredGenerations)} · Kling O1
-              </p>
-            </div>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-lg font-semibold">{copy.uploadTitle}</h3>
+            <span className="text-muted-foreground text-xs">{copy.sample}</span>
           </div>
-
+          <div
+            data-testid="practice-set-list"
+            className="grid grid-cols-4 gap-2"
+          >
+            {PRACTICE_SAMPLES.map((sample) => (
+              <button
+                type="button"
+                key={sample.id}
+                data-testid={`practice-set-${sample.id}`}
+                disabled={
+                  !draftReady || running || loadingSample || validatingMedia
+                }
+                title={copy.sampleDisclaimer}
+                className="group border-border hover:border-primary flex flex-col overflow-hidden rounded-lg border p-0 text-left transition-colors disabled:opacity-50"
+                onClick={() => {
+                  void loadPracticeMedia(sample);
+                }}
+              >
+                <img
+                  src={sample.poster}
+                  alt=""
+                  className="block aspect-[4/3] w-full shrink-0 object-cover"
+                />
+                <span className="block w-full flex-1 px-1.5 py-1.5 text-[10px] leading-snug">
+                  {copy.sampleNames[sample.id]}
+                </span>
+              </button>
+            ))}
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <UploadSlot
               label="Reference video"
-              hint="3–10s"
+              hint={`3–${readiness?.maxVideoSeconds || 10}s`}
               kind="video"
               disabled={
-                !draftReady || running || validatingMedia || savingDraft
+                !draftReady ||
+                running ||
+                validatingMedia ||
+                savingDraft ||
+                loadingSample
               }
               accept="video/mp4,video/quicktime,video/x-m4v"
               asset={referenceVideo}
               onFile={(file) => selectAsset(file, 'video', setReferenceVideo)}
               testId="upload-video"
+              formats={copy.videoFormats(maxVideoMB)}
+              clearLabel={copy.removeVideo}
+              onClear={() => {
+                setReferenceVideo(undefined);
+                setSampleId(undefined);
+              }}
             />
             <UploadSlot
               label="Main character"
               hint="Stays still"
               kind="image"
               disabled={
-                !draftReady || running || validatingMedia || savingDraft
+                !draftReady ||
+                running ||
+                validatingMedia ||
+                savingDraft ||
+                loadingSample
               }
               accept="image/jpeg,image/png,image/webp"
               asset={lead}
               onFile={(file) => selectAsset(file, 'image', setLead)}
               testId="upload-lead"
+              formats="JPG, PNG, WEBP · 10MB"
+              clearLabel={copy.removePhoto}
+              onClear={() => setLead(undefined)}
             />
           </div>
 
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-2 text-sm font-medium">Video size</legend>
-            <div className="flex gap-2">
-              {GENJUTSU_ASPECTS.map((ratio) => (
+            <legend className="mb-2 text-sm font-medium">
+              {copy.durationLabel}
+            </legend>
+            <div className="grid grid-cols-2 gap-2">
+              {GENJUTSU_DURATION_TIERS.map((seconds) => (
                 <button
-                  key={ratio}
+                  key={seconds}
                   type="button"
-                  aria-pressed={aspect === ratio}
-                  data-testid={`ratio-${ratio.replace(':', '-')}`}
+                  data-testid={`duration-${seconds}`}
+                  aria-pressed={durationTier === seconds}
                   disabled={
+                    !draftReady ||
+                    sessionPending ||
                     running ||
-                    Boolean(readiness && !readiness.aspects.includes(ratio))
+                    Boolean(readiness && seconds > readiness.maxVideoSeconds)
                   }
-                  title={
-                    readiness && !readiness.aspects.includes(ratio)
-                      ? 'This editing API does not support this ratio'
-                      : undefined
-                  }
-                  onClick={() => setAspect(ratio)}
+                  onClick={() => setDurationTier(seconds)}
                   className={cn(
-                    'flex flex-1 items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-colors disabled:opacity-60',
-                    aspect === ratio
-                      ? 'border-primary bg-primary/15 text-primary'
+                    'min-h-11 rounded-lg border px-2 py-2 text-sm transition-colors disabled:opacity-50',
+                    durationTier === seconds
+                      ? 'border-primary bg-primary/15 text-primary-text'
                       : 'border-border hover:border-primary/40'
                   )}
                 >
-                  <span
-                    className={cn(
-                      'rounded-[2px] border-2 border-current',
-                      ratio === '16:9'
-                        ? 'h-3 w-5'
-                        : ratio === '4:3'
-                          ? 'h-3.5 w-4.5'
-                          : 'h-5 w-3'
-                    )}
-                  />
-                  {ratio}
+                  {copy.durationOption(seconds, seconds / 5)}
                 </button>
               ))}
             </div>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              {copy.durationHint}
+            </p>
           </fieldset>
 
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-2 text-sm font-medium">
+              {copy.backgroundLabel}
+            </legend>
+            <div className="bg-muted flex gap-1 rounded-lg p-1">
+              {(['keep', 'change'] as const).map((mode) => (
+                <button
+                  type="button"
+                  key={mode}
+                  aria-pressed={backgroundMode === mode}
+                  disabled={running}
+                  data-testid={`background-${mode}`}
+                  onClick={() => setBackgroundMode(mode)}
+                  className={cn(
+                    'min-h-10 flex-1 rounded-md px-2 text-sm transition-colors',
+                    backgroundMode === mode
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground'
+                  )}
+                >
+                  {mode === 'keep'
+                    ? copy.keepBackground
+                    : copy.changeBackground}
+                </button>
+              ))}
+            </div>
+            {backgroundMode === 'change' && (
+              <div className="mt-1 flex flex-col gap-3">
+                <div
+                  className="grid grid-cols-3 gap-2"
+                  role="group"
+                  aria-label={copy.backgroundLabel}
+                >
+                  {copy.backgroundPresets.map((preset) => (
+                    <button
+                      type="button"
+                      key={preset.id}
+                      data-testid={`background-preset-${preset.id}`}
+                      aria-pressed={
+                        backgroundDescription === preset.description
+                      }
+                      title={preset.description}
+                      disabled={running}
+                      onClick={() =>
+                        setBackgroundDescription(preset.description)
+                      }
+                      className={cn(
+                        'min-h-10 rounded-lg border px-2 py-2 text-xs transition-colors disabled:opacity-50',
+                        backgroundDescription === preset.description
+                          ? 'border-primary/60 bg-primary/10 text-primary-text'
+                          : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
+                      )}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+                <label htmlFor="background-description" className="sr-only">
+                  {copy.backgroundDescription}
+                </label>
+                <textarea
+                  id="background-description"
+                  data-testid="background-description"
+                  value={backgroundDescription}
+                  onChange={(e) => setBackgroundDescription(e.target.value)}
+                  maxLength={500}
+                  disabled={running}
+                  rows={3}
+                  placeholder={copy.backgroundPlaceholder}
+                  className="border-border bg-background placeholder:text-muted-foreground focus-visible:ring-primary w-full resize-y rounded-lg border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
+                />
+              </div>
+            )}
+          </fieldset>
+          <details className="text-muted-foreground text-xs">
+            <summary className="min-h-9 cursor-pointer py-2">
+              {copy.moreSettings}
+            </summary>
+            <fieldset className="mt-2 flex flex-col gap-2">
+              <legend className="mb-2 text-sm font-medium">Video size</legend>
+              <div className="flex gap-2">
+                {GENJUTSU_ASPECTS.map((ratio) => (
+                  <button
+                    key={ratio}
+                    type="button"
+                    aria-pressed={aspect === ratio}
+                    data-testid={`ratio-${ratio.replace(':', '-')}`}
+                    disabled={
+                      running ||
+                      Boolean(readiness && !readiness.aspects.includes(ratio))
+                    }
+                    title={
+                      readiness && !readiness.aspects.includes(ratio)
+                        ? 'This editing API does not support this ratio'
+                        : undefined
+                    }
+                    onClick={() => setAspect(ratio)}
+                    className={cn(
+                      'flex flex-1 items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-colors disabled:opacity-60',
+                      aspect === ratio
+                        ? 'border-primary bg-primary/15 text-primary'
+                        : 'border-border hover:border-primary/40'
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'rounded-[2px] border-2 border-current',
+                        ratio === '16:9' ? 'h-3 w-5' : 'h-5 w-3'
+                      )}
+                    />
+                    {ratio}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </details>
+
           <div className="mt-auto flex flex-col gap-2">
-            <div className="text-muted-foreground flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1.5">
+            {draftSaveFailed && (
+              <p
+                role="status"
+                className="flex items-start gap-2 rounded-lg border border-amber-600/25 bg-amber-500/5 p-3 text-xs leading-relaxed text-amber-800 dark:text-amber-200"
+              >
+                <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                {copy.draftWarning}
+              </p>
+            )}
+            <div className="text-muted-foreground flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs">
+              <span
+                className="flex items-center gap-1.5"
+                title={copy.generationRules}
+              >
                 <Sparkles className="text-primary size-4" />
                 <span data-testid="generator-cost">
                   {copy.generationCost(requiredGenerations)}
                 </span>
               </span>
-              <span data-testid="generator-balance" className="tabular-nums">
-                {copy.remainingGenerations(
-                  Math.floor(
-                    (creditsQuery.data?.balance ?? 0) /
-                      GENJUTSU_CREDITS_PER_GENERATION
-                  )
-                )}
+              <span className="flex items-center gap-2">
+                <span data-testid="generator-balance" className="tabular-nums">
+                  {copy.remainingGenerations(
+                    Math.floor(
+                      (creditsQuery.data?.balance ?? 0) /
+                        GENJUTSU_CREDITS_PER_GENERATION
+                    )
+                  )}
+                </span>
+                <button
+                  type="button"
+                  data-testid="balance-buy-generations"
+                  className="text-primary-text min-h-9 shrink-0 font-medium underline-offset-4 hover:underline"
+                  onClick={() => setPaywall(true)}
+                >
+                  {copy.buy}
+                </button>
               </span>
             </div>
-            <p className="text-muted-foreground text-[11px]">
-              {copy.generationRules}
-            </p>
             {Boolean(
               (creditsQuery.data?.balance ?? 0) %
               GENJUTSU_CREDITS_PER_GENERATION
@@ -874,118 +1150,91 @@ export function GenjutsuGenerator({
               ) : (
                 <Sparkles className="size-5" />
               )}
-              Generate Now
+              {copy.generate}
             </button>
-          </div>
-        </section>
-
-        <section
-          aria-label="Select effect"
-          className="bg-card @container order-1 flex min-h-0 flex-col gap-3 rounded-2xl p-4 lg:order-2"
-        >
-          <h2 className="text-lg font-semibold">Select Effect</h2>
-          <div className="relative lg:min-h-[calc((100cqw-1.25rem)*2+2rem)] lg:flex-1">
-            <div
-              data-testid="template-list"
-              className="grid max-h-[calc((100cqw-1.25rem)*2+2rem)] auto-rows-max grid-cols-2 content-start gap-3 overflow-y-auto overscroll-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:absolute lg:inset-0 lg:max-h-none"
-            >
-              {TEMPLATES.map((template) => (
-                <button
-                  key={template.id}
-                  type="button"
-                  aria-pressed={selected.id === template.id}
-                  data-testid={`template-${template.id}`}
-                  className={cn(
-                    'group relative aspect-[3/4] overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed',
-                    selected.id === template.id
-                      ? 'ring-primary'
-                      : 'ring-transparent'
-                  )}
-                  disabled={running}
-                  onClick={() => {
-                    setSelectedId(template.id);
-                    setExampleId(template.id);
-                  }}
-                >
-                  <img
-                    src={template.image}
-                    alt={`${template.name} template`}
-                    loading="lazy"
-                    className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <span className="absolute inset-0 bg-gradient-to-t from-neutral-950/90 via-neutral-700/50 to-neutral-400/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
-                  {template.tag ? (
-                    <span className="bg-primary text-primary-foreground absolute top-2 left-2 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
-                      {template.tag}
-                    </span>
-                  ) : null}
-                  {selected.id === template.id ? (
-                    <span className="bg-primary text-primary-foreground absolute top-2 right-2 flex size-6 items-center justify-center rounded-full">
-                      <Check className="size-4" />
-                    </span>
-                  ) : null}
-                  <span className="absolute inset-x-2 bottom-2">
-                    <span className="block text-sm leading-tight font-semibold text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)]">
-                      {template.name}
-                    </span>
-                    <span className="block text-[11px] text-white/70">
-                      {template.duration}s · {template.ratios}
-                    </span>
-                  </span>
-                </button>
-              ))}
-            </div>
           </div>
         </section>
 
         <section
           aria-label="Preview"
-          className="bg-card order-3 flex min-h-0 flex-col gap-3 rounded-2xl p-4"
+          className="bg-card order-2 flex min-h-0 flex-col gap-3 rounded-2xl p-4"
         >
-          <div className="bg-muted flex w-fit gap-1 rounded-xl p-1">
-            <button
-              type="button"
-              data-testid="preview-example"
-              aria-pressed={previewMode === 'example'}
-              className={cn(
-                'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                previewMode === 'example'
-                  ? 'text-foreground bg-card shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+          {taskId ? (
+            <div className="bg-muted flex w-full flex-wrap gap-1 rounded-xl p-1">
+              <button
+                type="button"
+                data-testid="preview-example"
+                aria-pressed={previewMode === 'example'}
+                className={cn(
+                  'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                  previewMode === 'example'
+                    ? 'text-foreground bg-card shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+                onClick={() => setPreviewMode('example')}
+              >
+                {copy.originalLabel}
+              </button>
+              <button
+                type="button"
+                data-testid="preview-work"
+                aria-pressed={previewMode === 'work'}
+                className={cn(
+                  'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                  previewMode === 'work'
+                    ? 'text-foreground bg-card shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+                onClick={() => setPreviewMode('work')}
+              >
+                {copy.workLabel}
+              </button>
+              {workUrl && (
+                <button
+                  type="button"
+                  data-testid="preview-compare"
+                  aria-pressed={previewMode === 'compare'}
+                  className={cn(
+                    'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                    previewMode === 'compare'
+                      ? 'text-foreground bg-card shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                  onClick={() => setPreviewMode('compare')}
+                >
+                  {copy.compareLabel}
+                </button>
               )}
-              onClick={() => setPreviewMode('example')}
-            >
-              Reference Example
-            </button>
-            <button
-              type="button"
-              data-testid="preview-work"
-              aria-pressed={previewMode === 'work'}
-              className={cn(
-                'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                previewMode === 'work'
-                  ? 'text-foreground bg-card shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-              onClick={() => setPreviewMode('work')}
-            >
-              My Work
-            </button>
-          </div>
+            </div>
+          ) : (
+            <h3 className="text-lg font-semibold">{copy.previewTitle}</h3>
+          )}
           <div className="relative flex min-h-[420px] flex-1 items-center justify-center overflow-hidden rounded-xl bg-black lg:min-h-[500px]">
-            <img
-              src={example.image}
-              alt=""
-              aria-hidden="true"
-              className="absolute inset-0 size-full scale-110 object-cover opacity-50 blur-2xl"
-            />
-            {showWork ? (
+            {previewMode === 'compare' ? (
+              <div className="relative z-10 flex w-full self-stretch">
+                <VideoComparison
+                  source={
+                    taskId && comparison?.taskId === taskId
+                      ? comparison.source.preview
+                      : !taskId
+                        ? referenceVideo?.preview
+                        : undefined
+                  }
+                  result={workUrl}
+                  copy={{
+                    before: copy.before,
+                    after: copy.after,
+                    empty: copy.compareEmpty,
+                    missing: copy.compareMissing,
+                    play: copy.comparePlay,
+                  }}
+                />
+              </div>
+            ) : showWork ? (
               workUrl ? (
                 <video
                   data-testid="work-video"
                   src={workUrl || undefined}
-                  poster={selected.image}
                   autoPlay
                   loop
                   muted={muted}
@@ -1021,46 +1270,37 @@ export function GenjutsuGenerator({
                   )}
                 </div>
               )
-            ) : (
+            ) : referenceVideo?.preview ? (
               <video
-                key={example.video}
                 data-testid="reference-video"
-                src={example.video}
-                poster={example.image}
-                autoPlay
-                loop={!SAMPLE_PLAYLIST.some((id) => id === example.id)}
-                onEnded={() => {
-                  const index = SAMPLE_PLAYLIST.findIndex(
-                    (id) => id === example.id
-                  );
-                  if (index >= 0) {
-                    setExampleId(
-                      SAMPLE_PLAYLIST[(index + 1) % SAMPLE_PLAYLIST.length]
-                    );
-                  }
-                }}
-                muted={muted}
+                src={referenceVideo.preview}
+                controls
                 playsInline
-                className="absolute inset-0 size-full object-cover"
+                muted={muted}
+                className="absolute inset-0 size-full object-contain"
               />
+            ) : (
+              <p className="text-muted-foreground px-6 text-center text-sm">
+                {copy.previewEmpty}
+              </p>
             )}
-            <button
-              type="button"
-              aria-label={muted ? 'Unmute' : 'Mute'}
-              className="hover:bg-primary hover:text-primary-foreground absolute right-3 bottom-3 flex size-9 items-center justify-center rounded-full bg-black/70 text-white backdrop-blur transition"
-              onClick={() => setMuted((value) => !value)}
-            >
-              {muted ? (
-                <VolumeX className="size-4" />
-              ) : (
-                <Volume2 className="size-4" />
-              )}
-            </button>
-            <span className="absolute top-3 left-3 rounded-full bg-black/70 px-2.5 py-1 text-xs text-white backdrop-blur">
-              {showWork ? selected.name : example.name} ·{' '}
-              {showWork ? 'work' : 'Higgsfield reference'}
-            </span>
-            {task?.status === 'success' && task.url ? (
+            {showWork && workUrl && (
+              <button
+                type="button"
+                aria-label={muted ? 'Unmute' : 'Mute'}
+                className="hover:bg-primary hover:text-primary-foreground absolute right-3 bottom-3 flex size-9 items-center justify-center rounded-full bg-black/70 text-white backdrop-blur transition"
+                onClick={() => setMuted((value) => !value)}
+              >
+                {muted ? (
+                  <VolumeX className="size-4" />
+                ) : (
+                  <Volume2 className="size-4" />
+                )}
+              </button>
+            )}
+            {previewMode !== 'compare' &&
+            task?.status === 'success' &&
+            task.url ? (
               <a
                 href={task.url}
                 target="_blank"
@@ -1072,9 +1312,9 @@ export function GenjutsuGenerator({
               </a>
             ) : null}
           </div>
-          {!showWork && (
-            <p className="text-muted-foreground text-xs">
-              {copy.referenceDisclaimer}
+          {previewMode === 'compare' && (
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              {copy.compareHint}
             </p>
           )}
         </section>
@@ -1082,7 +1322,18 @@ export function GenjutsuGenerator({
 
       <Dialog open={paywall} onOpenChange={setPaywall}>
         <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5 sm:max-w-6xl sm:p-8">
-          <Pricing variant="dialog" beforeCheckout={persistDraft} />
+          <DialogTitle className="sr-only">{copy.buy}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {copy.generationRules}
+          </DialogDescription>
+          <Pricing
+            variant="dialog"
+            beforeCheckout={persistDraft}
+            requiredCredits={costCredits}
+            balanceCredits={creditsQuery.data?.balance ?? 0}
+            clipSeconds={referenceVideo?.duration}
+            trackingVisible={paywall}
+          />
         </DialogContent>
       </Dialog>
     </>

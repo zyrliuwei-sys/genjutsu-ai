@@ -12,9 +12,11 @@ import {
   GENJUTSU_EVOLINK_MODEL,
   GENJUTSU_MODEL_ID,
   genjutsuCredits,
+  genjutsuDurationTier,
   genjutsuReadiness,
   isGenjutsuAspect,
 } from '@/config/genjutsu';
+import { PRACTICE_SAMPLES } from '@/config/practice-media';
 import {
   AITaskStatus,
   createTask,
@@ -74,6 +76,17 @@ async function POST({ request }: { request: Request }) {
     const referenceVideo = body?.referenceVideo;
     const leadImage = body?.leadImage;
     const crowdImage = body?.crowdImage;
+    const backgroundMode = body?.backgroundMode ?? 'keep';
+    if (backgroundMode !== 'keep' && backgroundMode !== 'change')
+      return respErr('Invalid background mode');
+    const backgroundDescription = body?.backgroundDescription ?? '';
+    if (
+      typeof backgroundDescription !== 'string' ||
+      backgroundDescription.length > 500
+    )
+      return respErr('Background description must be at most 500 characters');
+    if (backgroundMode === 'change' && !backgroundDescription.trim())
+      return respErr('Describe the new background');
     if (!isGenjutsuAspect(body?.aspect)) return respErr('Invalid video size');
     const aspect = body.aspect;
     const configs = await getAllConfigs();
@@ -136,7 +149,9 @@ async function POST({ request }: { request: Request }) {
     const prompt = buildGenjutsuPrompt(
       body?.prompt,
       Boolean(crowdImage),
-      readiness.provider
+      readiness.provider,
+      { mode: backgroundMode, description: backgroundDescription },
+      PRACTICE_SAMPLES.find((sample) => sample.id === body?.sampleId)?.direction
     );
     if (prompt.length > MAX_PROMPT) return respErr('Prompt is too long');
     const duration = await verifyVideoReceipt(
@@ -145,6 +160,13 @@ async function POST({ request }: { request: Request }) {
       session.user.id
     );
     const costCredits = genjutsuCredits(duration);
+    if (
+      body?.durationTier !== undefined &&
+      body.durationTier !== genjutsuDurationTier(duration)
+    )
+      return respErr(
+        'Upload a reference video matching the selected duration tier'
+      );
 
     const safetyResult = await scanPromptWithWaffo(
       prompt,

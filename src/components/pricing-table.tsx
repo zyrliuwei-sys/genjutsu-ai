@@ -28,6 +28,8 @@ export interface PricingPlan {
   badge?: string;
   features: PricingFeature[];
   buttonText?: string;
+  disabled?: boolean;
+  notice?: string;
   productId?: string;
   productName?: string;
   paymentProvider?: string;
@@ -50,9 +52,11 @@ export interface PricingGroup {
 export function PricingTable({
   groups,
   onCheckout,
+  busy = false,
 }: {
   groups: PricingGroup[];
   onCheckout?: (plan: PricingPlan) => void;
+  busy?: boolean;
 }) {
   const [activeGroup, setActiveGroup] = useState(groups[0]?.key || '');
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -185,12 +189,22 @@ export function PricingTable({
               variant={plan.featured ? 'default' : 'outline'}
               className="h-10 w-full rounded-md text-sm font-medium"
               onClick={() => handleCheckout(plan)}
-              disabled={loadingId === plan.id}
+              disabled={busy || plan.disabled || loadingId === plan.id}
             >
               {loadingId === plan.id
                 ? m['common.pricing.processing']()
                 : plan.buttonText || m['common.pricing.get_started']()}
             </Button>
+            {plan.notice && (
+              <p
+                className={cn(
+                  'mt-3 text-xs leading-relaxed',
+                  plan.disabled ? 'text-muted-foreground' : 'text-primary-text'
+                )}
+              >
+                {plan.notice}
+              </p>
+            )}
 
             {/* Features */}
             <ul className="mt-8 space-y-3">

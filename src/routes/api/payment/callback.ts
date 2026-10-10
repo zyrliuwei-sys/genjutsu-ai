@@ -43,10 +43,17 @@ async function GET({ request }: { request: Request }) {
     console.error('payment callback error:', error);
   }
 
+  const destination = new URL(
+    resolveSameOriginRedirect(redirect, fallback, appUrl)
+  );
+  // This is a lookup hint only. The client must verify ownership + paid status
+  // through /api/user/orders before counting a purchase.
+  if (orderNo && /^[A-Za-z0-9_-]{1,100}$/.test(orderNo))
+    destination.searchParams.set('checkout_order', orderNo);
   return new Response(null, {
     status: 302,
     headers: {
-      Location: resolveSameOriginRedirect(redirect, fallback, appUrl),
+      Location: destination.toString(),
     },
   });
 }

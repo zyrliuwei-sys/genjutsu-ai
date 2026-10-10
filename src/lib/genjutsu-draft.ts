@@ -12,10 +12,15 @@ export type DraftAsset = {
 export type GenjutsuDraft = {
   owner?: string;
   selectedId: string;
+  sampleId?: string;
   aspect: string;
+  durationTier?: number;
+  backgroundMode?: 'keep' | 'change';
+  backgroundDescription?: string;
   lead?: DraftAsset;
   referenceVideo?: DraftAsset;
   savedAt: number;
+  comparison?: { taskId: string; source: DraftAsset };
 };
 const TTL = 24 * 60 * 60 * 1000;
 let queue: Promise<unknown> = Promise.resolve();
@@ -32,10 +37,26 @@ function draftKey() {
 async function database() {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open('genjutsu-drafts', 1);
+    let expired = false;
+    const timer = setTimeout(() => {
+      expired = true;
+      reject(new Error('Draft storage timed out'));
+    }, 5000);
     request.onupgradeneeded = () => request.result.createObjectStore('drafts');
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-    request.onblocked = () => reject(new Error('Draft storage is blocked'));
+    request.onsuccess = () => {
+      clearTimeout(timer);
+      if (expired) request.result.close();
+      else resolve(request.result);
+    };
+    request.onerror = () => {
+      clearTimeout(timer);
+      reject(request.error);
+    };
+    request.onblocked = () => {
+      clearTimeout(timer);
+      expired = true;
+      reject(new Error('Draft storage is blocked'));
+    };
   });
 }
 
@@ -49,9 +70,26 @@ async function transact<T>(
     return await new Promise<T>((resolve, reject) => {
       const tx = db.transaction('drafts', mode);
       const request = operation(tx.objectStore('drafts'), key);
-      tx.oncomplete = () => resolve(request.result);
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
+      const timer = setTimeout(() => {
+        reject(new Error('Draft save timed out'));
+        try {
+          tx.abort();
+        } catch {
+          /* Already settled. */
+        }
+      }, 5000);
+      tx.oncomplete = () => {
+        clearTimeout(timer);
+        resolve(request.result);
+      };
+      tx.onerror = () => {
+        clearTimeout(timer);
+        reject(tx.error);
+      };
+      tx.onabort = () => {
+        clearTimeout(timer);
+        reject(tx.error);
+      };
     });
   } finally {
     db.close();

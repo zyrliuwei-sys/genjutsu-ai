@@ -67,51 +67,10 @@
 }
 
 @layer base {
-  /* Genjutsu AI: "ink screening room". Washi paper by day, sumi ink by
-     night, one vermilion seal colour and a brass hairline for detail. */
-  :root {
-    --background: oklch(0.972 0.006 85);
-    --foreground: oklch(0.2 0.01 50);
-    --card: oklch(0.99 0.004 85);
-    --card-foreground: oklch(0.2 0.01 50);
-    --popover: oklch(0.99 0.004 85);
-    --popover-foreground: oklch(0.2 0.01 50);
-    --primary: oklch(0.55 0.18 32);
-    --primary-foreground: oklch(0.98 0.01 85);
-    /* Small red text: AA (4.5:1) against the page background */
-    --primary-text: oklch(0.55 0.18 32);
-    --secondary: oklch(0.935 0.008 80);
-    --secondary-foreground: oklch(0.22 0.01 50);
-    --muted: oklch(0.94 0.007 82);
-    --muted-foreground: oklch(0.47 0.014 60);
-    --accent: oklch(0.92 0.012 75);
-    --accent-foreground: oklch(0.22 0.01 50);
-    --destructive: oklch(0.55 0.21 25);
-    --destructive-foreground: oklch(0.98 0 0);
-    --border: oklch(0.885 0.01 78);
-    --input: oklch(0.86 0.012 78);
-    --ring: oklch(0.55 0.18 32);
-    --chart-1: oklch(0.55 0.18 32);
-    --chart-2: oklch(0.6 0.09 75);
-    --chart-3: oklch(0.45 0.06 250);
-    --chart-4: oklch(0.7 0.05 60);
-    --chart-5: oklch(0.35 0.02 50);
-    --radius: 0.5rem;
-    --sidebar: oklch(0.955 0.007 82);
-    --sidebar-foreground: oklch(0.2 0.01 50);
-    --sidebar-primary: oklch(0.55 0.18 32);
-    --sidebar-primary-foreground: oklch(0.98 0.01 85);
-    --sidebar-accent: oklch(0.92 0.012 75);
-    --sidebar-accent-foreground: oklch(0.22 0.01 50);
-    --sidebar-border: oklch(0.885 0.01 78);
-    --sidebar-ring: oklch(0.55 0.18 32);
-    /* Brass: timecodes, eyebrows, hairlines */
-    --brass: oklch(0.52 0.08 70);
-    /* The screen: always dark, whatever the theme */
-    --screen: oklch(0.13 0.005 50);
-  }
-
+  /* Fixed ink-screening-room palette, including before hydration. */
+  :root,
   .dark {
+    color-scheme: dark;
     --background: oklch(0.155 0.006 50);
     --foreground: oklch(0.93 0.012 80);
     --card: oklch(0.19 0.007 50);

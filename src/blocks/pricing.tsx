@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Film, Infinity as InfinityIcon, MonitorPlay, Zap } from 'lucide-react';
 import { toast } from 'sonner';
@@ -10,8 +10,11 @@ import { useRouter } from '@/core/i18n/navigation';
 import { genjutsuCredits } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
 import { apiPost } from '@/lib/api-client';
+import type { FunnelProperties } from '@/lib/funnel';
+import { purchaseGuidance, VIDEO_PACKS } from '@/lib/purchase-guidance';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { m } from '@/paraglide/messages.js';
+import { useFunnel } from '@/hooks/use-funnel';
 import { usePublicConfig } from '@/hooks/use-public-config';
 import {
   PaymentProviderModal,
@@ -45,6 +48,10 @@ export function Pricing({
   variant = 'section',
   headingAs: Heading = 'h2',
   beforeCheckout,
+  requiredCredits,
+  balanceCredits = 0,
+  clipSeconds,
+  trackingVisible = true,
 }: {
   title?: string;
   /** `h1` when the block is the page's main content (the /pricing route). */
@@ -52,9 +59,39 @@ export function Pricing({
   /** `dialog` drops the page-section chrome for use inside a modal. */
   variant?: 'section' | 'dialog';
   beforeCheckout?: () => Promise<unknown>;
+  requiredCredits?: number;
+  balanceCredits?: number;
+  clipSeconds?: number;
+  trackingVisible?: boolean;
 } = {}) {
   const router = useRouter();
   const { data: session } = useSession();
+  const { track } = useFunnel();
+  const viewTracked = useRef(false);
+  const checkoutLock = useRef(false);
+  const [preparing, setPreparing] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const [unsavedCheckout, setUnsavedCheckout] = useState<{
+    plan: PricingPlan;
+    provider?: PaymentProvider;
+  }>();
+  const guidance =
+    requiredCredits === undefined
+      ? undefined
+      : purchaseGuidance(requiredCredits, balanceCredits);
+  useEffect(() => {
+    if (!trackingVisible) {
+      viewTracked.current = false;
+      return;
+    }
+    if (
+      !viewTracked.current &&
+      track('pricing_view', {
+        surface: variant === 'dialog' ? 'dialog' : 'pricing',
+      })
+    )
+      viewTracked.current = true;
+  }, [trackingVisible, track, variant]);
 
   const { data: configsData, refetch: refetchConfigs } = usePublicConfig();
   const configs = configsData ?? {};
@@ -111,8 +148,19 @@ export function Pricing({
         count: Math.floor(product.credits / perVideo),
       }),
       price: usd(product.priceInCents),
-      featured: opts.featured,
-      badge: opts.badge,
+      featured: guidance ? guidance.recommended === productId : opts.featured,
+      badge: guidance
+        ? guidance.recommended === productId
+          ? m['landing.pricing.recommended_clip']()
+          : undefined
+        : opts.badge,
+      disabled: guidance ? !guidance.coversClip(productId) : false,
+      notice:
+        guidance && clipSeconds
+          ? guidance.coversClip(productId)
+            ? m['landing.pricing.covers_clip']()
+            : m['landing.pricing.short_clip_only']()
+          : undefined,
       features: features(product.credits),
       productId,
       priceInCents: product.priceInCents,
@@ -139,54 +187,102 @@ export function Pricing({
   ];
 
   const checkoutMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       plan,
       provider,
     }: {
       plan: PricingPlan;
       provider?: PaymentProvider;
-    }) =>
-      apiPost<{ checkout_url?: string }>('/api/payment/checkout', {
-        product_id: plan.productId,
-        product_name: plan.productName || plan.name,
-        plan_name: plan.plan?.name || plan.name,
-        price: plan.priceInCents,
-        currency: plan.currency || 'usd',
-        type: plan.plan ? 'subscription' : 'one-time',
-        description: plan.name,
-        plan: plan.plan,
-        credits: plan.credits,
-        credits_valid_days: plan.creditsValidDays,
-        payment_provider: provider,
-        // Come back to the page the user paid from.
-        redirect: currentPathWithQuery('/settings/billing'),
-      }),
-    onSuccess: (data) => {
-      if (!data?.checkout_url) {
-        toast.error('Checkout failed');
-        setLoadingProvider(null);
-        return;
-      }
+    }) => {
+      const data = await apiPost<{ checkout_url?: string }>(
+        '/api/payment/checkout',
+        {
+          product_id: plan.productId,
+          product_name: plan.productName || plan.name,
+          plan_name: plan.plan?.name || plan.name,
+          price: plan.priceInCents,
+          currency: plan.currency || 'usd',
+          type: plan.plan ? 'subscription' : 'one-time',
+          description: plan.name,
+          plan: plan.plan,
+          credits: plan.credits,
+          credits_valid_days: plan.creditsValidDays,
+          payment_provider: provider,
+          // Come back to the page the user paid from.
+          redirect: currentPathWithQuery('/settings/billing'),
+        }
+      );
+      if (
+        !data.checkout_url ||
+        new URL(data.checkout_url).protocol !== 'https:'
+      )
+        throw new Error('Checkout failed');
+      return data as { checkout_url: string };
+    },
+    onSuccess: (data, { plan, provider }) => {
+      track('checkout_created', eventDetails(plan, provider));
+      setRedirecting(true);
       window.location.href = data.checkout_url;
     },
-    onError: (err: any) => {
+    onError: (err: Error, { plan, provider }) => {
+      track('checkout_error', {
+        ...eventDetails(plan, provider),
+        outcome: 'request_failed',
+      });
       toast.error(err?.message || 'Checkout failed');
       setLoadingProvider(null);
     },
   });
 
-  async function startCheckout(plan: PricingPlan, provider?: PaymentProvider) {
+  function eventDetails(
+    plan: PricingPlan,
+    provider?: PaymentProvider
+  ): FunnelProperties {
+    return {
+      product_id: VIDEO_PACKS.includes(plan.id as (typeof VIDEO_PACKS)[number])
+        ? (plan.id as (typeof VIDEO_PACKS)[number])
+        : undefined,
+      payment_provider: provider,
+      value: (plan.priceInCents || 0) / 100,
+      surface: variant === 'dialog' ? 'dialog' : 'pricing',
+    };
+  }
+
+  async function startCheckout(
+    plan: PricingPlan,
+    provider?: PaymentProvider,
+    allowUnsaved = false
+  ) {
+    if (checkoutLock.current || redirecting || plan.disabled) return;
+    checkoutLock.current = true;
+    setPreparing(true);
     try {
-      await beforeCheckout?.();
+      if (!allowUnsaved) {
+        try {
+          await beforeCheckout?.();
+        } catch {
+          track('draft_save_failed', { outcome: 'storage_unavailable' });
+          setPendingPlan(plan);
+          setUnsavedCheckout({ plan, provider });
+          setModalOpen(true);
+          return;
+        }
+      }
+      setUnsavedCheckout(undefined);
+      setLoadingProvider(provider ?? null);
+      track('begin_checkout', eventDetails(plan, provider));
+      await checkoutMutation.mutateAsync({ plan, provider });
     } catch {
-      toast.error('Could not save media for your return');
-      return;
+      // The mutation's onError displays the failure; allow a deliberate retry.
+    } finally {
+      checkoutLock.current = false;
+      setPreparing(false);
     }
-    setLoadingProvider(provider ?? null);
-    checkoutMutation.mutate({ plan, provider });
   }
 
   async function handleCheckout(plan: PricingPlan) {
+    if (checkoutLock.current || redirecting || plan.disabled) return;
+    track('select_item', eventDetails(plan));
     if (!session?.user) {
       const callbackUrl = encodeURIComponent(currentPathWithQuery('/pricing'));
       router.push(`/sign-in?callbackUrl=${callbackUrl}`);
@@ -248,16 +344,33 @@ export function Pricing({
             {m['landing.pricing.failure_policy']()}
           </p>
         </div>
-        <PricingTable groups={groups} onCheckout={handleCheckout} />
+        {clipSeconds && (
+          <p
+            data-testid="pricing-clip-guidance"
+            className="border-primary/20 bg-primary/5 text-primary-text mb-7 rounded-xl border px-4 py-3 text-center text-sm leading-relaxed"
+          >
+            {m['landing.pricing.clip_requirement']({
+              seconds: String(Number(clipSeconds.toFixed(2))),
+              count: clipSeconds <= 5 ? 1 : 2,
+            })}
+          </p>
+        )}
+        <PricingTable
+          groups={groups}
+          onCheckout={handleCheckout}
+          busy={preparing || checkoutMutation.isPending || redirecting}
+        />
       </div>
 
       <PaymentProviderModal
         open={modalOpen}
         onOpenChange={(open) => {
+          if (preparing || checkoutMutation.isPending || redirecting) return;
           setModalOpen(open);
           if (!open) {
             setPendingPlan(null);
             setLoadingProvider(null);
+            setUnsavedCheckout(undefined);
           }
         }}
         providers={enabledProviders.length ? enabledProviders : ['stripe']}
@@ -265,6 +378,63 @@ export function Pricing({
         onSelect={handleProviderSelect}
         planName={pendingPlan?.name}
         price={pendingPlan?.price}
+        title={
+          unsavedCheckout
+            ? m['landing.pricing.save_failed_title']()
+            : m['common.pricing.choose_payment']()
+        }
+        description={
+          unsavedCheckout
+            ? m['landing.pricing.save_failed_body']()
+            : pendingPlan
+              ? m['common.pricing.payment_for']({
+                  plan: pendingPlan.name,
+                  price: pendingPlan.price,
+                })
+              : m['common.pricing.choose_payment_desc']()
+        }
+        labels={{ waffo: m['landing.pricing.provider_waffo_label']() }}
+        hints={{
+          paypal: m['landing.pricing.provider_paypal_hint'](),
+          waffo: m['landing.pricing.provider_waffo_hint'](),
+        }}
+        busy={preparing || checkoutMutation.isPending || redirecting}
+        notice={
+          unsavedCheckout && (
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                data-testid="continue-unsaved-checkout"
+                disabled={
+                  preparing || checkoutMutation.isPending || redirecting
+                }
+                className="bg-primary text-primary-foreground min-h-11 rounded-lg px-4 py-2 font-medium disabled:opacity-50"
+                onClick={() =>
+                  void startCheckout(
+                    unsavedCheckout.plan,
+                    unsavedCheckout.provider,
+                    true
+                  )
+                }
+              >
+                {m['landing.pricing.continue_payment']()}
+              </button>
+              <button
+                type="button"
+                disabled={
+                  preparing || checkoutMutation.isPending || redirecting
+                }
+                className="min-h-11 rounded-lg border px-4 py-2"
+                onClick={() => {
+                  setUnsavedCheckout(undefined);
+                  setModalOpen(false);
+                }}
+              >
+                {m['landing.pricing.back_to_files']()}
+              </button>
+            </div>
+          )
+        }
       />
     </Wrapper>
   );

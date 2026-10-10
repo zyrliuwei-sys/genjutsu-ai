@@ -10,7 +10,6 @@ import { m } from '@/paraglide/messages.js';
 import { useUserPermissions } from '@/hooks/use-user-permissions';
 import { LocaleSelector } from '@/components/locale-selector';
 import { SiteUserMenu } from '@/components/site-user-menu';
-import { ThemeToggle } from '@/components/theme-toggle';
 
 export interface NavLink {
   href: string;
@@ -81,7 +80,6 @@ export function SiteHeader({
         {/* Desktop actions */}
         <div className="hidden items-center gap-3 md:flex">
           <LocaleSelector />
-          <ThemeToggle />
           {isAdmin && (
             <Link
               href="/admin"
@@ -147,7 +145,6 @@ export function SiteHeader({
           </nav>
           <div className="border-border mt-3 flex items-center gap-2 border-t pt-3">
             <LocaleSelector />
-            <ThemeToggle />
             <div className="flex-1" />
             {isAdmin && (
               <Link

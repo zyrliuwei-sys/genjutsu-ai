@@ -1,4 +1,5 @@
 import { envConfigs } from '@/config';
+import { GENJUTSU_MAX_SECONDS } from '@/config/genjutsu';
 
 async function key() {
   if (!envConfigs.auth_secret) throw new Error('Server signing key is missing');
@@ -72,7 +73,7 @@ export async function verifyVideoReceipt(
     data.expires < Date.now() ||
     !Number.isFinite(data.duration) ||
     data.duration < 3 ||
-    data.duration > 10.05
+    data.duration > GENJUTSU_MAX_SECONDS + 0.05
   )
     throw new Error(
       'Expired or invalid video receipt; upload the reference video again'

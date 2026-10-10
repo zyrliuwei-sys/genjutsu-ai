@@ -1,8 +1,8 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { CreditCard, Loader2 } from 'lucide-react';
 
-import { m } from '@/paraglide/messages.js';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -28,6 +28,12 @@ interface Props {
   onSelect: (provider: PaymentProvider) => void;
   planName?: string;
   price?: string;
+  title: string;
+  description: string;
+  labels?: Partial<Record<PaymentProvider, string>>;
+  hints?: Partial<Record<PaymentProvider, string>>;
+  notice?: ReactNode;
+  busy?: boolean;
 }
 
 const providerLabel: Record<PaymentProvider, string> = {
@@ -47,42 +53,53 @@ export function PaymentProviderModal({
   onSelect,
   planName,
   price,
+  title,
+  description,
+  labels,
+  hints,
+  notice,
+  busy = false,
 }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{m['common.pricing.choose_payment']()}</DialogTitle>
-          <DialogDescription>
-            {planName
-              ? price
-                ? m['common.pricing.payment_for']({ plan: planName, price })
-                : m['common.pricing.payment_for_plan']({ plan: planName })
-              : m['common.pricing.choose_payment_desc']()}
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <div className="mt-2 space-y-2">
-          {providers.map((p) => {
-            const loading = loadingProvider === p;
-            return (
-              <Button
-                key={p}
-                variant="outline"
-                className="h-12 w-full justify-start gap-3"
-                disabled={!!loadingProvider}
-                onClick={() => onSelect(p)}
-              >
-                {loading ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <CreditCard className="size-4" />
-                )}
-                <span>{providerLabel[p]}</span>
-              </Button>
-            );
-          })}
-        </div>
+        {notice || (
+          <div className="mt-2 space-y-2">
+            {providers.map((p) => {
+              const loading = loadingProvider === p;
+              return (
+                <Button
+                  key={p}
+                  variant="outline"
+                  className="h-auto min-h-14 w-full justify-start gap-3 py-3 text-left whitespace-normal"
+                  disabled={busy || !!loadingProvider}
+                  onClick={() => onSelect(p)}
+                >
+                  {loading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <CreditCard className="size-4" />
+                  )}
+                  <span className="min-w-0">
+                    <span className="block">
+                      {labels?.[p] || providerLabel[p]}
+                    </span>
+                    {hints?.[p] && (
+                      <span className="text-muted-foreground mt-1 block text-xs leading-relaxed font-normal">
+                        {hints[p]}
+                      </span>
+                    )}
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
