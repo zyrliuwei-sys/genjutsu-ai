@@ -4,6 +4,7 @@ import {
   FalProvider,
   AITaskStatus as FalStatus,
 } from '@/core/ai';
+import { GENJUTSU_ENDPOINT, GENJUTSU_MODEL_ID } from '@/config/genjutsu';
 import { getStudioModel, STUDIO_MODELS } from '@/config/studio-models';
 import { AITaskStatus, findTask, updateTask } from '@/modules/ai-tasks/service';
 import { getStorage } from '@/modules/storage/service';
@@ -22,6 +23,7 @@ function parseJson<T>(value: unknown): T {
 
 export function isStudioTask(task: any) {
   return (
+    task?.model === GENJUTSU_MODEL_ID ||
     STUDIO_MODELS.some((model) => model.id === task?.model) ||
     LEGACY_MODEL_IDS.includes(task?.model)
   );
@@ -108,9 +110,18 @@ async function pollFal(
     mediaType,
   });
   if (res.taskStatus === FalStatus.FAILED) {
-    return { status: 'failed', error: 'Generation failed' };
+    return {
+      status: 'failed',
+      error: (res.taskResult as any)?.error || 'Generation failed',
+    };
   }
   if (res.taskStatus === FalStatus.SUCCESS) {
+    if (
+      !(res.taskResult as any)?.video?.url &&
+      !(res.taskResult as any)?.images?.[0]?.url
+    ) {
+      return { status: 'failed', error: 'No result returned' };
+    }
     return { status: 'success', taskResult: res.taskResult };
   }
   return { status: 'running' };
@@ -119,16 +130,38 @@ async function pollFal(
 /** Poll the provider once and persist a terminal status. Safe to repeat. */
 export async function refreshTask(task: any, configs: Record<string, string>) {
   const model = getStudioModel(task.model);
-  if (!model || !task.taskId) return taskView(task);
+  const provider =
+    task.model === GENJUTSU_MODEL_ID
+      ? {
+          provider:
+            task.provider === 'evolink'
+              ? ('evolink' as const)
+              : ('fal' as const),
+          endpoint: GENJUTSU_ENDPOINT,
+          kind: 'video' as const,
+        }
+      : model;
+  if (!provider) return taskView(task);
+  if (!task.taskId) {
+    if (Date.now() - new Date(task.createdAt).getTime() > STUCK_AFTER_MS) {
+      await updateTask({
+        taskId: task.id,
+        status: AITaskStatus.FAILED,
+        taskResult: { error: 'Generation submission timed out' },
+      });
+      return taskView(await findTask(task.id));
+    }
+    return taskView(task);
+  }
 
   try {
     const outcome =
-      model.provider === 'evolink'
+      provider.provider === 'evolink'
         ? await pollEvolink(task, configs)
         : await pollFal(
             task,
-            model.endpoint,
-            model.kind === 'video' ? AIMediaType.VIDEO : AIMediaType.IMAGE,
+            provider.endpoint,
+            provider.kind === 'video' ? AIMediaType.VIDEO : AIMediaType.IMAGE,
             configs
           );
 
@@ -151,7 +184,11 @@ export async function refreshTask(task: any, configs: Record<string, string>) {
     // Evolink: likely a transient network/API error — keep polling, but give
     // up (and refund) once the task is clearly stuck.
     const age = Date.now() - new Date(task.createdAt).getTime();
-    if (model.provider === 'evolink' && !(age > STUCK_AFTER_MS)) {
+    if (
+      !(age > STUCK_AFTER_MS) &&
+      (provider.provider === 'evolink' ||
+        !/\((401|403|404)\)/.test(error?.message || ''))
+    ) {
       return taskView(task);
     }
     // fal reports a failed run as COMPLETED + an error on the result fetch.

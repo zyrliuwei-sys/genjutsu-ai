@@ -11,29 +11,34 @@ const AD_PROMPT =
 const SHORTS_PROMPT =
   'Vertical short: a dramatic "you won\'t believe this" reveal, fast cuts, handheld phone camera, viral TikTok style';
 
-const TOOLS = [
+const TOOLS: Array<{
+  key: string;
+  image: string;
+  video?: string;
+  href: string;
+}> = [
   {
     key: 'video',
-    image: '/imgs/showcase/tool-video.jpg',
-    video: '/videos/tool-video.mp4',
+    image: '/videos/higgsfield-reference/motion.webp',
+    video: '/videos/higgsfield-reference/motion.mp4',
     href: '/create?kind=video',
   },
   {
     key: 'image',
-    image: '/imgs/showcase/tool-image.jpg',
-    video: undefined,
-    href: '/create?kind=image',
+    image: '/videos/higgsfield-reference/feature-3-2.webp',
+    video: '/videos/higgsfield-reference/feature-3-2.mp4',
+    href: '/create?kind=video',
   },
   {
     key: 'ads',
-    image: '/imgs/showcase/tool-ads.jpg',
-    video: '/videos/tool-ads.mp4',
+    image: '/videos/higgsfield-reference/feature-3-1.webp',
+    video: '/videos/higgsfield-reference/feature-3-1.mp4',
     href: `/create?kind=video&prompt=${encodeURIComponent(AD_PROMPT)}`,
   },
   {
     key: 'shorts',
-    image: '/imgs/showcase/tool-shorts.jpg',
-    video: '/videos/tool-shorts.mp4',
+    image: '/videos/higgsfield-reference/feature-1-2.webp',
+    video: '/videos/higgsfield-reference/feature-1-2.mp4',
     href: `/create?kind=video&prompt=${encodeURIComponent(SHORTS_PROMPT)}`,
   },
 ] as const;

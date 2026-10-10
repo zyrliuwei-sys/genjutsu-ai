@@ -24,10 +24,14 @@ export interface PageParams {
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  const isFormData =
+    typeof FormData !== 'undefined' && init?.body instanceof FormData;
   const res = await fetch(url, {
     ...init,
     headers: {
-      ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(init?.body && !isFormData
+        ? { 'Content-Type': 'application/json' }
+        : {}),
       ...init?.headers,
     },
   });
@@ -62,6 +66,12 @@ export const apiPatch = <T = void>(url: string, body?: unknown) =>
 
 export const apiDelete = <T = void>(url: string) =>
   request<T>(url, { method: 'DELETE' });
+
+export async function apiUpload<T>(url: string, file: File, field = 'files') {
+  const body = new FormData();
+  body.append(field, file);
+  return request<T>(url, { method: 'POST', body });
+}
 
 // Query-string builder for paginated list endpoints.
 export function pageQuery(base: string, p: PageParams) {

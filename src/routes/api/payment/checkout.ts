@@ -5,6 +5,7 @@ import { PaymentType } from '@/core/payment/types';
 import { getPricingProduct } from '@/config/pricing';
 import { getAllConfigs } from '@/modules/config/service';
 import { createCheckout } from '@/modules/payment/service';
+import { hasPermission } from '@/modules/rbac/service';
 import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respData, respErr } from '@/lib/resp';
 
@@ -68,7 +69,11 @@ async function POST({ request }: { request: Request }) {
       ? configs[`${providerKey}_test_amount`]
       : undefined;
     const testAmount = testAmountRaw ? parseInt(testAmountRaw) : 0;
-    const chargeAmount = testAmount > 0 ? testAmount : product.priceInCents;
+    // Test amounts must never silently discount a real customer's purchase.
+    const chargeAmount =
+      testAmount > 0 && (await hasPermission(session.user.id, 'admin.*'))
+        ? testAmount
+        : product.priceInCents;
 
     // Build success/cancel URLs — only accept same-origin redirects.
     const baseUrl = configs.app_url || 'http://localhost:3000';

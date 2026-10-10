@@ -8,13 +8,12 @@ const STATIC_PAGES: { path: string; title: string; description: string }[] = [
     path: '',
     title: 'Genjutsu AI',
     description:
-      'AI video and image generator for creators, short-video teams and marketers',
+      'AI video generator for creators, short-video teams and marketers',
   },
   {
     path: '/create',
     title: 'Create',
-    description:
-      'Text-to-video (Seedance) and text-to-image (GPT Image 2) studio',
+    description: 'AI video creation and motion transfer studio',
   },
   {
     path: '/pricing',

@@ -10,8 +10,8 @@ export function CTA() {
       <Reveal className="mx-auto max-w-7xl">
         <div className="eg-screen relative overflow-hidden rounded-lg">
           <LoopVideo
-            src="/videos/show-space.mp4"
-            poster="/imgs/showcase/show-space.jpg"
+            src="/videos/higgsfield-reference/launch.mp4"
+            poster="/videos/higgsfield-reference/launch.webp"
             label={m['landing.alt.cta']()}
             width={576}
             height={942}

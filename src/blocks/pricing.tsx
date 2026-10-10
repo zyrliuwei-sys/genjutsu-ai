@@ -2,21 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import {
-  Film,
-  Gift,
-  Image as ImageIcon,
-  Infinity as InfinityIcon,
-  MonitorPlay,
-  Sparkles,
-  Zap,
-} from 'lucide-react';
+import { Film, Infinity as InfinityIcon, MonitorPlay, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useSession } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
+import { genjutsuCredits } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
-import { getStudioModel, studioCredits } from '@/config/studio-models';
 import { apiPost } from '@/lib/api-client';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { m } from '@/paraglide/messages.js';
@@ -52,12 +44,14 @@ export function Pricing({
   title,
   variant = 'section',
   headingAs: Heading = 'h2',
+  beforeCheckout,
 }: {
   title?: string;
   /** `h1` when the block is the page's main content (the /pricing route). */
   headingAs?: 'h1' | 'h2';
   /** `dialog` drops the page-section chrome for use inside a modal. */
   variant?: 'section' | 'dialog';
+  beforeCheckout?: () => Promise<unknown>;
 } = {}) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -75,56 +69,27 @@ export function Pricing({
   );
 
   // Reference prices — the same math the generate API charges with.
-  const clip = { aspect: '9:16', duration: 5 } as const;
-  const perVideo = studioCredits(getStudioModel('seedance-2')!, {
-    ...clip,
-    resolution: '720p',
-  });
-  const perFastVideo = studioCredits(getStudioModel('seedance-2-fast')!, {
-    ...clip,
-    resolution: '480p',
-  });
-  const perImage = studioCredits(getStudioModel('gpt-image-2')!, {
-    ...clip,
-    resolution: '720p',
-  });
+  const perVideo = genjutsuCredits(5);
+  const perLongVideo = genjutsuCredits(10);
 
-  function features(credits: number, bonus = 0): PricingFeature[] {
+  function features(credits: number): PricingFeature[] {
     return [
-      {
-        icon: Sparkles,
-        label: m['landing.pricing.feature_credits']({
-          credits: credits.toLocaleString('en-US'),
-        }),
-      },
-      ...(bonus > 0
-        ? [
-            {
-              icon: Gift,
-              label: m['landing.pricing.feature_bonus']({
-                credits: bonus.toLocaleString('en-US'),
-              }),
-            },
-          ]
-        : []),
       {
         icon: Film,
         label: m['landing.pricing.feature_videos']({
           count: Math.floor(credits / perVideo),
         }),
       },
-      {
-        icon: Zap,
-        label: m['landing.pricing.feature_fast_videos']({
-          count: Math.floor(credits / perFastVideo),
-        }),
-      },
-      {
-        icon: ImageIcon,
-        label: m['landing.pricing.feature_images']({
-          count: Math.floor(credits / perImage),
-        }),
-      },
+      ...(credits >= perLongVideo
+        ? [
+            {
+              icon: Zap,
+              label: m['landing.pricing.feature_fast_videos']({
+                count: Math.floor(credits / perLongVideo),
+              }),
+            },
+          ]
+        : []),
       { icon: MonitorPlay, label: m['landing.pricing.feature_hd']() },
       {
         icon: InfinityIcon,
@@ -142,11 +107,13 @@ export function Pricing({
     return {
       id: productId,
       name: opts.name,
-      description: m['landing.pricing.pack_desc'](),
+      description: m['landing.pricing.pack_desc']({
+        count: Math.floor(product.credits / perVideo),
+      }),
       price: usd(product.priceInCents),
       featured: opts.featured,
       badge: opts.badge,
-      features: features(product.credits, product.bonusCredits),
+      features: features(product.credits),
       productId,
       priceInCents: product.priceInCents,
       currency: product.currency,
@@ -167,9 +134,6 @@ export function Pricing({
           badge: m['landing.pricing.popular'](),
         }),
         plan('pack_pro', { name: m['landing.pricing.pack_pro']() }),
-        plan('pack_studio', {
-          name: m['landing.pricing.pack_studio'](),
-        }),
       ],
     },
   ];
@@ -211,7 +175,13 @@ export function Pricing({
     },
   });
 
-  function startCheckout(plan: PricingPlan, provider?: PaymentProvider) {
+  async function startCheckout(plan: PricingPlan, provider?: PaymentProvider) {
+    try {
+      await beforeCheckout?.();
+    } catch {
+      toast.error('Could not save media for your return');
+      return;
+    }
     setLoadingProvider(provider ?? null);
     checkoutMutation.mutate({ plan, provider });
   }
@@ -272,11 +242,10 @@ export function Pricing({
             {m['landing.pricing.description']()}
           </p>
           <p className="text-muted-foreground mt-2 text-sm">
-            {m['landing.pricing.per_video']({
-              credits: perVideo.toLocaleString('en-US'),
-              fast: perFastVideo.toLocaleString('en-US'),
-              image: perImage.toLocaleString('en-US'),
-            })}
+            {m['landing.pricing.per_video']()}
+          </p>
+          <p className="text-muted-foreground mt-2 text-xs">
+            {m['landing.pricing.failure_policy']()}
           </p>
         </div>
         <PricingTable groups={groups} onCheckout={handleCheckout} />

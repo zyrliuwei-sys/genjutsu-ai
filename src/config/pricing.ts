@@ -10,6 +10,8 @@
 
 import { PaymentInterval, PaymentType } from '@/core/payment/types';
 
+import { GENJUTSU_CREDITS_PER_GENERATION } from './genjutsu';
+
 export type PricingPlanInfo = {
   name: string;
   interval: PaymentInterval;
@@ -25,6 +27,7 @@ export type PricingProduct = {
   priceInCents: number;
   currency: string;
   credits: number;
+  available?: boolean;
   /** Part of `credits` given on top of the 1 credit = $0.01 base (display). */
   bonusCredits?: number;
   creditsValidDays?: number;
@@ -34,12 +37,12 @@ export type PricingProduct = {
 /**
  * Credit catalog. Generation is priced in ./studio-models.ts (provider list
  * price × 7, e.g. 700 credits for a 5s 720p Seedance 2.0 clip) and
- * ./hotel-lobby-pricing.ts.
+ * ./hotel-lobby-pricing.ts and ./genjutsu.ts.
  *
- * Base rate is 1 credit = $0.01; bigger packs add bonus credits (0 / 10% /
- * 20% / 25%). At the 25% top bonus a generation still sells at 5.6× the
- * Evolink list price (and ~8× the VIP price we actually pay). Don't push
- * bonuses past that without re-checking provider costs.
+ * New packs grant exact generation units (620 internal credits per unit),
+ * not money-denominated leftovers. Their effective paid rate remains ≥7×
+ * provider list price. Existing balances
+ * and already-created orders are unchanged; legacy subscriptions remain below.
  * Keys MUST match what the pricing UI sends as product_id.
  *
  * The monthly plans are no longer shown on the pricing page; they stay here
@@ -48,38 +51,39 @@ export type PricingProduct = {
 export const pricingCatalog: Record<string, PricingProduct> = {
   pack_starter: {
     productId: 'pack_starter',
-    productName: 'Starter Pack',
-    planName: 'Starter Pack',
-    description: 'Starter Pack',
+    productName: 'Trial Pack',
+    planName: 'Trial Pack',
+    description: '1 generation (3–5s); 10s requires 2 generations',
     type: PaymentType.ONE_TIME,
-    priceInCents: 990,
+    priceInCents: 690,
     currency: 'usd',
-    credits: 990,
+    credits: GENJUTSU_CREDITS_PER_GENERATION,
     bonusCredits: 0,
   },
   pack_creator: {
     productId: 'pack_creator',
     productName: 'Creator Pack',
     planName: 'Creator Pack',
-    description: 'Creator Pack',
+    description: '4 generations: up to 4 × 5s or 2 × 10s',
     type: PaymentType.ONE_TIME,
     priceInCents: 2490,
     currency: 'usd',
-    credits: 2740,
-    bonusCredits: 250,
+    credits: GENJUTSU_CREDITS_PER_GENERATION * 4,
+    bonusCredits: 0,
   },
   pack_pro: {
     productId: 'pack_pro',
-    productName: 'Pro Pack',
-    planName: 'Pro Pack',
-    description: 'Pro Pack',
+    productName: 'Batch Pack',
+    planName: 'Batch Pack',
+    description: '8 generations: up to 8 × 5s or 4 × 10s',
     type: PaymentType.ONE_TIME,
     priceInCents: 4990,
     currency: 'usd',
-    credits: 5990,
-    bonusCredits: 1000,
+    credits: GENJUTSU_CREDITS_PER_GENERATION * 8,
+    bonusCredits: 0,
   },
   pack_studio: {
+    available: false,
     productId: 'pack_studio',
     productName: 'Studio Pack',
     planName: 'Studio Pack',
@@ -87,8 +91,8 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     type: PaymentType.ONE_TIME,
     priceInCents: 7900,
     currency: 'usd',
-    credits: 9900,
-    bonusCredits: 2000,
+    credits: 7900,
+    bonusCredits: 0,
   },
   basic_monthly: {
     productId: 'basic_monthly',
@@ -139,9 +143,10 @@ export const pricingCatalog: Record<string, PricingProduct> = {
 
 export function getPricingProduct(productId: string): PricingProduct | null {
   if (!productId) return null;
-  return pricingCatalog[productId] ?? null;
+  const product = pricingCatalog[productId];
+  return product?.available === false ? null : (product ?? null);
 }
 
 export function listPricingProducts(): PricingProduct[] {
-  return Object.values(pricingCatalog);
+  return Object.values(pricingCatalog).filter((p) => p.available !== false);
 }

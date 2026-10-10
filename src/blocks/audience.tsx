@@ -15,8 +15,8 @@ export function Audience() {
           <Reveal className="order-2 lg:order-1">
             <div className="eg-screen aspect-[4/5] overflow-hidden rounded-md">
               <LoopVideo
-                src="/videos/show-talking.mp4"
-                poster="/imgs/showcase/show-talking.jpg"
+                src="/videos/higgsfield-reference/crowd.mp4"
+                poster="/videos/higgsfield-reference/crowd.webp"
                 label={m['landing.alt.audience']()}
                 width={576}
                 height={942}

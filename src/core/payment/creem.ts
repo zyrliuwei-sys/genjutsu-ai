@@ -56,6 +56,22 @@ export class CreemProvider implements PaymentProvider {
       if (!order.productId) {
         throw new Error('productId is required');
       }
+      // Creem charges its mapped product price, not order.price. Fail closed
+      // when a dashboard product still has the previous catalog price.
+      if (order.price) {
+        const product = await this.makeRequest(
+          `/v1/products?product_id=${encodeURIComponent(order.productId)}`,
+          'GET'
+        );
+        if (
+          product.price !== order.price.amount ||
+          String(product.currency).toLowerCase() !==
+            order.price.currency.toLowerCase()
+        )
+          throw new Error(
+            'Payment product price does not match this plan; update the Creem product mapping in Admin Settings'
+          );
+      }
 
       // build payment payload
       const payload: any = {

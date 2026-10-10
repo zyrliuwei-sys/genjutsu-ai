@@ -133,10 +133,18 @@ export class FalProvider implements AIProvider {
     const statusResp = await fetch(statusUrl, { method: 'GET', headers });
 
     if (!statusResp.ok) {
-      throw new Error(`request failed with status: ${statusResp.status}`);
+      throw new Error(`fal status request failed (${statusResp.status})`);
     }
 
     const statusData = await statusResp.json();
+    if (statusData.error) {
+      return {
+        taskId,
+        taskStatus: AITaskStatus.FAILED,
+        taskResult: { error: String(statusData.error) },
+        taskInfo: {},
+      };
+    }
     const taskStatus = this.mapStatus(statusData.status);
 
     if (taskStatus !== AITaskStatus.SUCCESS) {
@@ -156,7 +164,17 @@ export class FalProvider implements AIProvider {
     const resultResp = await fetch(resultUrl, { method: 'GET', headers });
 
     if (!resultResp.ok) {
-      throw new Error(`request failed with status: ${resultResp.status}`);
+      if (resultResp.status === 422) {
+        return {
+          taskId,
+          taskStatus: AITaskStatus.FAILED,
+          taskResult: {
+            error: 'The provider rejected the input media or edit request',
+          },
+          taskInfo: {},
+        };
+      }
+      throw new Error(`fal result request failed (${resultResp.status})`);
     }
 
     const data = await resultResp.json();
@@ -281,14 +299,12 @@ export class FalProvider implements AIProvider {
   }
 
   private getQueryModel(model?: string): string {
-    if (!model) {
-      return '';
-    }
-    const parts = model.split('/');
-    if (parts.length <= 2) {
-      return model;
-    }
-    return `${parts[0]}/${parts[1]}`;
+    // Match fal's official SDK: submit uses the full route, but polling uses
+    // owner/alias (or namespace/owner/alias for workflows and comfy).
+    const parts = (model || '').split('/');
+    return parts
+      .slice(0, ['workflows', 'comfy'].includes(parts[0]) ? 3 : 2)
+      .join('/');
   }
 
   private formatInput({
@@ -313,7 +329,7 @@ export class FalProvider implements AIProvider {
 
     if (options.image_input && Array.isArray(options.image_input)) {
       if (['fal-ai/kling-video/o1/video-to-video/edit'].includes(model)) {
-        input.input_images = options.image_input;
+        input.image_urls = options.image_input;
       } else {
         input.image_url = options.image_input[0];
       }

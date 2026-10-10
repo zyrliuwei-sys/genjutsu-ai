@@ -99,7 +99,7 @@ export function PricingTable({
   }
 
   return (
-    <div className="space-y-10">
+    <div className="@container space-y-10">
       {/* Group tabs — pill toggle */}
       {groups.length > 1 && (
         <div className="flex justify-center">
@@ -127,17 +127,17 @@ export function PricingTable({
         className={cn(
           'mx-auto grid gap-6',
           currentGroup?.plans.length === 2
-            ? 'max-w-3xl sm:grid-cols-2'
+            ? 'max-w-3xl @min-[36rem]:grid-cols-2'
             : currentGroup?.plans.length === 3
-              ? 'max-w-5xl sm:grid-cols-2 lg:grid-cols-3'
-              : 'max-w-6xl sm:grid-cols-2 lg:grid-cols-4'
+              ? 'max-w-5xl @min-[36rem]:grid-cols-2 @min-[54rem]:grid-cols-3'
+              : 'max-w-6xl @min-[36rem]:grid-cols-2 @min-[58rem]:grid-cols-4'
         )}
       >
         {currentGroup?.plans.map((plan) => (
           <div
             key={plan.id}
             className={cn(
-              'relative flex flex-col rounded-lg border p-8 transition-all',
+              'relative flex min-w-0 flex-col rounded-lg border p-6 transition-all',
               plan.featured
                 ? 'bg-card border-primary/70 shadow-[0_30px_60px_-40px_rgb(0_0_0/0.6)]'
                 : 'bg-background border-border hover:border-foreground/30'
@@ -158,7 +158,7 @@ export function PricingTable({
 
             {/* Price */}
             <div className="mb-2 flex items-baseline gap-1">
-              <span className="font-serif text-6xl leading-none">
+              <span className="font-serif text-6xl leading-none whitespace-nowrap">
                 {plan.price}
               </span>
               {plan.interval && (
