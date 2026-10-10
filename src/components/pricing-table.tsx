@@ -140,6 +140,7 @@ export function PricingTable({
         {currentGroup?.plans.map((plan) => (
           <div
             key={plan.id}
+            data-testid={`pricing-plan-${plan.id}`}
             className={cn(
               'relative flex min-w-0 flex-col rounded-lg border p-6 transition-all',
               plan.featured

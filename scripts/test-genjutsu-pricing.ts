@@ -12,6 +12,10 @@ import {
 import { getPricingProduct, pricingCatalog } from '../src/config/pricing';
 import { CreemProvider } from '../src/core/payment/creem';
 import { PaymentType } from '../src/core/payment/types';
+import {
+  packVideoCapacity,
+  purchaseGuidance,
+} from '../src/lib/purchase-guidance';
 import { mp4Duration } from '../src/lib/video-duration';
 
 assert.equal(genjutsuCredits(3), 620);
@@ -49,6 +53,22 @@ assert.deepEqual(
   ]
 );
 assert.equal(getPricingProduct('pack_studio'), null);
+assert.deepEqual(
+  packs.map((p) => packVideoCapacity(p.credits, 5)),
+  [1, 4, 8]
+);
+assert.deepEqual(
+  packs.map((p) => packVideoCapacity(p.credits, 10)),
+  [0, 2, 4]
+);
+assert.equal(
+  purchaseGuidance(genjutsuCredits(10)).coversClip('pack_starter'),
+  false
+);
+assert.equal(
+  purchaseGuidance(genjutsuCredits(10), 620).coversClip('pack_starter'),
+  true
+);
 for (const product of packs) {
   const units = product.credits / GENJUTSU_CREDITS_PER_GENERATION;
   assert.equal(product.credits % GENJUTSU_CREDITS_PER_GENERATION, 0);

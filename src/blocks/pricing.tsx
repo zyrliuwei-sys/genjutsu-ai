@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Film, Infinity as InfinityIcon, MonitorPlay, Zap } from 'lucide-react';
+import { Film, Infinity as InfinityIcon, MonitorPlay } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useSession } from '@/core/auth/client';
@@ -11,7 +11,11 @@ import { genjutsuCredits } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
 import { apiPost } from '@/lib/api-client';
 import type { FunnelProperties } from '@/lib/funnel';
-import { purchaseGuidance, VIDEO_PACKS } from '@/lib/purchase-guidance';
+import {
+  packVideoCapacity,
+  purchaseGuidance,
+  VIDEO_PACKS,
+} from '@/lib/purchase-guidance';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { m } from '@/paraglide/messages.js';
 import { useFunnel } from '@/hooks/use-funnel';
@@ -51,6 +55,7 @@ export function Pricing({
   requiredCredits,
   balanceCredits = 0,
   clipSeconds,
+  durationTier,
   trackingVisible = true,
 }: {
   title?: string;
@@ -62,6 +67,7 @@ export function Pricing({
   requiredCredits?: number;
   balanceCredits?: number;
   clipSeconds?: number;
+  durationTier?: 5 | 10;
   trackingVisible?: boolean;
 } = {}) {
   const router = useRouter();
@@ -71,14 +77,24 @@ export function Pricing({
   const checkoutLock = useRef(false);
   const [preparing, setPreparing] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState<5 | 10>(
+    durationTier ?? (clipSeconds && clipSeconds > 5 ? 10 : 5)
+  );
+  useEffect(() => {
+    if (durationTier) setSelectedDuration(durationTier);
+    else if (clipSeconds) setSelectedDuration(clipSeconds > 5 ? 10 : 5);
+  }, [durationTier, clipSeconds]);
   const [unsavedCheckout, setUnsavedCheckout] = useState<{
     plan: PricingPlan;
     provider?: PaymentProvider;
   }>();
   const guidance =
-    requiredCredits === undefined
+    requiredCredits === undefined && selectedDuration === 5
       ? undefined
-      : purchaseGuidance(requiredCredits, balanceCredits);
+      : purchaseGuidance(
+          Math.max(requiredCredits ?? 0, genjutsuCredits(selectedDuration)),
+          balanceCredits
+        );
   useEffect(() => {
     if (!trackingVisible) {
       viewTracked.current = false;
@@ -107,26 +123,19 @@ export function Pricing({
 
   // Reference prices — the same math the generate API charges with.
   const perVideo = genjutsuCredits(5);
-  const perLongVideo = genjutsuCredits(10);
 
   function features(credits: number): PricingFeature[] {
     return [
       {
         icon: Film,
-        label: m['landing.pricing.feature_videos']({
-          count: Math.floor(credits / perVideo),
-        }),
-      },
-      ...(credits >= perLongVideo
-        ? [
-            {
-              icon: Zap,
-              label: m['landing.pricing.feature_fast_videos']({
-                count: Math.floor(credits / perLongVideo),
+        label:
+          packVideoCapacity(credits, selectedDuration) === 0
+            ? m['landing.pricing.five_second_only']()
+            : m['landing.pricing.duration_capacity']({
+                count: packVideoCapacity(credits, selectedDuration),
+                seconds: selectedDuration,
               }),
-            },
-          ]
-        : []),
+      },
       { icon: MonitorPlay, label: m['landing.pricing.feature_hd']() },
       {
         icon: InfinityIcon,
@@ -144,23 +153,27 @@ export function Pricing({
     return {
       id: productId,
       name: opts.name,
-      description: m['landing.pricing.pack_desc']({
+      description: m['landing.pricing.pack_units']({
         count: Math.floor(product.credits / perVideo),
       }),
       price: usd(product.priceInCents),
       featured: guidance ? guidance.recommended === productId : opts.featured,
       badge: guidance
         ? guidance.recommended === productId
-          ? m['landing.pricing.recommended_clip']()
+          ? clipSeconds
+            ? m['landing.pricing.recommended_clip']()
+            : m['landing.pricing.recommended_duration']()
           : undefined
         : opts.badge,
       disabled: guidance ? !guidance.coversClip(productId) : false,
       notice:
-        guidance && clipSeconds
-          ? guidance.coversClip(productId)
-            ? m['landing.pricing.covers_clip']()
-            : m['landing.pricing.short_clip_only']()
-          : undefined,
+        guidance && !guidance.coversClip(productId) && selectedDuration === 10
+          ? m['landing.pricing.ten_second_minimum']()
+          : guidance && clipSeconds
+            ? guidance.coversClip(productId)
+              ? m['landing.pricing.covers_clip']()
+              : m['landing.pricing.short_clip_only']()
+            : undefined,
       features: features(product.credits),
       productId,
       priceInCents: product.priceInCents,
@@ -343,6 +356,31 @@ export function Pricing({
           <p className="text-muted-foreground mt-2 text-xs">
             {m['landing.pricing.failure_policy']()}
           </p>
+          <div
+            role="group"
+            aria-label={m['landing.pricing.duration_label']()}
+            className="border-border bg-muted/40 mx-auto mt-6 inline-flex rounded-full border p-1"
+          >
+            {([5, 10] as const).map((seconds) => (
+              <button
+                key={seconds}
+                type="button"
+                data-testid={`pricing-duration-${seconds}`}
+                aria-pressed={selectedDuration === seconds}
+                disabled={
+                  preparing || checkoutMutation.isPending || redirecting
+                }
+                onClick={() => setSelectedDuration(seconds)}
+                className={`min-h-10 rounded-full px-6 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current ${
+                  selectedDuration === seconds
+                    ? 'bg-foreground text-background'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {m['landing.pricing.duration_option']({ seconds })}
+              </button>
+            ))}
+          </div>
         </div>
         {clipSeconds && (
           <p

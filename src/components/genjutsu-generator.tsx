@@ -1332,6 +1332,7 @@ export function GenjutsuGenerator({ copy }: { copy: GeneratorCopy }) {
             requiredCredits={costCredits}
             balanceCredits={creditsQuery.data?.balance ?? 0}
             clipSeconds={referenceVideo?.duration}
+            durationTier={durationTier as 5 | 10}
             trackingVisible={paywall}
           />
         </DialogContent>

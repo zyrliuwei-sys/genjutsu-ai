@@ -1,4 +1,9 @@
+import { genjutsuCredits } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
+
+export function packVideoCapacity(credits: number, seconds: 5 | 10) {
+  return Math.floor(Math.max(0, credits) / genjutsuCredits(seconds));
+}
 
 export const VIDEO_PACKS = [
   'pack_starter',
