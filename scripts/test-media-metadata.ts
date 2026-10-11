@@ -32,8 +32,8 @@ Object.defineProperty(globalThis, 'document', {
 });
 try {
   for (const [tier, cost] of [
-    [5, 620],
-    [10, 1240],
+    [5, 700],
+    [10, 1400],
   ]) {
     const bytes = await readFile(
       `public/videos/effect-clips/launch-${tier}s.mp4`

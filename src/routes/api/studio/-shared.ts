@@ -13,6 +13,7 @@ import {
   updateTask,
 } from '@/modules/ai-tasks/service';
 import { getStorage } from '@/modules/storage/service';
+import { matchesVideoAspect, mp4Dimensions } from '@/lib/video-dimensions';
 
 // Retired fal models — still listed in history, never polled again.
 const LEGACY_MODEL_IDS = ['seedance-lite', 'seedance-pro'];
@@ -41,7 +42,9 @@ export function taskView(task: any) {
     error?: string;
     archivePending?: boolean;
   }>(task.taskResult);
-  const options = parseJson<{ aspect?: string }>(task.options);
+  const options = parseJson<{ aspect?: string; referenceName?: string }>(
+    task.options
+  );
   return {
     id: task.id as string,
     status: task.status as AITaskStatus,
@@ -49,6 +52,7 @@ export function taskView(task: any) {
     model: task.model as string,
     prompt: task.prompt as string,
     aspect: options.aspect ?? '9:16',
+    referenceName: options.referenceName,
     credits: Number(task.costCredits) || 0,
     url: result.video?.url ?? result.images?.[0]?.url ?? null,
     error: result.error ?? null,
@@ -67,7 +71,14 @@ type Outcome =
  * bucket. Falls back to the original link when storage is not configured or
  * the copy fails, so a finished result is never lost to a storage hiccup.
  */
-export async function archive(url: string, key: string, contentType: string) {
+class OutputAspectError extends Error {}
+
+export async function archive(
+  url: string,
+  key: string,
+  contentType: string,
+  expectedAspect?: string
+) {
   try {
     const storage = await getStorage();
     if (!storage) return url;
@@ -100,10 +111,26 @@ export async function archive(url: string, key: string, contentType: string) {
       body.set(chunk, offset);
       offset += chunk.length;
     }
+    if (expectedAspect) {
+      let dimensions: { width: number; height: number };
+      try {
+        dimensions = mp4Dimensions(body);
+      } catch {
+        throw new OutputAspectError(
+          'Could not verify the generated video dimensions. Please retry.'
+        );
+      }
+      const { width, height } = dimensions;
+      if (!matchesVideoAspect(width, height, expectedAspect))
+        throw new OutputAspectError(
+          `The model returned a different video ratio (${width}×${height}). Please retry.`
+        );
+    }
     const res = await storage.uploadFile({ body, key, contentType });
     if (res.success && res.url?.startsWith('https://')) return res.url;
     console.error('archive failed:', res.error ?? res.url);
   } catch (error) {
+    if (error instanceof OutputAspectError) throw error;
     console.error('archive failed:', error);
   }
   return url;
@@ -130,7 +157,24 @@ async function pollEvolink(
         taskResult: { images: [{ url }], archivePending: url === res.url },
       };
     }
-    const url = await archive(res.url, `studio/${task.id}.mp4`, 'video/mp4');
+    const options = parseJson<{ aspect?: string; normalizedFrame?: boolean }>(
+      task.options
+    );
+    let url: string;
+    try {
+      url = await archive(
+        res.url,
+        `studio/${task.id}.mp4`,
+        'video/mp4',
+        options.normalizedFrame ? options.aspect : undefined
+      );
+    } catch (error) {
+      if (error instanceof OutputAspectError)
+        return { status: 'failed', error: error.message };
+      throw error;
+    }
+    if (options.normalizedFrame && url === res.url)
+      return { status: 'running' };
     return {
       status: 'success',
       taskResult: { video: { url }, archivePending: url === res.url },
@@ -168,11 +212,24 @@ async function pollFal(
       (res.taskResult as any)?.video?.url ??
       (res.taskResult as any)?.images?.[0]?.url;
     const video = mediaType === AIMediaType.VIDEO;
-    const url = await archive(
-      original,
-      `studio/${task.id}.${video ? 'mp4' : 'png'}`,
-      video ? 'video/mp4' : 'image/png'
+    const options = parseJson<{ aspect?: string; normalizedFrame?: boolean }>(
+      task.options
     );
+    let url: string;
+    try {
+      url = await archive(
+        original,
+        `studio/${task.id}.${video ? 'mp4' : 'png'}`,
+        video ? 'video/mp4' : 'image/png',
+        video && options.normalizedFrame ? options.aspect : undefined
+      );
+    } catch (error) {
+      if (error instanceof OutputAspectError)
+        return { status: 'failed', error: error.message };
+      throw error;
+    }
+    if (video && options.normalizedFrame && url === original)
+      return { status: 'running' };
     return {
       status: 'success',
       taskResult: {

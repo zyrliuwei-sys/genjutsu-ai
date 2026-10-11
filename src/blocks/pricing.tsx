@@ -6,9 +6,9 @@ import { Film, Infinity as InfinityIcon, MonitorPlay } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useSession } from '@/core/auth/client';
-import { useRouter } from '@/core/i18n/navigation';
+import { Link, useRouter } from '@/core/i18n/navigation';
 import { genjutsuCredits } from '@/config/genjutsu';
-import { pricingCatalog } from '@/config/pricing';
+import { pricingCatalog, type PricingProduct } from '@/config/pricing';
 import { apiPost } from '@/lib/api-client';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { m } from '@/paraglide/messages.js';
@@ -19,7 +19,6 @@ import {
 } from '@/components/payment-provider-modal';
 import {
   PricingTable,
-  type PricingFeature,
   type PricingGroup,
   type PricingPlan,
 } from '@/components/pricing-table';
@@ -47,6 +46,7 @@ export function Pricing({
   beforeCheckout,
   clipSeconds,
   balanceCredits = 0,
+  singleVideo,
 }: {
   title?: string;
   /** `h1` when the block is the page's main content (the /pricing route). */
@@ -56,6 +56,7 @@ export function Pricing({
   beforeCheckout?: () => Promise<unknown>;
   clipSeconds?: number;
   balanceCredits?: number;
+  singleVideo?: PricingProduct;
 } = {}) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -72,105 +73,57 @@ export function Pricing({
     [configs]
   );
 
-  // Reference prices — the same math the generate API charges with.
-  const perVideo = genjutsuCredits(5);
-  const perLongVideo = genjutsuCredits(10);
-  const clipCost = clipSeconds ? genjutsuCredits(clipSeconds) : perVideo;
-
-  function durationSummary(credits: number) {
-    const shortCount = Math.floor(credits / perVideo);
-    const longCount = Math.floor(credits / perLongVideo);
-    return longCount > 0
-      ? m['landing.pricing.duration_options']({ shortCount, longCount })
-      : m['landing.pricing.feature_videos']({ count: shortCount });
-  }
-
-  function features(credits: number): PricingFeature[] {
-    return [
-      {
-        icon: Film,
-        label: durationSummary(credits),
-      },
-      { icon: MonitorPlay, label: m['landing.pricing.feature_hd']() },
-      {
-        icon: InfinityIcon,
-        label: m['landing.pricing.feature_no_subscription'](),
-      },
-    ];
-  }
-
-  // Display data comes from the same catalog the checkout API trusts.
+  // One shared prepaid balance for every generation API.
+  const clipCost =
+    singleVideo?.credits ?? (clipSeconds ? genjutsuCredits(clipSeconds) : 0);
   function plan(
     productId: string,
-    opts: { name: string; featured?: boolean; badge?: string }
+    name: string,
+    featured = false
   ): PricingPlan {
     const product = pricingCatalog[productId];
-    const videos = Math.floor(product.credits / clipCost);
     const coversClip = product.credits + balanceCredits >= clipCost;
     return {
       id: productId,
-      name: opts.name,
-      description: clipSeconds
-        ? m['landing.pricing.selected_duration_count']({
-            count: videos,
-            seconds: clipSeconds > 5 ? 10 : 5,
-          })
-        : durationSummary(product.credits),
+      productId,
+      name,
+      featured,
+      description:
+        singleVideo || clipSeconds
+          ? m['landing.text_video.pack_count']({
+              count: Math.floor(product.credits / clipCost),
+            })
+          : m['landing.pricing.shared_balance']({
+              amount: usd(product.credits),
+            }),
       price: usd(product.priceInCents),
-      featured: opts.featured,
-      badge: opts.badge,
+      priceInCents: product.priceInCents,
+      currency: product.currency,
+      credits: product.credits,
       features: [
-        ...features(product.credits),
+        { icon: Film, label: m['landing.pricing.shared_modes']() },
+        { icon: MonitorPlay, label: m['landing.pricing.variable_cost']() },
         {
-          icon: Film,
-          label: m['landing.pricing.unit_value']({
-            seconds: 5,
-            price: usd(
-              product.priceInCents / Math.floor(product.credits / perVideo)
-            ),
-          }),
+          icon: InfinityIcon,
+          label: m['landing.pricing.feature_no_subscription'](),
         },
-        ...(product.credits >= perLongVideo
-          ? [
-              {
-                icon: Film,
-                label: m['landing.pricing.unit_value']({
-                  seconds: 10,
-                  price: usd(
-                    product.priceInCents /
-                      Math.floor(product.credits / perLongVideo)
-                  ),
-                }),
-              },
-            ]
-          : []),
         ...(!coversClip
           ? [{ label: m['landing.pricing.insufficient_selected_clip']() }]
           : []),
       ],
-      disabled: !coversClip,
-      productId,
-      priceInCents: product.priceInCents,
-      currency: product.currency,
-      credits: product.credits,
-      buttonText: coversClip
-        ? m['landing.pricing.buy_now']()
-        : m['landing.pricing.insufficient_selected_clip'](),
+      // A large clip may need multiple top-ups; keep purchase options available.
+      disabled: false,
+      buttonText: m['landing.pricing.buy_now'](),
     };
   }
-
   const groups: PricingGroup[] = [
     {
       key: 'one-time',
       label: m['landing.pricing.one_time'](),
       plans: [
-        plan('pack_starter', { name: m['landing.pricing.pack_starter']() }),
-        plan('pack_creator', {
-          name: m['landing.pricing.pack_creator'](),
-          featured: true,
-          badge: m['landing.pricing.popular'](),
-        }),
-        plan('pack_pro', { name: m['landing.pricing.pack_pro']() }),
+        plan('pack_starter', m['landing.pricing.pack_starter']()),
+        plan('pack_plus', m['landing.pricing.pack_plus'](), true),
+        plan('pack_pro', m['landing.pricing.pack_pro']()),
       ],
     },
   ];
@@ -279,11 +232,20 @@ export function Pricing({
             {m['landing.pricing.description']()}
           </p>
           <p className="text-muted-foreground mt-2 text-sm">
-            {m['landing.pricing.per_video']()}
+            {singleVideo
+              ? `${singleVideo.productName}. ${m['landing.text_video.audio']()}`
+              : variant === 'section'
+                ? m['landing.pricing.billing_rules']()
+                : m['landing.pricing.per_video']()}
           </p>
           <p className="text-muted-foreground mt-2 text-xs">
             {m['landing.pricing.failure_policy']()}
           </p>
+          {!dialog && (
+            <p className="text-primary mt-4 text-sm">
+              <Link href="/create">{m['landing.pricing.text_entry']()}</Link>
+            </p>
+          )}
         </div>
         <PricingTable groups={groups} onCheckout={handleCheckout} />
       </div>

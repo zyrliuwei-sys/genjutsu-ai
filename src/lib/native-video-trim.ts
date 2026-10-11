@@ -4,7 +4,12 @@ export function supportsNativeTrim() {
   return (
     typeof MediaRecorder !== 'undefined' &&
     MediaRecorder.isTypeSupported('video/mp4;codecs=avc1.42001E') &&
-    typeof HTMLCanvasElement.prototype.captureStream === 'function'
+    typeof HTMLCanvasElement.prototype.captureStream === 'function' &&
+    typeof (
+      HTMLVideoElement.prototype as HTMLVideoElement & {
+        captureStream?: () => MediaStream;
+      }
+    ).captureStream === 'function'
   );
 }
 
@@ -28,6 +33,7 @@ export async function nativeVideoTrim(
   const context = canvas.getContext('2d');
   if (!context) throw new Error('Canvas unavailable');
   let stream: MediaStream | undefined;
+  let sourceStream: MediaStream | undefined;
   let recorder: MediaRecorder | undefined;
   let frame: ReturnType<typeof setInterval> | undefined;
   try {
@@ -66,8 +72,14 @@ export async function nativeVideoTrim(
         };
         draw();
         stream = canvas.captureStream(30);
+        sourceStream = (
+          video as HTMLVideoElement & { captureStream: () => MediaStream }
+        ).captureStream();
+        sourceStream
+          .getAudioTracks()
+          .forEach((track) => stream!.addTrack(track));
         recorder = new MediaRecorder(stream, {
-          mimeType: 'video/mp4;codecs=avc1.42001E',
+          mimeType: 'video/mp4',
           videoBitsPerSecond: 4000000,
         });
         recorder.ondataavailable = (event) => {
@@ -78,7 +90,6 @@ export async function nativeVideoTrim(
           cleanup();
           resolve(new Blob(chunks, { type: 'video/mp4' }));
         };
-        recorder.start();
         // A timer also works when the page isn't actively painting frames.
         frame = setInterval(() => {
           draw();
@@ -88,13 +99,18 @@ export async function nativeVideoTrim(
               Math.round(((video.currentTime - start) / duration) * 100)
             )
           );
-          if (video.currentTime >= start + duration - 0.08 || video.ended) {
+          // AAC packet boundaries and encoder flushing can add a few frames.
+          // Leave headroom so a 5s clip never crosses the paid 10s tier.
+          if (video.currentTime >= start + duration - 0.4 || video.ended) {
             clearInterval(frame);
             video.pause();
             if (recorder?.state === 'recording') recorder.stop();
           }
         }, 1000 / 30);
-        void video.play().catch(fail);
+        void video
+          .play()
+          .then(() => recorder?.start())
+          .catch(fail);
       };
       signal?.throwIfAborted();
       video.src = url;
@@ -102,7 +118,7 @@ export async function nativeVideoTrim(
     // Validate the actual container, not the requested time or wall clock.
     const actual = mp4Duration(new Uint8Array(await bytes.arrayBuffer()));
     if (actual < 3 || actual > duration)
-      throw new Error('Invalid native clip duration');
+      throw new Error(`Invalid native clip duration: ${actual}`);
     return {
       file: new File(
         [bytes],
@@ -117,6 +133,7 @@ export async function nativeVideoTrim(
     video.pause();
     if (recorder?.state === 'recording') recorder.stop();
     stream?.getTracks().forEach((track) => track.stop());
+    sourceStream?.getTracks().forEach((track) => track.stop());
     video.removeAttribute('src');
     video.load();
     URL.revokeObjectURL(url);

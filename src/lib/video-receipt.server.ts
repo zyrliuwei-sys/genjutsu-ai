@@ -1,5 +1,7 @@
 import { envConfigs } from '@/config';
 
+import { matchesVideoAspect } from './video-dimensions';
+
 async function key() {
   if (!envConfigs.auth_secret) throw new Error('Server signing key is missing');
   return crypto.subtle.importKey(
@@ -13,12 +15,14 @@ async function key() {
 export async function signVideoReceipt(
   url: string,
   duration: number,
-  owner: string
+  owner: string,
+  dimensions?: { width: number; height: number }
 ) {
   const payload = JSON.stringify({
     url,
     duration,
     owner,
+    ...dimensions,
     expires: Date.now() + 48 * 60 * 60 * 1000,
   });
   const signature = new Uint8Array(
@@ -38,7 +42,8 @@ export async function signVideoReceipt(
 export async function verifyVideoReceipt(
   receipt: unknown,
   url: string,
-  owner: string
+  owner: string,
+  aspect?: '16:9' | '9:16'
 ): Promise<number> {
   if (!receipt || typeof receipt !== 'object')
     throw new Error('Upload the reference video again to verify its price');
@@ -76,6 +81,19 @@ export async function verifyVideoReceipt(
   )
     throw new Error(
       'Expired or invalid video receipt; upload the reference video again'
+    );
+  if (
+    aspect &&
+    (!Number.isFinite(data.width) ||
+      !Number.isFinite(data.height) ||
+      data.width < 720 ||
+      data.height < 720 ||
+      data.width > 2160 ||
+      data.height > 2160 ||
+      !matchesVideoAspect(data.width, data.height, aspect))
+  )
+    throw new Error(
+      'Upload the prepared reference video again to verify its ratio'
     );
   return data.duration;
 }

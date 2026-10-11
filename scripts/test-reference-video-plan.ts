@@ -27,6 +27,24 @@ for (const [width, height, expected] of [
 }
 assert.throws(() => referenceVideoPlan(0, 720));
 assert.throws(() => referenceVideoPlan(Number.NaN, 720));
+for (const aspect of ['16:9', '9:16'] as const) {
+  for (const [width, height] of [
+    [1280, 720],
+    [720, 1280],
+    [1920, 1080],
+    [1000, 1000],
+    [1916, 1080],
+    [4000, 2160],
+  ]) {
+    const plan = referenceVideoPlan(width, height, aspect);
+    const [w, h] = aspect.split(':').map(Number);
+    assert.equal(plan.width / plan.height, w / h);
+    assert.equal(plan.width % 2, 0);
+    assert.equal(plan.height % 2, 0);
+    assert.ok(Math.min(plan.width, plan.height) >= 720);
+    assert.ok(plan.filter.includes('pad='));
+  }
+}
 console.log(
   'PASS: low-resolution, 4K, odd dimensions, landscape/portrait and padded extremes.'
 );

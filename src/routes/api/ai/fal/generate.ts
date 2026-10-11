@@ -29,6 +29,10 @@ async function POST({ request }: { request: Request }) {
     const model: string = body?.model;
     const spec = FAL_MODELS[model];
     if (!spec) return respErr(`Unsupported model: ${model}`);
+    if (spec.mediaType === 'video')
+      return respErr(
+        'Use the prepaid video generator; unbilled admin video generation is disabled'
+      );
 
     const missing = spec.requires.filter((k) => {
       const v = body?.[k];

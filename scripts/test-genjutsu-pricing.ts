@@ -7,14 +7,15 @@ import {
   genjutsuCredits,
   genjutsuGenerations,
 } from '../src/config/genjutsu';
+import { CREDIT_UNIT } from '../src/config/hotel-lobby-pricing';
 import { getPricingProduct, pricingCatalog } from '../src/config/pricing';
 import { CreemProvider } from '../src/core/payment/creem';
 import { PaymentType } from '../src/core/payment/types';
 import { mp4Duration } from '../src/lib/video-duration';
 
-assert.equal(genjutsuCredits(3), 620);
-assert.equal(genjutsuCredits(5), 620);
-assert.equal(genjutsuCredits(10), 1240);
+assert.equal(genjutsuCredits(3), 700);
+assert.equal(genjutsuCredits(5), 700);
+assert.equal(genjutsuCredits(10), 1400);
 assert.throws(() => genjutsuCredits(NaN));
 assert.throws(() => genjutsuCredits(2.9));
 assert.throws(() => genjutsuCredits(11));
@@ -31,24 +32,27 @@ const packs = Object.values(pricingCatalog).filter(
   (p) => p.productId.startsWith('pack_') && p.available !== false
 );
 assert.deepEqual(
-  packs.map((p) => [
-    p.priceInCents,
-    p.credits / GENJUTSU_CREDITS_PER_GENERATION,
-  ]),
+  packs.map((p) => [p.priceInCents, p.credits]),
   [
-    [690, 1],
-    [2490, 4],
-    [4990, 8],
+    [990, 1050],
+    [1990, 2100],
+    [4990, 5950],
   ]
 );
-assert.equal(getPricingProduct('pack_studio'), null);
+for (const id of ['pack_studio', 'pack_duo', 'pack_creator'])
+  assert.equal(getPricingProduct(id), null);
+assert.equal(GENJUTSU_CREDITS_PER_GENERATION % CREDIT_UNIT, 0);
 for (const product of packs) {
+  // Whole $3.50 units so any balance can be spent down to zero.
+  assert.equal(product.credits % CREDIT_UNIT, 0);
+  assert.ok(product.priceInCents >= 990);
+  assert.ok(product.credits >= product.priceInCents);
+  assert.equal(product.bonusCredits, product.credits - product.priceInCents);
+  // Bonus balance may dilute the 7× list markup, never below 5.5×.
   const units = product.credits / GENJUTSU_CREDITS_PER_GENERATION;
-  assert.equal(product.credits % GENJUTSU_CREDITS_PER_GENERATION, 0);
   assert.ok(
-    product.priceInCents / 100 / units >= GENJUTSU_USD_PER_SECOND * 5 * 7
+    product.priceInCents / 100 / units >= GENJUTSU_USD_PER_SECOND * 5 * 5.5
   );
-  assert.equal(product.bonusCredits, 0);
 }
 const video = new Uint8Array(
   await readFile('public/videos/higgsfield-reference/dream.mp4')
@@ -61,6 +65,22 @@ const { signVideoReceipt, verifyVideoReceipt } =
 const url = 'https://media.example.test/video.mp4';
 const receipt = await signVideoReceipt(url, 5, 'test-user');
 assert.equal(await verifyVideoReceipt(receipt, url, 'test-user'), 5);
+const portraitReceipt = await signVideoReceipt(url, 5, 'test-user', {
+  width: 720,
+  height: 1280,
+});
+assert.equal(
+  await verifyVideoReceipt(portraitReceipt, url, 'test-user', '9:16'),
+  5
+);
+await assert.rejects(
+  verifyVideoReceipt(portraitReceipt, url, 'test-user', '16:9'),
+  /ratio/
+);
+await assert.rejects(
+  verifyVideoReceipt(receipt, url, 'test-user', '9:16'),
+  /ratio/
+);
 await assert.rejects(verifyVideoReceipt(receipt, url, 'another-user'));
 await assert.rejects(
   verifyVideoReceipt(
@@ -120,5 +140,5 @@ try {
   globalThis.fetch = originalFetch;
 }
 console.log(
-  'PASS: 1/2 generation units, three exact packs, ≥7× retail pricing, retired pack, signed duration and Creem checkout price guard'
+  'PASS: 1/2 generation units, three exact packs in $3.50 units, retired pack, signed duration and Creem checkout price guard'
 );

@@ -20,7 +20,7 @@ const extFromMime = (mimeType: string) => {
 };
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const MAX_REQUEST_BYTES = MAX_IMAGE_BYTES + 2 * 1024 * 1024;
+const MAX_REQUEST_BYTES = MAX_IMAGE_BYTES * 2 + 2 * 1024 * 1024;
 
 function hasImageSignature(bytes: Uint8Array, mimeType: string): boolean {
   const startsWith = (signature: number[]) =>
@@ -89,8 +89,12 @@ async function POST({ request }: { request: Request }) {
     const formData = await readLimitedFormData(request);
     if (!formData) return respErr('Upload too large or invalid form data');
     const files = formData.getAll('files');
-    if (files.length !== 1 || !(files[0] instanceof File)) {
-      return respErr('Upload exactly one image at a time');
+    if (
+      !files.length ||
+      files.length > 2 ||
+      files.some((file) => !(file instanceof File))
+    ) {
+      return respErr('Upload one or two images at a time');
     }
 
     const storage = await getStorage();

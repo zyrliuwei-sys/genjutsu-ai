@@ -12,7 +12,8 @@ export const GENJUTSU_EVOLINK_MODEL = 'kling-o1-video-edit';
 // Verified in the hydrated model-specific pricing panel on 2026-10-10:
 // https://evolink.ai/kling-o1?model=kling-o1-video-edit#pricing
 export const GENJUTSU_USD_PER_SECOND = 0.177;
-export const GENJUTSU_CREDITS_PER_GENERATION = 620;
+// 7 × $0.885 (5s) = $6.20, rounded up to a whole $3.50 unit.
+export const GENJUTSU_CREDITS_PER_GENERATION = 700;
 export function genjutsuGenerations(seconds = 5) {
   if (!Number.isFinite(seconds) || seconds < 3 || seconds > 10.05)
     throw new Error('Reference video must be 3–10 seconds long');
@@ -22,6 +23,62 @@ export function genjutsuCredits(seconds = 5) {
   return genjutsuGenerations(seconds) * GENJUTSU_CREDITS_PER_GENERATION;
 }
 export const GENJUTSU_CREDITS = genjutsuCredits(5);
+
+/** Trusted reference context: never transform scenery when replacing a performer. */
+export const GENJUTSU_REFERENCES: Record<
+  string,
+  { name: string; direction: string }
+> = {
+  'genjutsu-storm': {
+    name: 'Genjutsu STORM',
+    direction:
+      'Target the visually distinct central lead only. Preserve every surrounding performer and their synchronized choreography.',
+  },
+  'smalltown-boy': {
+    name: 'Smalltown Boy',
+    direction:
+      'Preserve the continuous running, jumping, landings and camera trajectory.',
+  },
+  'burning-bridges': {
+    name: 'Burning Bridges',
+    direction:
+      'Replace only the main martial-arts performer; retain the sparring partner, clothing, punches, blocks and contact timing.',
+  },
+  'thriller-dance': {
+    name: 'Thriller Dance',
+    direction:
+      'Keep the exact dance beats, movement trajectory and camera timing.',
+  },
+  'toc-toc': {
+    name: 'Toc Toc',
+    direction:
+      'Preserve the fight choreography, partner interaction and original physical contacts.',
+  },
+  'knight-cat': {
+    name: 'Knight Cat',
+    direction:
+      'Retain the original rooftop movement, landings, grounded feet and framing.',
+  },
+  'knight-cat-gym-bro': {
+    name: 'Knight Cat & Gym Bro',
+    direction:
+      'Replace only the principal performer. Keep other people and their actions unchanged.',
+  },
+  'car-dance-duo': {
+    name: 'Car Dance Duo',
+    direction:
+      'Replace only one principal performer; keep the partner, vehicle and original composition unchanged.',
+  },
+  'hotel-lobby': {
+    name: 'Hotel Lobby',
+    direction: 'Keep the source performance and camera timing unchanged.',
+  },
+  'vikas-edit': {
+    name: 'Vikas Edit',
+    direction:
+      'Preserve the action, partner interactions and original edit rhythm.',
+  },
+};
 
 /** Directions describe the actual references, not the legacy card names. */
 export const GENJUTSU_DIRECTIONS: Record<string, string> = {

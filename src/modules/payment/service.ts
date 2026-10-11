@@ -41,6 +41,21 @@ enum OrderStatus {
 }
 
 // --- Payment Manager ---
+/** Generation is prepaid: signup/manual grants alone must not bypass payment. */
+export async function hasPaidOrder(userId: string): Promise<boolean> {
+  const rows = await db()
+    .select({ id: order.id })
+    .from(order)
+    .where(
+      and(
+        eq(order.userId, userId),
+        eq(order.status, OrderStatus.PAID),
+        isNull(order.deletedAt)
+      )
+    )
+    .limit(1);
+  return rows.length > 0;
+}
 
 let manager: PaymentManager | null = null;
 let managerConfigHash = '';

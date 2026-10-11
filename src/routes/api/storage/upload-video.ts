@@ -8,6 +8,7 @@ import { getStorage } from '@/modules/storage/service';
 import { md5 } from '@/lib/hash';
 import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respData, respErr } from '@/lib/resp';
+import { mp4Dimensions } from '@/lib/video-dimensions';
 import { mp4Duration } from '@/lib/video-duration';
 import { signVideoReceipt } from '@/lib/video-receipt.server';
 import { MAX_REFERENCE_VIDEO_BYTES } from '@/lib/video-trim-plan';
@@ -91,6 +92,7 @@ async function POST({ request }: { request: Request }) {
       return respErr('Invalid video file');
     }
     const duration = mp4Duration(body);
+    const dimensions = mp4Dimensions(body);
     if (duration < 3 || duration > 10.05)
       return respErr('Reference video must be 3–10 seconds long');
 
@@ -129,7 +131,8 @@ async function POST({ request }: { request: Request }) {
           videoReceipt: await signVideoReceipt(
             publicUrl,
             duration,
-            session.user.id
+            session.user.id,
+            dimensions
           ),
           results: [
             {
@@ -159,7 +162,8 @@ async function POST({ request }: { request: Request }) {
       videoReceipt: await signVideoReceipt(
         result.url,
         duration,
-        session.user.id
+        session.user.id,
+        dimensions
       ),
       results: [
         {

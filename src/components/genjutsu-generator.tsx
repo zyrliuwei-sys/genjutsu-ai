@@ -25,9 +25,14 @@ import {
   type GenjutsuAspect,
   type GenjutsuReadiness,
 } from '@/config/genjutsu';
-import { pricingCatalog } from '@/config/pricing';
 import { REFERENCE_VIDEOS } from '@/config/reference-videos';
-import { apiGet, apiGetMedia, apiPost, apiUpload } from '@/lib/api-client';
+import {
+  apiDownload,
+  apiGet,
+  apiGetMedia,
+  apiPost,
+  apiUpload,
+} from '@/lib/api-client';
 import { warmVideoTools } from '@/lib/browser-video-engine';
 import { trimMiddleVideo } from '@/lib/browser-video-trim';
 import {
@@ -39,8 +44,8 @@ import { readMediaMetadata } from '@/lib/media-metadata';
 import { parallelMediaUpload } from '@/lib/parallel-media-upload';
 import { referenceVideoPlan } from '@/lib/reference-video-plan';
 import { cn } from '@/lib/utils';
+import { matchesVideoAspect } from '@/lib/video-dimensions';
 import { MAX_REFERENCE_VIDEO_MB } from '@/lib/video-trim-plan';
-import { useUserPermissions } from '@/hooks/use-user-permissions';
 import { Pricing } from '@/blocks/pricing';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
@@ -76,6 +81,8 @@ type GenjutsuTask = {
   url: string | null;
   error: string | null;
   archivePending?: boolean;
+  aspect?: string;
+  referenceName?: string;
 };
 
 const ART = REFERENCE_VIDEOS;
@@ -373,13 +380,19 @@ export function GenjutsuGenerator({
     chargeDetails: (credits: number, price: string) => string;
     serviceUnavailable: string;
     archivePending: string;
+    generatedVideo: string;
+    priorRatioMismatch: (
+      width: number,
+      height: number,
+      aspect: string
+    ) => string;
+    ratioPadding: string;
   };
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session, isPending: sessionPending } = useSession();
   const user = session?.user;
-  const { data: permissions } = useUserPermissions(Boolean(user));
   const [selectedId, setSelectedId] = useState(TEMPLATES[0].id);
   const [exampleId, setExampleId] = useState(TEMPLATES[0].id);
   const [validatingMedia, setValidatingMedia] = useState(false);
@@ -614,7 +627,8 @@ export function GenjutsuGenerator({
   }, [taskId, user?.id]);
   const creditsQuery = useQuery({
     queryKey: ['credits'],
-    queryFn: () => apiGet<{ balance: number }>('/api/credits'),
+    queryFn: () =>
+      apiGet<{ balance: number; hasPaidOrder: boolean }>('/api/credits'),
     enabled: Boolean(user),
   });
   const taskQuery = useQuery({
@@ -640,7 +654,8 @@ export function GenjutsuGenerator({
     file: File | undefined,
     type: 'image' | 'video',
     setAsset: (asset: Asset | undefined) => void,
-    tier: 5 | 10 = durationTier
+    tier: 5 | 10 = durationTier,
+    preserveAspect = false
   ) => {
     if (!file) return;
     const isVideo = ['video/mp4', 'video/quicktime', 'video/x-m4v'].includes(
@@ -749,7 +764,7 @@ export function GenjutsuGenerator({
             );
           }
         )[0];
-        if (closest) setAspect(closest);
+        if (closest && !preserveAspect) setAspect(closest);
         setPreviewMode('example');
       }
     } catch (error) {
@@ -767,9 +782,13 @@ export function GenjutsuGenerator({
   const uploadAsset = async (asset: Asset) => {
     let receiptValid = false;
     try {
+      const receipt =
+        asset.videoReceipt && JSON.parse(asset.videoReceipt.payload);
       receiptValid = Boolean(
-        asset.videoReceipt &&
-        JSON.parse(asset.videoReceipt.payload).expires > Date.now() + 60000
+        receipt &&
+        receipt.expires > Date.now() + 60000 &&
+        receipt.width === asset.width &&
+        receipt.height === asset.height
       );
     } catch {
       /* Re-upload invalid/expired receipts. */
@@ -820,21 +839,71 @@ export function GenjutsuGenerator({
         );
       if (!current.data.aspects.includes(aspect))
         throw new Error('This API does not support the selected video size');
-      if (
-        current.data.provider === 'fal' &&
-        referenceVideo.width &&
-        referenceVideo.height
-      ) {
-        const [w, h] = aspect.split(':').map(Number);
-        if (
-          Math.abs(referenceVideo.width / referenceVideo.height - w / h) > 0.03
-        )
+      // Editing models preserve source framing: prepare the actual input, not
+      // only the API's aspect_ratio flag. Pad to keep the entire performance.
+      let preparedReference = referenceVideo;
+      if (!referenceVideo.width || !referenceVideo.height)
+        throw new Error(
+          'Select the reference video again to verify its dimensions'
+        );
+      const plan = referenceVideoPlan(
+        referenceVideo.width,
+        referenceVideo.height,
+        aspect
+      );
+      if (plan.needsResize) {
+        if (!referenceVideo.file)
           throw new Error(
-            'This editing API preserves the uploaded video size; select its original ratio'
+            'Select the reference video again to change its ratio'
           );
+        const controller = new AbortController();
+        clipController.current = controller;
+        setTrimProgress(0);
+        try {
+          const result = await trimMiddleVideo(
+            referenceVideo.file,
+            referenceVideo.duration!,
+            durationTier,
+            setTrimProgress,
+            controller.signal,
+            {
+              width: referenceVideo.width,
+              height: referenceVideo.height,
+              aspect,
+            }
+          );
+          const preview = URL.createObjectURL(result.file);
+          let metadata;
+          try {
+            metadata = await readMediaMetadata(preview, 'video', result.file);
+          } catch (error) {
+            URL.revokeObjectURL(preview);
+            throw error;
+          }
+          if (!matchesVideoAspect(metadata.width, metadata.height, aspect)) {
+            URL.revokeObjectURL(preview);
+            throw new Error(
+              'Could not prepare the selected video ratio. Please retry.'
+            );
+          }
+          preparedReference = {
+            ...referenceVideo,
+            ...metadata,
+            file: result.file,
+            preview,
+            url: undefined,
+            videoReceipt: undefined,
+            uploading: false,
+          };
+          setReferenceVideo(preparedReference);
+        } finally {
+          if (clipController.current === controller)
+            clipController.current = undefined;
+          setTrimProgress(undefined);
+        }
       }
       setLead({ ...lead, uploading: true });
-      setReferenceVideo({ ...referenceVideo, uploading: true });
+      setReferenceVideo({ ...preparedReference, uploading: true });
       let leadImage: string;
       let videoUrl: string;
       let videoReceipt: Asset['videoReceipt'];
@@ -847,9 +916,9 @@ export function GenjutsuGenerator({
             return uploaded;
           },
           async () => {
-            const uploaded = await uploadAsset(referenceVideo);
+            const uploaded = await uploadAsset(preparedReference);
             setReferenceVideo({
-              ...referenceVideo,
+              ...preparedReference,
               url: uploaded.url,
               videoReceipt: uploaded.videoReceipt,
               uploading: false,
@@ -890,8 +959,8 @@ export function GenjutsuGenerator({
         leadImage,
         referenceVideo: videoUrl,
         videoReceipt,
-        referenceWidth: referenceVideo.width,
-        referenceHeight: referenceVideo.height,
+        referenceWidth: preparedReference.width,
+        referenceHeight: preparedReference.height,
       });
     },
     onSuccess: (created) => {
@@ -968,23 +1037,10 @@ export function GenjutsuGenerator({
         throw new Error(copy.serviceUnavailable);
       if (!current.data.aspects.includes(aspect))
         throw new Error('This API does not support the selected video size');
-      if (
-        current.data.provider === 'fal' &&
-        referenceVideo?.width &&
-        referenceVideo.height
-      ) {
-        const [w, h] = aspect.split(':').map(Number);
-        if (
-          Math.abs(referenceVideo.width / referenceVideo.height - w / h) > 0.03
-        )
-          throw new Error(
-            'This editing API preserves the uploaded video size; select its original ratio'
-          );
-      }
       const credits = await creditsQuery.refetch();
       if (credits.isError || !credits.data)
         throw new Error('Could not verify your balance. Please retry.');
-      if (!permissions?.isAdmin && credits.data.balance < costCredits) {
+      if (!credits.data.hasPaidOrder || credits.data.balance < costCredits) {
         setPaywall(true);
         return;
       }
@@ -1000,6 +1056,24 @@ export function GenjutsuGenerator({
 
   const workUrl = task?.status === 'success' ? task.url : null;
   const showWork = previewMode === 'work';
+  const [workDimensions, setWorkDimensions] = useState<{
+    url: string;
+    width: number;
+    height: number;
+  }>();
+  const workRatioMismatch =
+    workDimensions?.url === workUrl &&
+    task?.aspect &&
+    !matchesVideoAspect(
+      workDimensions.width,
+      workDimensions.height,
+      task.aspect
+    );
+  const downloadMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiDownload(`/api/studio/download?id=${encodeURIComponent(id)}`),
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   return (
     <>
@@ -1041,7 +1115,11 @@ export function GenjutsuGenerator({
                   onFocus={warmVideoTools}
                   data-filled={assetIsReady(referenceVideo)}
                   disabled={
-                    !draftReady || running || validatingMedia || savingDraft
+                    !draftReady ||
+                    running ||
+                    checkingGeneration ||
+                    validatingMedia ||
+                    savingDraft
                   }
                   className="absolute inset-0 z-20 size-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
                   onChange={(event) => {
@@ -1099,7 +1177,12 @@ export function GenjutsuGenerator({
                       data-testid="remove-reference-video"
                       aria-label={copy.removeReference}
                       title={copy.removeReference}
-                      disabled={running || savingDraft || validatingMedia}
+                      disabled={
+                        running ||
+                        checkingGeneration ||
+                        savingDraft ||
+                        validatingMedia
+                      }
                       onClick={() => {
                         setReferenceClosed(true);
                         setReferenceVideo(undefined);
@@ -1157,7 +1240,11 @@ export function GenjutsuGenerator({
               hint="Stays still"
               kind="image"
               disabled={
-                !draftReady || running || validatingMedia || savingDraft
+                !draftReady ||
+                running ||
+                checkingGeneration ||
+                validatingMedia ||
+                savingDraft
               }
               accept="image/jpeg,image/png,image/webp"
               asset={lead}
@@ -1180,6 +1267,7 @@ export function GenjutsuGenerator({
                   disabled={
                     !draftReady ||
                     running ||
+                    checkingGeneration ||
                     savingDraft ||
                     validatingMedia ||
                     (referenceSource === 'upload' &&
@@ -1197,7 +1285,8 @@ export function GenjutsuGenerator({
                         referenceVideo.sourceFile,
                         'video',
                         setReferenceVideo,
-                        seconds
+                        seconds,
+                        true
                       );
                       return;
                     }
@@ -1232,6 +1321,10 @@ export function GenjutsuGenerator({
                   data-testid={`ratio-${ratio.replace(':', '-')}`}
                   disabled={
                     running ||
+                    checkingGeneration ||
+                    savingDraft ||
+                    validatingMedia ||
+                    !draftReady ||
                     Boolean(readiness && !readiness.aspects.includes(ratio))
                   }
                   title={
@@ -1257,6 +1350,7 @@ export function GenjutsuGenerator({
                 </button>
               ))}
             </div>
+            <p className="text-muted-foreground text-xs">{copy.ratioPadding}</p>
           </fieldset>
 
           <div className="mt-auto flex flex-col gap-2">
@@ -1285,7 +1379,7 @@ export function GenjutsuGenerator({
             >
               {copy.chargeDetails(
                 costCredits,
-                `$${((pricingCatalog.pack_starter.priceInCents * requiredGenerations) / 100).toFixed(2)}`
+                `$${(costCredits / 100).toFixed(2)}`
               )}
             </p>
             {Boolean(
@@ -1343,7 +1437,12 @@ export function GenjutsuGenerator({
                       ? 'ring-primary'
                       : 'ring-transparent'
                   )}
-                  disabled={running || validatingMedia || savingDraft}
+                  disabled={
+                    running ||
+                    checkingGeneration ||
+                    validatingMedia ||
+                    savingDraft
+                  }
                   onClick={() => {
                     setReferenceSource('effect');
                     setReferenceClosed(false);
@@ -1441,7 +1540,14 @@ export function GenjutsuGenerator({
                   loop
                   muted={muted}
                   playsInline
-                  className="absolute inset-0 size-full object-cover"
+                  onLoadedMetadata={(event) =>
+                    setWorkDimensions({
+                      url: workUrl,
+                      width: event.currentTarget.videoWidth,
+                      height: event.currentTarget.videoHeight,
+                    })
+                  }
+                  className="absolute inset-0 size-full object-contain"
                 />
               ) : (
                 <div
@@ -1492,7 +1598,7 @@ export function GenjutsuGenerator({
                 loop
                 muted={muted}
                 playsInline
-                className="absolute inset-0 size-full object-cover"
+                className="absolute inset-0 size-full object-contain"
               />
             )}
             <button
@@ -1509,7 +1615,7 @@ export function GenjutsuGenerator({
             </button>
             <span className="absolute top-3 left-3 rounded-full bg-black/70 px-2.5 py-1 text-xs text-white backdrop-blur">
               {showWork
-                ? selected.name
+                ? task?.referenceName || copy.generatedVideo
                 : referenceSource === 'upload'
                   ? copy.customReference
                   : example.name}{' '}
@@ -1520,15 +1626,36 @@ export function GenjutsuGenerator({
                   ? copy.uploadReference
                   : 'Higgsfield reference'}
             </span>
-            {task?.status === 'success' && task.url && !task.archivePending ? (
-              <a
-                href={`/api/studio/download?id=${encodeURIComponent(task.id)}`}
-                download
+            {showWork &&
+            task?.status === 'success' &&
+            task.url &&
+            !task.archivePending ? (
+              <button
+                type="button"
+                disabled={downloadMutation.isPending}
+                onClick={() => downloadMutation.mutate(task.id)}
                 className="hover:bg-primary absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-black/70 px-3 py-2 text-xs text-white backdrop-blur transition"
               >
-                <Download className="size-3.5" /> Download
-              </a>
+                {downloadMutation.isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Download className="size-3.5" />
+                )}{' '}
+                Download
+              </button>
             ) : null}
+            {showWork && workRatioMismatch && (
+              <p
+                role="alert"
+                className="absolute top-12 right-3 left-3 rounded-lg bg-black/80 p-2 text-xs text-white"
+              >
+                {copy.priorRatioMismatch(
+                  workDimensions!.width,
+                  workDimensions!.height,
+                  task!.aspect!
+                )}
+              </p>
+            )}
             {showWork && task?.archivePending ? (
               <p
                 role="status"

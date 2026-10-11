@@ -13,6 +13,18 @@ export const FAL_SCENE_IMAGE_USD = 0.22;
 export const FAL_MOTION_USD_PER_SECOND = 0.05;
 export const PRICE_MARKUP = 7;
 export const USD_PER_CREDIT = 0.01;
+/**
+ * Every charge and every pack is a whole number of this unit ($3.50, the
+ * cheapest generation), so any balance can always be spent down to zero.
+ */
+export const CREDIT_UNIT = 350;
+
+/** Provider cost → credits: ≥ 7× markup, rounded up to a whole CREDIT_UNIT. */
+export function creditsForCost(usd: number) {
+  // Round off float noise (0.6 × 7 / 0.01 = 420.00000000000006) first.
+  const credits = Number(((usd * PRICE_MARKUP) / USD_PER_CREDIT).toFixed(6));
+  return Math.ceil(credits / CREDIT_UNIT) * CREDIT_UNIT;
+}
 
 // Length of the shipped reference video (public/videos/hotel-lobby-reference.mp4).
 // Set hotel_lobby_video_seconds in admin if a different video is configured.
@@ -24,10 +36,7 @@ export function falCostUsd(referenceSeconds: number) {
 
 export function duetCredits(referenceSeconds = DEFAULT_REFERENCE_SECONDS) {
   const seconds = Math.min(Math.max(referenceSeconds, 1), 30);
-  const credits = (falCostUsd(seconds) * PRICE_MARKUP) / USD_PER_CREDIT;
-  // Round off float noise (0.6 × 7 / 0.01 = 420.00000000000006), then round
-  // up to a whole 10 credits so prices read cleanly (434 → 440).
-  return Math.ceil(Number(credits.toFixed(6)) / 10) * 10;
+  return creditsForCost(falCostUsd(seconds));
 }
 
 /**
@@ -36,7 +45,8 @@ export function duetCredits(referenceSeconds = DEFAULT_REFERENCE_SECONDS) {
  */
 export function resolveDuetCredits(configs: Record<string, string>) {
   const override = Number(configs.hotel_lobby_credits);
-  if (Number.isFinite(override) && override > 0) return Math.ceil(override);
+  if (Number.isFinite(override) && override > 0)
+    return Math.ceil(override / CREDIT_UNIT) * CREDIT_UNIT;
   const seconds = Number(configs.hotel_lobby_video_seconds);
   return duetCredits(
     Number.isFinite(seconds) && seconds > 0

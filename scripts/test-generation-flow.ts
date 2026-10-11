@@ -135,11 +135,23 @@ await assert.rejects(
   /Download unavailable/
 );
 const originalFetch = globalThis.fetch;
-globalThis.fetch = async () => new Response(new Uint8Array([1, 2, 3]));
+globalThis.fetch = async (_input, init) => {
+  assert.equal(init?.redirect, 'manual');
+  return new Response(new Uint8Array([1, 2, 3]));
+};
 const file = await getDownload('user', 'success', 'https://media.example.com');
 assert.equal(file.filename, 'genjutsu-success.mp4');
 assert.equal(file.type, 'video/mp4');
 assert.equal((await new Response(file.body).arrayBuffer()).byteLength, 3);
+globalThis.fetch = async () =>
+  new Response(null, {
+    status: 302,
+    headers: { location: 'https://other.example.com' },
+  });
+await assert.rejects(
+  getDownload('user', 'success', 'https://media.example.com'),
+  /retrieve/
+);
 globalThis.fetch = originalFetch;
 
 const { GENJUTSU_MODEL_ID } = await import('../src/config/genjutsu');
@@ -214,6 +226,45 @@ const saved = await refreshTask(await findTask('archive'), {
 });
 assert.equal(saved.archivePending, false);
 assert(saved.url?.startsWith('https://media.example.com/'));
+// New normalized generations must not publish or charge for a wrong-ratio result.
+const wrongRatio = await createTaskOnce({
+  ...params,
+  id: 'wrong-ratio',
+  model: GENJUTSU_MODEL_ID,
+  options: {
+    aspect: '9:16',
+    normalizedFrame: true,
+    referenceName: 'Your video',
+  },
+});
+await client.execute({
+  sql: "UPDATE ai_task SET task_id = 'provider-wrong', created_at = ? WHERE id = 'wrong-ratio'",
+  args: [Date.now()],
+});
+const { readFileSync } = await import('node:fs');
+const landscapeBytes = readFileSync('public/videos/effect-clips/crowd-5s.mp4');
+globalThis.fetch = async (input) => {
+  const url = String(input);
+  if (url.includes('/v1/tasks/'))
+    return Response.json({
+      id: 'provider-wrong',
+      status: 'completed',
+      results: ['https://provider.example.com/wrong.mp4'],
+    });
+  if (url.includes('provider.example.com')) return new Response(landscapeBytes);
+  throw new Error('Wrong-ratio output must not be stored');
+};
+const balanceBeforeRefund = await getBalance('user');
+const rejectedResult = await refreshTask(await findTask(wrongRatio.task.id), {
+  evolink_api_key: 'fake',
+});
+assert.equal(rejectedResult.status, 'failed');
+assert.match(rejectedResult.error!, /different video ratio/);
+assert.equal(await getBalance('user'), balanceBeforeRefund + 620);
+await refreshTask(await findTask(wrongRatio.task.id), {
+  evolink_api_key: 'fake',
+});
+assert.equal(await getBalance('user'), balanceBeforeRefund + 620);
 globalThis.fetch = originalFetch;
 const { runD1HttpAtomicBatch } = await import('../src/core/db/d1-http');
 process.env.CLOUDFLARE_ACCOUNT_ID = 'fake-account';

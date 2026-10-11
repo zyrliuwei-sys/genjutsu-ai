@@ -11,6 +11,7 @@ import {
   GENJUTSU_ENDPOINT,
   GENJUTSU_EVOLINK_MODEL,
   GENJUTSU_MODEL_ID,
+  GENJUTSU_REFERENCES,
   genjutsuCredits,
   genjutsuReadiness,
   isGenjutsuAspect,
@@ -24,7 +25,7 @@ import {
 } from '@/modules/ai-tasks/service';
 import { getAllConfigs } from '@/modules/config/service';
 import { getBalance } from '@/modules/credits/service';
-import { hasPermission } from '@/modules/rbac/service';
+import { hasPaidOrder } from '@/modules/payment/service';
 import {
   generationTaskId,
   validGenerationRequestId,
@@ -122,8 +123,8 @@ async function POST({ request }: { request: Request }) {
       return respErr(
         'This video editing API does not support the selected video size'
       );
-    if (readiness.provider === 'fal') {
-      // fal edit preserves the source frame; do not claim an unsupported resize.
+    {
+      // Both editing providers preserve input framing. Prepare it before billing.
       const width = Number(body?.referenceWidth);
       const height = Number(body?.referenceHeight);
       const [w, h] = aspect.split(':').map(Number);
@@ -163,8 +164,13 @@ async function POST({ request }: { request: Request }) {
     ) {
       return respErr('Use media uploaded through this generator');
     }
+    const reference =
+      typeof body?.templateId === 'string' &&
+      Object.hasOwn(GENJUTSU_REFERENCES, body.templateId)
+        ? GENJUTSU_REFERENCES[body.templateId]
+        : undefined;
     const prompt = buildGenjutsuPrompt(
-      '',
+      reference?.direction ?? '',
       Boolean(crowdImage),
       readiness.provider
     );
@@ -172,7 +178,8 @@ async function POST({ request }: { request: Request }) {
     const duration = await verifyVideoReceipt(
       body?.videoReceipt,
       referenceVideo,
-      session.user.id
+      session.user.id,
+      aspect
     );
     const costCredits = genjutsuCredits(duration);
 
@@ -190,8 +197,10 @@ async function POST({ request }: { request: Request }) {
       return respErr(promptSafetyError(safetyResult));
     }
 
-    const isAdmin = await hasPermission(session.user.id, 'admin.*');
-    if (!isAdmin && (await getBalance(session.user.id)) < costCredits) {
+    if (
+      !(await hasPaidOrder(session.user.id)) ||
+      (await getBalance(session.user.id)) < costCredits
+    ) {
       return respErr('Insufficient credits');
     }
 
@@ -202,13 +211,15 @@ async function POST({ request }: { request: Request }) {
       provider: readiness.provider,
       model: GENJUTSU_MODEL_ID,
       prompt,
-      costCredits: isAdmin ? 0 : costCredits,
+      costCredits,
       options: {
         duration,
         aspect,
         referenceVideo,
         leadImage,
         crowdImage: crowdImage || null,
+        referenceName: reference?.name ?? 'Your video',
+        normalizedFrame: true,
       },
     });
     const task = claim.task;

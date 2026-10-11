@@ -4,8 +4,8 @@
  * client can only pick options — never set what it pays.
  *
  * Same rule as the duet video (./hotel-lobby-pricing.ts): every run is
- * charged at ≥ 7× its provider cost, 1 credit = $0.01, rounded up to 10
- * credits.
+ * charged at ≥ 7× its provider cost, 1 credit = $0.01, rounded up to a
+ * whole CREDIT_UNIT ($3.50).
  *
  * Evolink Seedance 2.0 list prices (evolink.ai/seedance-2-0, 2026-10-06),
  * billed per second of output, audio included:
@@ -15,7 +15,7 @@
  *   per image (measured $0.10 on 2026-10-06) — budgeted at $0.12.
  */
 
-import { PRICE_MARKUP, USD_PER_CREDIT } from './hotel-lobby-pricing';
+import { creditsForCost } from './hotel-lobby-pricing';
 
 export type StudioKind = 'video' | 'image';
 export type StudioProvider = 'evolink' | 'fal';
@@ -26,7 +26,7 @@ export type StudioAspect = (typeof STUDIO_ASPECTS)[number];
 export const VIDEO_RESOLUTIONS = ['480p', '720p', '1080p'] as const;
 export type VideoResolution = (typeof VIDEO_RESOLUTIONS)[number];
 
-export const VIDEO_DURATIONS = [5, 10, 15] as const;
+export const VIDEO_DURATIONS = [5, 10] as const;
 export type VideoDuration = (typeof VIDEO_DURATIONS)[number];
 
 export type StudioModel = {
@@ -57,6 +57,15 @@ export const STUDIO_MODELS: StudioModel[] = [
     name: 'Seedance 2.0',
     provider: 'evolink',
     endpoint: 'seedance-2.0-text-to-video',
+    usdPerSecond: SEEDANCE_2_USD_PER_SECOND,
+    resolutions: ['480p', '720p', '1080p'],
+  },
+  {
+    id: 'seedance-2-image',
+    kind: 'video',
+    name: 'Seedance 2.0 Image to Video',
+    provider: 'evolink',
+    endpoint: 'seedance-2.0-image-to-video',
     usdPerSecond: SEEDANCE_2_USD_PER_SECOND,
     resolutions: ['480p', '720p', '1080p'],
   },
@@ -97,10 +106,7 @@ export const IMAGE_SIZES: Record<
   '1:1': { width: 1024, height: 1024 },
 };
 
-function toCredits(usd: number) {
-  const credits = (usd * PRICE_MARKUP) / USD_PER_CREDIT;
-  return Math.ceil(Number(credits.toFixed(6)) / 10) * 10;
-}
+const toCredits = creditsForCost;
 
 export type StudioOptions = {
   aspect: StudioAspect;

@@ -36,7 +36,8 @@ export async function getDownload(
   )
     throw new Error('Download unavailable');
   const response = await fetch(url, {
-    redirect: 'error',
+    // Workers supports follow/manual, not error. Reject redirects explicitly.
+    redirect: 'manual',
     signal: AbortSignal.timeout(60000),
   });
   if (!response.ok || !response.body)

@@ -64,6 +64,32 @@ export async function apiGetMedia(url: string, signal?: AbortSignal) {
   return await res.blob();
 }
 
+/** Validate the response before creating a browser download (never save JSON errors). */
+export async function apiDownload(url: string) {
+  const response = await fetch(url, { signal: AbortSignal.timeout(120000) });
+  const type = response.headers.get('content-type') || '';
+  if (
+    !response.ok ||
+    (!type.startsWith('video/') && !type.startsWith('image/'))
+  ) {
+    const error = await response.json().catch(() => null);
+    throw new ApiError(-1, error?.message || 'Download failed. Please retry.');
+  }
+  const blob = await response.blob();
+  const filename =
+    response.headers
+      .get('content-disposition')
+      ?.match(/filename="([^"]+)"/)?.[1] || 'genjutsu-video.mp4';
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = objectUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+}
+
 export const apiPost = <T = void>(url: string, body?: unknown) =>
   request<T>(url, {
     method: 'POST',
@@ -83,6 +109,13 @@ export async function apiUpload<T>(url: string, file: File, field = 'files') {
   const body = new FormData();
   body.append(field, file);
   return request<T>(url, { method: 'POST', body });
+}
+
+// Query-string builder for paginated list endpoints.
+export async function apiUploadImages<T>(files: File[]) {
+  const body = new FormData();
+  files.forEach((file) => body.append('files', file));
+  return request<T>('/api/storage/upload-image', { method: 'POST', body });
 }
 
 // Query-string builder for paginated list endpoints.

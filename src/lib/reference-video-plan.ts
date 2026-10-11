@@ -1,12 +1,28 @@
 /** Normalize to model limits without stretching or cropping the subject. */
-export function referenceVideoPlan(width: number, height: number) {
+export function referenceVideoPlan(
+  width: number,
+  height: number,
+  aspect?: '16:9' | '9:16'
+) {
   if (![width, height].every((value) => Number.isFinite(value) && value > 0))
     throw new Error('Unable to read video dimensions');
   const even = (value: number) => Math.max(2, Math.round(value / 2) * 2);
   const ratio = width / height;
   let targetWidth: number;
   let targetHeight: number;
-  if (ratio > 2.5) {
+  if (aspect) {
+    const units = Math.min(
+      120,
+      Math.max(80, Math.round(Math.max(width, height) / 16))
+    );
+    targetWidth = (aspect === '16:9' ? 16 : 9) * units;
+    targetHeight = (aspect === '16:9' ? 9 : 16) * units;
+    // Video encoders require even dimensions.
+    if (targetWidth % 2 || targetHeight % 2) {
+      targetWidth = (aspect === '16:9' ? 16 : 9) * (units - 1);
+      targetHeight = (aspect === '16:9' ? 9 : 16) * (units - 1);
+    }
+  } else if (ratio > 2.5) {
     targetWidth = 2160;
     targetHeight = 864;
   } else if (ratio < 0.4) {

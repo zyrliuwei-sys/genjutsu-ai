@@ -82,7 +82,9 @@ export default defineConfig({
         '/higgsfield-genjutsu-alternative',
       ].map((path) => ({ path })),
       prerender: {
-        enabled: true,
+        // Start's prerender server keeps workerd alive on Workers builds.
+        // Serve these routes with SSR there; retain prerender for Node builds.
+        enabled: !isCloudflareBuild,
         autoStaticPathsDiscovery: false,
         crawlLinks: false,
         autoSubfolderIndex: true,

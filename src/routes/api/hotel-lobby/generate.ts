@@ -16,7 +16,7 @@ import {
 } from '@/modules/ai-tasks/service';
 import { getAllConfigs } from '@/modules/config/service';
 import { getBalance } from '@/modules/credits/service';
-import { hasPermission } from '@/modules/rbac/service';
+import { hasPaidOrder } from '@/modules/payment/service';
 import { respData, respErr } from '@/lib/resp';
 
 import {
@@ -56,9 +56,11 @@ async function POST({ request }: { request: Request }) {
 
     // Admins generate free; everyone else pays 7× the fal cost in credits.
     // Checked first so an unpaid user always lands on the paywall.
-    const isAdmin = await hasPermission(session.user.id, 'admin.*');
     const price = resolveDuetCredits(configs);
-    if (!isAdmin && (await getBalance(session.user.id)) < price) {
+    if (
+      !(await hasPaidOrder(session.user.id)) ||
+      (await getBalance(session.user.id)) < price
+    ) {
       return respErr('Insufficient credits');
     }
 
@@ -87,7 +89,7 @@ async function POST({ request }: { request: Request }) {
       provider: 'fal',
       model: PIPELINE_MODEL,
       prompt,
-      costCredits: isAdmin ? 0 : price,
+      costCredits: price,
     });
 
     try {

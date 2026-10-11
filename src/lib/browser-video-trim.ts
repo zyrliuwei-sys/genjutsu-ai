@@ -10,14 +10,14 @@ export async function trimMiddleVideo(
   tier: 5 | 10,
   onProgress?: (percent: number) => void,
   signal?: AbortSignal,
-  dimensions?: { width: number; height: number }
+  dimensions?: { width: number; height: number; aspect?: '16:9' | '9:16' }
 ) {
   signal?.throwIfAborted();
   if (source.size > MAX_REFERENCE_VIDEO_BYTES)
     throw new Error('Video exceeds the 30MB limit');
   const plan = middleClipPlan(sourceSeconds, tier);
   const resize = dimensions
-    ? referenceVideoPlan(dimensions.width, dimensions.height)
+    ? referenceVideoPlan(dimensions.width, dimensions.height, dimensions.aspect)
     : undefined;
   if (sourceSeconds <= tier && !resize?.needsResize)
     return { file: source, ...plan };

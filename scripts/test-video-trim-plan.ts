@@ -13,8 +13,8 @@ assert.deepEqual(middleClipPlan(7, 10), { start: 0, duration: 7 });
 assert.deepEqual(middleClipPlan(3, 5), { start: 0, duration: 3 });
 for (const invalid of [0, 2.9, NaN, Infinity])
   assert.throws(() => middleClipPlan(invalid, 5));
-assert.equal(genjutsuCredits(middleClipPlan(60, 5).duration), 620);
-assert.equal(genjutsuCredits(middleClipPlan(60, 10).duration), 1240);
+assert.equal(genjutsuCredits(middleClipPlan(60, 5).duration), 700);
+assert.equal(genjutsuCredits(middleClipPlan(60, 10).duration), 1400);
 assert.equal(
   genjutsuReadiness({ evolink_api_key: 'offline-placeholder' }).maxVideoMB,
   30

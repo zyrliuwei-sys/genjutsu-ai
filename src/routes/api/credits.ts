@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { getAuth } from '@/core/auth';
 import { getTasks, retryFailedRefund } from '@/modules/ai-tasks/service';
 import { getBalance, getHistory } from '@/modules/credits/service';
+import { hasPaidOrder } from '@/modules/payment/service';
 import { respData, respErr } from '@/lib/resp';
 
 async function GET({ request }: { request: Request }) {
@@ -27,7 +28,11 @@ async function GET({ request }: { request: Request }) {
       getHistory(session.user.id),
     ]);
 
-    return respData({ balance, history });
+    return respData({
+      balance,
+      history,
+      hasPaidOrder: await hasPaidOrder(session.user.id),
+    });
   } catch (error: any) {
     return respErr(error.message || 'Failed to get credits');
   }
