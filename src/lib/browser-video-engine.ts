@@ -66,7 +66,7 @@ function loadEngine() {
 
 /** Start loading while the user is choosing a file, without delaying the picker. */
 export function warmVideoTools() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || busy) return;
   void loadEngine().catch(() => {
     /* Actual preparation reports/retries failures. */
   });
@@ -106,7 +106,6 @@ export async function withVideoEngine<T>(
   } finally {
     signal?.removeEventListener('abort', abort);
     if (timeout) clearTimeout(timeout);
-    busy = false;
     if (completed && worker && current === worker) {
       try {
         await worker.deleteFile('output.mp4');
@@ -115,5 +114,6 @@ export async function withVideoEngine<T>(
       }
       scheduleRelease();
     } else release();
+    busy = false;
   }
 }
