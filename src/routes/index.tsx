@@ -5,6 +5,7 @@ import { m } from '@/paraglide/messages.js';
 import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { About } from '@/blocks/about';
 import { Audience } from '@/blocks/audience';
+import { ContentLinks } from '@/blocks/content-links';
 import { CTA } from '@/blocks/cta';
 import { FAQ, FAQ_KEYS } from '@/blocks/faq';
 import { Features } from '@/blocks/features';
@@ -77,7 +78,11 @@ export const Route = createFileRoute('/')({
                 operatingSystem: 'Web',
                 url: urlFor(locale),
                 description,
-                offers: { '@type': 'Offer', price: '5', priceCurrency: 'USD' },
+                offers: {
+                  '@type': 'Offer',
+                  price: '6.90',
+                  priceCurrency: 'USD',
+                },
               },
               {
                 '@type': 'FAQPage',
@@ -105,6 +110,7 @@ function HomePage() {
       <Header />
       <main>
         <Hero />
+        <ContentLinks />
         <Features />
         <Models />
         <Showcase />

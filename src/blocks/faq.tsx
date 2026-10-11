@@ -1,4 +1,5 @@
 import { tDynamic } from '@/core/i18n/dynamic';
+import { Link } from '@/core/i18n/navigation';
 import { m } from '@/paraglide/messages.js';
 import {
   Accordion,
@@ -43,6 +44,14 @@ export function FAQ() {
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground max-w-2xl pb-6 text-base leading-relaxed">
                 {tDynamic(`landing.faq.${key}.answer`)}
+                {key === 'free' && (
+                  <Link
+                    href="/genjutsu-free"
+                    className="text-primary focus-visible:outline-primary mt-3 block no-underline hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-4"
+                  >
+                    {m['landing.resources.genjutsu-free.title']()}
+                  </Link>
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}

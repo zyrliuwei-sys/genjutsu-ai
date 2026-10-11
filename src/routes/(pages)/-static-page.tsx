@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import { notFound, useLoaderData } from '@tanstack/react-router';
 
+import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
 import { m } from '@/paraglide/messages.js';
 import {
@@ -9,9 +10,11 @@ import {
   locales,
   localizeUrl,
 } from '@/paraglide/runtime.js';
+import { ContentLinks } from '@/blocks/content-links';
 
 type PageMeta = {
   title: string;
+  h1?: string;
   description: string;
   updated_at: string;
 };
@@ -85,9 +88,19 @@ function StaticPage() {
 
   return (
     <article>
+      {meta.h1 && (
+        <nav
+          aria-label="Breadcrumb"
+          className="text-muted-foreground mb-6 flex flex-wrap gap-2 text-sm"
+        >
+          <Link href="/">{locale === 'zh' ? '首页' : 'Home'}</Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{meta.h1}</span>
+        </nav>
+      )}
       <header className="border-border mb-6 border-b pb-5">
         <h1 className="eg-heading text-foreground text-4xl md:text-5xl">
-          {meta.title.split(' | ')[0]}
+          {meta.h1 ?? meta.title.split(' | ')[0]}
         </h1>
         <p className="text-muted-foreground mt-2 text-sm">{meta.description}</p>
         <p className="text-muted-foreground mt-2 text-xs">
@@ -97,6 +110,7 @@ function StaticPage() {
       <div className="text-foreground/90 text-[15px] leading-7">
         <Content />
       </div>
+      {meta.h1 && <ContentLinks currentSlug={slug} />}
     </article>
   );
 }

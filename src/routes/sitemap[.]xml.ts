@@ -9,6 +9,10 @@ const STATIC_PATHS = [
   '/pricing',
   '/privacy-policy',
   '/terms-of-service',
+  '/ai-genjutsu-generator',
+  '/genjutsu-video-ai',
+  '/genjutsu-free',
+  '/higgsfield-genjutsu-alternative',
 ];
 
 type Entry = {

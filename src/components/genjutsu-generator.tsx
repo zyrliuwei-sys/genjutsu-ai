@@ -28,6 +28,7 @@ import {
 import { pricingCatalog } from '@/config/pricing';
 import { REFERENCE_VIDEOS } from '@/config/reference-videos';
 import { apiGet, apiGetMedia, apiPost, apiUpload } from '@/lib/api-client';
+import { warmVideoTools } from '@/lib/browser-video-engine';
 import { trimMiddleVideo } from '@/lib/browser-video-trim';
 import {
   loadGenjutsuDraft,
@@ -35,6 +36,8 @@ import {
   type DraftAsset,
 } from '@/lib/genjutsu-draft';
 import { readMediaMetadata } from '@/lib/media-metadata';
+import { parallelMediaUpload } from '@/lib/parallel-media-upload';
+import { referenceVideoPlan } from '@/lib/reference-video-plan';
 import { cn } from '@/lib/utils';
 import { MAX_REFERENCE_VIDEO_MB } from '@/lib/video-trim-plan';
 import { useUserPermissions } from '@/hooks/use-user-permissions';
@@ -676,14 +679,6 @@ export function GenjutsuGenerator({
       if (isVideo && metadata.duration < 3)
         throw new Error(copy.videoDurationRange(metadata.duration.toFixed(2)));
       if (
-        isVideo &&
-        (metadata.width < 720 ||
-          metadata.height < 720 ||
-          metadata.width > 2160 ||
-          metadata.height > 2160)
-      )
-        throw new Error('Reference video dimensions must be 720–2160px');
-      if (
         !isVideo &&
         (metadata.width < 300 ||
           metadata.height < 300 ||
@@ -696,7 +691,10 @@ export function GenjutsuGenerator({
       const sourceDuration = metadata.duration;
       let preparedFile = file;
       let trimStart = 0;
-      if (isVideo && sourceDuration > tier) {
+      const resize = isVideo
+        ? referenceVideoPlan(metadata.width, metadata.height)
+        : undefined;
+      if (isVideo && (sourceDuration > tier || resize?.needsResize)) {
         setTrimProgress(0);
         try {
           const clipped = await trimMiddleVideo(
@@ -704,7 +702,8 @@ export function GenjutsuGenerator({
             sourceDuration,
             tier,
             setTrimProgress,
-            controller.signal
+            controller.signal,
+            { width: metadata.width, height: metadata.height }
           );
           preparedFile = clipped.file;
           trimStart = clipped.start;
@@ -716,6 +715,14 @@ export function GenjutsuGenerator({
           throw new Error(copy.trimFailed);
         }
       }
+      if (
+        isVideo &&
+        (metadata.width < 720 ||
+          metadata.height < 720 ||
+          metadata.width > 2160 ||
+          metadata.height > 2160)
+      )
+        throw new Error('Reference video dimensions must be 720–2160px');
       controller.signal.throwIfAborted();
       setAsset({
         kind: isVideo ? 'video' : 'image',
@@ -832,18 +839,27 @@ export function GenjutsuGenerator({
       let videoUrl: string;
       let videoReceipt: Asset['videoReceipt'];
       try {
-        // Keep successful uploads on retry rather than sending the file again.
-        leadImage = (await uploadAsset(lead)).url;
-        setLead({ ...lead, url: leadImage, uploading: false });
-        const videoUpload = await uploadAsset(referenceVideo);
+        // Parallel transfer; each successful asset is retained even if the other fails.
+        const [imageUpload, videoUpload] = await parallelMediaUpload(
+          async () => {
+            const uploaded = await uploadAsset(lead);
+            setLead({ ...lead, url: uploaded.url, uploading: false });
+            return uploaded;
+          },
+          async () => {
+            const uploaded = await uploadAsset(referenceVideo);
+            setReferenceVideo({
+              ...referenceVideo,
+              url: uploaded.url,
+              videoReceipt: uploaded.videoReceipt,
+              uploading: false,
+            });
+            return uploaded;
+          }
+        );
+        leadImage = imageUpload.url;
         videoUrl = videoUpload.url;
         videoReceipt = videoUpload.videoReceipt;
-        setReferenceVideo({
-          ...referenceVideo,
-          url: videoUrl,
-          videoReceipt,
-          uploading: false,
-        });
       } catch (error) {
         setLead((value) => (value ? { ...value, uploading: false } : value));
         setReferenceVideo((value) =>
@@ -1021,6 +1037,8 @@ export function GenjutsuGenerator({
                   accept="video/mp4,video/quicktime,video/x-m4v"
                   aria-label={copy.uploadReference}
                   data-testid="upload-video"
+                  onPointerDown={warmVideoTools}
+                  onFocus={warmVideoTools}
                   data-filled={assetIsReady(referenceVideo)}
                   disabled={
                     !draftReady || running || validatingMedia || savingDraft

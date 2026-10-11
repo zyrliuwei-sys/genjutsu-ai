@@ -4,8 +4,11 @@ import { SiteHeader } from '@/components/site-header';
 export function Header() {
   const navLinks = [
     { href: '/create', label: m['landing.nav.create']() },
-    { href: '/#tools', label: m['landing.nav.features']() },
-    { href: '/#about', label: m['landing.nav.about']() },
+    { href: '/ai-genjutsu-generator', label: m['landing.nav.features']() },
+    {
+      href: '/higgsfield-genjutsu-alternative',
+      label: m['landing.resources.compare_nav'](),
+    },
     { href: '/pricing', label: m['landing.nav.pricing']() },
   ];
 

@@ -1,4 +1,5 @@
 import { tDynamic } from '@/core/i18n/dynamic';
+import { Link } from '@/core/i18n/navigation';
 import { m } from '@/paraglide/messages.js';
 import { Reveal } from '@/components/reveal';
 
@@ -30,8 +31,12 @@ export function About() {
             <p className="first-letter:text-primary first-letter:float-left first-letter:mt-1.5 first-letter:mr-3 first-letter:font-serif first-letter:text-[4.6rem] first-letter:leading-[0.8]">
               {m['landing.about.p1']()}
             </p>
-            <p>{m['landing.about.p2']()}</p>
-            <p>{m['landing.about.p3']()}</p>
+            <Link
+              href="/ai-genjutsu-generator"
+              className="text-primary focus-visible:outline-primary no-underline hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-4"
+            >
+              {m['landing.resources.ai-genjutsu-generator.title']()}
+            </Link>
           </Reveal>
         </div>
 

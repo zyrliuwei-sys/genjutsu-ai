@@ -2,15 +2,15 @@ FROM node:22-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-# Pin pnpm to v10 — v11 makes ignored-build-scripts fatal even when
-# `pnpm.onlyBuiltDependencies` is set in package.json, breaking CI install.
-RUN apk add --no-cache libc6-compat && npm install -g pnpm@10
+# Match package.json's packageManager. pnpm 11 build policies and overrides
+# live in pnpm-workspace.yaml, which must be present during frozen installs.
+RUN apk add --no-cache libc6-compat && npm install -g pnpm@11.15.1
 
 WORKDIR /app
 
 # Copy package manifests, build config, and ALL dialect templates so the
 # postinstall hook can stamp out a matching schema.ts during install.
-COPY package.json pnpm-lock.yaml* vite.config.ts ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml vite.config.ts ./
 COPY scripts/db-setup.mjs scripts/db-setup.mjs
 COPY src/config/db/schema.sqlite.ts src/config/db/schema.sqlite.ts
 COPY src/config/db/schema.postgres.ts src/config/db/schema.postgres.ts
@@ -33,9 +33,9 @@ WORKDIR /app
 # such as AUTH_SECRET and DATABASE_URL must be supplied to the running container.
 ENV NODE_ENV=production
 
-ARG VITE_APP_URL=https://hotel-lobby.org
-ARG VITE_APP_NAME="Hotel Lobby AI"
-ARG VITE_APP_DESCRIPTION="Plan a two-person Hotel Lobby AI filter video and copy a prompt for an image-to-video studio."
+ARG VITE_APP_URL=https://genjutsu-ai.org
+ARG VITE_APP_NAME="Genjutsu AI"
+ARG VITE_APP_DESCRIPTION="Genjutsu AI is an online AI video generator and AI image generator built for people who publish every day."
 ARG VITE_APP_LOGO=/logo.svg
 ARG VITE_DEFAULT_LOCALE=en
 ENV VITE_APP_URL=${VITE_APP_URL} \

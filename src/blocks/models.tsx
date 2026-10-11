@@ -19,7 +19,6 @@ const MODELS = [
     href: '/create?kind=video&model=seedance-2-fast',
   },
   { key: 'gpt_image', type: 'video', href: '/create', isNew: true },
-  { key: 'duet', type: 'template', href: '/ai-livestream' },
   { key: 'voice', type: 'audio', soon: true },
 ] as const;
 
