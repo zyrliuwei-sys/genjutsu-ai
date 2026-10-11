@@ -1367,9 +1367,6 @@ export function GenjutsuGenerator({
                     </button>
                   )}
               </div>
-              <p className="text-muted-foreground text-[11px]">
-                {copy.referenceRequirements}
-              </p>
               {trimProgress !== undefined && (
                 <p
                   role="status"
@@ -1524,38 +1521,9 @@ export function GenjutsuGenerator({
                 </button>
               ))}
             </div>
-            <p className="text-muted-foreground text-xs">{copy.ratioPadding}</p>
           </fieldset>
 
           <div className="mt-auto flex flex-col gap-2">
-            <div className="text-muted-foreground flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1.5">
-                <Sparkles className="text-primary size-4" />
-                <span data-testid="generator-cost">
-                  {copy.generationCost(requiredGenerations)}
-                </span>
-              </span>
-              <span data-testid="generator-balance" className="tabular-nums">
-                {copy.remainingGenerations(
-                  Math.floor(
-                    (creditsQuery.data?.balance ?? 0) /
-                      GENJUTSU_CREDITS_PER_GENERATION
-                  )
-                )}
-              </span>
-            </div>
-            <p className="text-muted-foreground text-[11px]">
-              {copy.generationRules}
-            </p>
-            <p
-              data-testid="generator-charge-details"
-              className="text-muted-foreground text-[11px]"
-            >
-              {copy.chargeDetails(
-                costCredits,
-                `$${(costCredits / 100).toFixed(2)}`
-              )}
-            </p>
             {Boolean(
               (creditsQuery.data?.balance ?? 0) %
               GENJUTSU_CREDITS_PER_GENERATION
@@ -1586,9 +1554,6 @@ export function GenjutsuGenerator({
                   )}
                   {copy.preview.button}
                 </button>
-                <p className="text-muted-foreground text-[11px]">
-                  {copy.preview.hint}
-                </p>
               </div>
             )}
             <button
