@@ -1122,5 +1122,17 @@
   "landing.generator.generated_video": "生成的视频",
   "landing.generator.prior_ratio_mismatch": "这份旧作品实际为 {width}×{height}，不是 {aspect}。切换选项不会改变已生成视频的比例。",
   "landing.generator.ratio_padding": "切换比例会通过补边保留完整视频，不会裁掉人物。",
-  "landing.pricing.pack_plus": "进阶套餐"
+  "landing.pricing.pack_plus": "进阶套餐",
+  "landing.generator.preview_button": "免费 AI 预览",
+  "landing.generator.preview_hint": "付费前先看看你的角色放进这个场景的效果。每个账号可免费预览 1 次。",
+  "landing.generator.preview_working": "正在生成免费预览…",
+  "landing.generator.preview_tab": "我的预览",
+  "landing.generator.preview_cta": "让它动起来 — 生成视频",
+  "landing.generator.preview_failed": "预览生成失败，免费次数未消耗，请重试。",
+  "landing.generator.preview_used": "你已经使用过免费预览。",
+  "landing.generator.preview_busy": "免费预览当前繁忙，请稍后再试。",
+  "landing.generator.preview_unavailable": "你所在的地区暂不提供免费预览。",
+  "landing.generator.preview_watermark": "GENJUTSU AI · 预览",
+  "landing.generator.preview_label": "静态预览 · 生成的视频会保留参考视频的动作",
+  "landing.generator.preview_google_only": "免费预览仅限使用 Google 登录的账号。"
 }

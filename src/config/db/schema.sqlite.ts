@@ -721,3 +721,61 @@ export const preview = table(
 
 export type Preview = typeof preview.$inferSelect;
 export type NewPreview = typeof preview.$inferInsert;
+
+/** Conversion funnel events (create page → upload → generate → paywall → checkout). */
+export const funnelEvent = table(
+  'funnel_event',
+  {
+    id: text('id').primaryKey(),
+    event: text('event').notNull(),
+    userId: text('user_id'),
+    anonId: text('anon_id').notNull(),
+    path: text('path').notNull().default(''),
+    props: text('props').notNull().default(''),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .default(sqliteNowMs)
+      .notNull(),
+  },
+  (t) => [
+    index('idx_funnel_event_created').on(t.createdAt),
+    index('idx_funnel_event_event_created').on(t.event, t.createdAt),
+  ]
+);
+
+export type FunnelEvent = typeof funnelEvent.$inferSelect;
+export type NewFunnelEvent = typeof funnelEvent.$inferInsert;
+
+/**
+ * One free still preview per account (lifetime) for eligible countries:
+ * the user's character composited into a reference-video frame.
+ */
+export const genjutsuPreview = table(
+  'genjutsu_preview',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    ipHash: text('ip_hash').notNull(),
+    country: text('country').notNull(),
+    aspect: text('aspect').notNull(),
+    status: text('status').notNull(),
+    taskId: text('task_id'),
+    url: text('url'),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .default(sqliteNowMs)
+      .notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+      .default(sqliteNowMs)
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index('idx_genjutsu_preview_ip').on(t.ipHash),
+    index('idx_genjutsu_preview_created').on(t.createdAt),
+  ]
+);
+
+export type GenjutsuPreview = typeof genjutsuPreview.$inferSelect;
+export type NewGenjutsuPreview = typeof genjutsuPreview.$inferInsert;

@@ -100,6 +100,20 @@ export function GenjutsuGenerator() {
             trimFailed: m['landing.generator.trim_failed'](),
             trimmedReference: (start, end, total) =>
               m['landing.generator.trimmed_reference']({ start, end, total }),
+            preview: {
+              button: m['landing.generator.preview_button'](),
+              hint: m['landing.generator.preview_hint'](),
+              working: m['landing.generator.preview_working'](),
+              tab: m['landing.generator.preview_tab'](),
+              cta: m['landing.generator.preview_cta'](),
+              failed: m['landing.generator.preview_failed'](),
+              used: m['landing.generator.preview_used'](),
+              busy: m['landing.generator.preview_busy'](),
+              unavailable: m['landing.generator.preview_unavailable'](),
+              googleOnly: m['landing.generator.preview_google_only'](),
+              watermark: m['landing.generator.preview_watermark'](),
+              label: m['landing.generator.preview_label'](),
+            },
             chargeDetails: (credits, price) =>
               m['landing.generator.charge_details']({ price }),
           }}

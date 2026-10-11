@@ -11,6 +11,7 @@ import { genjutsuCredits } from '@/config/genjutsu';
 import { pricingCatalog, type PricingProduct } from '@/config/pricing';
 import { apiPost } from '@/lib/api-client';
 import { currentPathWithQuery } from '@/lib/redirect';
+import { track } from '@/lib/track';
 import { m } from '@/paraglide/messages.js';
 import { usePublicConfig } from '@/hooks/use-public-config';
 import {
@@ -157,9 +158,11 @@ export function Pricing({
         setLoadingProvider(null);
         return;
       }
+      track('checkout_redirect');
       window.location.href = data.checkout_url;
     },
     onError: (err: any) => {
+      track('checkout_failed', { error: String(err?.message || '') });
       toast.error(err?.message || 'Checkout failed');
       setLoadingProvider(null);
     },
@@ -177,6 +180,10 @@ export function Pricing({
   }
 
   async function handleCheckout(plan: PricingPlan) {
+    track('plan_click', {
+      plan: plan.productId || '',
+      signedIn: Boolean(session?.user),
+    });
     if (!session?.user) {
       const callbackUrl = encodeURIComponent(currentPathWithQuery('/pricing'));
       router.push(`/sign-in?callbackUrl=${callbackUrl}`);

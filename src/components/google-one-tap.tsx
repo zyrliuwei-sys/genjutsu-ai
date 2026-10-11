@@ -3,8 +3,13 @@
 import { useEffect, useRef } from 'react';
 
 import { getAuthClient, useSession } from '@/core/auth/client';
+import { usePathname } from '@/core/i18n/navigation';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { usePublicConfig } from '@/hooks/use-public-config';
+
+// Only prompt where visitors show purchase/creation intent. Site-wide prompts
+// turned content readers into low-intent sign-ups that never generated.
+const ONE_TAP_PATHS = new Set(['/create', '/pricing']);
 
 // Mounts the Google One Tap prompt for signed-out visitors when the
 // admin has enabled it. Self-contained: pulls config from
@@ -14,9 +19,12 @@ export function GoogleOneTap() {
   const { data: session, isPending } = useSession();
   const { data: configs } = usePublicConfig();
   const triggered = useRef(false);
+  const pathname = usePathname();
+  const allowed = ONE_TAP_PATHS.has(pathname.replace(/\/$/, '') || '/');
 
   useEffect(() => {
     if (triggered.current) return;
+    if (!allowed) return;
     if (!configs) return;
     if (isPending) return;
     if (session?.user) return;
@@ -42,7 +50,7 @@ export function GoogleOneTap() {
         // Same — One Tap cancellations throw NetworkError/AbortError that
         // aren't actionable.
       });
-  }, [configs, session, isPending]);
+  }, [configs, session, isPending, allowed]);
 
   return null;
 }

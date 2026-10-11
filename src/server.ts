@@ -29,6 +29,18 @@ function ensureCloudflareEnv(): Promise<void> {
 export default {
   async fetch(req: Request): Promise<Response> {
     await ensureCloudflareEnv();
+    // Route handlers may receive a re-wrapped Request without `cf`; carry the
+    // edge country as the standard header (used for free-preview eligibility).
+    // `cf` is set by the edge, so it always overrides a client-sent header.
+    const edgeCountry = (req as any).cf?.country;
+    if (
+      edgeCountry &&
+      req.headers.get('cf-ipcountry') !== String(edgeCountry)
+    ) {
+      const headers = new Headers(req.headers);
+      headers.set('cf-ipcountry', String(edgeCountry));
+      req = new Request(req, { headers });
+    }
     // English-only site: permanently redirect legacy /zh URLs to their English path.
     const reqUrl = new URL(req.url);
     if (reqUrl.pathname === '/zh' || reqUrl.pathname.startsWith('/zh/')) {
