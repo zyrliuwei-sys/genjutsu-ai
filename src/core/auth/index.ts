@@ -6,6 +6,7 @@ import { db } from '@/core/db';
 import type { EmailProvider } from '@/core/email';
 import { CloudflareEmailProvider } from '@/core/email/cloudflare';
 import { ResendProvider } from '@/core/email/resend';
+import { NoticeEmail } from '@/core/email/templates/notice-email';
 import { VerifyEmail } from '@/core/email/templates/verify-email';
 import { AUTH_SECRET_PLACEHOLDER, envConfigs } from '@/config';
 import * as schema from '@/config/db/schema';
@@ -134,6 +135,73 @@ function getEmailProvider(
   const from = configs.resend_sender_email;
   if (!apiKey || !from) return null;
   return { provider: new ResendProvider({ apiKey, defaultFrom: from }), from };
+}
+
+/** App name, site URL and a raster logo (email clients don't render SVG). */
+export function getEmailBrand(configs: Record<string, string>) {
+  const appName = configs.app_name || envConfigs.app_name;
+  const siteUrl = (configs.app_url || envConfigs.app_url || '').replace(
+    /\/$/,
+    ''
+  );
+  const rawLogo = configs.app_logo || '';
+  const logo = /\.svg(\?|#|$)/i.test(rawLogo) ? '' : rawLogo;
+  const logoUrl = logo.startsWith('http')
+    ? logo
+    : logo
+      ? `${siteUrl}${logo.startsWith('/') ? '' : '/'}${logo}`
+      : undefined;
+  return { appName, siteUrl, logoUrl };
+}
+
+async function sendWelcomeEmail(
+  user: { email: string; name?: string | null; locale?: string | null },
+  configs: Record<string, string>
+) {
+  const emailCtx = getEmailProvider(configs);
+  if (!emailCtx || !user.email) return;
+  const { appName, siteUrl, logoUrl } = getEmailBrand(configs);
+  const zh = user.locale === 'zh';
+  const name = user.name?.trim();
+  const copy = zh
+    ? {
+        subject: `欢迎加入 ${appName}`,
+        heading: name ? `${name}，欢迎加入 ${appName}` : `欢迎加入 ${appName}`,
+        paragraphs: [
+          '感谢注册！上传一段 3–10 秒的视频和一张照片，用「视频角色互换」几分钟就能把视频里的人换成你想要的角色。',
+          '也可以用「文字转视频」，输入一段描述，或上传首帧、尾帧图片，直接生成一段全新的视频。',
+        ],
+        ctaText: '开始生成第一个视频',
+        footer: `你收到这封邮件，是因为你在 ${appName} 注册了账号。`,
+      }
+    : {
+        subject: `Welcome to ${appName}`,
+        heading: name
+          ? `Welcome to ${appName}, ${name}`
+          : `Welcome to ${appName}`,
+        paragraphs: [
+          'Thanks for signing up! Upload a 3–10 second clip and a photo, and Video Character Swap will put your character into the video in minutes.',
+          'You can also use Text to Video: describe a scene, or upload a first and last frame, and get a brand-new clip.',
+        ],
+        ctaText: 'Create your first video',
+        footer: `You're receiving this because you created an account at ${appName}.`,
+      };
+  const result = await emailCtx.provider.sendEmail({
+    to: user.email,
+    subject: copy.subject,
+    react: NoticeEmail({
+      appName,
+      logoUrl,
+      preview: copy.paragraphs[0],
+      heading: copy.heading,
+      paragraphs: copy.paragraphs,
+      ctaText: copy.ctaText,
+      ctaUrl: `${siteUrl}${zh ? '/zh' : ''}/`,
+      footer: copy.footer,
+    }),
+  });
+  if (!result.success)
+    console.error('[auth] welcome email failed:', result.error);
 }
 
 /** Check whether email sending is available for the selected provider */
@@ -298,6 +366,12 @@ export function getAuth(configs?: Record<string, string>) {
             } catch (error) {
               console.error('[auth] grant signup credits failed', error);
             }
+
+            try {
+              await sendWelcomeEmail(createdUser, all);
+            } catch (error) {
+              console.error('[auth] welcome email failed', error);
+            }
           },
         },
       },
@@ -368,16 +442,7 @@ export function getAuth(configs?: Record<string, string>) {
                   );
                   return;
                 }
-                const appName = all.app_name || envConfigs.app_name;
-                // Email clients don't render SVG <img>; only embed a raster logo,
-                // otherwise fall back to the text brand in the template.
-                const rawLogo = all.app_logo || '';
-                const logo = /\.svg(\?|#|$)/i.test(rawLogo) ? '' : rawLogo;
-                const logoUrl = logo.startsWith('http')
-                  ? logo
-                  : logo
-                    ? `${all.app_url || appUrl || ''}${logo.startsWith('/') ? '' : '/'}${logo}`
-                    : undefined;
+                const { appName, logoUrl } = getEmailBrand(all);
                 const result = await emailCtx.provider.sendEmail({
                   to: user.email,
                   subject: `Verify your email - ${appName}`,

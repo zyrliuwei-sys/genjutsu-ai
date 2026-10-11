@@ -80,7 +80,7 @@ export function VerifyEmail({
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
+export const styles: Record<string, React.CSSProperties> = {
   body: {
     margin: 0,
     padding: 0,
