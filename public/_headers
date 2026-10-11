@@ -3,3 +3,7 @@
 
 /videos/higgsfield-reference/*
   Cache-Control: public, max-age=86400
+
+/vendor/ffmpeg/core-0.12.10.wasm.gz
+  Content-Type: application/octet-stream
+  Cache-Control: public, max-age=31536000, immutable

@@ -1,4 +1,5 @@
 import { withVideoEngine } from './browser-video-engine';
+import { nativeVideoTrim, supportsNativeTrim } from './native-video-trim';
 import { referenceVideoPlan } from './reference-video-plan';
 import { mp4Duration } from './video-duration';
 import { MAX_REFERENCE_VIDEO_BYTES, middleClipPlan } from './video-trim-plan';
@@ -20,6 +21,29 @@ export async function trimMiddleVideo(
     : undefined;
   if (sourceSeconds <= tier && !resize?.needsResize)
     return { file: source, ...plan };
+  if (supportsNativeTrim() && dimensions) {
+    try {
+      const result = await nativeVideoTrim(
+        source,
+        plan.start,
+        plan.duration,
+        resize?.width ?? dimensions.width,
+        resize?.height ?? dimensions.height,
+        onProgress,
+        signal
+      );
+      if (result.file.size > MAX_REFERENCE_VIDEO_BYTES)
+        throw new Error('Trimmed video exceeds the 30MB limit');
+      onProgress?.(100);
+      return result;
+    } catch (error) {
+      signal?.throwIfAborted();
+      console.warn(
+        'Native video preparation failed; trying WASM encoder',
+        error
+      );
+    }
+  }
   return withVideoEngine(source, signal, async (ffmpeg) => {
     const progressHandler = ({ progress }: { progress: number }) =>
       onProgress?.(Math.max(0, Math.min(99, Math.round(progress * 100))));

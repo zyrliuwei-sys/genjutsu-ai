@@ -1,5 +1,7 @@
 import type { FFmpeg } from '@ffmpeg/ffmpeg';
 
+import { supportsNativeTrim } from './native-video-trim';
+
 let loading: Promise<FFmpeg> | undefined;
 let current: FFmpeg | undefined;
 let busy = false;
@@ -30,22 +32,35 @@ function loadEngine() {
     const worker = new FFmpeg();
     let wasmURL: string | undefined;
     try {
-      const parts = await Promise.all(
-        [0, 1].map(async (part) => {
-          const res = await fetch(
-            `/vendor/ffmpeg/core.wasm.${part}?v=0.12.10`,
-            {
-              cache: 'force-cache',
-              signal: AbortSignal.timeout(30000),
-            }
-          );
-          if (!res.ok) throw new Error('Could not load browser video tools');
-          return res.arrayBuffer();
-        })
-      );
-      wasmURL = URL.createObjectURL(
-        new Blob(parts, { type: 'application/wasm' })
-      );
+      let wasm: Blob;
+      if (typeof DecompressionStream !== 'undefined') {
+        const res = await fetch('/vendor/ffmpeg/core-0.12.10.wasm.gz', {
+          cache: 'force-cache',
+          signal: AbortSignal.timeout(120000),
+        });
+        if (!res.ok || !res.body)
+          throw new Error('Could not load browser video tools');
+        const bytes = await new Response(
+          res.body.pipeThrough(new DecompressionStream('gzip'))
+        ).arrayBuffer();
+        wasm = new Blob([bytes], { type: 'application/wasm' });
+      } else {
+        const parts = await Promise.all(
+          [0, 1].map(async (part) => {
+            const res = await fetch(
+              `/vendor/ffmpeg/core.wasm.${part}?v=0.12.10`,
+              {
+                cache: 'force-cache',
+                signal: AbortSignal.timeout(120000),
+              }
+            );
+            if (!res.ok) throw new Error('Could not load browser video tools');
+            return res.arrayBuffer();
+          })
+        );
+        wasm = new Blob(parts, { type: 'application/wasm' });
+      }
+      wasmURL = URL.createObjectURL(wasm);
       await worker.load({
         coreURL: `${location.origin}/vendor/ffmpeg/ffmpeg-core.js?v=0.12.10`,
         wasmURL,
@@ -66,7 +81,7 @@ function loadEngine() {
 
 /** Start loading while the user is choosing a file, without delaying the picker. */
 export function warmVideoTools() {
-  if (typeof window === 'undefined' || busy) return;
+  if (typeof window === 'undefined' || busy || supportsNativeTrim()) return;
   void loadEngine().catch(() => {
     /* Actual preparation reports/retries failures. */
   });
