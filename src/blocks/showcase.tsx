@@ -20,6 +20,12 @@ export function Showcase() {
           <p className="text-muted-foreground mt-4 max-w-lg text-lg">
             {m['landing.showcase.description']()}
           </p>
+          <Link
+            href="/genjutsu-video-ai"
+            className="text-primary focus-visible:outline-primary mt-4 inline-block no-underline hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            {m['landing.resources.genjutsu-video-ai.title']()}
+          </Link>
         </div>
         <Link href="/create" className="eg-pill-primary">
           {m['landing.showcase.cta']()}

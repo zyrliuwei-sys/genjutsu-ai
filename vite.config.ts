@@ -75,6 +75,20 @@ export default defineConfig({
     paraglideVitePlugin(paraglideConfig),
     tanstackStart({
       srcDirectory: 'src',
+      pages: [
+        '/ai-genjutsu-generator',
+        '/genjutsu-video-ai',
+        '/genjutsu-free',
+        '/higgsfield-genjutsu-alternative',
+      ].map((path) => ({ path })),
+      prerender: {
+        enabled: true,
+        autoStaticPathsDiscovery: false,
+        crawlLinks: false,
+        autoSubfolderIndex: true,
+        failOnError: true,
+        concurrency: 2,
+      },
     }),
     viteReact(),
     nitro(),
