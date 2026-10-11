@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/d1';
 
-import { createD1HttpDb } from './d1-http';
+import { createD1HttpDb, runD1HttpAtomicBatch } from './d1-http';
 
 // Minimal D1Database type to avoid pulling in @cloudflare/workers-types globally
 type D1Database = {
@@ -35,6 +35,26 @@ function getD1Binding(): D1Database {
     );
   }
   return binding as D1Database;
+}
+
+/** D1 transactions are batch-only. Never emulate financial writes sequentially. */
+export async function runD1AtomicBatch(
+  queries: { toSQL(): { sql: string; params: unknown[] } }[]
+) {
+  if (
+    !findD1Binding() &&
+    typeof process !== 'undefined' &&
+    process.env.D1_REMOTE_HTTP === 'true'
+  ) {
+    return runD1HttpAtomicBatch(queries.map((query) => query.toSQL()));
+  }
+  const binding = getD1Binding();
+  return binding.batch(
+    queries.map((query) => {
+      const { sql, params } = query.toSQL();
+      return binding.prepare(sql).bind(...params);
+    })
+  );
 }
 
 export function createD1Db() {

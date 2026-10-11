@@ -1,8 +1,14 @@
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull, notInArray, notLike } from 'drizzle-orm';
 
 import { db } from '@/core/db';
-import { aiTask } from '@/config/db/schema';
-import { consume, revoke } from '@/modules/credits/service';
+import { runD1AtomicBatch } from '@/core/db/d1';
+import { envConfigs } from '@/config';
+import { aiTask, credit } from '@/config/db/schema';
+import {
+  consume,
+  prepareTaskConsumption,
+  revoke,
+} from '@/modules/credits/service';
 import { getUuid } from '@/lib/hash';
 
 export enum AITaskStatus {
@@ -17,6 +23,7 @@ export enum AITaskStatus {
  * Create an AI task with optional credit consumption.
  */
 export async function createTask(params: {
+  id?: string;
   userId: string;
   mediaType: string;
   provider: string;
@@ -28,10 +35,48 @@ export async function createTask(params: {
   const { userId, mediaType, provider, model, prompt, costCredits, options } =
     params;
 
+  if (envConfigs.database_provider === 'd1') {
+    const id = params.id || getUuid();
+    const plan = costCredits
+      ? await prepareTaskConsumption({
+          userId,
+          credits: costCredits,
+          taskId: id,
+          description: `AI ${mediaType} generation`,
+        })
+      : undefined;
+    const data = {
+      id,
+      userId,
+      mediaType,
+      provider,
+      model,
+      prompt,
+      status: AITaskStatus.PENDING,
+      costCredits: costCredits || 0,
+      options:
+        typeof options === 'string'
+          ? options
+          : options === undefined
+            ? null
+            : JSON.stringify(options),
+      taskInfo: plan
+        ? JSON.stringify({ creditId: plan.consumedCredit.id })
+        : null,
+    };
+    await runD1AtomicBatch([
+      db().insert(aiTask).values(data),
+      ...(plan
+        ? [...plan.updates, db().insert(credit).values(plan.consumedCredit)]
+        : []),
+    ]);
+    return findTask(id);
+  }
+
   return db().transaction(async (tx: any) => {
     // 1. Insert task
     const taskData: any = {
-      id: getUuid(),
+      id: params.id || getUuid(),
       userId,
       mediaType,
       provider,
@@ -77,6 +122,45 @@ export async function createTask(params: {
   });
 }
 
+/** The task primary key is the durable submission claim, across workers. */
+export async function createTaskOnce(
+  params: Parameters<typeof createTask>[0] & { id: string }
+) {
+  try {
+    return { task: await createTask(params), created: true };
+  } catch (error) {
+    const existing = await findTask(params.id);
+    if (
+      !existing ||
+      existing.userId !== params.userId ||
+      existing.model !== params.model
+    )
+      throw error;
+    return { task: existing, created: false };
+  }
+}
+
+/** Revoke is itself atomic/idempotent. Never swallow a database failure. */
+export async function retryFailedRefund(taskId: string) {
+  const task = await findTask(taskId);
+  if (task?.status !== AITaskStatus.FAILED || !task.taskInfo) return;
+  const info = JSON.parse(task.taskInfo as string);
+  if (info.refundSettled) return;
+  if (info.creditId) {
+    await revoke(info.creditId);
+    await db()
+      .update(aiTask)
+      .set({ taskInfo: JSON.stringify({ ...info, refundSettled: true }) })
+      .where(
+        and(
+          eq(aiTask.id, taskId),
+          eq(aiTask.status, AITaskStatus.FAILED),
+          eq(aiTask.taskInfo, task.taskInfo)
+        )
+      );
+  }
+}
+
 /**
  * Update task status. Revokes credits on failure.
  */
@@ -101,19 +185,29 @@ export async function updateTask(params: {
     updateData.taskResult = JSON.stringify(taskResult);
   }
 
-  await db().update(aiTask).set(updateData).where(eq(aiTask.id, taskId));
-
-  // Revoke credits on failure
-  if (status === AITaskStatus.FAILED && task.taskInfo) {
-    try {
-      const info = JSON.parse(task.taskInfo as string);
-      if (info.creditId) {
-        await revoke(info.creditId);
-      }
-    } catch {
-      // Ignore parse errors
-    }
-  }
+  // A stale poll cannot overwrite a terminal decision. Same-state updates
+  // are allowed for result archival retries.
+  await db()
+    .update(aiTask)
+    .set(updateData)
+    .where(
+      and(
+        eq(aiTask.id, taskId),
+        status === task.status &&
+          [
+            AITaskStatus.SUCCESS,
+            AITaskStatus.FAILED,
+            AITaskStatus.CANCELED,
+          ].includes(status)
+          ? eq(aiTask.status, status)
+          : notInArray(aiTask.status, [
+              AITaskStatus.SUCCESS,
+              AITaskStatus.FAILED,
+              AITaskStatus.CANCELED,
+            ])
+      )
+    );
+  await retryFailedRefund(taskId);
 }
 
 /**
@@ -176,6 +270,7 @@ export async function getTasks(params: {
   status?: string;
   page?: number;
   limit?: number;
+  refundPending?: boolean;
 }) {
   const { userId, mediaType, status, page = 1, limit = 20 } = params;
 
@@ -187,6 +282,10 @@ export async function getTasks(params: {
         eq(aiTask.userId, userId),
         mediaType ? eq(aiTask.mediaType, mediaType) : undefined,
         status ? eq(aiTask.status, status) : undefined,
+        params.refundPending
+          ? notLike(aiTask.taskInfo, '%"refundSettled":true%')
+          : undefined,
+        params.refundPending ? gt(aiTask.costCredits, 0) : undefined,
         isNull(aiTask.deletedAt)
       )
     )

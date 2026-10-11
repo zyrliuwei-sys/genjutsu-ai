@@ -87,6 +87,7 @@ export class FalProvider implements AIProvider {
     }
 
     const resp = await fetch(apiUrl, {
+      signal: AbortSignal.timeout(60000),
       method: 'POST',
       headers,
       body: JSON.stringify(input),
@@ -130,7 +131,11 @@ export class FalProvider implements AIProvider {
       Authorization: `Key ${this.configs.apiKey}`,
     };
 
-    const statusResp = await fetch(statusUrl, { method: 'GET', headers });
+    const statusResp = await fetch(statusUrl, {
+      method: 'GET',
+      headers,
+      signal: AbortSignal.timeout(30000),
+    });
 
     if (!statusResp.ok) {
       throw new Error(`fal status request failed (${statusResp.status})`);
@@ -161,7 +166,11 @@ export class FalProvider implements AIProvider {
     }
 
     const resultUrl = `${this.baseUrl}/${queryModel}/requests/${taskId}`;
-    const resultResp = await fetch(resultUrl, { method: 'GET', headers });
+    const resultResp = await fetch(resultUrl, {
+      method: 'GET',
+      headers,
+      signal: AbortSignal.timeout(30000),
+    });
 
     if (!resultResp.ok) {
       if (resultResp.status === 422) {

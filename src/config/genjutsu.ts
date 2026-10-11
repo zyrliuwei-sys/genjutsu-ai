@@ -3,6 +3,8 @@
  * intentionally kept here so the UI, task polling and generation route share
  * one model id without exposing provider credentials to the browser.
  */
+import { MAX_REFERENCE_VIDEO_MB } from '@/lib/video-trim-plan';
+
 export const GENJUTSU_MODEL_ID = 'genjutsu-storm';
 export const GENJUTSU_ENDPOINT = 'fal-ai/kling-video/o1/video-to-video/edit';
 export const GENJUTSU_EVOLINK_MODEL = 'kling-o1-video-edit';
@@ -45,7 +47,7 @@ export const GENJUTSU_DIRECTIONS: Record<string, string> = {
     'Recast the main subject with the supplied image while maintaining the source shot and action beat for beat. Keep the surrounding composition and physical interactions stable; use coherent live-action lighting and clean temporal edges.',
 };
 
-export const GENJUTSU_ASPECTS = ['16:9', '4:3', '9:16'] as const;
+export const GENJUTSU_ASPECTS = ['16:9', '9:16'] as const;
 export type GenjutsuAspect = (typeof GENJUTSU_ASPECTS)[number];
 
 export function isGenjutsuAspect(value: unknown): value is GenjutsuAspect {
@@ -89,7 +91,7 @@ export function genjutsuReadiness(
     safetyReady,
     ready: Boolean(provider && storageReady && safetyReady),
     aspects: provider === 'evolink' ? ['16:9', '9:16'] : [...GENJUTSU_ASPECTS],
-    maxVideoMB: provider === 'evolink' ? 100 : 200,
+    maxVideoMB: MAX_REFERENCE_VIDEO_MB,
   };
 }
 
@@ -103,7 +105,7 @@ export function buildGenjutsuPrompt(
   const crowd = provider === 'fal' ? '@Image1' : 'reference image 2';
   const extra = typeof prompt === 'string' ? prompt.trim().slice(0, 500) : '';
   const base = [
-    'Edit the input video, do not invent an unrelated new shot.',
+    'Edit the input video, do not invent an unrelated new shot. Preserve the original background, environment, scenery, props, lighting and all non-target people. Do not replace or restyle the background.',
     `Replace only the main performer with ${character}. Preserve the original choreography, action trajectory, timing, cuts, camera path and perspective.`,
     hasCrowd
       ? `Use ${crowd} for the surrounding scene while preserving the original performance.`

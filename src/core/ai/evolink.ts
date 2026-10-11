@@ -54,6 +54,7 @@ export class EvolinkProvider {
 
   private async request(path: string, init?: RequestInit) {
     const resp = await fetch(`${this.baseUrl}${path}`, {
+      signal: AbortSignal.timeout(init?.method === 'POST' ? 60000 : 30000),
       ...init,
       headers: {
         Authorization: `Bearer ${this.apiKey}`,

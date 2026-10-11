@@ -52,6 +52,14 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 export const apiGet = <T>(url: string, init?: RequestInit) =>
   request<T>(url, init);
 
+/** Same-origin public media, with cancellation for a changed template. */
+export async function apiGetMedia(url: string, signal?: AbortSignal) {
+  const res = await fetch(url, { signal });
+  if (!res.ok || !res.headers.get('content-type')?.includes('video/'))
+    throw new ApiError(-1, 'Could not load the selected reference video');
+  return res.blob();
+}
+
 export const apiPost = <T = void>(url: string, body?: unknown) =>
   request<T>(url, {
     method: 'POST',

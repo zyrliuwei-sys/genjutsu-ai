@@ -66,5 +66,9 @@ package-lock.json
 # Runtime image uploads (no-storage local fallback)
 /public/uploads/
 
+# Rebuilt from the pinned @ffmpeg/core package before dev/build.
+/public/vendor/ffmpeg/ffmpeg-core.js
+/public/vendor/ffmpeg/core.wasm.*
+
 # IndexNow installer backups
 .indexnow-backup-*

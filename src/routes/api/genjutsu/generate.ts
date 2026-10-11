@@ -17,13 +17,18 @@ import {
 } from '@/config/genjutsu';
 import {
   AITaskStatus,
-  createTask,
+  createTaskOnce,
+  findTask,
   setProviderTaskId,
   updateTask,
 } from '@/modules/ai-tasks/service';
 import { getAllConfigs } from '@/modules/config/service';
 import { getBalance } from '@/modules/credits/service';
 import { hasPermission } from '@/modules/rbac/service';
+import {
+  generationTaskId,
+  validGenerationRequestId,
+} from '@/lib/generation-request';
 import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respData, respErr } from '@/lib/resp';
 import { verifyVideoReceipt } from '@/lib/video-receipt.server';
@@ -50,8 +55,23 @@ function isUploadedAsset(value: unknown) {
   }
 }
 
-async function GET() {
+async function GET({ request }: { request: Request }) {
   try {
+    const requestId = new URL(request.url).searchParams.get('requestId');
+    if (requestId !== null) {
+      const session = await getAuth().api.getSession({
+        headers: request.headers,
+      });
+      if (!session?.user) return respErr('Unauthorized');
+      if (!validGenerationRequestId(requestId))
+        return respErr('Invalid generation request ID');
+      const task = await findTask(
+        await generationTaskId(session.user.id, requestId)
+      );
+      return respData({
+        task: task && task.userId === session.user.id ? taskView(task) : null,
+      });
+    }
     return respData(genjutsuReadiness(await getAllConfigs()));
   } catch {
     return respErr('Unable to check generation configuration');
@@ -63,6 +83,17 @@ async function POST({ request }: { request: Request }) {
     const auth = getAuth();
     const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user) return respErr('Unauthorized');
+    const body = await request.json();
+    if (!validGenerationRequestId(body?.requestId))
+      return respErr('Invalid generation request ID');
+    const submissionId = await generationTaskId(
+      session.user.id,
+      body.requestId
+    );
+    const existing = await findTask(submissionId);
+    // Recover an accepted submission even if readiness/balance changed since.
+    if (existing && existing.userId === session.user.id)
+      return respData(taskView(existing));
     const limited = enforceMinIntervalRateLimit(request, {
       intervalMs: 5000,
       keyPrefix: 'genjutsu-generate',
@@ -70,7 +101,6 @@ async function POST({ request }: { request: Request }) {
     });
     if (limited) return limited;
 
-    const body = await request.json();
     const referenceVideo = body?.referenceVideo;
     const leadImage = body?.leadImage;
     const crowdImage = body?.crowdImage;
@@ -134,7 +164,7 @@ async function POST({ request }: { request: Request }) {
       return respErr('Use media uploaded through this generator');
     }
     const prompt = buildGenjutsuPrompt(
-      body?.prompt,
+      '',
       Boolean(crowdImage),
       readiness.provider
     );
@@ -165,7 +195,8 @@ async function POST({ request }: { request: Request }) {
       return respErr('Insufficient credits');
     }
 
-    const task = await createTask({
+    const claim = await createTaskOnce({
+      id: submissionId,
       userId: session.user.id,
       mediaType: AIMediaType.VIDEO,
       provider: readiness.provider,
@@ -180,6 +211,8 @@ async function POST({ request }: { request: Request }) {
         crowdImage: crowdImage || null,
       },
     });
+    const task = claim.task;
+    if (!claim.created) return respData(taskView(task));
 
     try {
       if (readiness.provider === 'evolink') {

@@ -20,6 +20,7 @@ export interface PricingPlan {
   id: string;
   name: string;
   description?: string;
+  disabled?: boolean;
   price: string;
   originalPrice?: string;
   currency?: string;
@@ -87,6 +88,7 @@ export function PricingTable({
   });
 
   function handleCheckout(plan: PricingPlan) {
+    if (plan.disabled) return;
     if (onCheckout) {
       onCheckout(plan);
       return;
@@ -185,7 +187,7 @@ export function PricingTable({
               variant={plan.featured ? 'default' : 'outline'}
               className="h-10 w-full rounded-md text-sm font-medium"
               onClick={() => handleCheckout(plan)}
-              disabled={loadingId === plan.id}
+              disabled={plan.disabled || loadingId === plan.id}
             >
               {loadingId === plan.id
                 ? m['common.pricing.processing']()

@@ -1,5 +1,11 @@
+import { mp4Duration } from './video-duration';
+
 /** Decode local media before uploading; never send invalid clips to a paid API. */
-export async function readMediaMetadata(url: string, kind: 'image' | 'video') {
+export async function readMediaMetadata(
+  url: string,
+  kind: 'image' | 'video',
+  file?: Blob
+) {
   if (kind === 'image') {
     const image = new Image();
     image.src = url;
@@ -10,6 +16,11 @@ export async function readMediaMetadata(url: string, kind: 'image' | 'video') {
       duration: 0,
     };
   }
+  // Use the same movie header as the upload endpoint. Browsers can report
+  // Infinity or a different track duration for otherwise valid MP4/MOV files.
+  const fileDuration = file
+    ? mp4Duration(new Uint8Array(await file.arrayBuffer()))
+    : undefined;
   const video = document.createElement('video');
   video.preload = 'metadata';
   try {
@@ -27,7 +38,7 @@ export async function readMediaMetadata(url: string, kind: 'image' | 'video') {
         resolve({
           width: video.videoWidth,
           height: video.videoHeight,
-          duration: video.duration,
+          duration: fileDuration ?? video.duration,
         });
       };
       video.onerror = () => {

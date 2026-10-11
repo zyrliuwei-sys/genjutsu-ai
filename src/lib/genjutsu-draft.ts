@@ -3,6 +3,9 @@
 export type DraftAsset = {
   kind: 'image' | 'video';
   file?: File;
+  sourceFile?: File;
+  sourceDuration?: number;
+  trimStart?: number;
   url?: string;
   width?: number;
   height?: number;
@@ -13,6 +16,9 @@ export type GenjutsuDraft = {
   owner?: string;
   selectedId: string;
   aspect: string;
+  durationTier?: 5 | 10;
+  referenceClosed?: boolean;
+  referenceSource?: 'effect' | 'upload';
   lead?: DraftAsset;
   referenceVideo?: DraftAsset;
   savedAt: number;

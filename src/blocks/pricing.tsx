@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Film, Infinity as InfinityIcon, MonitorPlay, Zap } from 'lucide-react';
+import { Film, Infinity as InfinityIcon, MonitorPlay } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useSession } from '@/core/auth/client';
@@ -45,6 +45,8 @@ export function Pricing({
   variant = 'section',
   headingAs: Heading = 'h2',
   beforeCheckout,
+  clipSeconds,
+  balanceCredits = 0,
 }: {
   title?: string;
   /** `h1` when the block is the page's main content (the /pricing route). */
@@ -52,6 +54,8 @@ export function Pricing({
   /** `dialog` drops the page-section chrome for use inside a modal. */
   variant?: 'section' | 'dialog';
   beforeCheckout?: () => Promise<unknown>;
+  clipSeconds?: number;
+  balanceCredits?: number;
 } = {}) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -71,25 +75,22 @@ export function Pricing({
   // Reference prices — the same math the generate API charges with.
   const perVideo = genjutsuCredits(5);
   const perLongVideo = genjutsuCredits(10);
+  const clipCost = clipSeconds ? genjutsuCredits(clipSeconds) : perVideo;
+
+  function durationSummary(credits: number) {
+    const shortCount = Math.floor(credits / perVideo);
+    const longCount = Math.floor(credits / perLongVideo);
+    return longCount > 0
+      ? m['landing.pricing.duration_options']({ shortCount, longCount })
+      : m['landing.pricing.feature_videos']({ count: shortCount });
+  }
 
   function features(credits: number): PricingFeature[] {
     return [
       {
         icon: Film,
-        label: m['landing.pricing.feature_videos']({
-          count: Math.floor(credits / perVideo),
-        }),
+        label: durationSummary(credits),
       },
-      ...(credits >= perLongVideo
-        ? [
-            {
-              icon: Zap,
-              label: m['landing.pricing.feature_fast_videos']({
-                count: Math.floor(credits / perLongVideo),
-              }),
-            },
-          ]
-        : []),
       { icon: MonitorPlay, label: m['landing.pricing.feature_hd']() },
       {
         icon: InfinityIcon,
@@ -104,21 +105,57 @@ export function Pricing({
     opts: { name: string; featured?: boolean; badge?: string }
   ): PricingPlan {
     const product = pricingCatalog[productId];
+    const videos = Math.floor(product.credits / clipCost);
+    const coversClip = product.credits + balanceCredits >= clipCost;
     return {
       id: productId,
       name: opts.name,
-      description: m['landing.pricing.pack_desc']({
-        count: Math.floor(product.credits / perVideo),
-      }),
+      description: clipSeconds
+        ? m['landing.pricing.selected_duration_count']({
+            count: videos,
+            seconds: clipSeconds > 5 ? 10 : 5,
+          })
+        : durationSummary(product.credits),
       price: usd(product.priceInCents),
       featured: opts.featured,
       badge: opts.badge,
-      features: features(product.credits),
+      features: [
+        ...features(product.credits),
+        {
+          icon: Film,
+          label: m['landing.pricing.unit_value']({
+            seconds: 5,
+            price: usd(
+              product.priceInCents / Math.floor(product.credits / perVideo)
+            ),
+          }),
+        },
+        ...(product.credits >= perLongVideo
+          ? [
+              {
+                icon: Film,
+                label: m['landing.pricing.unit_value']({
+                  seconds: 10,
+                  price: usd(
+                    product.priceInCents /
+                      Math.floor(product.credits / perLongVideo)
+                  ),
+                }),
+              },
+            ]
+          : []),
+        ...(!coversClip
+          ? [{ label: m['landing.pricing.insufficient_selected_clip']() }]
+          : []),
+      ],
+      disabled: !coversClip,
       productId,
       priceInCents: product.priceInCents,
       currency: product.currency,
       credits: product.credits,
-      buttonText: m['landing.pricing.buy_now'](),
+      buttonText: coversClip
+        ? m['landing.pricing.buy_now']()
+        : m['landing.pricing.insufficient_selected_clip'](),
     };
   }
 

@@ -10,8 +10,9 @@ import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respData, respErr } from '@/lib/resp';
 import { mp4Duration } from '@/lib/video-duration';
 import { signVideoReceipt } from '@/lib/video-receipt.server';
+import { MAX_REFERENCE_VIDEO_BYTES } from '@/lib/video-trim-plan';
 
-const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
+const MAX_VIDEO_BYTES = MAX_REFERENCE_VIDEO_BYTES;
 const MAX_REQUEST_BYTES = MAX_VIDEO_BYTES + 2 * 1024 * 1024;
 const INLINE_MAX_BYTES =
   (Number(envConfigs.inline_image_max_kb) || 10240) * 1024;

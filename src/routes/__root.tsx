@@ -85,12 +85,13 @@ function RootComponent() {
       <ThemeProvider
         attribute="class"
         defaultTheme="dark"
+        forcedTheme="dark"
         enableSystem={false}
         disableTransitionOnChange
       >
         <Outlet />
         <SandboxPreviewBridge />
-        <Toaster position="top-center" richColors />
+        <Toaster theme="dark" position="top-center" richColors />
         <GoogleOneTap />
         {analytics?.gaId ? (
           <GoogleAnalytics measurementId={analytics.gaId} />
@@ -115,7 +116,7 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: ReactNode }) {
   return (
-    <html lang={getLocale()} suppressHydrationWarning>
+    <html lang={getLocale()} className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

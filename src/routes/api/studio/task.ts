@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { getAuth } from '@/core/auth';
-import { AITaskStatus, findTask } from '@/modules/ai-tasks/service';
+import { findTask } from '@/modules/ai-tasks/service';
 import { getAllConfigs } from '@/modules/config/service';
 import { respData, respErr } from '@/lib/resp';
 
-import { isStudioTask, refreshTask, taskView } from './-shared';
+import { isStudioTask, refreshTask } from './-shared';
 
 // Poll one studio task; each poll asks the provider for the latest status.
 async function GET({ request }: { request: Request }) {
@@ -20,13 +20,6 @@ async function GET({ request }: { request: Request }) {
     const task = await findTask(id);
     if (!task || task.userId !== session.user.id || !isStudioTask(task)) {
       return respErr('Task not found');
-    }
-
-    if (
-      task.status === AITaskStatus.SUCCESS ||
-      task.status === AITaskStatus.FAILED
-    ) {
-      return respData(taskView(task));
     }
 
     return respData(await refreshTask(task, await getAllConfigs()));

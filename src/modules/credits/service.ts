@@ -1,6 +1,8 @@
 import { and, asc, desc, eq, gt, isNull, or, sql, sum } from 'drizzle-orm';
 
 import { db } from '@/core/db';
+import { runD1AtomicBatch } from '@/core/db/d1';
+import { envConfigs } from '@/config';
 import { credit } from '@/config/db/schema';
 import { getSnowId, getUuid } from '@/lib/hash';
 
@@ -218,6 +220,64 @@ export async function consume(params: {
 
 // --- Revoke (restore credits from a consumed record) ---
 
+/** Plan only; optimistic guards make any stale FIFO snapshot abort the batch. */
+export async function prepareTaskConsumption(params: {
+  userId: string;
+  credits: number;
+  taskId: string;
+  description: string;
+}) {
+  const now = new Date();
+  const grants = await db()
+    .select()
+    .from(credit)
+    .where(
+      and(
+        eq(credit.userId, params.userId),
+        eq(credit.transactionType, CreditTransactionType.GRANT),
+        eq(credit.status, CreditStatus.ACTIVE),
+        gt(credit.remainingCredits, 0),
+        or(isNull(credit.expiresAt), gt(credit.expiresAt, now))
+      )
+    )
+    .orderBy(asc(credit.expiresAt), asc(credit.createdAt), asc(credit.id))
+    .limit(10000);
+  let remaining = params.credits;
+  const consumedItems = [];
+  const updates = [];
+  for (const grant of grants) {
+    if (!remaining) break;
+    const amount = Math.min(remaining, grant.remainingCredits);
+    consumedItems.push({ creditId: grant.id, creditsConsumed: amount });
+    // remaining_credits is NOT NULL: a changed or revoked grant aborts ALL
+    // batch statements, including the task and consumption record inserts.
+    updates.push(
+      db()
+        .update(credit)
+        .set({
+          remainingCredits: sql`case when ${credit.remainingCredits} = ${grant.remainingCredits} and ${credit.status} = 'active' then ${credit.remainingCredits} - ${amount} else null end`,
+        })
+        .where(eq(credit.id, grant.id))
+    );
+    remaining -= amount;
+  }
+  if (remaining) throw new Error('Insufficient credits');
+  const consumedCredit: NewCredit = {
+    id: getUuid(),
+    userId: params.userId,
+    transactionNo: getSnowId(),
+    transactionType: CreditTransactionType.CONSUME,
+    transactionScene: 'ai_task',
+    credits: -params.credits,
+    remainingCredits: 0,
+    status: CreditStatus.ACTIVE,
+    description: params.description,
+    consumedDetail: JSON.stringify(consumedItems),
+    metadata: JSON.stringify({ taskId: params.taskId }),
+  };
+  return { updates, consumedCredit };
+}
+
 export async function revoke(consumeCreditId: string) {
   const [consumeRecord] = await db()
     .select()
@@ -234,6 +294,37 @@ export async function revoke(consumeCreditId: string) {
   if (!consumeRecord || !consumeRecord.consumedDetail) return;
 
   const items = JSON.parse(consumeRecord.consumedDetail);
+
+  if (envConfigs.database_provider === 'd1') {
+    // Restore only while the consume record is active; marking it deleted
+    // LAST, in the same atomic batch, makes concurrent retries harmless.
+    const queries = items.map((item: any) =>
+      db()
+        .update(credit)
+        .set({
+          remainingCredits: sql`${credit.remainingCredits} + ${item.creditsConsumed}`,
+        })
+        .where(
+          and(
+            eq(credit.id, item.creditId),
+            sql`exists (select 1 from credit c where c.id = ${consumeCreditId} and c.status = 'active' and c.transaction_type = 'consume')`
+          )
+        )
+    );
+    queries.push(
+      db()
+        .update(credit)
+        .set({ status: CreditStatus.DELETED })
+        .where(
+          and(
+            eq(credit.id, consumeCreditId),
+            eq(credit.status, CreditStatus.ACTIVE)
+          )
+        )
+    );
+    await runD1AtomicBatch(queries);
+    return;
+  }
 
   await db().transaction(async (tx: any) => {
     // Claim the consumption record first (ACTIVE -> DELETED). Concurrent

@@ -6,7 +6,12 @@ import {
 } from '@/core/ai';
 import { GENJUTSU_ENDPOINT, GENJUTSU_MODEL_ID } from '@/config/genjutsu';
 import { getStudioModel, STUDIO_MODELS } from '@/config/studio-models';
-import { AITaskStatus, findTask, updateTask } from '@/modules/ai-tasks/service';
+import {
+  AITaskStatus,
+  findTask,
+  retryFailedRefund,
+  updateTask,
+} from '@/modules/ai-tasks/service';
 import { getStorage } from '@/modules/storage/service';
 
 // Retired fal models — still listed in history, never polled again.
@@ -34,6 +39,7 @@ export function taskView(task: any) {
     video?: { url?: string };
     images?: { url?: string }[];
     error?: string;
+    archivePending?: boolean;
   }>(task.taskResult);
   const options = parseJson<{ aspect?: string }>(task.options);
   return {
@@ -46,6 +52,7 @@ export function taskView(task: any) {
     credits: Number(task.costCredits) || 0,
     url: result.video?.url ?? result.images?.[0]?.url ?? null,
     error: result.error ?? null,
+    archivePending: result.archivePending === true,
     createdAt: task.createdAt,
   };
 }
@@ -64,7 +71,36 @@ export async function archive(url: string, key: string, contentType: string) {
   try {
     const storage = await getStorage();
     if (!storage) return url;
-    const res = await storage.downloadAndUpload({ url, key, contentType });
+    const response = await fetch(url, { signal: AbortSignal.timeout(45000) });
+    if (!response.ok || !response.body)
+      throw new Error('Could not retrieve generated media');
+    const maxBytes = 64 * 1024 * 1024;
+    if (Number(response.headers.get('content-length')) > maxBytes) {
+      await response.body.cancel();
+      throw new Error('Generated media exceeds archive limit');
+    }
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        size += value.length;
+        if (size > maxBytes)
+          throw new Error('Generated media exceeds archive limit');
+        chunks.push(value);
+      }
+    } finally {
+      await reader.cancel().catch(() => {});
+    }
+    const body = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) {
+      body.set(chunk, offset);
+      offset += chunk.length;
+    }
+    const res = await storage.uploadFile({ body, key, contentType });
     if (res.success && res.url?.startsWith('https://')) return res.url;
     console.error('archive failed:', res.error ?? res.url);
   } catch (error) {
@@ -89,10 +125,16 @@ async function pollEvolink(
     if (!res.url) return { status: 'failed', error: 'No result returned' };
     if (task.mediaType === AIMediaType.IMAGE) {
       const url = await archive(res.url, `studio/${task.id}.png`, 'image/png');
-      return { status: 'success', taskResult: { images: [{ url }] } };
+      return {
+        status: 'success',
+        taskResult: { images: [{ url }], archivePending: url === res.url },
+      };
     }
     const url = await archive(res.url, `studio/${task.id}.mp4`, 'video/mp4');
-    return { status: 'success', taskResult: { video: { url } } };
+    return {
+      status: 'success',
+      taskResult: { video: { url }, archivePending: url === res.url },
+    };
   }
   return { status: 'running' };
 }
@@ -122,13 +164,61 @@ async function pollFal(
     ) {
       return { status: 'failed', error: 'No result returned' };
     }
-    return { status: 'success', taskResult: res.taskResult };
+    const original =
+      (res.taskResult as any)?.video?.url ??
+      (res.taskResult as any)?.images?.[0]?.url;
+    const video = mediaType === AIMediaType.VIDEO;
+    const url = await archive(
+      original,
+      `studio/${task.id}.${video ? 'mp4' : 'png'}`,
+      video ? 'video/mp4' : 'image/png'
+    );
+    return {
+      status: 'success',
+      taskResult: {
+        ...(res.taskResult as any),
+        ...(video ? { video: { url } } : { images: [{ url }] }),
+        archivePending: url === original,
+      },
+    };
   }
   return { status: 'running' };
 }
 
 /** Poll the provider once and persist a terminal status. Safe to repeat. */
 export async function refreshTask(task: any, configs: Record<string, string>) {
+  if (task.status === AITaskStatus.FAILED) {
+    await retryFailedRefund(task.id);
+    return taskView(task);
+  }
+  if (task.status === AITaskStatus.CANCELED) return taskView(task);
+  if (task.status === AITaskStatus.SUCCESS) {
+    const result = parseJson<any>(task.taskResult);
+    if (result.archivePending) {
+      const original = result.video?.url ?? result.images?.[0]?.url;
+      if (original) {
+        const video = Boolean(result.video);
+        const url = await archive(
+          original,
+          `studio/${task.id}.${video ? 'mp4' : 'png'}`,
+          video ? 'video/mp4' : 'image/png'
+        );
+        if (url !== original) {
+          await updateTask({
+            taskId: task.id,
+            status: AITaskStatus.SUCCESS,
+            taskResult: {
+              ...result,
+              archivePending: false,
+              ...(video ? { video: { url } } : { images: [{ url }] }),
+            },
+          });
+          return taskView(await findTask(task.id));
+        }
+      }
+    }
+    return taskView(task);
+  }
   const model = getStudioModel(task.model);
   const provider =
     task.model === GENJUTSU_MODEL_ID
@@ -176,6 +266,17 @@ export async function refreshTask(task: any, configs: Record<string, string>) {
         taskId: task.id,
         status: AITaskStatus.SUCCESS,
         taskResult: outcome.taskResult,
+      });
+    } else if (
+      Date.now() - new Date(task.createdAt).getTime() >
+      STUCK_AFTER_MS
+    ) {
+      await updateTask({
+        taskId: task.id,
+        status: AITaskStatus.FAILED,
+        taskResult: {
+          error: 'Generation timed out. Your balance will be restored.',
+        },
       });
     } else if (task.status === AITaskStatus.PENDING) {
       await updateTask({ taskId: task.id, status: AITaskStatus.PROCESSING });

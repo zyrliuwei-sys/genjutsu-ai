@@ -15,6 +15,44 @@ import { drizzle } from 'drizzle-orm/sqlite-proxy';
 
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
+/** REST batch body preserves atomicity; SQL values remain bound parameters.
+ * https://developers.cloudflare.com/api/resources/d1/subresources/database/methods/query/
+ */
+export async function runD1HttpAtomicBatch(
+  batch: { sql: string; params: unknown[] }[]
+) {
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+  const databaseId = process.env.D1_DATABASE_ID;
+  if (!accountId || !databaseId)
+    throw new Error('D1 HTTP configuration is missing');
+  const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`;
+  for (const forceRefresh of [false, true]) {
+    const response = await fetch(url, {
+      method: 'POST',
+      signal: AbortSignal.timeout(30000),
+      headers: {
+        Authorization: `Bearer ${await getToken(forceRefresh)}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ batch }),
+    });
+    if (response.status === 401 && !forceRefresh) continue;
+    const data = (await response.json().catch(() => null)) as any;
+    if (
+      !response.ok ||
+      !data?.success ||
+      data.result?.some((result: any) => result.success === false)
+    ) {
+      throw new Error(
+        data?.errors?.map((error: any) => error.message).join('; ') ||
+          'Atomic D1 batch failed'
+      );
+    }
+    return data.result;
+  }
+  throw new Error('D1 HTTP authentication failed');
+}
+
 async function getToken(forceRefresh = false): Promise<string> {
   if (process.env.CLOUDFLARE_API_TOKEN) return process.env.CLOUDFLARE_API_TOKEN;
   if (!forceRefresh && cachedToken && Date.now() < cachedToken.expiresAt) {
