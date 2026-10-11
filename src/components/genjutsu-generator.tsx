@@ -1857,19 +1857,14 @@ export function GenjutsuGenerator({
                     <Volume2 className="size-4" />
                   )}
                 </button>
-                <span className="absolute top-3 left-3 rounded-full bg-black/70 px-2.5 py-1 text-xs text-white backdrop-blur">
-                  {showWork
-                    ? task?.referenceName || copy.generatedVideo
-                    : referenceSource === 'upload'
-                      ? copy.customReference
-                      : example.name}{' '}
-                  ·{' '}
-                  {showWork
-                    ? 'work'
-                    : referenceSource === 'upload'
-                      ? copy.uploadReference
-                      : 'Higgsfield reference'}
-                </span>
+                {(showWork || referenceSource === 'upload') && (
+                  <span className="absolute top-3 left-3 rounded-full bg-black/70 px-2.5 py-1 text-xs text-white backdrop-blur">
+                    {showWork
+                      ? task?.referenceName || copy.generatedVideo
+                      : copy.customReference}{' '}
+                    · {showWork ? 'work' : copy.uploadReference}
+                  </span>
+                )}
               </>
             )}
             {showWork &&
@@ -1911,11 +1906,6 @@ export function GenjutsuGenerator({
               </p>
             ) : null}
           </div>
-          {!showWork && !showStill && (
-            <p className="text-muted-foreground text-xs">
-              {copy.referenceDisclaimer}
-            </p>
-          )}
         </section>
       </div>
 
