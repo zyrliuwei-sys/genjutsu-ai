@@ -1,0 +1,5 @@
+/videos/effect-clips/*
+  Cache-Control: public, max-age=86400
+
+/videos/higgsfield-reference/*
+  Cache-Control: public, max-age=86400

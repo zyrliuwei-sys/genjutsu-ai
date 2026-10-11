@@ -556,7 +556,7 @@ export function GenjutsuGenerator({
       });
       const preview = URL.createObjectURL(file);
       try {
-        const metadata = await readMediaMetadata(preview, 'video');
+        const metadata = await readMediaMetadata(preview, 'video', file);
         genjutsuCredits(metadata.duration);
         return { file, ...metadata };
       } finally {
@@ -1051,8 +1051,20 @@ export function GenjutsuGenerator({
                       {copy.referenceEmpty}
                     </span>
                   </div>
-                ) : referenceVideo &&
-                  (referenceSource === 'upload' || !effectQuery.isFetching) ? (
+                ) : referenceSource === 'effect' ? (
+                  <video
+                    key={effectClip}
+                    data-testid="selected-reference-preview"
+                    src={effectClip}
+                    poster={selected.image}
+                    preload="metadata"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 size-full object-cover"
+                  />
+                ) : referenceVideo ? (
                   <PreviewAsset
                     asset={referenceVideo}
                     className="absolute inset-0"
@@ -1062,22 +1074,23 @@ export function GenjutsuGenerator({
                     <Loader2 className="size-5 animate-spin" />
                   </div>
                 )}
-                {referenceVideo && !referenceClosed && (
-                  <button
-                    type="button"
-                    data-testid="remove-reference-video"
-                    aria-label={copy.removeReference}
-                    title={copy.removeReference}
-                    disabled={running || savingDraft || validatingMedia}
-                    onClick={() => {
-                      setReferenceClosed(true);
-                      setReferenceVideo(undefined);
-                    }}
-                    className="hover:bg-destructive focus-visible:ring-primary absolute top-2 right-2 z-30 flex size-7 items-center justify-center rounded-full bg-black/80 text-white transition-colors focus-visible:ring-2 disabled:opacity-50"
-                  >
-                    <X className="size-3.5" aria-hidden="true" />
-                  </button>
-                )}
+                {!referenceClosed &&
+                  (referenceVideo || referenceSource === 'effect') && (
+                    <button
+                      type="button"
+                      data-testid="remove-reference-video"
+                      aria-label={copy.removeReference}
+                      title={copy.removeReference}
+                      disabled={running || savingDraft || validatingMedia}
+                      onClick={() => {
+                        setReferenceClosed(true);
+                        setReferenceVideo(undefined);
+                      }}
+                      className="hover:bg-destructive focus-visible:ring-primary absolute top-2 right-2 z-30 flex size-7 items-center justify-center rounded-full bg-black/80 text-white transition-colors focus-visible:ring-2 disabled:opacity-50"
+                    >
+                      <X className="size-3.5" aria-hidden="true" />
+                    </button>
+                  )}
               </div>
               <p className="text-muted-foreground text-[11px]">
                 {copy.referenceRequirements}

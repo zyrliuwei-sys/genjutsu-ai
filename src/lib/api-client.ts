@@ -54,10 +54,14 @@ export const apiGet = <T>(url: string, init?: RequestInit) =>
 
 /** Same-origin public media, with cancellation for a changed template. */
 export async function apiGetMedia(url: string, signal?: AbortSignal) {
-  const res = await fetch(url, { signal });
+  const timeout = AbortSignal.timeout(15000);
+  const res = await fetch(url, {
+    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+  });
   if (!res.ok || !res.headers.get('content-type')?.includes('video/'))
     throw new ApiError(-1, 'Could not load the selected reference video');
-  return res.blob();
+  // The timeout covers the response body too, not just its headers.
+  return await res.blob();
 }
 
 export const apiPost = <T = void>(url: string, body?: unknown) =>
