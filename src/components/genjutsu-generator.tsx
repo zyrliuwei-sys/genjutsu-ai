@@ -215,6 +215,17 @@ const TEMPLATES = TEMPLATE_CANDIDATES.filter((template) => {
   seenVideos.add(template.video);
   return true;
 });
+// Vertical effect from our own source clip; second so the default stays put.
+TEMPLATES.splice(1, 0, {
+  id: 'fire-skirt-spin',
+  name: 'Fire Skirt Spin',
+  image: '/videos/effects/fire-skirt.jpg',
+  video: '/videos/effects/fire-skirt.mp4',
+  duration: 9,
+  ratios: '9:16',
+  tag: 'New',
+  prompt: '',
+});
 for (const template of TEMPLATES) {
   const assetId = template.video.split('/').pop()?.replace('.mp4', '');
   if (assetId && GENJUTSU_DIRECTIONS[assetId])
@@ -472,6 +483,8 @@ export function GenjutsuGenerator({
   const [selectedId, setSelectedId] = useState(TEMPLATES[0].id);
   const [exampleId, setExampleId] = useState(TEMPLATES[0].id);
   const [validatingMedia, setValidatingMedia] = useState(false);
+  // Photos validate separately so they stay selectable while a video trims.
+  const [validatingPhoto, setValidatingPhoto] = useState(false);
   const [trimProgress, setTrimProgress] = useState<number>();
   const clipController = useRef<AbortController | undefined>(undefined);
   useEffect(() => () => clipController.current?.abort(), []);
@@ -765,6 +778,12 @@ export function GenjutsuGenerator({
       preview: URL.createObjectURL(effectQuery.data.file),
       uploading: false,
     });
+    // The editing API keeps the input framing, so the size follows the clip.
+    const closest = closestAspect(
+      effectQuery.data.width,
+      effectQuery.data.height
+    );
+    if (closest) setAspect(closest);
   }, [
     effectQuery.data,
     draftReady,
@@ -885,8 +904,9 @@ export function GenjutsuGenerator({
     }
     let preview = URL.createObjectURL(file);
     const controller = new AbortController();
-    clipController.current = controller;
-    setValidatingMedia(true);
+    if (isVideo) clipController.current = controller;
+    const setValidating = isVideo ? setValidatingMedia : setValidatingPhoto;
+    setValidating(true);
     try {
       let metadata = await readMediaMetadata(
         preview,
@@ -966,10 +986,12 @@ export function GenjutsuGenerator({
       if (!controller.signal.aborted)
         toast.error(error instanceof Error ? error.message : 'Invalid media');
     } finally {
-      if (clipController.current === controller)
-        clipController.current = undefined;
-      setValidatingMedia(false);
-      setTrimProgress(undefined);
+      if (isVideo) {
+        if (clipController.current === controller)
+          clipController.current = undefined;
+        setTrimProgress(undefined);
+      }
+      setValidating(false);
       if (jobUrl) {
         setVideoJob((current) => (current === jobUrl ? undefined : current));
         URL.revokeObjectURL(jobUrl);
@@ -1222,7 +1244,8 @@ export function GenjutsuGenerator({
     !recoveryQuery.isFetching &&
     !uploading &&
     !running &&
-    !validatingMedia;
+    !validatingMedia &&
+    !validatingPhoto;
 
   async function startGeneration() {
     setSubmitting(true);
@@ -1351,7 +1374,7 @@ export function GenjutsuGenerator({
     !draftReady ||
     running ||
     checkingGeneration ||
-    validatingMedia ||
+    validatingPhoto ||
     savingDraft;
   const generateDisabled =
     !canGenerate ||
@@ -1934,6 +1957,25 @@ export function GenjutsuGenerator({
                   : copy.customReference}{' '}
                 · {showWork ? 'work' : copy.uploadReference}
               </span>
+            )}
+            {showWork && task && isDone(task) && (
+              <button
+                type="button"
+                data-testid="close-work"
+                aria-label="Close video"
+                title="Close video"
+                onClick={() => {
+                  // The result stays in My videos; this only clears the panel.
+                  if (user)
+                    sessionStorage.removeItem(`genjutsu-task:${user.id}`);
+                  sessionStorage.removeItem(submissionStorageKey);
+                  setTaskId(undefined);
+                  setPreviewMode('example');
+                }}
+                className="hover:bg-destructive absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full bg-black/70 text-white backdrop-blur transition-colors"
+              >
+                <X className="size-4" aria-hidden="true" />
+              </button>
             )}
             {showWork &&
             task?.status === 'success' &&

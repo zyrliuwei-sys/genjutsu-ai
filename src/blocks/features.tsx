@@ -16,7 +16,7 @@ const SWAPS = [
     key: 'dance',
     width: 720,
     height: 1280,
-    photo: '/videos/swap/photo-1.jpg',
+    photo: '/videos/swap/photo-2.jpg',
   },
 ] as const;
 

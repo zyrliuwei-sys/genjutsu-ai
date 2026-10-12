@@ -8,6 +8,7 @@ import {
   LifeBuoy,
   Receipt,
   User,
+  Video,
 } from 'lucide-react';
 
 import { envConfigs } from '@/config';
@@ -27,6 +28,12 @@ function SettingsLayout() {
       href: '/settings',
       label: m['settings.nav.overview'](),
       icon: LayoutDashboard,
+      group,
+    },
+    {
+      href: '/settings/videos',
+      label: m['settings.nav.videos'](),
+      icon: Video,
       group,
     },
     {

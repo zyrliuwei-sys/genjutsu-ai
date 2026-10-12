@@ -65,29 +65,15 @@ export async function apiGetMedia(url: string, signal?: AbortSignal) {
 }
 
 /** Validate the response before creating a browser download (never save JSON errors). */
+/** Validates, then hands the file to the browser's download manager. */
 export async function apiDownload(url: string) {
-  const response = await fetch(url, { signal: AbortSignal.timeout(120000) });
-  const type = response.headers.get('content-type') || '';
-  if (
-    !response.ok ||
-    (!type.startsWith('video/') && !type.startsWith('image/'))
-  ) {
-    const error = await response.json().catch(() => null);
-    throw new ApiError(-1, error?.message || 'Download failed. Please retry.');
-  }
-  const blob = await response.blob();
-  const filename =
-    response.headers
-      .get('content-disposition')
-      ?.match(/filename="([^"]+)"/)?.[1] || 'genjutsu-video.mp4';
-  const objectUrl = URL.createObjectURL(blob);
+  await request(`${url}${url.includes('?') ? '&' : '?'}check=1`);
   const link = document.createElement('a');
-  link.href = objectUrl;
-  link.download = filename;
+  link.href = url;
+  link.download = '';
   document.body.appendChild(link);
   link.click();
   link.remove();
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
 }
 
 export const apiPost = <T = void>(url: string, body?: unknown) =>

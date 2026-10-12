@@ -76,6 +76,11 @@ export const GENJUTSU_REFERENCES: Record<
     name: 'Hotel Lobby',
     direction: 'Keep the source performance and camera timing unchanged.',
   },
+  'fire-skirt-spin': {
+    name: 'Fire Skirt Spin',
+    direction:
+      'Replace only the dancer; keep the skirt spins, floor work, sparks and camera framing unchanged.',
+  },
   'vikas-edit': {
     name: 'Vikas Edit',
     direction:
@@ -93,6 +98,8 @@ export const GENJUTSU_DIRECTIONS: Record<string, string> = {
     'Recast the original two-person martial-arts performance with the supplied lead identity. Keep punches, blocks, footwork, contacts and camera movement aligned to the input. Photoreal dojo, plausible anatomy and spatial continuity.',
   launch:
     'Recast the main performer while retaining the source action and edit rhythm. Create physically grounded, photoreal changes of surroundings with continuous subject identity. Do not invent extra cuts or change the choreography.',
+  'fire-skirt':
+    'Replace the solo dancer using the supplied character image. Preserve the exact skirt spins, handstand and floor work, the glowing spark trails, the empty studio and the camera framing. Photoreal skin and fabric, consistent face, no extra limbs or flicker.',
   'feature-1-2':
     'Replace the main performer using the supplied character image. Preserve the exact source motion, camera framing and interaction with the surroundings. Realistic live-action textures, consistent face and wardrobe, no animation aesthetic.',
   'feature-1-1':

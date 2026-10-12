@@ -2,8 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { getAuth } from '@/core/auth';
 import { getAllConfigs } from '@/modules/config/service';
-import { getDownload } from '@/modules/media-download/service';
-import { respErr } from '@/lib/resp';
+import { findDownload, getDownload } from '@/modules/media-download/service';
+import { respData, respErr } from '@/lib/resp';
 
 async function GET({ request }: { request: Request }) {
   try {
@@ -15,12 +15,19 @@ async function GET({ request }: { request: Request }) {
     if (!id || id.length > 100)
       return respErr('Invalid task ID', { status: 400 });
     const configs = await getAllConfigs();
+    // `check` validates first so the browser's own download manager can
+    // stream the file afterwards without the page swallowing errors.
+    if (new URL(request.url).searchParams.has('check')) {
+      await findDownload(session.user.id, id, configs.r2_domain);
+      return respData({ ok: true });
+    }
     const file = await getDownload(session.user.id, id, configs.r2_domain);
     // Binary success response, JSON error envelopes follow the API convention.
     return new Response(file.body, {
       headers: {
         'Content-Type': file.type,
         'Content-Disposition': `attachment; filename="${file.filename}"`,
+        ...(file.size ? { 'Content-Length': file.size } : {}),
         'Cache-Control': 'private, no-store',
         'X-Content-Type-Options': 'nosniff',
       },
