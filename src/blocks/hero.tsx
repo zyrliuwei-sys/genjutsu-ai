@@ -69,13 +69,6 @@ export function Hero() {
               {m['landing.hero.cta']()}
               <ArrowRight aria-hidden className="size-4" />
             </a>
-            <a
-              href="#genjutsu-effects"
-              className="eg-pill-light"
-              onClick={() => track('hero_cta', { target: 'effects' })}
-            >
-              {m['landing.hero.secondary']()}
-            </a>
           </div>
           <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-sm">
             {m['landing.hero.trust']()}

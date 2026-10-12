@@ -287,6 +287,7 @@ function UploadSlot({
   removeLabel,
   testId,
   frameClassName,
+  rootClassName,
 }: {
   label: string;
   hint: string;
@@ -299,10 +300,11 @@ function UploadSlot({
   removeLabel: string;
   testId: string;
   frameClassName?: string;
+  rootClassName?: string;
 }) {
   const inputId = useId();
   return (
-    <div className="flex min-w-0 flex-col gap-2">
+    <div className={cn('flex min-w-0 flex-col gap-2', rootClassName)}>
       <div className="flex flex-col">
         <label htmlFor={inputId} className="truncate text-sm font-medium">
           {label}
@@ -456,7 +458,7 @@ export function GenjutsuGenerator({
   // Phones only: length, size and own-video upload sit behind a toggle.
   const [moreOpen, setMoreOpen] = useState(false);
   // The preview box takes the media's aspect ratio, so clips get no bars
-  // (desktop caps the height and narrows the box for tall media).
+  // (desktop caps the height at 560px and narrows the box for tall media).
   const [mediaRatio, setMediaRatio] = useState(16 / 9);
   const fitMedia = (width: number, height: number) => {
     if (width && height) setMediaRatio(width / height);
@@ -1318,17 +1320,19 @@ export function GenjutsuGenerator({
       <div
         ref={generatorRef}
         id="generator"
-        className="border-border bg-muted text-foreground grid scroll-mt-24 gap-3 rounded-3xl border p-3 max-lg:pb-24 lg:grid-cols-[300px_minmax(0,340px)_minmax(0,1fr)]"
+        className="border-border bg-muted text-foreground grid scroll-mt-24 grid-cols-1 gap-3 rounded-3xl border p-3 max-lg:pb-24 lg:grid-cols-[300px_minmax(0,1fr)]"
       >
         <section
           id="genjutsu-upload"
           aria-label="Create"
-          className="bg-card order-3 flex min-h-0 scroll-mt-24 flex-col gap-4 rounded-2xl p-4 lg:order-1"
+          className="bg-card order-3 flex min-h-0 scroll-mt-24 flex-col gap-4 rounded-2xl p-4 lg:col-start-1 lg:row-span-2 lg:row-start-1"
         >
           <h2 className="text-lg font-semibold max-lg:hidden">AI Effects</h2>
           <div
             className={cn(
-              'grid grid-cols-2 gap-2',
+              // Desktop: the effect plays in the big preview, so only the
+              // photo slot stays here and fills the column height.
+              'grid grid-cols-2 gap-2 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2',
               compactReference && 'max-lg:grid-cols-1'
             )}
           >
@@ -1338,7 +1342,7 @@ export function GenjutsuGenerator({
                 compactReference && 'max-lg:hidden'
               )}
             >
-              <div className="flex flex-col">
+              <div className="flex flex-col lg:hidden">
                 <label
                   htmlFor={referenceInputId}
                   className="text-sm font-medium"
@@ -1353,7 +1357,7 @@ export function GenjutsuGenerator({
               </div>
               <div
                 data-testid="selected-reference-video"
-                className="border-border bg-muted relative aspect-[3/4] overflow-hidden rounded-xl border"
+                className="border-border bg-muted relative aspect-[3/4] overflow-hidden rounded-xl border lg:hidden"
               >
                 <input
                   id={referenceInputId}
@@ -1453,23 +1457,6 @@ export function GenjutsuGenerator({
                   {copy.trimming(trimProgress)}
                 </p>
               )}
-              {referenceSource === 'upload' &&
-                referenceVideo?.sourceDuration &&
-                !validatingMedia && (
-                  <p
-                    data-testid="video-trim-range"
-                    className="text-muted-foreground text-xs"
-                  >
-                    {copy.trimmedReference(
-                      (referenceVideo.trimStart || 0).toFixed(2),
-                      (
-                        (referenceVideo.trimStart || 0) +
-                        (referenceVideo.duration || 0)
-                      ).toFixed(2),
-                      referenceVideo.sourceDuration.toFixed(2)
-                    )}
-                  </p>
-                )}
               {referenceSource === 'effect' &&
                 !referenceClosed &&
                 effectQuery.isError && (
@@ -1483,8 +1470,8 @@ export function GenjutsuGenerator({
                 )}
             </div>
             <UploadSlot
-              label="Main character"
-              hint="Stays still"
+              label="Your photo"
+              hint="One person, face clearly visible"
               kind="image"
               disabled={leadDisabled}
               accept="image/jpeg,image/png,image/webp"
@@ -1493,9 +1480,11 @@ export function GenjutsuGenerator({
               onRemove={() => setLead(undefined)}
               removeLabel={copy.removePhoto}
               testId="upload-lead"
-              frameClassName={
-                compactReference ? 'max-lg:aspect-[4/3]' : undefined
-              }
+              rootClassName="lg:min-h-0 lg:flex-1"
+              frameClassName={cn(
+                'lg:aspect-auto lg:min-h-48 lg:flex-1',
+                compactReference && 'max-lg:aspect-[4/3]'
+              )}
             />
           </div>
 
@@ -1620,6 +1609,11 @@ export function GenjutsuGenerator({
           </div>
 
           <div className="mt-auto flex flex-col gap-2">
+            <p className="text-muted-foreground text-center text-xs max-lg:hidden">
+              {copy.generationCost(
+                Math.ceil(costCredits / GENJUTSU_CREDITS_PER_GENERATION)
+              )}
+            </p>
             {Boolean(
               (creditsQuery.data?.balance ?? 0) %
               GENJUTSU_CREDITS_PER_GENERATION
@@ -1666,13 +1660,13 @@ export function GenjutsuGenerator({
         <section
           id="genjutsu-effects"
           aria-label="Select effect"
-          className="bg-card @container order-2 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:order-2"
+          className="bg-card order-2 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-2 lg:row-start-2"
         >
           <h2 className="text-lg font-semibold">Select Effect</h2>
-          <div className="relative lg:min-h-[calc((100cqw-1.25rem)*2+2rem)] lg:flex-1">
+          <div className="relative">
             <div
               data-testid="template-list"
-              className="flex snap-x gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:absolute lg:inset-0 lg:grid lg:snap-none lg:auto-rows-max lg:grid-cols-2 lg:content-start lg:overflow-x-visible lg:overflow-y-auto lg:overscroll-contain"
+              className="flex snap-x gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin]"
             >
               {TEMPLATES.map((template) => (
                 <button
@@ -1681,7 +1675,7 @@ export function GenjutsuGenerator({
                   aria-pressed={selected.id === template.id}
                   data-testid={`template-${template.id}`}
                   className={cn(
-                    'group relative aspect-[3/4] w-28 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-auto',
+                    'group relative aspect-[3/4] w-28 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
                     selected.id === template.id
                       ? 'ring-primary'
                       : 'ring-transparent'
@@ -1735,6 +1729,29 @@ export function GenjutsuGenerator({
                   </span>
                 </button>
               ))}
+              {/* Opens the reference-video input kept in the Create column. */}
+              <label
+                htmlFor={referenceInputId}
+                data-testid="template-own-video"
+                aria-pressed={referenceSource === 'upload'}
+                onClick={() => track('effect_select', { effect: 'own_video' })}
+                className={cn(
+                  'border-border bg-muted hover:border-primary/70 relative flex aspect-[3/4] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-2 text-center ring-2 transition-colors lg:w-32',
+                  referenceSource === 'upload'
+                    ? 'ring-primary'
+                    : 'ring-transparent'
+                )}
+              >
+                <span className="bg-primary/15 text-primary ring-primary/40 flex size-10 items-center justify-center rounded-full ring-1">
+                  <Video className="size-5" aria-hidden="true" />
+                </span>
+                <span className="text-sm leading-tight font-semibold">
+                  {copy.uploadReference}
+                </span>
+                <span className="text-muted-foreground text-[11px]">
+                  MP4, MOV
+                </span>
+              </label>
             </div>
           </div>
         </section>
@@ -1742,7 +1759,7 @@ export function GenjutsuGenerator({
         <section
           ref={previewRef}
           aria-label="Preview"
-          className="bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:order-3"
+          className="bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-2 lg:row-start-1"
         >
           <div className="bg-muted flex w-fit gap-1 rounded-xl p-1">
             <button
@@ -1792,7 +1809,7 @@ export function GenjutsuGenerator({
           </div>
           <div
             style={{ '--media-ratio': mediaRatio } as React.CSSProperties}
-            className="relative flex items-center justify-center overflow-hidden rounded-xl bg-black max-lg:aspect-(--media-ratio) lg:mx-auto lg:h-[min(596px,calc(100cqw/var(--media-ratio)))] lg:w-[min(100cqw,calc(596px*var(--media-ratio)))]"
+            className="relative flex items-center justify-center overflow-hidden rounded-xl bg-black max-lg:aspect-(--media-ratio) lg:mx-auto lg:h-[min(560px,calc(100cqw/var(--media-ratio)))] lg:w-[min(100cqw,calc(560px*var(--media-ratio)))]"
           >
             <img
               src={example.image}
