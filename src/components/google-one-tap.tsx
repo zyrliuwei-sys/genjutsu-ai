@@ -7,9 +7,10 @@ import { usePathname } from '@/core/i18n/navigation';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { usePublicConfig } from '@/hooks/use-public-config';
 
-// Only prompt where visitors show purchase/creation intent. Site-wide prompts
+// Only prompt where visitors show purchase/creation intent (the homepage hosts
+// the generator, so it counts). Site-wide prompts
 // turned content readers into low-intent sign-ups that never generated.
-const ONE_TAP_PATHS = new Set(['/create', '/pricing']);
+const ONE_TAP_PATHS = new Set(['/', '/create', '/pricing']);
 
 // Mounts the Google One Tap prompt for signed-out visitors when the
 // admin has enabled it. Self-contained: pulls config from

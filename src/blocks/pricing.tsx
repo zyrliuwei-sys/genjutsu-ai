@@ -85,6 +85,19 @@ export function Pricing({
   // One shared prepaid balance for every generation API.
   const clipCost =
     singleVideo?.credits ?? (clipSeconds ? genjutsuCredits(clipSeconds) : 0);
+  function packQuantity(product: PricingProduct) {
+    const count = Math.floor(product.credits / GENJUTSU_CREDITS);
+    return {
+      quantity:
+        count === 1
+          ? m['landing.pricing.pack_one_video']()
+          : m['landing.pricing.pack_videos']({ count }),
+      quantityNote: m['landing.pricing.pack_unit_price']({
+        price: usd(Math.round(product.priceInCents / count)),
+      }),
+    };
+  }
+
   function plan(
     productId: string,
     name: string,
@@ -103,9 +116,8 @@ export function Pricing({
         ? m['landing.text_video.pack_count']({
             count: Math.floor(product.credits / clipCost),
           })
-        : m['landing.pricing.pack_videos']({
-            count: Math.floor(product.credits / GENJUTSU_CREDITS),
-          }),
+        : undefined,
+      ...(singleVideo ? {} : packQuantity(product)),
       price: usd(product.priceInCents),
       priceInCents: product.priceInCents,
       currency: product.currency,
@@ -288,7 +300,7 @@ export function Pricing({
                 {pendingPlan.price}
               </p>
               <p className="text-muted-foreground mt-2 text-sm">
-                {pendingPlan.description}
+                {pendingPlan.quantity ?? pendingPlan.description}
               </p>
               <button
                 type="button"

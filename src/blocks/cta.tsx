@@ -3,19 +3,19 @@ import { m } from '@/paraglide/messages.js';
 import { LoopVideo } from '@/components/loop-video';
 import { Reveal } from '@/components/reveal';
 
-/** Closing frame: a widescreen still with the pitch set as its subtitle. */
+/** Closing frame: the Genjutsu STORM clip with the pitch set as its subtitle. */
 export function CTA() {
   return (
     <section className="px-4 pb-24 sm:pb-32">
       <Reveal className="mx-auto max-w-7xl">
         <div className="eg-screen relative overflow-hidden rounded-lg">
           <LoopVideo
-            src="/videos/cta-astronaut.mp4"
-            poster="/videos/cta-astronaut.jpg"
+            src="/videos/higgsfield-reference/crowd.mp4"
+            poster="/videos/higgsfield-reference/crowd.webp"
             label={m['landing.alt.cta']()}
-            width={1344}
-            height={768}
-            className="absolute inset-0 size-full object-[50%_40%] opacity-60"
+            width={1920}
+            height={1080}
+            className="absolute inset-0 size-full object-[50%_45%] opacity-60"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/60" />
           <div className="relative flex min-h-[460px] flex-col items-center justify-end px-6 pt-24 pb-14 text-center text-white sm:min-h-[520px] sm:pb-16">

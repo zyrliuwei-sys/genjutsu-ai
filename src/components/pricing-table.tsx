@@ -27,6 +27,10 @@ export interface PricingPlan {
   interval?: string;
   featured?: boolean;
   badge?: string;
+  /** What the pack buys, shown prominently under the price (e.g. "3 videos"). */
+  quantity?: string;
+  /** Small text beside `quantity` (e.g. per-unit price). */
+  quantityNote?: string;
   features: PricingFeature[];
   buttonText?: string;
   productId?: string;
@@ -173,6 +177,19 @@ export function PricingTable({
               <span className="text-muted-foreground mb-1 text-sm line-through">
                 {plan.originalPrice}
               </span>
+            )}
+
+            {plan.quantity && (
+              <div className="bg-primary/10 ring-primary/30 mb-3 flex items-baseline justify-between gap-2 rounded-md px-3 py-2 ring-1">
+                <span className="text-foreground text-lg font-semibold">
+                  {plan.quantity}
+                </span>
+                {plan.quantityNote && (
+                  <span className="text-muted-foreground text-xs">
+                    {plan.quantityNote}
+                  </span>
+                )}
+              </div>
             )}
 
             {/* Description */}
