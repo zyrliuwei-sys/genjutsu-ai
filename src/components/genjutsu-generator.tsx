@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Check,
+  ChevronDown,
   Download,
   Eye,
   ImageIcon,
@@ -285,6 +286,7 @@ function UploadSlot({
   onRemove,
   removeLabel,
   testId,
+  frameClassName,
 }: {
   label: string;
   hint: string;
@@ -296,6 +298,7 @@ function UploadSlot({
   onRemove: () => void;
   removeLabel: string;
   testId: string;
+  frameClassName?: string;
 }) {
   const inputId = useId();
   return (
@@ -309,7 +312,8 @@ function UploadSlot({
       <div
         className={cn(
           'group hover:border-primary/70 border-border bg-muted relative aspect-[3/4] overflow-hidden rounded-xl border border-dashed transition-colors',
-          disabled && 'opacity-70'
+          disabled && 'opacity-70',
+          frameClassName
         )}
       >
         <input
@@ -380,6 +384,8 @@ export function GenjutsuGenerator({
 }: {
   copy: {
     generationCost: (count: number) => string;
+    moreSettings: string;
+    uploadPhotoCta: string;
     remainingGenerations: (count: number) => string;
     generationRules: string;
     legacyBalance: string;
@@ -447,7 +453,30 @@ export function GenjutsuGenerator({
   );
   const [muted, setMuted] = useState(true);
   const [paywall, setPaywall] = useState(false);
+  // Phones only: length, size and own-video upload sit behind a toggle.
+  const [moreOpen, setMoreOpen] = useState(false);
+  const generatorRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLElement>(null);
+  const [generatorVisible, setGeneratorVisible] = useState(false);
   useEffect(() => track('create_view'), []);
+  useEffect(() => {
+    const node = generatorRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(([entry]) =>
+      setGeneratorVisible(entry.isIntersecting)
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  // On phones the result area is above the controls — bring it into view
+  // once something starts rendering there.
+  const revealResult = () => {
+    if (window.matchMedia('(max-width: 1023px)').matches)
+      previewRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+  };
   const [draftReady, setDraftReady] = useState(false);
   const [draftOwner, setDraftOwner] = useState<string>();
   const [savingDraft, setSavingDraft] = useState(false);
@@ -916,6 +945,7 @@ export function GenjutsuGenerator({
     onSuccess: ({ preview }) => {
       queryClient.setQueryData(previewKey, { eligible: false, preview });
       setPreviewMode('still');
+      revealResult();
     },
     onError: (error: Error) => {
       const known: Record<string, string> = {
@@ -1100,6 +1130,7 @@ export function GenjutsuGenerator({
       track('generate_submitted');
       setTaskId(created.id);
       setPreviewMode('work');
+      revealResult();
       queryClient.setQueryData(['genjutsu-task', created.id], created);
       queryClient.invalidateQueries({ queryKey: ['credits'] });
     },
@@ -1254,20 +1285,53 @@ export function GenjutsuGenerator({
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const leadDisabled =
+    !draftReady ||
+    running ||
+    checkingGeneration ||
+    validatingMedia ||
+    savingDraft;
+  const previewDisabled =
+    !canGenerate ||
+    previewMutation.isPending ||
+    referenceClosed ||
+    !lead ||
+    !referenceVideo;
+  const generateDisabled =
+    !canGenerate ||
+    (referenceSource === 'effect' &&
+      (effectQuery.isFetching || effectQuery.isError || !effectQuery.data)) ||
+    referenceClosed ||
+    !referenceVideo;
+  // Phones show only the photo slot while a built-in effect clip is in use.
+  const compactReference =
+    !moreOpen && referenceSource === 'effect' && !referenceClosed;
+
   return (
     <>
       <div
+        ref={generatorRef}
         id="generator"
-        className="border-border bg-muted text-foreground grid scroll-mt-24 gap-3 rounded-3xl border p-3 lg:grid-cols-[300px_minmax(0,340px)_minmax(0,1fr)]"
+        className="border-border bg-muted text-foreground grid scroll-mt-24 gap-3 rounded-3xl border p-3 max-lg:pb-24 lg:grid-cols-[300px_minmax(0,340px)_minmax(0,1fr)]"
       >
         <section
           id="genjutsu-upload"
           aria-label="Create"
-          className="bg-card order-2 flex min-h-0 scroll-mt-24 flex-col gap-4 rounded-2xl p-4 lg:order-1"
+          className="bg-card order-3 flex min-h-0 scroll-mt-24 flex-col gap-4 rounded-2xl p-4 lg:order-1"
         >
-          <h2 className="text-lg font-semibold">AI Effects</h2>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex flex-col gap-2">
+          <h2 className="text-lg font-semibold max-lg:hidden">AI Effects</h2>
+          <div
+            className={cn(
+              'grid grid-cols-2 gap-2',
+              compactReference && 'max-lg:grid-cols-1'
+            )}
+          >
+            <div
+              className={cn(
+                'flex flex-col gap-2',
+                compactReference && 'max-lg:hidden'
+              )}
+            >
               <div className="flex flex-col">
                 <label
                   htmlFor={referenceInputId}
@@ -1416,118 +1480,138 @@ export function GenjutsuGenerator({
               label="Main character"
               hint="Stays still"
               kind="image"
-              disabled={
-                !draftReady ||
-                running ||
-                checkingGeneration ||
-                validatingMedia ||
-                savingDraft
-              }
+              disabled={leadDisabled}
               accept="image/jpeg,image/png,image/webp"
               asset={lead}
               onFile={(file) => selectAsset(file, 'image', setLead)}
               onRemove={() => setLead(undefined)}
               removeLabel={copy.removePhoto}
               testId="upload-lead"
+              frameClassName={
+                compactReference ? 'max-lg:aspect-[4/3]' : undefined
+              }
             />
           </div>
 
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-2 text-sm font-medium">Video length</legend>
-            <div className="flex gap-2">
-              {([5, 10] as const).map((seconds) => (
-                <button
-                  type="button"
-                  key={seconds}
-                  data-testid={`duration-${seconds}`}
-                  aria-pressed={durationTier === seconds}
-                  disabled={
-                    !draftReady ||
-                    running ||
-                    checkingGeneration ||
-                    savingDraft ||
-                    validatingMedia ||
-                    (referenceSource === 'upload' &&
-                      !!referenceVideo &&
-                      !referenceVideo.sourceFile &&
-                      durationTier !== seconds)
-                  }
-                  onClick={() => {
-                    if (
-                      referenceSource === 'upload' &&
-                      referenceVideo?.sourceFile &&
-                      durationTier !== seconds
-                    ) {
-                      void selectAsset(
-                        referenceVideo.sourceFile,
-                        'video',
-                        setReferenceVideo,
-                        seconds,
-                        true
-                      );
-                      return;
-                    }
-                    if (
-                      referenceSource === 'effect' &&
-                      durationTier !== seconds
-                    )
-                      setReferenceVideo(undefined);
-                    setDurationTier(seconds);
-                  }}
-                  className={cn(
-                    'min-h-11 flex-1 rounded-lg border px-2 py-2 text-sm',
-                    durationTier === seconds
-                      ? 'border-primary bg-primary/15 text-primary'
-                      : 'border-border'
-                  )}
-                >
-                  {seconds === 5 ? '5s' : 'Up to 10s'}
-                </button>
-              ))}
-            </div>
-          </fieldset>
+          <button
+            type="button"
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen((open) => !open)}
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 self-start text-sm lg:hidden"
+          >
+            <ChevronDown
+              aria-hidden
+              className={cn(
+                'size-4 transition-transform',
+                moreOpen && 'rotate-180'
+              )}
+            />
+            {copy.moreSettings}
+          </button>
 
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-2 text-sm font-medium">Video size</legend>
-            <div className="flex gap-2">
-              {GENJUTSU_ASPECTS.map((ratio) => (
-                <button
-                  key={ratio}
-                  type="button"
-                  aria-pressed={aspect === ratio}
-                  data-testid={`ratio-${ratio.replace(':', '-')}`}
-                  disabled={
-                    running ||
-                    checkingGeneration ||
-                    savingDraft ||
-                    validatingMedia ||
-                    !draftReady ||
-                    Boolean(readiness && !readiness.aspects.includes(ratio))
-                  }
-                  title={
-                    readiness && !readiness.aspects.includes(ratio)
-                      ? 'This editing API does not support this ratio'
-                      : undefined
-                  }
-                  onClick={() => setAspect(ratio)}
-                  className={cn(
-                    'flex flex-1 items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-colors disabled:opacity-60',
-                    aspect === ratio
-                      ? 'border-primary bg-primary/15 text-primary'
-                      : 'border-border hover:border-primary/40'
-                  )}
-                >
-                  <span
+          <div
+            className={cn(
+              'flex flex-col gap-4 lg:contents',
+              !moreOpen && 'max-lg:hidden'
+            )}
+          >
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-2 text-sm font-medium">Video length</legend>
+              <div className="flex gap-2">
+                {([5, 10] as const).map((seconds) => (
+                  <button
+                    type="button"
+                    key={seconds}
+                    data-testid={`duration-${seconds}`}
+                    aria-pressed={durationTier === seconds}
+                    disabled={
+                      !draftReady ||
+                      running ||
+                      checkingGeneration ||
+                      savingDraft ||
+                      validatingMedia ||
+                      (referenceSource === 'upload' &&
+                        !!referenceVideo &&
+                        !referenceVideo.sourceFile &&
+                        durationTier !== seconds)
+                    }
+                    onClick={() => {
+                      if (
+                        referenceSource === 'upload' &&
+                        referenceVideo?.sourceFile &&
+                        durationTier !== seconds
+                      ) {
+                        void selectAsset(
+                          referenceVideo.sourceFile,
+                          'video',
+                          setReferenceVideo,
+                          seconds,
+                          true
+                        );
+                        return;
+                      }
+                      if (
+                        referenceSource === 'effect' &&
+                        durationTier !== seconds
+                      )
+                        setReferenceVideo(undefined);
+                      setDurationTier(seconds);
+                    }}
                     className={cn(
-                      'rounded-[2px] border-2 border-current',
-                      ratio === '16:9' ? 'h-3 w-5' : 'h-5 w-3'
+                      'min-h-11 flex-1 rounded-lg border px-2 py-2 text-sm',
+                      durationTier === seconds
+                        ? 'border-primary bg-primary/15 text-primary'
+                        : 'border-border'
                     )}
-                  />
-                  {ratio}
-                </button>
-              ))}
-            </div>
-          </fieldset>
+                  >
+                    {seconds === 5 ? '5s' : 'Up to 10s'}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-2 text-sm font-medium">Video size</legend>
+              <div className="flex gap-2">
+                {GENJUTSU_ASPECTS.map((ratio) => (
+                  <button
+                    key={ratio}
+                    type="button"
+                    aria-pressed={aspect === ratio}
+                    data-testid={`ratio-${ratio.replace(':', '-')}`}
+                    disabled={
+                      running ||
+                      checkingGeneration ||
+                      savingDraft ||
+                      validatingMedia ||
+                      !draftReady ||
+                      Boolean(readiness && !readiness.aspects.includes(ratio))
+                    }
+                    title={
+                      readiness && !readiness.aspects.includes(ratio)
+                        ? 'This editing API does not support this ratio'
+                        : undefined
+                    }
+                    onClick={() => setAspect(ratio)}
+                    className={cn(
+                      'flex flex-1 items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-colors disabled:opacity-60',
+                      aspect === ratio
+                        ? 'border-primary bg-primary/15 text-primary'
+                        : 'border-border hover:border-primary/40'
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'rounded-[2px] border-2 border-current',
+                        ratio === '16:9' ? 'h-3 w-5' : 'h-5 w-3'
+                      )}
+                    />
+                    {ratio}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </div>
 
           <div className="mt-auto flex flex-col gap-2">
             {Boolean(
@@ -1542,13 +1626,7 @@ export function GenjutsuGenerator({
               <div className="flex flex-col gap-1.5">
                 <button
                   type="button"
-                  disabled={
-                    !canGenerate ||
-                    previewMutation.isPending ||
-                    referenceClosed ||
-                    !lead ||
-                    !referenceVideo
-                  }
+                  disabled={previewDisabled}
                   data-testid="preview-button"
                   className="border-primary/60 text-foreground hover:bg-primary/10 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl border px-2.5 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50"
                   onClick={startPreview}
@@ -1564,15 +1642,7 @@ export function GenjutsuGenerator({
             )}
             <button
               type="button"
-              disabled={
-                !canGenerate ||
-                (referenceSource === 'effect' &&
-                  (effectQuery.isFetching ||
-                    effectQuery.isError ||
-                    !effectQuery.data)) ||
-                referenceClosed ||
-                !referenceVideo
-              }
+              disabled={generateDisabled}
               data-testid="generate-button"
               className="group/button bg-primary text-primary-foreground shadow-primary/70 hover:bg-primary/80 hover:shadow-primary inline-flex h-12 w-full shrink-0 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2.5 text-base font-semibold shadow-[0_0_30px_-6px] transition-shadow outline-none disabled:pointer-events-none disabled:opacity-50"
               onClick={startGeneration}
@@ -1590,13 +1660,13 @@ export function GenjutsuGenerator({
         <section
           id="genjutsu-effects"
           aria-label="Select effect"
-          className="bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:order-2"
+          className="bg-card @container order-2 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:order-2"
         >
           <h2 className="text-lg font-semibold">Select Effect</h2>
           <div className="relative lg:min-h-[calc((100cqw-1.25rem)*2+2rem)] lg:flex-1">
             <div
               data-testid="template-list"
-              className="grid max-h-[calc((100cqw-1.25rem)*2+2rem)] auto-rows-max grid-cols-2 content-start gap-3 overflow-y-auto overscroll-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:absolute lg:inset-0 lg:max-h-none"
+              className="flex snap-x gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:absolute lg:inset-0 lg:grid lg:snap-none lg:auto-rows-max lg:grid-cols-2 lg:content-start lg:overflow-x-visible lg:overflow-y-auto lg:overscroll-contain"
             >
               {TEMPLATES.map((template) => (
                 <button
@@ -1605,7 +1675,7 @@ export function GenjutsuGenerator({
                   aria-pressed={selected.id === template.id}
                   data-testid={`template-${template.id}`}
                   className={cn(
-                    'group relative aspect-[3/4] overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed',
+                    'group relative aspect-[3/4] w-28 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-auto',
                     selected.id === template.id
                       ? 'ring-primary'
                       : 'ring-transparent'
@@ -1664,8 +1734,9 @@ export function GenjutsuGenerator({
         </section>
 
         <section
+          ref={previewRef}
           aria-label="Preview"
-          className="bg-card order-3 flex min-h-0 flex-col gap-3 rounded-2xl p-4"
+          className="bg-card order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:order-3"
         >
           <div className="bg-muted flex w-fit gap-1 rounded-xl p-1">
             <button
@@ -1713,7 +1784,7 @@ export function GenjutsuGenerator({
               </button>
             )}
           </div>
-          <div className="relative flex min-h-[420px] flex-1 items-center justify-center overflow-hidden rounded-xl bg-black lg:min-h-[500px]">
+          <div className="relative flex min-h-[280px] flex-1 items-center justify-center overflow-hidden rounded-xl bg-black lg:min-h-[500px]">
             <img
               src={example.image}
               alt=""
@@ -1916,6 +1987,67 @@ export function GenjutsuGenerator({
           </div>
         </section>
       </div>
+
+      {generatorVisible && !paywall && (
+        <div className="border-border bg-background/95 fixed inset-x-0 bottom-0 z-40 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+          {!lead ? (
+            <button
+              type="button"
+              disabled={leadDisabled}
+              onClick={() => {
+                track('sticky_cta', { action: 'upload' });
+                document
+                  .querySelector<HTMLInputElement>(
+                    '[data-testid="upload-lead"]'
+                  )
+                  ?.click();
+              }}
+              className="bg-primary text-primary-foreground inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold disabled:opacity-50"
+            >
+              <ImageIcon className="size-5" />
+              {copy.uploadPhotoCta}
+            </button>
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              <p className="text-muted-foreground text-center text-xs">
+                {copy.generationCost(
+                  Math.ceil(costCredits / GENJUTSU_CREDITS_PER_GENERATION)
+                )}
+              </p>
+              <div className="flex gap-2">
+                {canPreview && (
+                  <button
+                    type="button"
+                    disabled={previewDisabled}
+                    onClick={startPreview}
+                    className="border-primary/60 inline-flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border text-sm font-semibold disabled:opacity-50"
+                  >
+                    {previewMutation.isPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                    {copy.preview.button}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  disabled={generateDisabled}
+                  onClick={startGeneration}
+                  className="bg-primary text-primary-foreground inline-flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl text-base font-semibold disabled:opacity-50"
+                >
+                  {running ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    <Sparkles className="size-5" />
+                  )}
+                  Generate Now
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <Dialog open={paywall} onOpenChange={setPaywall}>
         <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5 sm:max-w-6xl sm:p-8">

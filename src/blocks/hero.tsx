@@ -59,7 +59,8 @@ export function Hero() {
             {m['landing.hero.subheadline']()}
           </p>
 
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+          {/* Phones go straight into the generator below (sticky CTA there). */}
+          <div className="mt-7 hidden flex-wrap items-center justify-center gap-3 lg:flex">
             <a
               href="#genjutsu-upload"
               className="eg-pill-primary gap-3"

@@ -80,6 +80,8 @@ export function GenjutsuGenerator() {
             ratioPadding: m['landing.generator.ratio_padding'](),
             generationCost: (count) =>
               m['landing.generator.generation_cost']({ count }),
+            moreSettings: m['landing.generator.more_settings'](),
+            uploadPhotoCta: m['landing.hero.cta'](),
             remainingGenerations: (count) =>
               m['landing.generator.remaining_generations']({ count }),
             generationRules: m['landing.pricing.per_video'](),
