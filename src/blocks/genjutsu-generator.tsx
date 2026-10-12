@@ -14,7 +14,8 @@ export function GenjutsuGenerator() {
         role="group"
         aria-label={m['landing.generator.mode']()}
       >
-        {(['edit', 'text'] as const).map((value) => (
+        {/* Text to Video is temporarily hidden; add 'text' back to re-enable. */}
+        {(['edit'] as ('edit' | 'text')[]).map((value) => (
           <button
             type="button"
             key={value}

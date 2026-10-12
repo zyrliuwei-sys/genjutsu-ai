@@ -455,6 +455,11 @@ export function GenjutsuGenerator({
   const [paywall, setPaywall] = useState(false);
   // Phones only: length, size and own-video upload sit behind a toggle.
   const [moreOpen, setMoreOpen] = useState(false);
+  // Phones size the preview box to the media shown, so 16:9 clips get no bars.
+  const [mediaRatio, setMediaRatio] = useState(16 / 9);
+  const fitMedia = (width: number, height: number) => {
+    if (width && height) setMediaRatio(width / height);
+  };
   const generatorRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLElement>(null);
   const [generatorVisible, setGeneratorVisible] = useState(false);
@@ -1784,7 +1789,10 @@ export function GenjutsuGenerator({
               </button>
             )}
           </div>
-          <div className="relative flex min-h-[280px] flex-1 items-center justify-center overflow-hidden rounded-xl bg-black lg:min-h-[500px]">
+          <div
+            style={{ '--media-ratio': mediaRatio } as React.CSSProperties}
+            className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl bg-black max-lg:aspect-(--media-ratio) lg:min-h-[500px]"
+          >
             <img
               src={example.image}
               alt=""
@@ -1802,6 +1810,12 @@ export function GenjutsuGenerator({
                     src={freePreview!.url}
                     alt={copy.preview.tab}
                     draggable={false}
+                    onLoad={(event) =>
+                      fitMedia(
+                        event.currentTarget.naturalWidth,
+                        event.currentTarget.naturalHeight
+                      )
+                    }
                     className="absolute inset-0 size-full object-contain"
                   />
                   <div
@@ -1861,13 +1875,12 @@ export function GenjutsuGenerator({
                   loop
                   muted={muted}
                   playsInline
-                  onLoadedMetadata={(event) =>
-                    setWorkDimensions({
-                      url: workUrl,
-                      width: event.currentTarget.videoWidth,
-                      height: event.currentTarget.videoHeight,
-                    })
-                  }
+                  onLoadedMetadata={(event) => {
+                    const { videoWidth: width, videoHeight: height } =
+                      event.currentTarget;
+                    setWorkDimensions({ url: workUrl, width, height });
+                    fitMedia(width, height);
+                  }}
                   className="absolute inset-0 size-full object-contain"
                 />
               ) : (
@@ -1919,6 +1932,12 @@ export function GenjutsuGenerator({
                 loop
                 muted={muted}
                 playsInline
+                onLoadedMetadata={(event) =>
+                  fitMedia(
+                    event.currentTarget.videoWidth,
+                    event.currentTarget.videoHeight
+                  )
+                }
                 className="absolute inset-0 size-full object-contain"
               />
             )}
