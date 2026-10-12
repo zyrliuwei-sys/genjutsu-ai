@@ -21,6 +21,8 @@ export type GenjutsuDraft = {
   referenceSource?: 'effect' | 'upload';
   lead?: DraftAsset;
   referenceVideo?: DraftAsset;
+  /** Last uploaded own video, kept selectable after switching effects. */
+  ownVideo?: DraftAsset;
   savedAt: number;
 };
 const TTL = 24 * 60 * 60 * 1000;

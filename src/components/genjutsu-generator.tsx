@@ -480,6 +480,8 @@ export function GenjutsuGenerator({
   const durationTier = GENJUTSU_SECONDS;
   const [lead, setLead] = useState<Asset>();
   const [referenceVideo, setReferenceVideo] = useState<Asset>();
+  // The visitor's last uploaded video, kept as a card in the effects strip.
+  const [ownVideo, setOwnVideo] = useState<Asset>();
   const [referenceClosed, setReferenceClosed] = useState(false);
   const [referenceSource, setReferenceSource] = useState<'effect' | 'upload'>(
     'effect'
@@ -581,6 +583,14 @@ export function GenjutsuGenerator({
         };
         setLead(restore(draft?.lead));
         setReferenceVideo(restore(draft?.referenceVideo));
+        setOwnVideo(
+          restore(
+            draft?.ownVideo ??
+              (draft?.referenceSource === 'upload'
+                ? draft.referenceVideo
+                : undefined)
+          )
+        );
         setReferenceClosed(draft?.referenceClosed === true);
         setReferenceSource(
           draft?.referenceSource === 'upload' ? 'upload' : 'effect'
@@ -635,6 +645,7 @@ export function GenjutsuGenerator({
       referenceSource,
       lead: store(lead),
       referenceVideo: store(referenceVideo),
+      ownVideo: store(ownVideo),
       savedAt: Date.now(),
     });
   }
@@ -657,6 +668,7 @@ export function GenjutsuGenerator({
     user?.id,
     lead,
     referenceVideo,
+    ownVideo,
     selectedId,
     aspect,
     durationTier,
@@ -676,6 +688,36 @@ export function GenjutsuGenerator({
     },
     [referenceVideo?.preview]
   );
+  useEffect(
+    () => () => {
+      if (ownVideo?.preview.startsWith('blob:'))
+        URL.revokeObjectURL(ownVideo.preview);
+    },
+    [ownVideo?.preview]
+  );
+  // Mirror the uploaded reference (incl. its storage url/receipt once
+  // generated) into its own copy with a separate preview URL.
+  useEffect(() => {
+    if (
+      referenceSource !== 'upload' ||
+      !referenceVideo?.file ||
+      referenceVideo.uploading
+    )
+      return;
+    setOwnVideo((current) =>
+      current?.file === referenceVideo.file &&
+      current?.url === referenceVideo.url &&
+      current?.videoReceipt === referenceVideo.videoReceipt
+        ? current
+        : {
+            ...referenceVideo,
+            preview:
+              current?.file === referenceVideo.file
+                ? current!.preview
+                : URL.createObjectURL(referenceVideo.file!),
+          }
+    );
+  }, [referenceSource, referenceVideo]);
 
   const selected = useMemo(
     () =>
@@ -775,6 +817,37 @@ export function GenjutsuGenerator({
       toast.error(taskQuery.error.message);
     }
   }, [taskQuery.isError, taskQuery.error, user?.id, submissionStorageKey]);
+
+  const closestAspect = (width: number, height: number) => {
+    const sourceRatio = width / height;
+    const ratio = (value: string) => {
+      const [w, h] = value.split(':').map(Number);
+      return w / h;
+    };
+    return [...(readiness?.aspects || GENJUTSU_ASPECTS)].sort(
+      (a, b) =>
+        Math.abs(ratio(a) - sourceRatio) - Math.abs(ratio(b) - sourceRatio)
+    )[0];
+  };
+
+  // Re-selects the kept own video from the effects strip.
+  const selectOwnVideo = () => {
+    if (!ownVideo) return;
+    track('effect_select', { effect: 'own_video_saved' });
+    setReferenceSource('upload');
+    setReferenceClosed(false);
+    setReferenceVideo({
+      ...ownVideo,
+      preview: ownVideo.file
+        ? URL.createObjectURL(ownVideo.file)
+        : ownVideo.url!,
+    });
+    if (ownVideo.width && ownVideo.height) {
+      const closest = closestAspect(ownVideo.width, ownVideo.height);
+      if (closest) setAspect(closest);
+    }
+    setPreviewMode('example');
+  };
 
   const selectAsset = async (
     file: File | undefined,
@@ -884,19 +957,7 @@ export function GenjutsuGenerator({
       if (isVideo) {
         setReferenceSource('upload');
         setReferenceClosed(false);
-        const sourceRatio = metadata.width / metadata.height;
-        const closest = [...(readiness?.aspects || GENJUTSU_ASPECTS)].sort(
-          (a, b) => {
-            const ratio = (value: string) => {
-              const [w, h] = value.split(':').map(Number);
-              return w / h;
-            };
-            return (
-              Math.abs(ratio(a) - sourceRatio) -
-              Math.abs(ratio(b) - sourceRatio)
-            );
-          }
-        )[0];
+        const closest = closestAspect(metadata.width, metadata.height);
         if (closest && !preserveAspect) setAspect(closest);
         setPreviewMode('example');
       }
@@ -1602,11 +1663,13 @@ export function GenjutsuGenerator({
                 <button
                   key={template.id}
                   type="button"
-                  aria-pressed={selected.id === template.id}
+                  aria-pressed={
+                    referenceSource === 'effect' && selected.id === template.id
+                  }
                   data-testid={`template-${template.id}`}
                   className={cn(
                     'group relative aspect-[3/4] w-28 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
-                    selected.id === template.id
+                    referenceSource === 'effect' && selected.id === template.id
                       ? 'ring-primary'
                       : 'ring-transparent'
                   )}
@@ -1643,7 +1706,8 @@ export function GenjutsuGenerator({
                       {template.tag}
                     </span>
                   ) : null}
-                  {selected.id === template.id ? (
+                  {referenceSource === 'effect' &&
+                  selected.id === template.id ? (
                     <span className="bg-primary text-primary-foreground absolute top-2 right-2 flex size-6 items-center justify-center rounded-full">
                       <Check className="size-4" />
                     </span>
@@ -1659,15 +1723,59 @@ export function GenjutsuGenerator({
                   </span>
                 </button>
               ))}
+              {ownVideo ? (
+                <button
+                  type="button"
+                  data-testid="template-saved-video"
+                  aria-pressed={referenceSource === 'upload'}
+                  disabled={
+                    running ||
+                    checkingGeneration ||
+                    validatingMedia ||
+                    savingDraft
+                  }
+                  onClick={selectOwnVideo}
+                  className={cn(
+                    'group bg-muted relative aspect-[3/4] w-28 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
+                    referenceSource === 'upload'
+                      ? 'ring-primary'
+                      : 'ring-transparent'
+                  )}
+                >
+                  <video
+                    src={`${ownVideo.preview}#t=0.1`}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                  {referenceSource === 'upload' ? (
+                    <span className="bg-primary text-primary-foreground absolute top-2 right-2 flex size-6 items-center justify-center rounded-full">
+                      <Check className="size-4" />
+                    </span>
+                  ) : null}
+                  <span className="absolute inset-x-2 bottom-2">
+                    <span className="block text-sm leading-tight font-semibold text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)]">
+                      {copy.customReference}
+                    </span>
+                    {ownVideo.duration ? (
+                      <span className="block text-[11px] text-white/70">
+                        {Math.round(ownVideo.duration)}s
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+              ) : null}
               {/* Opens the reference-video input kept in the Create column. */}
               <label
                 htmlFor={referenceInputId}
                 data-testid="template-own-video"
-                aria-pressed={referenceSource === 'upload'}
+                aria-pressed={referenceSource === 'upload' && !ownVideo}
                 onClick={() => track('effect_select', { effect: 'own_video' })}
                 className={cn(
                   'border-border bg-muted hover:border-primary/70 relative flex aspect-[3/4] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-2 text-center ring-2 transition-colors lg:w-32',
-                  referenceSource === 'upload'
+                  referenceSource === 'upload' && !ownVideo
                     ? 'ring-primary'
                     : 'ring-transparent'
                 )}
