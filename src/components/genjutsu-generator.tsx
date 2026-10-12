@@ -507,6 +507,8 @@ export function GenjutsuGenerator({
   const generatorRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLElement>(null);
   const [generatorVisible, setGeneratorVisible] = useState(false);
+  const createRef = useRef<HTMLElement>(null);
+  const [createVisible, setCreateVisible] = useState(false);
   useEffect(() => track('create_view'), []);
   useEffect(() => {
     const node = generatorRef.current;
@@ -515,7 +517,19 @@ export function GenjutsuGenerator({
       setGeneratorVisible(entry.isIntersecting)
     );
     observer.observe(node);
-    return () => observer.disconnect();
+    // Once the upload/generate controls are on screen the sticky CTA would
+    // only duplicate them.
+    const create = createRef.current;
+    const createObserver = create
+      ? new IntersectionObserver(([entry]) =>
+          setCreateVisible(entry.isIntersecting)
+        )
+      : undefined;
+    if (create) createObserver!.observe(create);
+    return () => {
+      observer.disconnect();
+      createObserver?.disconnect();
+    };
   }, []);
   // On phones the result area is above the controls — bring it into view
   // once something starts rendering there.
@@ -1287,18 +1301,19 @@ export function GenjutsuGenerator({
       (effectQuery.isFetching || effectQuery.isError || !effectQuery.data)) ||
     referenceClosed ||
     !referenceVideo;
-  // Phones show only the photo slot while a built-in effect clip is in use.
-  const compactReference =
-    !moreOpen && referenceSource === 'effect' && !referenceClosed;
+  // Phones show only the photo slot: the reference clip (effect or the
+  // visitor's own upload) already plays in the preview above.
+  const compactReference = !moreOpen;
 
   return (
     <>
       <div
         ref={generatorRef}
         id="generator"
-        className="border-border bg-muted text-foreground grid scroll-mt-24 grid-cols-1 gap-3 rounded-3xl border p-3 max-lg:pb-24 lg:grid-cols-[300px_minmax(0,1fr)]"
+        className="border-border bg-muted text-foreground grid scroll-mt-24 grid-cols-1 gap-3 rounded-3xl border p-3 lg:grid-cols-[300px_minmax(0,1fr)]"
       >
         <section
+          ref={createRef}
           id="genjutsu-upload"
           aria-label="Create"
           className="bg-card order-3 flex min-h-0 scroll-mt-24 flex-col gap-4 rounded-2xl p-4 lg:col-start-1 lg:row-span-2 lg:row-start-1"
@@ -1930,7 +1945,7 @@ export function GenjutsuGenerator({
         </section>
       </div>
 
-      {generatorVisible && !paywall && (
+      {generatorVisible && !createVisible && !paywall && (
         <div className="border-border bg-background/95 fixed inset-x-0 bottom-0 z-40 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
           {!lead ? (
             <button
