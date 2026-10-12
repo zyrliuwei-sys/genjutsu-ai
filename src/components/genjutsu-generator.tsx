@@ -455,7 +455,8 @@ export function GenjutsuGenerator({
   const [paywall, setPaywall] = useState(false);
   // Phones only: length, size and own-video upload sit behind a toggle.
   const [moreOpen, setMoreOpen] = useState(false);
-  // Phones size the preview box to the media shown, so 16:9 clips get no bars.
+  // The preview box takes the media's aspect ratio, so clips get no bars
+  // (desktop caps the height and narrows the box for tall media).
   const [mediaRatio, setMediaRatio] = useState(16 / 9);
   const fitMedia = (width: number, height: number) => {
     if (width && height) setMediaRatio(width / height);
@@ -1741,7 +1742,7 @@ export function GenjutsuGenerator({
         <section
           ref={previewRef}
           aria-label="Preview"
-          className="bg-card order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:order-3"
+          className="bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:order-3"
         >
           <div className="bg-muted flex w-fit gap-1 rounded-xl p-1">
             <button
@@ -1791,7 +1792,7 @@ export function GenjutsuGenerator({
           </div>
           <div
             style={{ '--media-ratio': mediaRatio } as React.CSSProperties}
-            className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl bg-black max-lg:aspect-(--media-ratio) lg:min-h-[500px]"
+            className="relative flex items-center justify-center overflow-hidden rounded-xl bg-black max-lg:aspect-(--media-ratio) lg:mx-auto lg:h-[min(596px,calc(100cqw/var(--media-ratio)))] lg:w-[min(100cqw,calc(596px*var(--media-ratio)))]"
           >
             <img
               src={example.image}
