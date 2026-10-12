@@ -4,7 +4,6 @@ import {
   Check,
   ChevronDown,
   Download,
-  Eye,
   ImageIcon,
   Loader2,
   Sparkles,
@@ -16,7 +15,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { signIn, useSession } from '@/core/auth/client';
+import { useSession } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
 import {
   GENJUTSU_ASPECTS,
@@ -48,7 +47,6 @@ import { referenceVideoPlan } from '@/lib/reference-video-plan';
 import { track } from '@/lib/track';
 import { cn } from '@/lib/utils';
 import { matchesVideoAspect } from '@/lib/video-dimensions';
-import { captureVideoFrame } from '@/lib/video-frame';
 import { MAX_REFERENCE_VIDEO_MB } from '@/lib/video-trim-plan';
 import { Pricing } from '@/blocks/pricing';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -78,19 +76,6 @@ type Asset = {
   duration?: number;
   videoReceipt?: { payload: string; signature: string };
 };
-
-type FreePreview = {
-  status: 'processing' | 'success' | 'failed';
-  url: string | null;
-  aspect: string;
-};
-
-const PREVIEW_ERRORS = [
-  'PREVIEW_USED',
-  'PREVIEW_BUSY',
-  'PREVIEW_UNAVAILABLE',
-  'PREVIEW_GOOGLE_ONLY',
-];
 
 type GenjutsuTask = {
   id: string;
@@ -414,20 +399,6 @@ export function GenjutsuGenerator({
       aspect: string
     ) => string;
     ratioPadding: string;
-    preview: {
-      button: string;
-      hint: string;
-      working: string;
-      tab: string;
-      cta: string;
-      failed: string;
-      used: string;
-      busy: string;
-      unavailable: string;
-      googleOnly: string;
-      watermark: string;
-      label: string;
-    };
   };
 }) {
   const router = useRouter();
@@ -450,9 +421,7 @@ export function GenjutsuGenerator({
   );
   const referenceInputId = useId();
   const [taskId, setTaskId] = useState<string>();
-  const [previewMode, setPreviewMode] = useState<'example' | 'work' | 'still'>(
-    'example'
-  );
+  const [previewMode, setPreviewMode] = useState<'example' | 'work'>('example');
   const [muted, setMuted] = useState(true);
   const [paywall, setPaywall] = useState(false);
   // Phones only: length, size and own-video upload sit behind a toggle.
@@ -704,32 +673,6 @@ export function GenjutsuGenerator({
       apiGet<{ balance: number; hasPaidOrder: boolean }>('/api/credits'),
     enabled: Boolean(user),
   });
-  const previewKey = ['genjutsu-preview', user?.id ?? 'anonymous'];
-  const previewQuery = useQuery({
-    queryKey: previewKey,
-    enabled: !sessionPending,
-    queryFn: () =>
-      apiGet<{ eligible: boolean; preview: FreePreview | null }>(
-        '/api/genjutsu/preview'
-      ),
-    refetchInterval: (query) =>
-      query.state.data?.preview?.status === 'processing' ? 3000 : false,
-  });
-  const freePreview =
-    previewQuery.data?.preview?.status === 'failed'
-      ? null
-      : (previewQuery.data?.preview ?? null);
-  const previewStatus = useRef<string | undefined>(undefined);
-  useEffect(() => {
-    const status = previewQuery.data?.preview?.status;
-    if (previewStatus.current === 'processing' && status === 'success')
-      track('preview_ready');
-    if (previewStatus.current === 'processing' && status === 'failed') {
-      track('preview_failed');
-      toast.error(copy.preview.failed);
-    }
-    previewStatus.current = status;
-  }, [previewQuery.data?.preview?.status]);
   const taskQuery = useQuery({
     queryKey: ['genjutsu-task', taskId],
     queryFn: () => apiGet<GenjutsuTask>(`/api/studio/task?id=${taskId}`),
@@ -920,75 +863,6 @@ export function GenjutsuGenerator({
       duration: response.duration,
     };
   };
-
-  const previewMutation = useMutation({
-    mutationFn: async () => {
-      if (!assetIsReady(lead) || !assetIsReady(referenceVideo))
-        throw new Error('Upload a main character image and a reference video');
-      const frameFile = await captureVideoFrame(referenceVideo!.preview);
-      const leadUpload = await uploadAsset(lead!);
-      if (leadUpload.url !== lead!.url) {
-        const uploaded = lead!;
-        setLead((current) =>
-          current?.preview === uploaded.preview
-            ? { ...current, url: leadUpload.url }
-            : current
-        );
-        // The image upload endpoint allows one upload per second.
-        await new Promise((resolve) => setTimeout(resolve, 1100));
-      }
-      const frame = await apiUpload<{ urls: string[] }>(
-        '/api/storage/upload-image',
-        frameFile
-      );
-      if (!frame.urls[0]?.startsWith('https://'))
-        throw new Error(copy.serviceUnavailable);
-      return apiPost<{ preview: FreePreview }>('/api/genjutsu/preview', {
-        leadImage: leadUpload.url,
-        frameImage: frame.urls[0],
-        aspect,
-        templateId: referenceSource === 'effect' ? selected.id : undefined,
-      });
-    },
-    onSuccess: ({ preview }) => {
-      queryClient.setQueryData(previewKey, { eligible: false, preview });
-      setPreviewMode('still');
-      revealResult();
-    },
-    onError: (error: Error) => {
-      const known: Record<string, string> = {
-        PREVIEW_USED: copy.preview.used,
-        PREVIEW_BUSY: copy.preview.busy,
-        PREVIEW_UNAVAILABLE: copy.preview.unavailable,
-        PREVIEW_GOOGLE_ONLY: copy.preview.googleOnly,
-        PREVIEW_FAILED: copy.preview.failed,
-      };
-      toast.error(known[error.message] || error.message);
-      if (PREVIEW_ERRORS.includes(error.message))
-        queryClient.invalidateQueries({ queryKey: previewKey });
-    },
-  });
-
-  async function startPreview() {
-    track('preview_click', { signedIn: Boolean(user) });
-    if (!user) {
-      try {
-        await persistDraft();
-      } catch {
-        toast.error('Could not save media for your return');
-        return;
-      }
-      sessionStorage.setItem(RESUME_KEY, 'preview');
-      // Free previews are Google-only, so skip the generic sign-in page.
-      try {
-        await signIn.social({ provider: 'google', callbackURL: '/create' });
-      } catch {
-        router.push(`/sign-in?callbackUrl=${encodeURIComponent('/create')}`);
-      }
-      return;
-    }
-    previewMutation.mutate();
-  }
 
   const generate = useMutation({
     mutationFn: async () => {
@@ -1249,10 +1123,9 @@ export function GenjutsuGenerator({
   // The visitor clicked Generate before signing in: once the saved draft is
   // restored under their account, continue straight to the balance check
   // (paywall or generation) instead of making them click again.
-  // Same for a free preview requested while signed out.
   const resumed = useRef(false);
   useEffect(() => {
-    if (resumed.current || !user || !canGenerate || !previewQuery.data) return;
+    if (resumed.current || !user || !canGenerate) return;
     if (!assetIsReady(lead) || !assetIsReady(referenceVideo)) return;
     let pending: string | null = null;
     try {
@@ -1264,16 +1137,11 @@ export function GenjutsuGenerator({
     resumed.current = true;
     if (!pending) return;
     track('signin_resume', { action: pending });
-    if (pending !== 'preview') void startGeneration();
-    else if (previewQuery.data.eligible) previewMutation.mutate();
-    else if (previewQuery.data.preview) setPreviewMode('still');
-    else toast.error(copy.preview.googleOnly);
+    if (pending === 'generate') void startGeneration();
   });
 
   const workUrl = task?.status === 'success' ? task.url : null;
   const showWork = previewMode === 'work';
-  const showStill = previewMode === 'still' && Boolean(freePreview);
-  const canPreview = Boolean(previewQuery.data?.eligible) && !freePreview;
   const [workDimensions, setWorkDimensions] = useState<{
     url: string;
     width: number;
@@ -1299,12 +1167,6 @@ export function GenjutsuGenerator({
     checkingGeneration ||
     validatingMedia ||
     savingDraft;
-  const previewDisabled =
-    !canGenerate ||
-    previewMutation.isPending ||
-    referenceClosed ||
-    !lead ||
-    !referenceVideo;
   const generateDisabled =
     !canGenerate ||
     (referenceSource === 'effect' &&
@@ -1447,16 +1309,6 @@ export function GenjutsuGenerator({
                     </button>
                   )}
               </div>
-              {trimProgress !== undefined && (
-                <p
-                  role="status"
-                  data-testid="video-trim-status"
-                  className="text-primary flex items-center gap-2 text-xs"
-                >
-                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                  {copy.trimming(trimProgress)}
-                </p>
-              )}
               {referenceSource === 'effect' &&
                 !referenceClosed &&
                 effectQuery.isError && (
@@ -1622,24 +1474,6 @@ export function GenjutsuGenerator({
                 {copy.legacyBalance}
               </p>
             )}
-            {canPreview && (
-              <div className="flex flex-col gap-1.5">
-                <button
-                  type="button"
-                  disabled={previewDisabled}
-                  data-testid="preview-button"
-                  className="border-primary/60 text-foreground hover:bg-primary/10 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl border px-2.5 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50"
-                  onClick={startPreview}
-                >
-                  {previewMutation.isPending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                  {copy.preview.button}
-                </button>
-              </div>
-            )}
             <button
               type="button"
               disabled={generateDisabled}
@@ -1790,22 +1624,6 @@ export function GenjutsuGenerator({
             >
               My Work
             </button>
-            {freePreview && (
-              <button
-                type="button"
-                data-testid="preview-still"
-                aria-pressed={previewMode === 'still'}
-                className={cn(
-                  'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                  previewMode === 'still'
-                    ? 'text-foreground bg-card shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-                onClick={() => setPreviewMode('still')}
-              >
-                {copy.preview.tab}
-              </button>
-            )}
           </div>
           <div
             style={{ '--media-ratio': mediaRatio } as React.CSSProperties}
@@ -1817,73 +1635,7 @@ export function GenjutsuGenerator({
               aria-hidden="true"
               className="absolute inset-0 size-full scale-110 object-cover opacity-50 blur-2xl"
             />
-            {showStill ? (
-              freePreview!.status === 'success' && freePreview!.url ? (
-                <div
-                  className="absolute inset-0 select-none"
-                  onContextMenu={(event) => event.preventDefault()}
-                >
-                  <img
-                    data-testid="preview-image"
-                    src={freePreview!.url}
-                    alt={copy.preview.tab}
-                    draggable={false}
-                    onLoad={(event) =>
-                      fitMedia(
-                        event.currentTarget.naturalWidth,
-                        event.currentTarget.naturalHeight
-                      )
-                    }
-                    className="absolute inset-0 size-full object-contain"
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 flex flex-wrap content-center items-center justify-center gap-x-10 gap-y-16 overflow-hidden"
-                  >
-                    {Array.from({ length: 12 }, (_, i) => (
-                      <span
-                        key={i}
-                        className="-rotate-[24deg] text-base font-bold tracking-widest whitespace-nowrap text-white/30 drop-shadow-[0_1px_1px_rgb(0_0_0/0.5)]"
-                      >
-                        {copy.preview.watermark}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="absolute inset-x-3 bottom-14 flex flex-col items-center gap-2">
-                    <span className="rounded-full bg-black/70 px-3 py-1 text-center text-[11px] text-white/80 backdrop-blur">
-                      {copy.preview.label}
-                    </span>
-                    <button
-                      type="button"
-                      data-testid="preview-cta"
-                      disabled={!canGenerate}
-                      onClick={() => {
-                        track('preview_cta');
-                        void startGeneration();
-                      }}
-                      className="bg-primary text-primary-foreground shadow-primary/70 inline-flex h-11 items-center gap-1.5 rounded-xl px-5 text-sm font-semibold shadow-[0_0_30px_-6px] disabled:opacity-50"
-                    >
-                      <Sparkles className="size-4" />
-                      {copy.preview.cta}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  role="status"
-                  className="relative z-10 flex flex-col items-center gap-3 p-6 text-center text-sm text-white"
-                >
-                  {freePreview!.status === 'processing' ? (
-                    <>
-                      <Loader2 className="size-7 animate-spin" />
-                      {copy.preview.working}
-                    </>
-                  ) : (
-                    copy.preview.failed
-                  )}
-                </div>
-              )
-            ) : showWork ? (
+            {showWork ? (
               workUrl ? (
                 <video
                   data-testid="work-video"
@@ -1959,29 +1711,25 @@ export function GenjutsuGenerator({
                 className="absolute inset-0 size-full object-contain"
               />
             )}
-            {!showStill && (
-              <>
-                <button
-                  type="button"
-                  aria-label={muted ? 'Unmute' : 'Mute'}
-                  className="hover:bg-primary hover:text-primary-foreground absolute right-3 bottom-3 flex size-9 items-center justify-center rounded-full bg-black/70 text-white backdrop-blur transition"
-                  onClick={() => setMuted((value) => !value)}
-                >
-                  {muted ? (
-                    <VolumeX className="size-4" />
-                  ) : (
-                    <Volume2 className="size-4" />
-                  )}
-                </button>
-                {(showWork || referenceSource === 'upload') && (
-                  <span className="absolute top-3 left-3 rounded-full bg-black/70 px-2.5 py-1 text-xs text-white backdrop-blur">
-                    {showWork
-                      ? task?.referenceName || copy.generatedVideo
-                      : copy.customReference}{' '}
-                    · {showWork ? 'work' : copy.uploadReference}
-                  </span>
-                )}
-              </>
+            <button
+              type="button"
+              aria-label={muted ? 'Unmute' : 'Mute'}
+              className="hover:bg-primary hover:text-primary-foreground absolute right-3 bottom-3 flex size-9 items-center justify-center rounded-full bg-black/70 text-white backdrop-blur transition"
+              onClick={() => setMuted((value) => !value)}
+            >
+              {muted ? (
+                <VolumeX className="size-4" />
+              ) : (
+                <Volume2 className="size-4" />
+              )}
+            </button>
+            {(showWork || referenceSource === 'upload') && (
+              <span className="absolute top-3 left-3 rounded-full bg-black/70 px-2.5 py-1 text-xs text-white backdrop-blur">
+                {showWork
+                  ? task?.referenceName || copy.generatedVideo
+                  : copy.customReference}{' '}
+                · {showWork ? 'work' : copy.uploadReference}
+              </span>
             )}
             {showWork &&
             task?.status === 'success' &&
@@ -2052,21 +1800,6 @@ export function GenjutsuGenerator({
                 )}
               </p>
               <div className="flex gap-2">
-                {canPreview && (
-                  <button
-                    type="button"
-                    disabled={previewDisabled}
-                    onClick={startPreview}
-                    className="border-primary/60 inline-flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border text-sm font-semibold disabled:opacity-50"
-                  >
-                    {previewMutation.isPending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Eye className="size-4" />
-                    )}
-                    {copy.preview.button}
-                  </button>
-                )}
                 <button
                   type="button"
                   disabled={generateDisabled}

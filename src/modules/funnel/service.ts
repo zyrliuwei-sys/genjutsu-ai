@@ -20,10 +20,6 @@ export const FUNNEL_EVENTS = [
   'checkout_redirect',
   'checkout_failed',
   'generate_submitted',
-  'preview_click',
-  'preview_ready',
-  'preview_failed',
-  'preview_cta',
 ] as const;
 
 export type FunnelEventName = (typeof FUNNEL_EVENTS)[number];

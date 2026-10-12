@@ -1126,17 +1126,5 @@
   "landing.generator.generated_video": "Generated video",
   "landing.generator.prior_ratio_mismatch": "This earlier result is {width}×{height}, not {aspect}. Changing the controls does not resize an existing video.",
   "landing.generator.ratio_padding": "A different ratio keeps the full video with padding; it does not crop the performer.",
-  "landing.pricing.pack_plus": "Plus Pack",
-  "landing.generator.preview_button": "Free AI preview",
-  "landing.generator.preview_hint": "See your character in this scene before you pay. 1 free preview per account.",
-  "landing.generator.preview_working": "Creating your free preview…",
-  "landing.generator.preview_tab": "My Preview",
-  "landing.generator.preview_cta": "Bring it to life — generate the video",
-  "landing.generator.preview_failed": "The preview could not be created. Your free preview is still available — try again.",
-  "landing.generator.preview_used": "You have already used your free preview.",
-  "landing.generator.preview_busy": "Free previews are busy right now. Please try again later.",
-  "landing.generator.preview_unavailable": "Free preview is not available in your region.",
-  "landing.generator.preview_watermark": "GENJUTSU AI · PREVIEW",
-  "landing.generator.preview_label": "Still preview · the video keeps the reference motion",
-  "landing.generator.preview_google_only": "Free preview is only available for accounts signed in with Google."
+  "landing.pricing.pack_plus": "Plus Pack"
 }
