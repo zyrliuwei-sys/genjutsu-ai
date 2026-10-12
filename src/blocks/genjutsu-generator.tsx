@@ -6,30 +6,10 @@ import { GenjutsuGenerator as Generator } from '@/components/genjutsu-generator'
 import { TextVideoGenerator } from '@/components/text-video-generator';
 
 export function GenjutsuGenerator() {
-  const [mode, setMode] = useState<'text' | 'edit'>('edit');
+  // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
+  const [mode] = useState<'text' | 'edit'>('edit');
   return (
     <div>
-      <div
-        className="border-border bg-card mb-4 flex w-fit gap-1 rounded-xl border p-1"
-        role="group"
-        aria-label={m['landing.generator.mode']()}
-      >
-        {/* Text to Video is temporarily hidden; add 'text' back to re-enable. */}
-        {(['edit'] as ('edit' | 'text')[]).map((value) => (
-          <button
-            type="button"
-            key={value}
-            aria-pressed={mode === value}
-            data-testid={`generator-mode-${value}`}
-            onClick={() => setMode(value)}
-            className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${mode === value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            {value === 'text'
-              ? m['landing.generator.text_mode']()
-              : m['landing.generator.edit_mode']()}
-          </button>
-        ))}
-      </div>
       {mode === 'text' && (
         <TextVideoGenerator
           locale={getLocale()}
