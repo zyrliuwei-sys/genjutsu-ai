@@ -7,22 +7,25 @@ import { MAX_REFERENCE_VIDEO_MB } from '@/lib/video-trim-plan';
 
 export const GENJUTSU_MODEL_ID = 'genjutsu-storm';
 export const GENJUTSU_ENDPOINT = 'fal-ai/kling-video/o1/video-to-video/edit';
-export const GENJUTSU_EVOLINK_MODEL = 'kling-o1-video-edit';
-// EvoLink Kling O1 Video Edit: $0.177/input second, billed 3–10s.
-// Verified in the hydrated model-specific pricing panel on 2026-10-10:
-// https://evolink.ai/kling-o1?model=kling-o1-video-edit#pricing
-export const GENJUTSU_USD_PER_SECOND = 0.177;
-// 7 × $0.885 (5s) = $6.20, rounded up to a whole $3.50 unit.
-export const GENJUTSU_CREDITS_PER_GENERATION = 700;
-export function genjutsuGenerations(seconds = 5) {
+export const GENJUTSU_EVOLINK_MODEL = 'kling-o3-video-edit';
+export const GENJUTSU_EVOLINK_QUALITY = '720p';
+// EvoLink Kling O3 Video Edit 720p: $0.120/input second, rounded up, keeps
+// the original sound. Verified in the model pricing panel and a playground
+// A/B against O1 / O1 Fast on 2026-10-12:
+// https://evolink.ai/kling-o3?model=kling-o3-video-edit#pricing
+export const GENJUTSU_USD_PER_SECOND = 0.12;
+// Every video is one clip of up to 10s ($1.20 cost), sold at $9.90 of balance.
+export const GENJUTSU_SECONDS = 10;
+export const GENJUTSU_CREDITS_PER_GENERATION = 990;
+export function genjutsuGenerations(seconds = GENJUTSU_SECONDS) {
   if (!Number.isFinite(seconds) || seconds < 3 || seconds > 10.05)
     throw new Error('Reference video must be 3–10 seconds long');
-  return seconds <= 5 ? 1 : 2;
+  return 1;
 }
-export function genjutsuCredits(seconds = 5) {
+export function genjutsuCredits(seconds = GENJUTSU_SECONDS) {
   return genjutsuGenerations(seconds) * GENJUTSU_CREDITS_PER_GENERATION;
 }
-export const GENJUTSU_CREDITS = genjutsuCredits(5);
+export const GENJUTSU_CREDITS = genjutsuCredits();
 
 /** Trusted reference context: never transform scenery when replacing a performer. */
 export const GENJUTSU_REFERENCES: Record<

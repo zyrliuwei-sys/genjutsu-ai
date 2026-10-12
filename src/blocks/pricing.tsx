@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 import { useSession } from '@/core/auth/client';
 import { Link, useRouter } from '@/core/i18n/navigation';
-import { genjutsuCredits } from '@/config/genjutsu';
+import { GENJUTSU_CREDITS, genjutsuCredits } from '@/config/genjutsu';
 import { pricingCatalog, type PricingProduct } from '@/config/pricing';
 import { apiPost } from '@/lib/api-client';
 import { currentPathWithQuery } from '@/lib/redirect';
@@ -97,14 +97,15 @@ export function Pricing({
       productId,
       name,
       featured,
-      description:
-        singleVideo || clipSeconds
-          ? m['landing.text_video.pack_count']({
-              count: Math.floor(product.credits / clipCost),
-            })
-          : m['landing.pricing.shared_balance']({
-              amount: usd(product.credits),
-            }),
+      // Packs are sized in whole 10s Genjutsu videos; the text-to-video
+      // paywall keeps its own per-clip count.
+      description: singleVideo
+        ? m['landing.text_video.pack_count']({
+            count: Math.floor(product.credits / clipCost),
+          })
+        : m['landing.pricing.pack_videos']({
+            count: Math.floor(product.credits / GENJUTSU_CREDITS),
+          }),
       price: usd(product.priceInCents),
       priceInCents: product.priceInCents,
       currency: product.currency,

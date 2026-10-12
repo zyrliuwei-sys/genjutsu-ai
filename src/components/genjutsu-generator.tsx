@@ -21,6 +21,7 @@ import {
   GENJUTSU_ASPECTS,
   GENJUTSU_CREDITS_PER_GENERATION,
   GENJUTSU_DIRECTIONS,
+  GENJUTSU_SECONDS,
   genjutsuCredits,
   genjutsuGenerations,
   type GenjutsuAspect,
@@ -478,7 +479,8 @@ export function GenjutsuGenerator({
   const clipController = useRef<AbortController | undefined>(undefined);
   useEffect(() => () => clipController.current?.abort(), []);
   const [aspect, setAspect] = useState<GenjutsuAspect>('16:9');
-  const [durationTier, setDurationTier] = useState<5 | 10>(5);
+  // Every video is a single clip of up to 10s; there is no length choice.
+  const durationTier = GENJUTSU_SECONDS;
   const [lead, setLead] = useState<Asset>();
   const [referenceVideo, setReferenceVideo] = useState<Asset>();
   const [referenceClosed, setReferenceClosed] = useState(false);
@@ -586,7 +588,6 @@ export function GenjutsuGenerator({
         setReferenceSource(
           draft?.referenceSource === 'upload' ? 'upload' : 'effect'
         );
-        setDurationTier(draft?.durationTier === 10 ? 10 : 5);
         if (draft && TEMPLATES.some((t) => t.id === draft.selectedId)) {
           setSelectedId(draft.selectedId);
           setExampleId(draft.selectedId);
@@ -886,7 +887,6 @@ export function GenjutsuGenerator({
       if (isVideo) {
         setReferenceSource('upload');
         setReferenceClosed(false);
-        setDurationTier(tier);
         const sourceRatio = metadata.width / metadata.height;
         const closest = [...(readiness?.aspects || GENJUTSU_ASPECTS)].sort(
           (a, b) => {
@@ -1133,7 +1133,7 @@ export function GenjutsuGenerator({
 
   const running = generate.isPending || Boolean(taskId && !isDone(task));
   // Generation overlay: the provider reports no progress, so the bar is an
-  // estimate from observed render times (5s clips ~2–4 min, 10s up to ~12).
+  // estimate from observed render times.
   const generatingView = submitting || running;
   useEffect(() => {
     if (!generatingView) return;
@@ -1142,8 +1142,8 @@ export function GenjutsuGenerator({
     return () => clearInterval(timer);
   }, [generatingView]);
   const preparingMedia = submitting || generate.isPending;
-  const longClip = (referenceVideo?.duration || durationTier) > 6;
-  const expectedSecs = longClip ? 600 : 240;
+  // Kling O3 rendered a 7s clip in ~3–4 min in testing (2026-10-12).
+  const expectedSecs = 300;
   const renderStart =
     !preparingMedia && task?.createdAt
       ? Date.parse(task.createdAt)
@@ -1491,61 +1491,6 @@ export function GenjutsuGenerator({
               !moreOpen && 'max-lg:hidden'
             )}
           >
-            <fieldset className="flex flex-col gap-2">
-              <legend className="mb-2 text-sm font-medium">Video length</legend>
-              <div className="flex gap-2">
-                {([5, 10] as const).map((seconds) => (
-                  <button
-                    type="button"
-                    key={seconds}
-                    data-testid={`duration-${seconds}`}
-                    aria-pressed={durationTier === seconds}
-                    disabled={
-                      !draftReady ||
-                      running ||
-                      checkingGeneration ||
-                      savingDraft ||
-                      validatingMedia ||
-                      (referenceSource === 'upload' &&
-                        !!referenceVideo &&
-                        !referenceVideo.sourceFile &&
-                        durationTier !== seconds)
-                    }
-                    onClick={() => {
-                      if (
-                        referenceSource === 'upload' &&
-                        referenceVideo?.sourceFile &&
-                        durationTier !== seconds
-                      ) {
-                        void selectAsset(
-                          referenceVideo.sourceFile,
-                          'video',
-                          setReferenceVideo,
-                          seconds,
-                          true
-                        );
-                        return;
-                      }
-                      if (
-                        referenceSource === 'effect' &&
-                        durationTier !== seconds
-                      )
-                        setReferenceVideo(undefined);
-                      setDurationTier(seconds);
-                    }}
-                    className={cn(
-                      'min-h-11 flex-1 rounded-lg border px-2 py-2 text-sm',
-                      durationTier === seconds
-                        ? 'border-primary bg-primary/15 text-primary'
-                        : 'border-border'
-                    )}
-                  >
-                    {seconds === 5 ? '5s' : 'Up to 10s'}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-2 text-sm font-medium">Video size</legend>
               <div className="flex gap-2">
@@ -1935,7 +1880,7 @@ export function GenjutsuGenerator({
                   hint={
                     preparingMedia
                       ? copy.generatingPreparing
-                      : copy.generatingEta(longClip ? '5–12' : '2–4')
+                      : copy.generatingEta('3–6')
                   }
                   percent={generatingPercent}
                 />

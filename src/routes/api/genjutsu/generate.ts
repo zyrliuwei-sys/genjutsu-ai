@@ -10,6 +10,7 @@ import {
   buildGenjutsuPrompt,
   GENJUTSU_ENDPOINT,
   GENJUTSU_EVOLINK_MODEL,
+  GENJUTSU_EVOLINK_QUALITY,
   GENJUTSU_MODEL_ID,
   GENJUTSU_REFERENCES,
   genjutsuCredits,
@@ -236,8 +237,11 @@ async function POST({ request }: { request: Request }) {
           prompt,
           video_urls: [referenceVideo],
           image_urls: crowdImage ? [leadImage, crowdImage] : [leadImage],
+          // O3 edits keep the input framing (the clip is already normalized
+          // to the chosen aspect), so no aspect_ratio — same body as the
+          // EvoLink playground request.
+          quality: GENJUTSU_EVOLINK_QUALITY,
           keep_original_sound: true,
-          aspect_ratio: aspect,
         });
         await setProviderTaskId(task.id, id);
       } else {

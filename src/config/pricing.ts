@@ -43,9 +43,9 @@ export type PricingProduct = {
  * price × 7, e.g. 700 credits for a 5s 720p Seedance 2.0 clip) and
  * ./hotel-lobby-pricing.ts and ./genjutsu.ts.
  *
- * Packs grant shared balance at 1 internal credit = $0.01, always a whole
- * number of CREDIT_UNIT (350 credits = $3.50, the cheapest generation) so
- * every balance can be spent down to zero. Larger packs carry a bonus.
+ * Packs grant shared balance at 1 internal credit = $0.01. The visible packs
+ * are sized in whole 10-second Genjutsu videos (990 credits each, see
+ * ./genjutsu.ts): 1 / 3 / 5 videos, larger packs carrying a bonus.
  * Each generation charges at least 7× its provider list cost. Existing balances
  * and already-created orders are unchanged; legacy subscriptions remain below.
  * Keys MUST match what the pricing UI sends as product_id.
@@ -58,23 +58,23 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     productId: 'pack_starter',
     productName: 'Trial Pack',
     planName: 'Trial Pack',
-    description: '$9.90 for $10.50 shared generation balance',
+    description: '$9.90 for one 10-second video ($9.90 balance)',
     type: PaymentType.ONE_TIME,
     priceInCents: 990,
     currency: 'usd',
-    credits: 1050,
-    bonusCredits: 60,
+    credits: 990,
+    bonusCredits: 0,
   },
   pack_plus: {
     productId: 'pack_plus',
     productName: 'Plus Pack',
     planName: 'Plus Pack',
-    description: '$19.90 for $21.00 shared generation balance',
+    description: '$24.90 for three 10-second videos ($29.70 balance)',
     type: PaymentType.ONE_TIME,
-    priceInCents: 1990,
+    priceInCents: 2490,
     currency: 'usd',
-    credits: 2100,
-    bonusCredits: 110,
+    credits: 2970,
+    bonusCredits: 480,
   },
   pack_creator: {
     available: false,
@@ -104,11 +104,11 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     productId: 'pack_pro',
     productName: 'Batch Pack',
     planName: 'Batch Pack',
-    description: '$49.90 for $59.50 shared generation balance',
+    description: '$39.90 for five 10-second videos ($49.50 balance)',
     type: PaymentType.ONE_TIME,
-    priceInCents: 4990,
+    priceInCents: 3990,
     currency: 'usd',
-    credits: 5950,
+    credits: 4950,
     bonusCredits: 960,
   },
   pack_studio: {
