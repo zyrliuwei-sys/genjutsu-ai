@@ -9,6 +9,8 @@ export interface FooterColumn {
   title: string;
   /** external: open in a new tab. Off-site (http) hrefs always open in a new tab. */
   links: { label: string; href: string; external?: boolean }[];
+  /** Hide this column on phones to keep the footer short. */
+  hideOnMobile?: boolean;
 }
 
 /** Off-site URLs render as plain <a>; internal paths use the locale-aware Link. */
@@ -40,7 +42,7 @@ export function SiteFooter({
     <footer className="bg-background text-foreground border-border border-t">
       <div className="mx-auto max-w-7xl px-6 pt-14 pb-6 sm:px-10 sm:pt-16 lg:px-16">
         {tagline && (
-          <p className="eg-heading mb-12 max-w-2xl text-4xl leading-[1.05] sm:text-5xl">
+          <p className="eg-heading mb-12 max-w-2xl text-4xl leading-[1.05] max-md:hidden sm:text-5xl">
             {tagline}
           </p>
         )}
@@ -57,7 +59,10 @@ export function SiteFooter({
             )}
           >
             {columns.map((col) => (
-              <div key={col.title} className="space-y-5">
+              <div
+                key={col.title}
+                className={cn('space-y-5', col.hideOnMobile && 'max-md:hidden')}
+              >
                 <p className="text-foreground text-[13px] font-semibold tracking-wide">
                   {col.title}
                 </p>

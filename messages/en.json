@@ -782,6 +782,7 @@
   "landing.nav.pricing": "Pricing",
   "landing.hero.headline": "Put yourself in any viral video with Genjutsu AI",
   "landing.hero.subheadline": "Pick an effect, upload one photo, and Genjutsu AI swaps you into the scene: same moves, same background, ready to post in minutes.",
+  "landing.hero.subheadline_short": "Upload one photo and step into the scene.",
   "landing.hero.cta": "Upload your photo",
   "landing.hero.secondary": "Browse effects",
   "landing.chips.auth": "Authentication",
@@ -1153,5 +1154,13 @@
   "landing.generator.generated_video": "Generated video",
   "landing.generator.prior_ratio_mismatch": "This earlier result is {width}×{height}, not {aspect}. Changing the controls does not resize an existing video.",
   "landing.generator.ratio_padding": "A different ratio keeps the full video with padding; it does not crop the performer.",
-  "landing.pricing.pack_plus": "Plus Pack"
+  "landing.pricing.pack_plus": "Plus Pack",
+  "landing.pricing.description_short": "Packs from $9.90. No subscription.",
+  "landing.faq.description_short": "Quick answers before you start.",
+  "landing.faq.what.answer_short": "Upload one photo, pick an effect or your own video, and Genjutsu AI swaps you into the scene.",
+  "landing.faq.free.answer_short": "Sign-up and examples are free. Generating needs a pack, from $9.90, no subscription.",
+  "landing.faq.credits.answer_short": "Each pack covers a set number of videos. Failed generations are refunded automatically.",
+  "landing.faq.commercial.answer_short": "Yes, within our Terms of Service.",
+  "landing.faq.higgsfield.answer_short": "No. Genjutsu AI is an independent studio, not affiliated with Higgsfield.",
+  "landing.pricing.failure_policy_short": "Failed generations are refunded automatically."
 }

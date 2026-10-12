@@ -56,7 +56,12 @@ export function Hero() {
             {m['landing.hero.headline']()}
           </h1>
           <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-base leading-relaxed sm:text-lg">
-            {m['landing.hero.subheadline']()}
+            <span className="max-md:hidden">
+              {m['landing.hero.subheadline']()}
+            </span>
+            <span className="md:hidden">
+              {m['landing.hero.subheadline_short']()}
+            </span>
           </p>
 
           {/* Phones go straight into the generator below (sticky CTA there). */}
@@ -70,7 +75,7 @@ export function Hero() {
               <ArrowRight aria-hidden className="size-4" />
             </a>
           </div>
-          <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-sm">
+          <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-sm max-md:hidden">
             {m['landing.hero.trust']()}
           </p>
         </div>

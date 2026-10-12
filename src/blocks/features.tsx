@@ -43,7 +43,7 @@ export function Features() {
   return (
     <section
       id="tools"
-      className="border-border scroll-mt-20 border-t px-4 py-24 sm:py-32"
+      className="border-border scroll-mt-20 border-t px-4 pt-24 pb-12 sm:py-32"
     >
       <div className="mx-auto max-w-7xl">
         <Reveal className="grid gap-6 lg:grid-cols-2 lg:items-end">
@@ -54,7 +54,7 @@ export function Features() {
             <p className="text-muted-foreground max-w-md text-lg leading-relaxed lg:text-right">
               {m['landing.swap.description']()}
             </p>
-            <Link href="/create" className="eg-pill-primary">
+            <Link href="/create" className="eg-pill-primary max-md:hidden">
               {m['landing.swap.cta']()}
               <ArrowRight className="size-4" />
             </Link>
@@ -67,7 +67,10 @@ export function Features() {
               key={swap.key}
               delay={i * 90}
               className={
-                swap.height > swap.width ? 'mx-auto w-full max-w-sm' : ''
+                // Phones show only the first (landscape) example.
+                swap.height > swap.width
+                  ? 'mx-auto w-full max-w-sm max-md:hidden'
+                  : ''
               }
             >
               <BeforeAfterVideo

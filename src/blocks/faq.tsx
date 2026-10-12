@@ -1,5 +1,6 @@
 import { tDynamic } from '@/core/i18n/dynamic';
 import { Link } from '@/core/i18n/navigation';
+import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
 import {
   Accordion,
@@ -21,6 +22,15 @@ export const FAQ_KEYS = [
   'formats',
 ] as const;
 
+// Phones show a short FAQ: these questions only, with one-line answers.
+const MOBILE_FAQ_KEYS = new Set<string>([
+  'what',
+  'free',
+  'credits',
+  'commercial',
+  'higgsfield',
+]);
+
 export function FAQ() {
   return (
     <section
@@ -33,17 +43,37 @@ export function FAQ() {
             {m['landing.faq.title']()}
           </h2>
           <p className="text-muted-foreground mt-5 text-lg">
-            {m['landing.faq.description']()}
+            <span className="max-md:hidden">
+              {m['landing.faq.description']()}
+            </span>
+            <span className="md:hidden">
+              {m['landing.faq.description_short']()}
+            </span>
           </p>
         </div>
         <Accordion className="border-border w-full border-t">
           {FAQ_KEYS.map((key) => (
-            <AccordionItem key={key} value={key}>
+            <AccordionItem
+              key={key}
+              value={key}
+              className={cn(!MOBILE_FAQ_KEYS.has(key) && 'max-md:hidden')}
+            >
               <AccordionTrigger className="cursor-pointer py-6 text-left text-lg font-medium tracking-tight hover:no-underline">
                 {tDynamic(`landing.faq.${key}.question`)}
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground max-w-2xl pb-6 text-base leading-relaxed">
-                {tDynamic(`landing.faq.${key}.answer`)}
+                {MOBILE_FAQ_KEYS.has(key) ? (
+                  <>
+                    <span className="max-md:hidden">
+                      {tDynamic(`landing.faq.${key}.answer`)}
+                    </span>
+                    <span className="md:hidden">
+                      {tDynamic(`landing.faq.${key}.answer_short`)}
+                    </span>
+                  </>
+                ) : (
+                  tDynamic(`landing.faq.${key}.answer`)
+                )}
                 {key === 'free' && (
                   <Link
                     href="/genjutsu-free"

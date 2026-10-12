@@ -18,14 +18,14 @@ export function CTA() {
             className="absolute inset-0 size-full object-[50%_45%] opacity-60"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/60" />
-          <div className="relative flex min-h-[460px] flex-col items-center justify-end px-6 pt-24 pb-14 text-center text-white sm:min-h-[520px] sm:pb-16">
-            <p className="font-mono text-[11px] tracking-[0.18em] text-white/60 uppercase">
+          <div className="relative flex min-h-[460px] flex-col items-center justify-end px-6 pt-24 pb-14 text-center text-white max-md:justify-center max-md:py-14 sm:min-h-[520px] sm:pb-16">
+            <p className="font-mono text-[11px] tracking-[0.18em] text-white/60 uppercase max-md:hidden">
               {m['landing.cta.eyebrow']()}
             </p>
             <h2 className="eg-heading mt-4 max-w-3xl text-4xl leading-[1.04] text-balance sm:text-6xl">
               {m['landing.cta.headline']()}
             </h2>
-            <p className="mt-5 max-w-xl text-white/75 sm:text-lg">
+            <p className="mt-5 max-w-xl text-white/75 max-md:hidden sm:text-lg">
               {m['landing.cta.subheadline']()}
             </p>
             <Link

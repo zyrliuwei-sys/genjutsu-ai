@@ -122,11 +122,21 @@ export function Pricing({
       credits: product.credits,
       features: [
         ...(singleVideo ? [] : [{ icon: Video, label: packVideos(productId) }]),
-        { icon: Film, label: m['landing.pricing.shared_modes']() },
-        { icon: MonitorPlay, label: m['landing.pricing.variable_cost']() },
+        // Phones show only the video count; the rest is desktop-only.
+        {
+          icon: Film,
+          label: m['landing.pricing.shared_modes'](),
+          hideOnMobile: true,
+        },
+        {
+          icon: MonitorPlay,
+          label: m['landing.pricing.variable_cost'](),
+          hideOnMobile: true,
+        },
         {
           icon: InfinityIcon,
           label: m['landing.pricing.feature_no_subscription'](),
+          hideOnMobile: true,
         },
         ...(!coversClip
           ? [{ label: m['landing.pricing.insufficient_selected_clip']() }]
@@ -268,23 +278,35 @@ export function Pricing({
               dialog ? 'mt-2 text-sm' : 'mt-5'
             )}
           >
-            {m['landing.pricing.description']()}
+            <span className={dialog ? undefined : 'max-md:hidden'}>
+              {m['landing.pricing.description']()}
+            </span>
+            {!dialog && (
+              <span className="md:hidden">
+                {m['landing.pricing.description_short']()}
+              </span>
+            )}
           </p>
           {/* The paywall keeps one line; billing details live on /pricing. */}
           {!dialog && (
             <>
-              <p className="text-muted-foreground mt-2 text-sm">
+              <p className="text-muted-foreground mt-2 text-sm max-md:hidden">
                 {singleVideo
                   ? `${singleVideo.productName}. ${m['landing.text_video.audio']()}`
                   : m['landing.pricing.billing_rules']()}
               </p>
               <p className="text-muted-foreground mt-2 text-xs">
-                {m['landing.pricing.failure_policy']()}
+                <span className="max-md:hidden">
+                  {m['landing.pricing.failure_policy']()}
+                </span>
+                <span className="md:hidden">
+                  {m['landing.pricing.failure_policy_short']()}
+                </span>
               </p>
             </>
           )}
           {!dialog && (
-            <p className="text-primary mt-4 text-sm">
+            <p className="text-primary mt-4 text-sm max-md:hidden">
               <Link href="/create">{m['landing.pricing.text_entry']()}</Link>
             </p>
           )}

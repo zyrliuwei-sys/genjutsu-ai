@@ -14,7 +14,13 @@ type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 export type PricingFeature =
   | string
-  | { icon?: IconComponent; label: string; tooltip?: string };
+  | {
+      icon?: IconComponent;
+      label: string;
+      tooltip?: string;
+      /** Hide on phones to keep the card short. */
+      hideOnMobile?: boolean;
+    };
 
 export interface PricingPlan {
   id: string;
@@ -218,7 +224,13 @@ export function PricingTable({
                 const Icon: IconComponent = (isObj && feature.icon) || Check;
                 const label = isObj ? feature.label : feature;
                 return (
-                  <li key={i} className="flex items-center gap-2.5 text-sm">
+                  <li
+                    key={i}
+                    className={cn(
+                      'flex items-center gap-2.5 text-sm',
+                      isObj && feature.hideOnMobile && 'max-md:hidden'
+                    )}
+                  >
                     <Icon className="text-muted-foreground size-4 shrink-0" />
                     <span className="text-foreground/90">{label}</span>
                   </li>

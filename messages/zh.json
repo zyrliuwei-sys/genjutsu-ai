@@ -782,6 +782,7 @@
   "landing.nav.pricing": "价格",
   "landing.hero.headline": "用 Genjutsu AI，把你放进爆款视频里",
   "landing.hero.subheadline": "选一个特效，上传一张照片，Genjutsu AI 就把你换进画面里。动作和背景都不变，几分钟就能发布。",
+  "landing.hero.subheadline_short": "上传一张照片，把你换进画面里。",
   "landing.hero.cta": "上传你的照片",
   "landing.hero.secondary": "浏览特效",
   "landing.chips.auth": "身份认证",
@@ -1153,5 +1154,13 @@
   "landing.generator.generated_video": "生成的视频",
   "landing.generator.prior_ratio_mismatch": "这份旧作品实际为 {width}×{height}，不是 {aspect}。切换选项不会改变已生成视频的比例。",
   "landing.generator.ratio_padding": "切换比例会通过补边保留完整视频，不会裁掉人物。",
-  "landing.pricing.pack_plus": "进阶套餐"
+  "landing.pricing.pack_plus": "进阶套餐",
+  "landing.pricing.description_short": "套餐 $9.90 起，无订阅。",
+  "landing.faq.description_short": "开始前的常见问题。",
+  "landing.faq.what.answer_short": "上传一张照片，选一个特效或你自己的视频，Genjutsu AI 就把你换进画面里。",
+  "landing.faq.free.answer_short": "注册和示例免费，生成视频需要购买套餐，$9.90 起，无订阅。",
+  "landing.faq.credits.answer_short": "每个套餐对应固定数量的视频，生成失败自动退回。",
+  "landing.faq.commercial.answer_short": "可以，需遵守我们的服务条款。",
+  "landing.faq.higgsfield.answer_short": "不是。Genjutsu AI 是独立的创作工具，与 Higgsfield 无关联。",
+  "landing.pricing.failure_policy_short": "生成失败自动退回。"
 }

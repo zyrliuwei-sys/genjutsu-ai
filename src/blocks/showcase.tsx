@@ -11,7 +11,10 @@ export function Showcase() {
   const items = [...SHOWCASE_ITEMS, ...SHOWCASE_ITEMS];
 
   return (
-    <section id="ideas" className="scroll-mt-20 overflow-hidden py-24 sm:py-32">
+    <section
+      id="ideas"
+      className="scroll-mt-20 overflow-hidden pt-12 pb-24 sm:py-32"
+    >
       <Reveal className="mx-auto mb-12 flex max-w-7xl flex-wrap items-end justify-between gap-6 px-4">
         <div>
           <h2 className="eg-heading text-4xl leading-[1.05] sm:text-5xl">

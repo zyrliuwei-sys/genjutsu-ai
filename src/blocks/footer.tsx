@@ -6,6 +6,7 @@ export function Footer() {
   const columns: FooterColumn[] = [
     {
       title: m['landing.footer.product'](),
+      hideOnMobile: true,
       links: [
         { label: m['landing.footer.video'](), href: '/create?kind=video' },
         { label: m['landing.footer.image'](), href: '/create?kind=video' },
@@ -15,6 +16,7 @@ export function Footer() {
     },
     {
       title: m['landing.footer.resources'](),
+      hideOnMobile: true,
       links: [
         {
           label: 'support@genjutsu-ai.org',

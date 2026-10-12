@@ -110,14 +110,21 @@ function HomePage() {
       <Header />
       <main>
         <Hero />
-        <ContentLinks />
+        {/* Phones get a shorter page; the text stays in the HTML for SEO. */}
+        <div className="max-md:hidden">
+          <ContentLinks />
+        </div>
         <Features />
-        <Models />
+        <div className="max-md:hidden">
+          <Models />
+        </div>
         <Showcase />
-        <About />
-        <Guide />
-        <Compare />
-        <Audience />
+        <div className="max-md:hidden">
+          <About />
+          <Guide />
+          <Compare />
+          <Audience />
+        </div>
         <Pricing />
         <FAQ />
         <CTA />
