@@ -1310,15 +1310,53 @@ export function GenjutsuGenerator({
       <div
         ref={generatorRef}
         id="generator"
-        className="border-border bg-muted text-foreground grid scroll-mt-24 grid-cols-1 gap-3 rounded-3xl border p-3 lg:grid-cols-[300px_minmax(0,1fr)]"
+        className="border-border bg-muted text-foreground grid scroll-mt-24 grid-cols-1 gap-3 rounded-3xl border p-3 lg:grid-cols-[minmax(0,1fr)_320px]"
       >
         <section
           ref={createRef}
           id="genjutsu-upload"
           aria-label="Create"
-          className="bg-card order-3 flex min-h-0 scroll-mt-24 flex-col gap-4 rounded-2xl p-4 lg:col-start-1 lg:row-span-2 lg:row-start-1"
+          className="bg-card order-3 flex min-h-0 scroll-mt-24 flex-col gap-4 rounded-2xl p-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:gap-5 lg:p-5"
         >
           <h2 className="text-lg font-semibold max-lg:hidden">AI Effects</h2>
+          {/* Desktop: the effect picked below the preview, echoed here so the
+              panel reads as effect → photo → size → generate. */}
+          <div className="flex flex-col gap-2 max-lg:hidden">
+            <span className="text-sm font-medium">Effect</span>
+            <a
+              href="#genjutsu-effects"
+              className="border-border bg-muted hover:border-primary/50 group flex items-center gap-3 rounded-xl border p-2 transition-colors"
+            >
+              {referenceSource === 'upload' ? (
+                <span className="bg-primary/15 text-primary flex aspect-[3/4] w-12 shrink-0 items-center justify-center rounded-lg">
+                  <Video className="size-5" aria-hidden="true" />
+                </span>
+              ) : (
+                <img
+                  src={selected.image}
+                  alt=""
+                  className="aspect-[3/4] w-12 shrink-0 rounded-lg object-cover"
+                />
+              )}
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-sm font-semibold">
+                  {referenceSource === 'upload'
+                    ? copy.customReference
+                    : selected.name}
+                </span>
+                {referenceSource === 'effect' && (
+                  <span className="text-muted-foreground text-xs">
+                    {Math.min(selected.duration, durationTier)}s ·{' '}
+                    {selected.ratios}
+                  </span>
+                )}
+              </span>
+              <ChevronDown
+                aria-hidden
+                className="text-muted-foreground group-hover:text-primary size-4 shrink-0 -rotate-90 transition-colors"
+              />
+            </a>
+          </div>
           <div
             className={cn(
               // Desktop: the effect plays in the big preview, so only the
@@ -1568,7 +1606,7 @@ export function GenjutsuGenerator({
         <section
           id="genjutsu-effects"
           aria-label="Select effect"
-          className="bg-card order-2 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-2 lg:row-start-2"
+          className="bg-card order-2 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-2"
         >
           <h2 className="text-lg font-semibold">Select Effect</h2>
           <div className="relative">
@@ -1667,7 +1705,7 @@ export function GenjutsuGenerator({
         <section
           ref={previewRef}
           aria-label="Preview"
-          className="bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-2 lg:row-start-1"
+          className="bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-1"
         >
           <div className="bg-muted flex w-fit gap-1 rounded-xl p-1">
             <button
