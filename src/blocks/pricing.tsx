@@ -7,6 +7,7 @@ import {
   Film,
   Infinity as InfinityIcon,
   MonitorPlay,
+  Video,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -85,17 +86,15 @@ export function Pricing({
   // One shared prepaid balance for every generation API.
   const clipCost =
     singleVideo?.credits ?? (clipSeconds ? genjutsuCredits(clipSeconds) : 0);
-  function packQuantity(product: PricingProduct) {
+  // "3 videos · $8.30 each · 10s" — packs are sized in whole 10s videos.
+  function packVideos(productId?: string) {
+    const product = productId ? pricingCatalog[productId] : undefined;
+    if (!product) return '';
     const count = Math.floor(product.credits / GENJUTSU_CREDITS);
-    return {
-      quantity:
-        count === 1
-          ? m['landing.pricing.pack_one_video']()
-          : m['landing.pricing.pack_videos']({ count }),
-      quantityNote: m['landing.pricing.pack_unit_price']({
-        price: usd(Math.round(product.priceInCents / count)),
-      }),
-    };
+    const price = usd(Math.round(product.priceInCents / count));
+    return count === 1
+      ? m['landing.pricing.pack_one_video']({ price })
+      : m['landing.pricing.pack_videos']({ count, price });
   }
 
   function plan(
@@ -117,12 +116,12 @@ export function Pricing({
             count: Math.floor(product.credits / clipCost),
           })
         : undefined,
-      ...(singleVideo ? {} : packQuantity(product)),
       price: usd(product.priceInCents),
       priceInCents: product.priceInCents,
       currency: product.currency,
       credits: product.credits,
       features: [
+        ...(singleVideo ? [] : [{ icon: Video, label: packVideos(productId) }]),
         { icon: Film, label: m['landing.pricing.shared_modes']() },
         { icon: MonitorPlay, label: m['landing.pricing.variable_cost']() },
         {
@@ -300,7 +299,7 @@ export function Pricing({
                 {pendingPlan.price}
               </p>
               <p className="text-muted-foreground mt-2 text-sm">
-                {pendingPlan.quantity ?? pendingPlan.description}
+                {packVideos(pendingPlan.productId) || pendingPlan.description}
               </p>
               <button
                 type="button"
