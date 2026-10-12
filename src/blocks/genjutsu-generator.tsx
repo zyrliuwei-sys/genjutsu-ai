@@ -59,8 +59,6 @@ export function GenjutsuGenerator() {
                 aspect,
               }),
             ratioPadding: m['landing.generator.ratio_padding'](),
-            generationCost: (count) =>
-              m['landing.generator.generation_cost']({ count }),
             moreSettings: m['landing.generator.more_settings'](),
             generatingTitle: m['landing.generator.generating_title'](),
             generatingPreparing: m['landing.generator.generating_preparing'](),
@@ -72,7 +70,6 @@ export function GenjutsuGenerator() {
             remainingGenerations: (count) =>
               m['landing.generator.remaining_generations']({ count }),
             generationRules: m['landing.pricing.per_video'](),
-            legacyBalance: m['landing.generator.legacy_balance'](),
             contentPolicy: m['landing.generator.content_policy'](),
             referenceDisclaimer: m['landing.generator.reference_disclaimer'](),
             removeReference: m['landing.generator.remove_reference'](),

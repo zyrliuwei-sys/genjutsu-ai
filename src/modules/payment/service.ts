@@ -1,5 +1,6 @@
-import { and, desc, eq, isNull, or } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, isNull, or } from 'drizzle-orm';
 
+import { ROLES, RoleStatus } from '@/core/auth/rbac';
 import { db } from '@/core/db';
 import {
   AlipayProvider,
@@ -18,7 +19,13 @@ import {
   type PaymentEvent,
   type PaymentOrder,
 } from '@/core/payment/types';
-import { credit, order, subscription } from '@/config/db/schema';
+import {
+  credit,
+  order,
+  role,
+  subscription,
+  userRole,
+} from '@/config/db/schema';
 import { getAllConfigs } from '@/modules/config/service';
 import { calculateCreditExpirationTime } from '@/modules/credits/service';
 import {
@@ -41,8 +48,26 @@ enum OrderStatus {
 }
 
 // --- Payment Manager ---
-/** Generation is prepaid: signup/manual grants alone must not bypass payment. */
+/**
+ * Generation is prepaid: signup/manual grants alone must not bypass payment.
+ * Admins are exempt so they can test with granted balance.
+ */
 export async function hasPaidOrder(userId: string): Promise<boolean> {
+  const admin = await db()
+    .select({ id: userRole.id })
+    .from(userRole)
+    .innerJoin(role, eq(userRole.roleId, role.id))
+    .where(
+      and(
+        eq(userRole.userId, userId),
+        inArray(role.name, [ROLES.SUPER_ADMIN, ROLES.ADMIN]),
+        eq(role.status, RoleStatus.ACTIVE),
+        or(isNull(userRole.expiresAt), gt(userRole.expiresAt, new Date()))
+      )
+    )
+    .limit(1);
+  if (admin.length > 0) return true;
+
   const rows = await db()
     .select({ id: order.id })
     .from(order)

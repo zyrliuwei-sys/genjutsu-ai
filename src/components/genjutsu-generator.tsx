@@ -19,7 +19,6 @@ import { useSession } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
 import {
   GENJUTSU_ASPECTS,
-  GENJUTSU_CREDITS_PER_GENERATION,
   GENJUTSU_DIRECTIONS,
   GENJUTSU_SECONDS,
   genjutsuCredits,
@@ -432,7 +431,6 @@ export function GenjutsuGenerator({
   copy,
 }: {
   copy: {
-    generationCost: (count: number) => string;
     moreSettings: string;
     generatingTitle: string;
     generatingPreparing: string;
@@ -442,7 +440,6 @@ export function GenjutsuGenerator({
     uploadPhotoCta: string;
     remainingGenerations: (count: number) => string;
     generationRules: string;
-    legacyBalance: string;
     contentPolicy: string;
     referenceDisclaimer: string;
     removeReference: string;
@@ -1573,19 +1570,6 @@ export function GenjutsuGenerator({
           </div>
 
           <div className="mt-auto flex flex-col gap-2">
-            <p className="text-muted-foreground text-center text-xs max-lg:hidden">
-              {copy.generationCost(
-                Math.ceil(costCredits / GENJUTSU_CREDITS_PER_GENERATION)
-              )}
-            </p>
-            {Boolean(
-              (creditsQuery.data?.balance ?? 0) %
-              GENJUTSU_CREDITS_PER_GENERATION
-            ) && (
-              <p className="text-muted-foreground text-[11px]">
-                {copy.legacyBalance}
-              </p>
-            )}
             <button
               type="button"
               disabled={generateDisabled}
@@ -1949,11 +1933,6 @@ export function GenjutsuGenerator({
             </button>
           ) : (
             <div className="flex flex-col gap-1.5">
-              <p className="text-muted-foreground text-center text-xs">
-                {copy.generationCost(
-                  Math.ceil(costCredits / GENJUTSU_CREDITS_PER_GENERATION)
-                )}
-              </p>
               <div className="flex gap-2">
                 <button
                   type="button"

@@ -1,50 +1,45 @@
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
-import { tDynamic } from '@/core/i18n/dynamic';
 import { Link } from '@/core/i18n/navigation';
 import { m } from '@/paraglide/messages.js';
-import { LoopVideo } from '@/components/loop-video';
+import { BeforeAfterVideo } from '@/components/before-after-video';
 import { Reveal } from '@/components/reveal';
 
-const AD_PROMPT =
-  'Turn this product into a 9:16 ad: a quick hook in the first second, close-up hero shots, a happy customer using it, bright commercial lighting';
-const SHORTS_PROMPT =
-  'Vertical short: a dramatic "you won\'t believe this" reveal, fast cuts, handheld phone camera, viral TikTok style';
-
-const TOOLS: Array<{
-  key: string;
-  image: string;
-  video?: string;
-  href: string;
-}> = [
+const SWAPS = [
   {
-    key: 'video',
-    image: '/videos/higgsfield-reference/motion.webp',
-    video: '/videos/higgsfield-reference/motion.mp4',
-    href: '/create?kind=video',
+    key: 'crowd',
+    width: 1280,
+    height: 720,
+    photo: '/videos/swap/photo-1.jpg',
   },
   {
-    key: 'image',
-    image: '/videos/higgsfield-reference/feature-3-2.webp',
-    video: '/videos/higgsfield-reference/feature-3-2.mp4',
-    href: '/create?kind=video',
-  },
-  {
-    key: 'ads',
-    image: '/videos/higgsfield-reference/feature-3-1.webp',
-    video: '/videos/higgsfield-reference/feature-3-1.mp4',
-    href: `/create?kind=video&prompt=${encodeURIComponent(AD_PROMPT)}`,
-  },
-  {
-    key: 'shorts',
-    image: '/videos/higgsfield-reference/feature-1-2.webp',
-    video: '/videos/higgsfield-reference/feature-1-2.mp4',
-    href: `/create?kind=video&prompt=${encodeURIComponent(SHORTS_PROMPT)}`,
+    key: 'dance',
+    width: 720,
+    height: 1280,
+    photo: '/videos/swap/photo-1.jpg',
   },
 ] as const;
 
-/** The four studios, shown as widescreen stills in an editorial 2x2. */
+const COPY = {
+  crowd: {
+    tag: () => m['landing.swap.crowd.tag'](),
+    title: () => m['landing.swap.crowd.title'](),
+    description: () => m['landing.swap.crowd.description'](),
+  },
+  dance: {
+    tag: () => m['landing.swap.dance.tag'](),
+    title: () => m['landing.swap.dance.title'](),
+    description: () => m['landing.swap.dance.description'](),
+  },
+};
+
+/** Before/after showcase: drag the divider to compare source and result. */
 export function Features() {
+  const labels = {
+    before: m['landing.swap.before'](),
+    after: m['landing.swap.after'](),
+    slider: m['landing.swap.slider'](),
+  };
   return (
     <section
       id="tools"
@@ -53,48 +48,49 @@ export function Features() {
       <div className="mx-auto max-w-7xl">
         <Reveal className="grid gap-6 lg:grid-cols-2 lg:items-end">
           <h2 className="eg-heading max-w-xl text-4xl leading-[1.05] sm:text-5xl">
-            {m['landing.tools.title']()}
+            {m['landing.swap.title']()}
           </h2>
-          <p className="text-muted-foreground max-w-md text-lg leading-relaxed lg:justify-self-end">
-            {m['landing.tools.description']()}
-          </p>
+          <div className="flex flex-col gap-6 lg:items-end">
+            <p className="text-muted-foreground max-w-md text-lg leading-relaxed lg:text-right">
+              {m['landing.swap.description']()}
+            </p>
+            <Link href="/create" className="eg-pill-primary">
+              {m['landing.swap.cta']()}
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
         </Reveal>
-        <div className="mt-16 grid gap-x-10 gap-y-14 md:grid-cols-2">
-          {TOOLS.map((tool, i) => (
-            <Reveal key={tool.key} delay={(i % 2) * 90}>
-              <Link href={tool.href} className="group block">
-                <div className="eg-screen relative aspect-[21/9] overflow-hidden rounded-md">
-                  {tool.video ? (
-                    <LoopVideo
-                      src={tool.video}
-                      poster={tool.image}
-                      label={tDynamic(`landing.tools.${tool.key}.title`)}
-                      width={1024}
-                      height={439}
-                      className="size-full opacity-90 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-100"
-                    />
-                  ) : (
-                    <img
-                      src={tool.image}
-                      alt={tDynamic(`landing.tools.${tool.key}.title`)}
-                      width={1024}
-                      height={529}
-                      loading="lazy"
-                      className="size-full object-cover object-top opacity-90 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-100"
-                    />
-                  )}
-                </div>
-                <p className="eg-eyebrow mt-6">
-                  {tDynamic(`landing.tools.${tool.key}.tag`)}
-                </p>
-                <h3 className="eg-heading mt-2 flex items-center gap-3 text-3xl">
-                  {tDynamic(`landing.tools.${tool.key}.title`)}
-                  <ArrowUpRight className="text-primary size-5 -translate-x-1 opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100" />
-                </h3>
-                <p className="text-muted-foreground mt-2 max-w-md leading-relaxed">
-                  {tDynamic(`landing.tools.${tool.key}.description`)}
-                </p>
-              </Link>
+        {/* 3.16fr : 1fr keeps the 16:9 and 9:16 clips the same height. */}
+        <div className="mt-16 grid gap-x-8 gap-y-14 lg:grid-cols-[3.16fr_1fr]">
+          {SWAPS.map((swap, i) => (
+            <Reveal
+              key={swap.key}
+              delay={i * 90}
+              className={
+                swap.height > swap.width ? 'mx-auto w-full max-w-sm' : ''
+              }
+            >
+              <BeforeAfterVideo
+                before={{
+                  src: `/videos/swap/${swap.key}-before.mp4`,
+                  poster: `/videos/swap/${swap.key}-before.jpg`,
+                }}
+                after={{
+                  src: `/videos/swap/${swap.key}-after.mp4`,
+                  poster: `/videos/swap/${swap.key}-after.jpg`,
+                }}
+                photo={{ src: swap.photo, label: m['landing.swap.photo']() }}
+                labels={labels}
+                width={swap.width}
+                height={swap.height}
+              />
+              <p className="eg-eyebrow mt-6">{COPY[swap.key].tag()}</p>
+              <h3 className="eg-heading mt-2 text-3xl">
+                {COPY[swap.key].title()}
+              </h3>
+              <p className="text-muted-foreground mt-2 max-w-md leading-relaxed">
+                {COPY[swap.key].description()}
+              </p>
             </Reveal>
           ))}
         </div>
