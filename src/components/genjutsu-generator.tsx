@@ -1820,7 +1820,7 @@ export function GenjutsuGenerator({
       )}
 
       <Dialog open={paywall} onOpenChange={setPaywall}>
-        <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5 sm:max-w-6xl sm:p-8">
+        <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5 sm:max-w-[60rem] sm:p-8">
           <Pricing
             variant="dialog"
             beforeCheckout={async () => {

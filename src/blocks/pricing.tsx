@@ -17,10 +17,10 @@ import { pricingCatalog, type PricingProduct } from '@/config/pricing';
 import { apiPost } from '@/lib/api-client';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { track } from '@/lib/track';
+import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
 import { usePublicConfig } from '@/hooks/use-public-config';
 import {
-  paymentForText,
   PaymentProviderModal,
   PaymentProviderOptions,
   type PaymentProvider,
@@ -240,7 +240,7 @@ export function Pricing({
       }
     >
       <div className="mx-auto max-w-6xl">
-        <div className={dialog ? 'mb-8 pr-8 text-center' : 'mb-20 text-center'}>
+        <div className={dialog ? 'mb-6 px-8 text-center' : 'mb-20 text-center'}>
           <Heading
             className={
               dialog
@@ -250,19 +250,27 @@ export function Pricing({
           >
             {title ?? m['landing.pricing.title']()}
           </Heading>
-          <p className="text-muted-foreground mt-5">
+          <p
+            className={cn(
+              'text-muted-foreground',
+              dialog ? 'mt-2 text-sm' : 'mt-5'
+            )}
+          >
             {m['landing.pricing.description']()}
           </p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            {singleVideo
-              ? `${singleVideo.productName}. ${m['landing.text_video.audio']()}`
-              : variant === 'section'
-                ? m['landing.pricing.billing_rules']()
-                : m['landing.pricing.per_video']()}
-          </p>
-          <p className="text-muted-foreground mt-2 text-xs">
-            {m['landing.pricing.failure_policy']()}
-          </p>
+          {/* The paywall keeps one line; billing details live on /pricing. */}
+          {!dialog && (
+            <>
+              <p className="text-muted-foreground mt-2 text-sm">
+                {singleVideo
+                  ? `${singleVideo.productName}. ${m['landing.text_video.audio']()}`
+                  : m['landing.pricing.billing_rules']()}
+              </p>
+              <p className="text-muted-foreground mt-2 text-xs">
+                {m['landing.pricing.failure_policy']()}
+              </p>
+            </>
+          )}
           {!dialog && (
             <p className="text-primary mt-4 text-sm">
               <Link href="/create">{m['landing.pricing.text_entry']()}</Link>
@@ -270,27 +278,37 @@ export function Pricing({
           )}
         </div>
         {dialog && pendingPlan ? (
-          <div className="mx-auto max-w-md">
-            <p className="mb-1 font-medium">
-              {m['common.pricing.choose_payment']()}
-            </p>
-            <p className="text-muted-foreground mb-4 text-sm">
-              {paymentForText(pendingPlan.name, pendingPlan.price)}
-            </p>
-            <PaymentProviderOptions
-              providers={enabledProviders}
-              loadingProvider={loadingProvider}
-              onSelect={handleProviderSelect}
-            />
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-foreground mt-4 inline-flex items-center gap-1 text-sm disabled:opacity-50"
-              disabled={!!loadingProvider}
-              onClick={() => setPendingPlan(null)}
-            >
-              <ArrowLeft className="size-4" />
-              {m['common.pricing.back_to_plans']()}
-            </button>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="border-primary/60 bg-primary/5 flex flex-col rounded-2xl border p-5">
+              <p className="text-muted-foreground text-sm">
+                {pendingPlan.name}
+              </p>
+              <p className="mt-1 text-4xl font-semibold tracking-tight">
+                {pendingPlan.price}
+              </p>
+              <p className="text-muted-foreground mt-2 text-sm">
+                {pendingPlan.description}
+              </p>
+              <button
+                type="button"
+                className="text-muted-foreground hover:text-foreground mt-auto inline-flex items-center gap-1 self-start pt-6 text-sm disabled:opacity-50"
+                disabled={!!loadingProvider}
+                onClick={() => setPendingPlan(null)}
+              >
+                <ArrowLeft className="size-4" />
+                {m['common.pricing.back_to_plans']()}
+              </button>
+            </div>
+            <div className="flex flex-col justify-center">
+              <p className="mb-3 font-medium">
+                {m['common.pricing.choose_payment']()}
+              </p>
+              <PaymentProviderOptions
+                providers={enabledProviders}
+                loadingProvider={loadingProvider}
+                onSelect={handleProviderSelect}
+              />
+            </div>
           </div>
         ) : (
           <PricingTable groups={groups} onCheckout={handleCheckout} />
