@@ -56,68 +56,68 @@ export const HERO_CARDS: ShowcaseItem[] = [
 
 export const SHOWCASE_ITEMS: ShowcaseItem[] = [
   {
-    key: 'unboxing',
-    image: '/videos/higgsfield-reference/feature-3-2.webp',
-    video: '/videos/higgsfield-reference/feature-3-2.mp4',
+    key: 'rain',
+    image: '/videos/showcase/rain.webp',
+    video: '/videos/showcase/rain.mp4',
     kind: 'video',
     prompt:
-      'A black sneaker bursts out of a flash of white light against a dark backdrop, slow-motion product reveal',
+      'A man in a long coat and bowler hat dances through a rain-soaked stone arcade at night, lanterns glowing, slow dolly-in, cinematic musical',
   },
   {
-    key: 'cyber',
-    image: '/videos/higgsfield-reference/feature-1-1.webp',
-    video: '/videos/higgsfield-reference/feature-1-1.mp4',
+    key: 'escape',
+    image: '/videos/showcase/escape.webp',
+    video: '/videos/showcase/escape.mp4',
     kind: 'video',
     prompt:
-      'A cyber ninja on a neon rooftop in the rain draws a glowing blade, the camera circles around, cinematic sci-fi',
+      'A woman in an orange prison jumpsuit breaks free from a guard on a city sidewalk and sprints away, handheld tracking shot, action film',
   },
   {
-    key: 'food',
-    image: '/videos/higgsfield-reference/feature-2-1.webp',
-    video: '/videos/higgsfield-reference/feature-2-1.mp4',
+    key: 'manhattan',
+    image: '/videos/showcase/manhattan.webp',
+    video: '/videos/showcase/manhattan.mp4',
     kind: 'video',
     prompt:
-      'Slow motion chocolate sauce pours over a tall stack of pancakes with fresh berries, macro food commercial',
+      'A woman in a camel trench coat drops a stack of books on a snowy Manhattan street and a stranger stops to help, romantic film scene',
   },
   {
-    key: 'travel',
-    image: '/videos/higgsfield-reference/feature-2-3.webp',
-    video: '/videos/higgsfield-reference/feature-2-3.mp4',
+    key: 'crew',
+    image: '/videos/showcase/crew.webp',
+    video: '/videos/showcase/crew.mp4',
     kind: 'video',
     prompt:
-      'Drone fly-through over a turquoise lagoon and white cliffs at golden hour, smooth travel vlog shot',
+      'Five friends in retro outfits strut and dance down a sunny city sidewalk toward the camera, tracking shot, comedy music video',
   },
   {
-    key: 'talking',
-    image: '/videos/higgsfield-reference/crowd.webp',
-    video: '/videos/higgsfield-reference/crowd.mp4',
+    key: 'bungee',
+    image: '/videos/showcase/bungee.webp',
+    video: '/videos/showcase/bungee.mp4',
     kind: 'video',
     prompt:
-      'A friendly young creator talks to the camera in a home studio with a ring light and plants, vertical talking-head video',
+      'A woman in a teal jacket jumps from a red steel bridge high above a turquoise canyon river, camera follows the fall, extreme sports',
   },
   {
-    key: 'fashion',
-    image: '/videos/higgsfield-reference/motion.webp',
-    video: '/videos/higgsfield-reference/motion.mp4',
+    key: 'runway',
+    image: '/videos/showcase/runway.webp',
+    video: '/videos/showcase/runway.mp4',
     kind: 'video',
     prompt:
-      'A model in a flowing yellow dress walks through desert dunes at sunset, the fabric catches the wind, fashion ad',
+      'A blonde model throws on a striped shirt while striding down a city street toward the camera, handheld tracking shot, fashion ad',
   },
   {
-    key: 'space',
-    image: '/videos/higgsfield-reference/launch.webp',
-    video: '/videos/higgsfield-reference/launch.mp4',
+    key: 'golf',
+    image: '/videos/showcase/golf.webp',
+    video: '/videos/showcase/golf.mp4',
     kind: 'video',
     prompt:
-      'An astronaut floats slowly toward a giant glowing ringed planet, stars drift past, cinematic space scene',
+      'A man in a long grey coat tees off on a lush green golf course, camera swings around him as the ball flies, sports commercial',
   },
   {
-    key: 'skincare',
-    image: '/videos/higgsfield-reference/feature-3-1.webp',
-    video: '/videos/higgsfield-reference/feature-3-1.mp4',
+    key: 'groove',
+    image: '/videos/showcase/groove.webp',
+    video: '/videos/showcase/groove.mp4',
     kind: 'video',
     prompt:
-      'A blue lotus slowly blooms inside a tall glass vial on wet stone, gentle camera push-in, soft studio light, premium skincare video',
+      'A man in a red suit dances through a crowd in a moody blue hall, everyone moves around him, music video',
   },
 ];
 

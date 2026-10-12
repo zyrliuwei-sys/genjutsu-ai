@@ -32,86 +32,70 @@ export const GENJUTSU_REFERENCES: Record<
   string,
   { name: string; direction: string }
 > = {
-  'genjutsu-storm': {
-    name: 'Genjutsu STORM',
+  'rain-dance': {
+    name: 'Rain Dance',
     direction:
-      'Target the visually distinct central lead only. Preserve every surrounding performer and their synchronized choreography.',
-  },
-  'smalltown-boy': {
-    name: 'Smalltown Boy',
-    direction:
-      'Preserve the continuous running, jumping, landings and camera trajectory.',
-  },
-  'burning-bridges': {
-    name: 'Burning Bridges',
-    direction:
-      'Replace only the main martial-arts performer; retain the sparring partner, clothing, punches, blocks and contact timing.',
-  },
-  'thriller-dance': {
-    name: 'Thriller Dance',
-    direction:
-      'Keep the exact dance beats, movement trajectory and camera timing.',
-  },
-  'toc-toc': {
-    name: 'Toc Toc',
-    direction:
-      'Preserve the fight choreography, partner interaction and original physical contacts.',
-  },
-  'knight-cat': {
-    name: 'Knight Cat',
-    direction:
-      'Retain the original rooftop movement, landings, grounded feet and framing.',
-  },
-  'knight-cat-gym-bro': {
-    name: 'Knight Cat & Gym Bro',
-    direction:
-      'Replace only the principal performer. Keep other people and their actions unchanged.',
-  },
-  'car-dance-duo': {
-    name: 'Car Dance Duo',
-    direction:
-      'Replace only one principal performer; keep the partner, vehicle and original composition unchanged.',
-  },
-  'hotel-lobby': {
-    name: 'Hotel Lobby',
-    direction: 'Keep the source performance and camera timing unchanged.',
+      'Preserve the dance steps, splashes, arcade lanterns and the slow camera push-in.',
   },
   'fire-skirt-spin': {
     name: 'Fire Skirt Spin',
     direction:
       'Replace only the dancer; keep the skirt spins, floor work, sparks and camera framing unchanged.',
   },
-  'vikas-edit': {
-    name: 'Vikas Edit',
+  'prison-break': {
+    name: 'Prison Break',
     direction:
-      'Preserve the action, partner interactions and original edit rhythm.',
+      'Replace only the escaping woman; keep the guard, the struggle, the sprint and the handheld tracking camera.',
+  },
+  'street-strut': {
+    name: 'Street Strut',
+    direction:
+      'Replace only the front performer; keep the rest of the group, their dance steps and the tracking shot unchanged.',
+  },
+  'red-suit-groove': {
+    name: 'Red Suit Groove',
+    direction:
+      'Replace only the dancer in the red suit; keep the surrounding crowd and their choreography.',
+  },
+  'street-runway': {
+    name: 'Street Runway',
+    direction:
+      'Preserve the walk, the shirt toss and the handheld camera following the model.',
+  },
+  'manhattan-meet': {
+    name: 'Manhattan Meet',
+    direction:
+      'Replace only the woman with the books; keep the stranger, the falling books, the snowy street and the edit rhythm.',
+  },
+  'canyon-bungee': {
+    name: 'Canyon Bungee',
+    direction:
+      'Preserve the jump from the bridge, the fall, the rope and the camera tracking downward.',
+  },
+  'fairway-swing': {
+    name: 'Fairway Swing',
+    direction:
+      'Preserve the golf swing, ball flight and the camera move around the golfer.',
   },
 };
 
 /** Directions describe the actual references, not the legacy card names. */
 export const GENJUTSU_DIRECTIONS: Record<string, string> = {
-  crowd:
-    'A live-action ensemble performance: the lead remains visually distinct at the center while the surrounding performers keep the original synchronized choreography. Preserve crowd count, spacing, body contacts and occlusions. Contemporary wardrobe, muted cinematic grade, no generic beauty montage.',
-  dream:
-    'Preserve the continuous running, jumping and landing performance and matching camera motion. Transform the environment into a photoreal surreal rooftop world with impossible doorways and suspended everyday objects. Ground every landing and retain momentum; no unrelated pastel flower reveal.',
-  motion:
-    'Recast the original two-person martial-arts performance with the supplied lead identity. Keep punches, blocks, footwork, contacts and camera movement aligned to the input. Photoreal dojo, plausible anatomy and spatial continuity.',
-  launch:
-    'Recast the main performer while retaining the source action and edit rhythm. Create physically grounded, photoreal changes of surroundings with continuous subject identity. Do not invent extra cuts or change the choreography.',
+  rain: 'Replace the dancer in the long coat and hat using the supplied character image. Preserve the dance steps, puddle splashes, wet stone arcade, glowing lanterns and the slow camera push-in. Photoreal rain and reflections, consistent face and wardrobe, no extra limbs or flicker.',
   'fire-skirt':
     'Replace the solo dancer using the supplied character image. Preserve the exact skirt spins, handstand and floor work, the glowing spark trails, the empty studio and the camera framing. Photoreal skin and fabric, consistent face, no extra limbs or flicker.',
-  'feature-1-2':
-    'Replace the main performer using the supplied character image. Preserve the exact source motion, camera framing and interaction with the surroundings. Realistic live-action textures, consistent face and wardrobe, no animation aesthetic.',
-  'feature-1-1':
-    'Preserve the source fight choreography, partner interaction and camera movement. Recast the lead using the supplied reference while keeping spatial relationships, impacts and occlusions coherent. Cinematic photoreal action, not a standalone portrait animation.',
-  'feature-2-1':
-    'Preserve the original performer action, movement trajectory and camera timing. Restage the shot on a cinematic rooftop with grounded feet and realistic perspective. Keep character identity consistent with the uploaded image.',
-  'feature-2-3':
-    'Keep the original choreography and camera path while restaging the performance in a photoreal outdoor park. Match contact shadows, scale and natural light; preserve the lead identity throughout.',
-  'feature-3-1':
-    'Perform a targeted photoreal reality edit while preserving the source take, timing and camera movement. Replace the main subject using the supplied image; retain non-target objects, people and their motion.',
-  'feature-3-2':
-    'Recast the main subject with the supplied image while maintaining the source shot and action beat for beat. Keep the surrounding composition and physical interactions stable; use coherent live-action lighting and clean temporal edges.',
+  escape:
+    'Replace the woman in the orange jumpsuit using the supplied character image. Preserve the struggle with the guard, the fall, the sprint down the sidewalk and the handheld tracking camera. Photoreal daylight street, grounded physical contact, consistent identity across cuts.',
+  crew: 'Replace the lead performer at the front of the group using the supplied character image. Keep the other four performers, their synchronized strut and dance moves, the sunny sidewalk and the backward tracking shot. Natural daylight, coherent occlusions, no extra people.',
+  groove:
+    'Replace the dancer in the red suit using the supplied character image. Preserve his choreography, the surrounding dancers and crowd, the moody blue hall and the camera framing. Photoreal fabric and skin, stable identity, no extra limbs or flicker.',
+  runway:
+    'Replace the model using the supplied character image. Preserve the walk toward the camera, the striped shirt toss, the city street and the handheld follow shot. Natural daylight, realistic fabric motion, consistent face and wardrobe.',
+  manhattan:
+    'Replace the woman in the camel trench coat using the supplied character image. Keep the falling books, the stranger who helps, the snowy Manhattan street and the original edit rhythm. Soft winter light, consistent identity across close-ups and wide shots.',
+  bungee:
+    'Replace the jumper in the teal jacket using the supplied character image. Preserve the climb over the red steel bridge railing, the jump, the fall toward the turquoise river and the downward camera tracking. Photoreal scale and motion blur, consistent identity.',
+  golf: 'Replace the golfer in the long grey coat using the supplied character image. Preserve the swing, the ball flight, the green course and the camera move around the golfer. Natural sunlight, realistic coat motion, consistent face.',
 };
 
 export const GENJUTSU_ASPECTS = ['16:9', '9:16'] as const;

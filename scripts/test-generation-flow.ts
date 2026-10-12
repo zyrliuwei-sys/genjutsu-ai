@@ -242,7 +242,9 @@ await client.execute({
   args: [Date.now()],
 });
 const { readFileSync } = await import('node:fs');
-const landscapeBytes = readFileSync('public/videos/effect-clips/crowd-5s.mp4');
+const landscapeBytes = readFileSync(
+  'public/videos/effect-clips/runway-10s.mp4'
+);
 globalThis.fetch = async (input) => {
   const url = String(input);
   if (url.includes('/v1/tasks/'))

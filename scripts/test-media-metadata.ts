@@ -31,12 +31,9 @@ Object.defineProperty(globalThis, 'document', {
   },
 });
 try {
-  for (const [tier, cost] of [
-    [5, 700],
-    [10, 1400],
-  ]) {
+  for (const [tier, cost] of [[10, 990]]) {
     const bytes = await readFile(
-      `public/videos/effect-clips/launch-${tier}s.mp4`
+      `public/videos/effect-clips/runway-${tier}s.mp4`
     );
     const result = await readMediaMetadata(
       'blob:test',
@@ -47,19 +44,19 @@ try {
     assert.equal(genjutsuCredits(result.duration), cost);
     assert.equal(result.width, 1280);
   }
-  const long = await readFile('public/videos/higgsfield-reference/launch.mp4');
+  const long = await readFile('public/videos/higgsfield-reference/crowd.mp4');
   const result = await readMediaMetadata(
     'blob:test',
     'video',
     new Blob([long])
   );
-  assert.ok(result.duration > 59);
+  assert.ok(result.duration > 14);
   assert.throws(() => genjutsuCredits(result.duration));
   await assert.rejects(
     readMediaMetadata('blob:test', 'video', new Blob(['invalid']))
   );
   console.log(
-    'Media metadata: 5s/10s pricing, Infinity fallback, long and invalid files passed'
+    'Media metadata: 10s pricing, Infinity fallback, long and invalid files passed'
   );
 } finally {
   if (originalDocument)

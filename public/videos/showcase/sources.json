@@ -1,0 +1,46 @@
+{
+  "note": "Third-party TikTok clips used for the landing showcase (/videos/showcase) and the Select Effect references (/videos/effects, /videos/effect-clips). Public availability is not a reuse license. Confirm permission with each creator before commercial publication.",
+  "importedAt": "2026-10-12",
+  "assets": [
+    {
+      "id": "rain",
+      "creator": "iartfredsylvain",
+      "url": "https://www.tiktok.com/@iartfredsylvain/video/7695522621718351136"
+    },
+    {
+      "id": "escape",
+      "creator": "natstudio25",
+      "url": "https://www.tiktok.com/@natstudio25/video/7690281187872378133"
+    },
+    {
+      "id": "manhattan",
+      "creator": "dream.bygracey",
+      "url": "https://www.tiktok.com/@dream.bygracey/video/7691106880944377108"
+    },
+    {
+      "id": "crew",
+      "creator": "allied.theaiplug",
+      "url": "https://www.tiktok.com/@allied.theaiplug/video/7695767402931408141"
+    },
+    {
+      "id": "bungee",
+      "creator": "longliveai",
+      "url": "https://www.tiktok.com/@longliveai/video/7571593623180037398"
+    },
+    {
+      "id": "runway",
+      "creator": "skitflix_world",
+      "url": "https://www.tiktok.com/@skitflix_world/video/7689053471424662806"
+    },
+    {
+      "id": "golf",
+      "creator": "edwin.ratbottom",
+      "url": "https://www.tiktok.com/@edwin.ratbottom/video/7693773404012383518"
+    },
+    {
+      "id": "groove",
+      "creator": "justsilkriot",
+      "url": "https://www.tiktok.com/@justsilkriot/video/7695217521607118111"
+    }
+  ]
+}

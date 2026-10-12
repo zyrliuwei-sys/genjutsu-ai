@@ -26,7 +26,6 @@ import {
   type GenjutsuAspect,
   type GenjutsuReadiness,
 } from '@/config/genjutsu';
-import { REFERENCE_VIDEOS } from '@/config/reference-videos';
 import {
   apiDownload,
   apiGet,
@@ -55,7 +54,8 @@ type Template = {
   id: string;
   name: string;
   image: string;
-  video: string;
+  /** Reference clip id under /videos/effect-clips. */
+  asset: string;
   duration: number;
   ratios: string;
   tag?: 'Trending' | 'New';
@@ -88,149 +88,37 @@ type GenjutsuTask = {
   createdAt?: string;
 };
 
-const ART = REFERENCE_VIDEOS;
-
-const TEMPLATE_NAMES = [
-  'Genjutsu STORM',
-  'Smalltown Boy',
-  'Burning Bridges',
-  'Thriller Dance',
-  'Alors On Danse',
-  'Toc Toc',
-  'Knight Cat',
-  'Knight Cat & Gym Bro',
-  'Car Dance Duo',
-  'Hotel Lobby',
-  'Rumpelstiltskin',
-  'Clapping Cat',
-  'Gas Station Dance',
-  'Car Jump',
-  'Vikas Edit',
-  'Turn the Lights Off',
-  'Cheba Man',
-  'Raindance',
-  'Zombie Love Story',
-] as const;
-
-const TEMPLATE_META = [
-  ['28', '16:9 / 4:3 / 9:16', 'Trending'],
-  ['22', '9:16', 'Trending'],
-  ['18', '16:9', 'Trending'],
-  ['21', '9:16', 'New'],
-  ['20', '16:9 / 9:16', 'Trending'],
-  ['11', '9:16', 'Trending'],
-  ['5', '9:16', 'New'],
-  ['9', '4:3', 'New'],
-  ['15', '16:9', 'New'],
-  ['15', '16:9', 'New'],
-  ['15', '16:9', 'Trending'],
-  ['11', '9:16', 'New'],
-  ['18', '9:16', 'Trending'],
-  ['12', '9:16', 'New'],
-  ['28', '1:1', 'New'],
-  ['11', '16:9', 'New'],
-  ['15', '9:16', 'New'],
-  ['15', '16:9 / 4:3 / 9:16', undefined],
-  ['15', '9:16 / 16:9', undefined],
-] as const;
-
-const TEMPLATE_PROMPTS = [
-  'Turn the reference performance into a storm-lit Genjutsu reality with dramatic wind, rain, practical light streaks, and a controlled cinematic push-in.',
-  'Keep the exact motion and camera timing while rebuilding the scene as a quiet small-town night with natural street light and restrained film grain.',
-  'Preserve the source choreography and transform the environment into a tense cinematic bridge at dusk with wet surfaces and deep atmospheric contrast.',
-  'Maintain every dance beat and camera move, restaging the performance as a high-contrast monochrome music video with crisp silhouette separation.',
-  'Keep the original performance locked to the timeline and shift the world into an energetic European dance-film look with bold color and clean motion.',
-  'Preserve the subject identity and timing while adding a playful close-up reaction, expressive lighting, and a polished short-form comedy finish.',
-  'Keep the action unchanged and transform the character into a small armored cat hero in a miniature cinematic world with believable scale.',
-  'Preserve the two performers and camera path while creating a clean gym-bro transformation with punchy lighting and stable anatomy.',
-  'Keep the vehicle, choreography, and camera timing coherent while turning the source into a stylized car-dance sequence with controlled reflections.',
-  'Preserve the motion and framing while rebuilding the environment as a warm hotel lobby with elegant practical lights and premium commercial polish.',
-  'Keep the source movement and subject identity while transforming the world into a dark fairytale with theatrical shadows and subtle magic.',
-  'Maintain the original timing and camera motion while turning the main subject into a charming clapping cat with clean paws and no flicker.',
-  'Preserve the source choreography while restaging it at a cinematic gas station at night with reflective pavement and practical neon accents.',
-  'Keep the original motion and camera path while creating a believable airborne car jump with controlled dust, scale, and cinematic impact.',
-  'Preserve the exact edit rhythm and transform the subject into a polished creator-style fashion sequence with confident color grading.',
-  'Keep movement, framing, and timing fixed while shifting the scene into a dramatic lights-off reveal with a precise final beat.',
-  'Preserve the performance and create a playful surreal character treatment with stable facial identity, soft shadows, and editorial timing.',
-  'Keep the original motion and restage the scene as a rain-driven cinematic performance with wet highlights, atmospheric depth, and natural physics.',
-  'Preserve the source performance while creating a tender cinematic zombie love story with restrained makeup, soft moonlight, and stable expressions.',
-] as const;
-
-const TEMPLATE_CANDIDATES: Template[] = TEMPLATE_NAMES.map((name, index) => {
-  const art = ART[index % ART.length];
-  const meta = TEMPLATE_META[index];
-  return {
-    id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-    name,
-    image: art.image,
-    video: art.video,
-    duration: art.duration,
-    ratios: art.ratios,
-    tag: meta[2] as Template['tag'],
-    prompt: TEMPLATE_PROMPTS[index],
-  };
+// Each effect plays /videos/effect-clips/<asset>-10s.mp4 and sends it as the
+// motion reference; `asset` also keys GENJUTSU_DIRECTIONS.
+const effect = (
+  id: string,
+  name: string,
+  asset: string,
+  duration: number,
+  ratios: string,
+  tag?: Template['tag']
+): Template => ({
+  id,
+  name,
+  image: `/videos/effects/${asset}.jpg`,
+  asset,
+  duration,
+  ratios,
+  tag,
+  prompt: GENJUTSU_DIRECTIONS[asset] ?? '',
 });
 
-// Original third-party reference clips; provenance is recorded alongside assets.
-// Keep generation directions and the other effects unchanged.
-const REFERENCE_EXAMPLES: Record<
-  string,
-  { asset: string; duration: number; prompt: string }
-> = {
-  'genjutsu-storm': {
-    asset: 'crowd',
-    duration: 14,
-    prompt:
-      'Keep the central performer still and use the reference image for their appearance. Introduce identical copies in separate rows behind them, performing a synchronized arm raise. Preserve the source camera path, timing and realistic physical scale. Blue-hour cinematic lighting, clean silhouettes, consistent faces and wardrobe, no overlapping bodies or extra limbs.',
-  },
-  'alors-on-danse': {
-    asset: 'dream',
-    duration: 9,
-    prompt:
-      'Preserve the source performance, camera movement and timing. Use the reference image for the main character and seamlessly transform the surroundings into a dreamlike island above pastel clouds with giant sculptural flowers and floating lanterns. Photoreal skin and fabric, grounded feet, soft moonlight, stable identity and fluid motion, no cartoon rendering or flicker.',
-  },
-  raindance: {
-    asset: 'motion',
-    duration: 10,
-    prompt:
-      'Preserve the source choreography, camera movement and timing. Use the reference image for the main character and transform the surroundings into a rain-soaked Tokyo street at night with red and cyan practical lighting reflected in puddles. Natural rain, realistic shadows and skin, coherent silhouettes, stable face and clothing, no extra limbs or flicker.',
-  },
-};
-
-for (const template of TEMPLATE_CANDIDATES) {
-  const sample = REFERENCE_EXAMPLES[template.id];
-  if (!sample) continue;
-  template.image = `/videos/higgsfield-reference/${sample.asset}.webp`;
-  template.video = `/videos/higgsfield-reference/${sample.asset}.mp4`;
-  template.duration = sample.duration;
-  template.ratios = '16:9';
-  template.prompt = sample.prompt;
-}
-
-// A source clip appears only once in Select Effect, even if multiple names
-// were previously mapped to it. Keep the first card's existing copy.
-const seenVideos = new Set<string>();
-const TEMPLATES = TEMPLATE_CANDIDATES.filter((template) => {
-  if (seenVideos.has(template.video)) return false;
-  seenVideos.add(template.video);
-  return true;
-});
-// Vertical effect from our own source clip; second so the default stays put.
-TEMPLATES.splice(1, 0, {
-  id: 'fire-skirt-spin',
-  name: 'Fire Skirt Spin',
-  image: '/videos/effects/fire-skirt.jpg',
-  video: '/videos/effects/fire-skirt.mp4',
-  duration: 9,
-  ratios: '9:16',
-  tag: 'New',
-  prompt: '',
-});
-for (const template of TEMPLATES) {
-  const assetId = template.video.split('/').pop()?.replace('.mp4', '');
-  if (assetId && GENJUTSU_DIRECTIONS[assetId])
-    template.prompt = GENJUTSU_DIRECTIONS[assetId];
-}
+const TEMPLATES: Template[] = [
+  effect('rain-dance', 'Rain Dance', 'rain', 10, '9:16', 'Trending'),
+  effect('fire-skirt-spin', 'Fire Skirt Spin', 'fire-skirt', 9, '9:16', 'New'),
+  effect('prison-break', 'Prison Break', 'escape', 10, '9:16', 'Trending'),
+  effect('street-strut', 'Street Strut', 'crew', 10, '9:16', 'Trending'),
+  effect('red-suit-groove', 'Red Suit Groove', 'groove', 10, '9:16', 'New'),
+  effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
+  effect('manhattan-meet', 'Manhattan Meet', 'manhattan', 10, '9:16', 'New'),
+  effect('canyon-bungee', 'Canyon Bungee', 'bungee', 10, '9:16', 'New'),
+  effect('fairway-swing', 'Fairway Swing', 'golf', 10, '9:16'),
+];
 
 const isDone = (task?: GenjutsuTask) =>
   task?.status === 'success' ||
@@ -739,8 +627,7 @@ export function GenjutsuGenerator({
   );
   const example =
     TEMPLATES.find((template) => template.id === exampleId) ?? TEMPLATES[0];
-  const effectAssetId = selected.video.split('/').pop()!.replace('.mp4', '');
-  const effectClip = `/videos/effect-clips/${effectAssetId}-${durationTier}s.mp4`;
+  const effectClip = `/videos/effect-clips/${selected.asset}-${durationTier}s.mp4`;
   const effectQuery = useQuery({
     queryKey: ['effect-clip', effectClip],
     enabled: draftReady && !referenceClosed && referenceSource === 'effect',
