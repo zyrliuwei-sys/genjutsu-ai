@@ -62,6 +62,12 @@ export function GenjutsuGenerator() {
             generationCost: (count) =>
               m['landing.generator.generation_cost']({ count }),
             moreSettings: m['landing.generator.more_settings'](),
+            generatingTitle: m['landing.generator.generating_title'](),
+            generatingPreparing: m['landing.generator.generating_preparing'](),
+            generatingEta: (minutes) =>
+              m['landing.generator.generating_eta']({ minutes }),
+            videoReading: m['landing.generator.video_reading'](),
+            videoPreparing: m['landing.generator.video_preparing'](),
             uploadPhotoCta: m['landing.hero.cta'](),
             remainingGenerations: (count) =>
               m['landing.generator.remaining_generations']({ count }),

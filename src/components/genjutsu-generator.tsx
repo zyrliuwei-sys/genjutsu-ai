@@ -85,6 +85,7 @@ type GenjutsuTask = {
   archivePending?: boolean;
   aspect?: string;
   referenceName?: string;
+  createdAt?: string;
 };
 
 const ART = REFERENCE_VIDEOS;
@@ -260,6 +261,66 @@ function PreviewAsset({
   );
 }
 
+// Status card shown over the preview while media is prepared or rendered.
+// `percent` undefined = indeterminate.
+function ProgressPanel({
+  icon,
+  title,
+  hint,
+  percent,
+  onMedia = false,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  hint?: string;
+  percent?: number;
+  onMedia?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        'relative flex w-full max-w-sm flex-col items-center gap-2 px-6 text-center sm:gap-3',
+        onMedia ? 'text-white' : 'text-foreground'
+      )}
+    >
+      <span className="bg-primary/15 text-primary ring-primary/40 flex size-10 items-center justify-center rounded-full ring-1 sm:size-12">
+        {icon}
+      </span>
+      <p className="text-sm font-semibold sm:text-base">{title}</p>
+      {hint && (
+        <p
+          className={cn(
+            'text-xs sm:text-sm',
+            onMedia ? 'text-white/70' : 'text-muted-foreground'
+          )}
+        >
+          {hint}
+        </p>
+      )}
+      <div
+        className={cn(
+          'h-1.5 w-full overflow-hidden rounded-full sm:h-2',
+          onMedia ? 'bg-white/20' : 'bg-foreground/10'
+        )}
+      >
+        {percent === undefined ? (
+          <div className="bg-primary h-full w-1/3 animate-pulse rounded-full" />
+        ) : (
+          <div
+            className="bg-primary h-full rounded-full transition-[width] duration-700 ease-out"
+            style={{ width: `${Math.max(2, Math.min(100, percent))}%` }}
+          />
+        )}
+      </div>
+      {percent !== undefined && (
+        <p className="text-xs tabular-nums opacity-70">
+          {Math.round(percent)}%
+        </p>
+      )}
+    </div>
+  );
+}
+
 function UploadSlot({
   label,
   hint,
@@ -372,6 +433,11 @@ export function GenjutsuGenerator({
   copy: {
     generationCost: (count: number) => string;
     moreSettings: string;
+    generatingTitle: string;
+    generatingPreparing: string;
+    generatingEta: (minutes: string) => string;
+    videoReading: string;
+    videoPreparing: string;
     uploadPhotoCta: string;
     remainingGenerations: (count: number) => string;
     generationRules: string;
@@ -426,6 +492,12 @@ export function GenjutsuGenerator({
   const [paywall, setPaywall] = useState(false);
   // Phones only: length, size and own-video upload sit behind a toggle.
   const [moreOpen, setMoreOpen] = useState(false);
+  // Blob URL of a reference video being read/trimmed (drives the overlay).
+  const [videoJob, setVideoJob] = useState<string>();
+  // Between the Generate click and the task existing (checks, uploads).
+  const [submitting, setSubmitting] = useState(false);
+  const [startedAt, setStartedAt] = useState<number>();
+  const [now, setNow] = useState(() => Date.now());
   // The preview box takes the media's aspect ratio, so clips get no bars
   // (desktop caps the height at 560px and narrows the box for tall media).
   const [mediaRatio, setMediaRatio] = useState(16 / 9);
@@ -721,6 +793,11 @@ export function GenjutsuGenerator({
       return;
     }
 
+    const jobUrl = isVideo ? URL.createObjectURL(file) : undefined;
+    if (jobUrl) {
+      setVideoJob(jobUrl);
+      revealResult();
+    }
     let preview = URL.createObjectURL(file);
     const controller = new AbortController();
     clipController.current = controller;
@@ -821,6 +898,10 @@ export function GenjutsuGenerator({
         clipController.current = undefined;
       setValidatingMedia(false);
       setTrimProgress(undefined);
+      if (jobUrl) {
+        setVideoJob((current) => (current === jobUrl ? undefined : current));
+        URL.revokeObjectURL(jobUrl);
+      }
     }
   };
 
@@ -1037,6 +1118,28 @@ export function GenjutsuGenerator({
   }, [queryClient, task]);
 
   const running = generate.isPending || Boolean(taskId && !isDone(task));
+  // Generation overlay: the provider reports no progress, so the bar is an
+  // estimate from observed render times (5s clips ~2–4 min, 10s up to ~12).
+  const generatingView = submitting || running;
+  useEffect(() => {
+    if (!generatingView) return;
+    setNow(Date.now());
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [generatingView]);
+  const preparingMedia = submitting || generate.isPending;
+  const longClip = (referenceVideo?.duration || durationTier) > 6;
+  const expectedSecs = longClip ? 600 : 240;
+  const renderStart =
+    !preparingMedia && task?.createdAt
+      ? Date.parse(task.createdAt)
+      : (startedAt ?? now);
+  const elapsedSecs = Math.max(0, (now - renderStart) / 1000);
+  const generatingPercent = preparingMedia
+    ? Math.min(8, 2 + elapsedSecs)
+    : elapsedSecs < expectedSecs
+      ? 8 + (82 * elapsedSecs) / expectedSecs
+      : 90 + 9 * (1 - Math.exp(-(elapsedSecs - expectedSecs) / expectedSecs));
   const uploading = Boolean(lead?.uploading || referenceVideo?.uploading);
   const canGenerate =
     draftReady &&
@@ -1050,6 +1153,17 @@ export function GenjutsuGenerator({
     !validatingMedia;
 
   async function startGeneration() {
+    setSubmitting(true);
+    setStartedAt(Date.now());
+    revealResult();
+    try {
+      await runGeneration();
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function runGeneration() {
     if (
       referenceSource === 'effect' &&
       !referenceClosed &&
@@ -1768,6 +1882,49 @@ export function GenjutsuGenerator({
               >
                 {copy.archivePending}
               </p>
+            ) : null}
+            {videoJob ? (
+              <div
+                role="status"
+                className="absolute inset-0 z-30 flex items-center justify-center overflow-hidden"
+              >
+                <video
+                  src={videoJob}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  aria-hidden="true"
+                  className="absolute inset-0 size-full scale-110 object-cover opacity-70 blur-2xl"
+                />
+                <div className="absolute inset-0 bg-black/45" />
+                <ProgressPanel
+                  onMedia
+                  icon={<Video className="size-5" />}
+                  title={
+                    trimProgress === undefined
+                      ? copy.videoReading
+                      : copy.videoPreparing
+                  }
+                  percent={trimProgress}
+                />
+              </div>
+            ) : generatingView ? (
+              <div
+                role="status"
+                className="bg-muted absolute inset-0 z-30 flex items-center justify-center"
+              >
+                <ProgressPanel
+                  icon={<Sparkles className="size-5 animate-pulse" />}
+                  title={copy.generatingTitle}
+                  hint={
+                    preparingMedia
+                      ? copy.generatingPreparing
+                      : copy.generatingEta(longClip ? '5–12' : '2–4')
+                  }
+                  percent={generatingPercent}
+                />
+              </div>
             ) : null}
           </div>
         </section>
