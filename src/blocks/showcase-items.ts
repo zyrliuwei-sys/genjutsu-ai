@@ -88,12 +88,12 @@ export const SHOWCASE_ITEMS: ShowcaseItem[] = [
       'Five friends in retro outfits strut and dance down a sunny city sidewalk toward the camera, tracking shot, comedy music video',
   },
   {
-    key: 'bungee',
-    image: '/videos/showcase/bungee.webp',
-    video: '/videos/showcase/bungee.mp4',
+    key: 'moonwalk',
+    image: '/videos/showcase/moonwalk.webp',
+    video: '/videos/showcase/moonwalk.mp4',
     kind: 'video',
     prompt:
-      'A woman in a teal jacket jumps from a red steel bridge high above a turquoise canyon river, camera follows the fall, extreme sports',
+      'A lone astronaut walks away from the camera across a mirror-still sea toward a giant cracked moon at sunset, ripples spreading, cinematic sci-fi',
   },
   {
     key: 'runway',

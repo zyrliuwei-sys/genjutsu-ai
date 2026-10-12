@@ -116,7 +116,7 @@ const TEMPLATES: Template[] = [
   effect('red-suit-groove', 'Red Suit Groove', 'groove', 10, '9:16', 'New'),
   effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
   effect('manhattan-meet', 'Manhattan Meet', 'manhattan', 10, '9:16', 'New'),
-  effect('canyon-bungee', 'Canyon Bungee', 'bungee', 10, '9:16', 'New'),
+  effect('moonlit-walk', 'Moonlit Walk', 'moonwalk', 5, '16:9', 'New'),
   effect('rail-ollie', 'Rail Ollie', 'skate', 10, '9:16', 'New'),
 ];
 

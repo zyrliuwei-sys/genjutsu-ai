@@ -32,6 +32,11 @@ export const GENJUTSU_REFERENCES: Record<
   string,
   { name: string; direction: string }
 > = {
+  'moonlit-walk': {
+    name: 'Moonlit Walk',
+    direction:
+      'Replace only the astronaut; keep the slow walk away from the camera, the ripples, the giant moon, the mirror-still sea and the static framing.',
+  },
   'sketch-glow-up': {
     name: 'Sketch Glow-Up',
     direction:
@@ -81,6 +86,8 @@ export const GENJUTSU_REFERENCES: Record<
 
 /** Directions describe the actual references, not the legacy card names. */
 export const GENJUTSU_DIRECTIONS: Record<string, string> = {
+  moonwalk:
+    'Replace the astronaut using the supplied character image, seen from behind. Preserve the slow walk away from the camera across the mirror-still water, the spreading ripples and reflection, the giant cracked moon, the distant lit platform, the pastel sunset sky and the static wide framing. Photoreal scale and lighting, consistent figure, no flicker.',
   glowup:
     'Replace the girl using the supplied character image in both looks. Preserve the sketching at the table, the paper flip toward the camera, the transition into the magazine-cover pose climbing out of the page, and the camera framing. Photoreal skin and hair, consistent face across the transformation, no extra limbs or flicker.',
   'fire-skirt':
