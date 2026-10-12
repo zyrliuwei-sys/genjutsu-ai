@@ -19,16 +19,9 @@ export function About() {
             <h2 className="eg-heading mt-4 text-5xl leading-[1.02] sm:text-6xl">
               {m['landing.about.title']()}
             </h2>
-            <img
-              src="/logo.svg"
-              alt=""
-              width={512}
-              height={512}
-              className="mt-10 hidden size-20 -rotate-6 rounded-xl lg:block"
-            />
           </Reveal>
           <Reveal className="text-foreground/85 max-w-2xl space-y-6 text-lg leading-[1.75]">
-            <p className="first-letter:text-primary first-letter:float-left first-letter:mt-1.5 first-letter:mr-3 first-letter:font-serif first-letter:text-[4.6rem] first-letter:leading-[0.8]">
+            <p className="first-letter:text-primary first-letter:float-left first-letter:mt-1.5 first-letter:mr-5 first-letter:font-serif first-letter:text-[4.6rem] first-letter:leading-[0.8]">
               {m['landing.about.p1']()}
             </p>
             <Link
