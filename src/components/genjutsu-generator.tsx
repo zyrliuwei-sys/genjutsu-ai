@@ -117,7 +117,7 @@ const TEMPLATES: Template[] = [
   effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
   effect('manhattan-meet', 'Manhattan Meet', 'manhattan', 10, '9:16', 'New'),
   effect('canyon-bungee', 'Canyon Bungee', 'bungee', 10, '9:16', 'New'),
-  effect('fairway-swing', 'Fairway Swing', 'golf', 10, '9:16'),
+  effect('rail-ollie', 'Rail Ollie', 'skate', 10, '9:16', 'New'),
 ];
 
 const isDone = (task?: GenjutsuTask) =>

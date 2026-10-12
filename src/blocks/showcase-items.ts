@@ -104,12 +104,12 @@ export const SHOWCASE_ITEMS: ShowcaseItem[] = [
       'A blonde model throws on a striped shirt while striding down a city street toward the camera, handheld tracking shot, fashion ad',
   },
   {
-    key: 'golf',
-    image: '/videos/showcase/golf.webp',
-    video: '/videos/showcase/golf.mp4',
+    key: 'skate',
+    image: '/videos/showcase/skate.webp',
+    video: '/videos/showcase/skate.mp4',
     kind: 'video',
     prompt:
-      'A man in a long grey coat tees off on a lush green golf course, camera swings around him as the ball flies, sports commercial',
+      'A skater in a green jacket ollies over a metal rail at golden hour, dust kicking up, low-angle slow motion with the city skyline behind, sneaker ad',
   },
   {
     key: 'groove',

@@ -72,10 +72,10 @@ export const GENJUTSU_REFERENCES: Record<
     direction:
       'Preserve the jump from the bridge, the fall, the rope and the camera tracking downward.',
   },
-  'fairway-swing': {
-    name: 'Fairway Swing',
+  'rail-ollie': {
+    name: 'Rail Ollie',
     direction:
-      'Preserve the golf swing, ball flight and the camera move around the golfer.',
+      'Preserve the run-up, the ollie over the rail, the landing, the dust and the low-angle slow-motion camera.',
   },
 };
 
@@ -95,7 +95,8 @@ export const GENJUTSU_DIRECTIONS: Record<string, string> = {
     'Replace the woman in the camel trench coat using the supplied character image. Keep the falling books, the stranger who helps, the snowy Manhattan street and the original edit rhythm. Soft winter light, consistent identity across close-ups and wide shots.',
   bungee:
     'Replace the jumper in the teal jacket using the supplied character image. Preserve the climb over the red steel bridge railing, the jump, the fall toward the turquoise river and the downward camera tracking. Photoreal scale and motion blur, consistent identity.',
-  golf: 'Replace the golfer in the long grey coat using the supplied character image. Preserve the swing, the ball flight, the green course and the camera move around the golfer. Natural sunlight, realistic coat motion, consistent face.',
+  skate:
+    'Replace the skater in the green jacket using the supplied character image. Preserve the push, the ollie over the metal rail, the landing, the kicked-up dust, the city skyline and the low-angle slow-motion camera. Golden-hour light, realistic board and fabric motion, consistent face.',
 };
 
 export const GENJUTSU_ASPECTS = ['16:9', '9:16'] as const;
