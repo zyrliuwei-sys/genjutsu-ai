@@ -1682,6 +1682,73 @@ export function GenjutsuGenerator({
               data-testid="template-list"
               className="flex snap-x gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin]"
             >
+              {/* Opens the reference-video input kept in the Create column. */}
+              <label
+                htmlFor={referenceInputId}
+                data-testid="template-own-video"
+                aria-pressed={referenceSource === 'upload' && !ownVideo}
+                onClick={() => track('effect_select', { effect: 'own_video' })}
+                className={cn(
+                  'border-border bg-muted hover:border-primary/70 relative flex aspect-[3/4] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-2 text-center ring-2 transition-colors lg:w-32',
+                  referenceSource === 'upload' && !ownVideo
+                    ? 'ring-primary'
+                    : 'ring-transparent'
+                )}
+              >
+                <span className="bg-primary/15 text-primary ring-primary/40 flex size-10 items-center justify-center rounded-full ring-1">
+                  <Video className="size-5" aria-hidden="true" />
+                </span>
+                <span className="text-sm leading-tight font-semibold">
+                  {copy.uploadReference}
+                </span>
+                <span className="text-muted-foreground text-[11px]">
+                  MP4, MOV
+                </span>
+              </label>
+              {ownVideo ? (
+                <button
+                  type="button"
+                  data-testid="template-saved-video"
+                  aria-pressed={referenceSource === 'upload'}
+                  disabled={
+                    running ||
+                    checkingGeneration ||
+                    validatingMedia ||
+                    savingDraft
+                  }
+                  onClick={selectOwnVideo}
+                  className={cn(
+                    'group bg-muted relative aspect-[3/4] w-28 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
+                    referenceSource === 'upload'
+                      ? 'ring-primary'
+                      : 'ring-transparent'
+                  )}
+                >
+                  <video
+                    src={`${ownVideo.preview}#t=0.1`}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                  {referenceSource === 'upload' ? (
+                    <span className="bg-primary text-primary-foreground absolute top-2 right-2 flex size-6 items-center justify-center rounded-full">
+                      <Check className="size-4" />
+                    </span>
+                  ) : null}
+                  <span className="absolute inset-x-2 bottom-2">
+                    <span className="block text-sm leading-tight font-semibold text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)]">
+                      {copy.customReference}
+                    </span>
+                    {ownVideo.duration ? (
+                      <span className="block text-[11px] text-white/70">
+                        {Math.round(ownVideo.duration)}s
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+              ) : null}
               {TEMPLATES.map((template) => (
                 <button
                   key={template.id}
@@ -1746,73 +1813,6 @@ export function GenjutsuGenerator({
                   </span>
                 </button>
               ))}
-              {ownVideo ? (
-                <button
-                  type="button"
-                  data-testid="template-saved-video"
-                  aria-pressed={referenceSource === 'upload'}
-                  disabled={
-                    running ||
-                    checkingGeneration ||
-                    validatingMedia ||
-                    savingDraft
-                  }
-                  onClick={selectOwnVideo}
-                  className={cn(
-                    'group bg-muted relative aspect-[3/4] w-28 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
-                    referenceSource === 'upload'
-                      ? 'ring-primary'
-                      : 'ring-transparent'
-                  )}
-                >
-                  <video
-                    src={`${ownVideo.preview}#t=0.1`}
-                    muted
-                    playsInline
-                    preload="metadata"
-                    className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
-                  {referenceSource === 'upload' ? (
-                    <span className="bg-primary text-primary-foreground absolute top-2 right-2 flex size-6 items-center justify-center rounded-full">
-                      <Check className="size-4" />
-                    </span>
-                  ) : null}
-                  <span className="absolute inset-x-2 bottom-2">
-                    <span className="block text-sm leading-tight font-semibold text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)]">
-                      {copy.customReference}
-                    </span>
-                    {ownVideo.duration ? (
-                      <span className="block text-[11px] text-white/70">
-                        {Math.round(ownVideo.duration)}s
-                      </span>
-                    ) : null}
-                  </span>
-                </button>
-              ) : null}
-              {/* Opens the reference-video input kept in the Create column. */}
-              <label
-                htmlFor={referenceInputId}
-                data-testid="template-own-video"
-                aria-pressed={referenceSource === 'upload' && !ownVideo}
-                onClick={() => track('effect_select', { effect: 'own_video' })}
-                className={cn(
-                  'border-border bg-muted hover:border-primary/70 relative flex aspect-[3/4] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-2 text-center ring-2 transition-colors lg:w-32',
-                  referenceSource === 'upload' && !ownVideo
-                    ? 'ring-primary'
-                    : 'ring-transparent'
-                )}
-              >
-                <span className="bg-primary/15 text-primary ring-primary/40 flex size-10 items-center justify-center rounded-full ring-1">
-                  <Video className="size-5" aria-hidden="true" />
-                </span>
-                <span className="text-sm leading-tight font-semibold">
-                  {copy.uploadReference}
-                </span>
-                <span className="text-muted-foreground text-[11px]">
-                  MP4, MOV
-                </span>
-              </label>
             </div>
           </div>
         </section>
