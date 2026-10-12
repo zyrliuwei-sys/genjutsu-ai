@@ -32,20 +32,20 @@ export const GENJUTSU_REFERENCES: Record<
   string,
   { name: string; direction: string }
 > = {
-  'rain-dance': {
-    name: 'Rain Dance',
+  'sketch-glow-up': {
+    name: 'Sketch Glow-Up',
     direction:
-      'Preserve the dance steps, splashes, arcade lanterns and the slow camera push-in.',
+      'Preserve the drawing, the paper flip transition, the magazine-cover pose and the camera framing.',
   },
   'fire-skirt-spin': {
     name: 'Fire Skirt Spin',
     direction:
       'Replace only the dancer; keep the skirt spins, floor work, sparks and camera framing unchanged.',
   },
-  'prison-break': {
-    name: 'Prison Break',
+  'roller-rink': {
+    name: 'Roller Rink',
     direction:
-      'Replace only the escaping woman; keep the guard, the struggle, the sprint and the handheld tracking camera.',
+      'Replace only the skater in the pink sweatshirt; keep the other skaters, the rink lights and the camera rolling alongside her.',
   },
   'street-strut': {
     name: 'Street Strut',
@@ -81,11 +81,11 @@ export const GENJUTSU_REFERENCES: Record<
 
 /** Directions describe the actual references, not the legacy card names. */
 export const GENJUTSU_DIRECTIONS: Record<string, string> = {
-  rain: 'Replace the dancer in the long coat and hat using the supplied character image. Preserve the dance steps, puddle splashes, wet stone arcade, glowing lanterns and the slow camera push-in. Photoreal rain and reflections, consistent face and wardrobe, no extra limbs or flicker.',
+  glowup:
+    'Replace the girl using the supplied character image in both looks. Preserve the sketching at the table, the paper flip toward the camera, the transition into the magazine-cover pose climbing out of the page, and the camera framing. Photoreal skin and hair, consistent face across the transformation, no extra limbs or flicker.',
   'fire-skirt':
     'Replace the solo dancer using the supplied character image. Preserve the exact skirt spins, handstand and floor work, the glowing spark trails, the empty studio and the camera framing. Photoreal skin and fabric, consistent face, no extra limbs or flicker.',
-  escape:
-    'Replace the woman in the orange jumpsuit using the supplied character image. Preserve the struggle with the guard, the fall, the sprint down the sidewalk and the handheld tracking camera. Photoreal daylight street, grounded physical contact, consistent identity across cuts.',
+  rink: 'Replace the skater in the pink sweatshirt using the supplied character image. Preserve her glide, turns and hair motion, the other skaters, the glossy rink floor, string lights and the tracking camera. Bright disco lighting, realistic skates and fabric, consistent face.',
   crew: 'Replace the lead performer at the front of the group using the supplied character image. Keep the other four performers, their synchronized strut and dance moves, the sunny sidewalk and the backward tracking shot. Natural daylight, coherent occlusions, no extra people.',
   groove:
     'Replace the dancer in the red suit using the supplied character image. Preserve his choreography, the surrounding dancers and crowd, the moody blue hall and the camera framing. Photoreal fabric and skin, stable identity, no extra limbs or flicker.',

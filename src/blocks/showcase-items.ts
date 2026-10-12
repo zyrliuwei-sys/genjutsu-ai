@@ -56,20 +56,20 @@ export const HERO_CARDS: ShowcaseItem[] = [
 
 export const SHOWCASE_ITEMS: ShowcaseItem[] = [
   {
-    key: 'rain',
-    image: '/videos/showcase/rain.webp',
-    video: '/videos/showcase/rain.mp4',
+    key: 'glowup',
+    image: '/videos/showcase/glowup.webp',
+    video: '/videos/showcase/glowup.mp4',
     kind: 'video',
     prompt:
-      'A man in a long coat and bowler hat dances through a rain-soaked stone arcade at night, lanterns glowing, slow dolly-in, cinematic musical',
+      'A girl with pink hair clips sketches at a glossy table, flips the paper toward the camera and transforms into a platinum-blonde cover star climbing out of a magazine page, glow-up transition',
   },
   {
-    key: 'escape',
-    image: '/videos/showcase/escape.webp',
-    video: '/videos/showcase/escape.mp4',
+    key: 'rink',
+    image: '/videos/showcase/rink.webp',
+    video: '/videos/showcase/rink.mp4',
     kind: 'video',
     prompt:
-      'A woman in an orange prison jumpsuit breaks free from a guard on a city sidewalk and sprints away, handheld tracking shot, action film',
+      'A girl in a pink sweatshirt and jeans glides across a glossy roller rink under string lights and disco colors, hair flying, camera rolling alongside her, retro roller disco',
   },
   {
     key: 'manhattan',

@@ -109,9 +109,9 @@ const effect = (
 });
 
 const TEMPLATES: Template[] = [
-  effect('rain-dance', 'Rain Dance', 'rain', 10, '9:16', 'Trending'),
+  effect('sketch-glow-up', 'Sketch Glow-Up', 'glowup', 9, '9:16', 'Trending'),
   effect('fire-skirt-spin', 'Fire Skirt Spin', 'fire-skirt', 9, '9:16', 'New'),
-  effect('prison-break', 'Prison Break', 'escape', 10, '9:16', 'Trending'),
+  effect('roller-rink', 'Roller Rink', 'rink', 10, '9:16', 'Trending'),
   effect('street-strut', 'Street Strut', 'crew', 10, '9:16', 'Trending'),
   effect('red-suit-groove', 'Red Suit Groove', 'groove', 10, '9:16', 'New'),
   effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
