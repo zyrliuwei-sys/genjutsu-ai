@@ -1261,8 +1261,9 @@ export function GenjutsuGenerator({
         className="border-border bg-muted text-foreground grid scroll-mt-24 gap-3 rounded-3xl border p-3 lg:grid-cols-[300px_minmax(0,340px)_minmax(0,1fr)]"
       >
         <section
+          id="genjutsu-upload"
           aria-label="Create"
-          className="bg-card order-2 flex min-h-0 flex-col gap-4 rounded-2xl p-4 lg:order-1"
+          className="bg-card order-2 flex min-h-0 scroll-mt-24 flex-col gap-4 rounded-2xl p-4 lg:order-1"
         >
           <h2 className="text-lg font-semibold">AI Effects</h2>
           <div className="grid grid-cols-2 gap-2">
@@ -1587,8 +1588,9 @@ export function GenjutsuGenerator({
         </section>
 
         <section
+          id="genjutsu-effects"
           aria-label="Select effect"
-          className="bg-card @container order-1 flex min-h-0 flex-col gap-3 rounded-2xl p-4 lg:order-2"
+          className="bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:order-2"
         >
           <h2 className="text-lg font-semibold">Select Effect</h2>
           <div className="relative lg:min-h-[calc((100cqw-1.25rem)*2+2rem)] lg:flex-1">
@@ -1615,6 +1617,7 @@ export function GenjutsuGenerator({
                     savingDraft
                   }
                   onClick={() => {
+                    track('effect_select', { effect: template.id });
                     setReferenceSource('effect');
                     setReferenceClosed(false);
                     if (

@@ -4,6 +4,9 @@ import { getUuid } from '@/lib/hash';
 
 export const FUNNEL_EVENTS = [
   'create_view',
+  'hero_cta',
+  'effect_select',
+  'page_exit',
   'lead_uploaded',
   'reference_ready',
   'generate_click',
