@@ -10,7 +10,7 @@ const SWAPS = [
     key: 'crowd',
     width: 1280,
     height: 720,
-    photo: '/videos/swap/photo-1.jpg',
+    photo: undefined,
   },
   {
     key: 'dance',
@@ -79,7 +79,11 @@ export function Features() {
                   src: `/videos/swap/${swap.key}-after.mp4`,
                   poster: `/videos/swap/${swap.key}-after.jpg`,
                 }}
-                photo={{ src: swap.photo, label: m['landing.swap.photo']() }}
+                photo={
+                  swap.photo
+                    ? { src: swap.photo, label: m['landing.swap.photo']() }
+                    : undefined
+                }
                 labels={labels}
                 width={swap.width}
                 height={swap.height}
