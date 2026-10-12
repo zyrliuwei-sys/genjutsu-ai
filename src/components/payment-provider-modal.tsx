@@ -1,6 +1,6 @@
 'use client';
 
-import { CreditCard, Loader2 } from 'lucide-react';
+import { CreditCard, Loader2, Wallet } from 'lucide-react';
 
 import { m } from '@/paraglide/messages.js';
 import { Button } from '@/components/ui/button';
@@ -30,14 +30,69 @@ interface Props {
   price?: string;
 }
 
-const providerLabel: Record<PaymentProvider, string> = {
-  stripe: 'Stripe',
-  creem: 'Creem',
-  paypal: 'PayPal',
-  alipay: 'Alipay',
-  wechat: 'WeChat Pay',
-  waffo: 'Waffo',
-};
+// Buyers don't know processor brands — Waffo is shown as the card option.
+function providerLabel(p: PaymentProvider) {
+  if (p === 'waffo') return m['common.pricing.provider_card']();
+  return {
+    stripe: 'Stripe',
+    creem: 'Creem',
+    paypal: 'PayPal',
+    alipay: 'Alipay',
+    wechat: 'WeChat Pay',
+  }[p];
+}
+
+// Card first: many buyers have no PayPal account.
+const PROVIDER_ORDER: PaymentProvider[] = [
+  'waffo',
+  'stripe',
+  'creem',
+  'paypal',
+  'alipay',
+  'wechat',
+];
+
+export function PaymentProviderOptions({
+  providers,
+  loadingProvider,
+  onSelect,
+}: {
+  providers: PaymentProvider[];
+  loadingProvider?: PaymentProvider | null;
+  onSelect: (provider: PaymentProvider) => void;
+}) {
+  const sorted = PROVIDER_ORDER.filter((p) => providers.includes(p));
+  return (
+    <div className="space-y-2">
+      {sorted.map((p) => {
+        const Icon = p === 'paypal' ? Wallet : CreditCard;
+        return (
+          <Button
+            key={p}
+            variant="outline"
+            className="h-12 w-full justify-start gap-3"
+            disabled={!!loadingProvider}
+            onClick={() => onSelect(p)}
+          >
+            {loadingProvider === p ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Icon className="size-4" />
+            )}
+            <span>{providerLabel(p)}</span>
+          </Button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function paymentForText(planName?: string, price?: string) {
+  if (!planName) return m['common.pricing.choose_payment_desc']();
+  return price
+    ? m['common.pricing.payment_for']({ plan: planName, price })
+    : m['common.pricing.payment_for_plan']({ plan: planName });
+}
 
 export function PaymentProviderModal({
   open,
@@ -54,34 +109,16 @@ export function PaymentProviderModal({
         <DialogHeader>
           <DialogTitle>{m['common.pricing.choose_payment']()}</DialogTitle>
           <DialogDescription>
-            {planName
-              ? price
-                ? m['common.pricing.payment_for']({ plan: planName, price })
-                : m['common.pricing.payment_for_plan']({ plan: planName })
-              : m['common.pricing.choose_payment_desc']()}
+            {paymentForText(planName, price)}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-2 space-y-2">
-          {providers.map((p) => {
-            const loading = loadingProvider === p;
-            return (
-              <Button
-                key={p}
-                variant="outline"
-                className="h-12 w-full justify-start gap-3"
-                disabled={!!loadingProvider}
-                onClick={() => onSelect(p)}
-              >
-                {loading ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <CreditCard className="size-4" />
-                )}
-                <span>{providerLabel[p]}</span>
-              </Button>
-            );
-          })}
+        <div className="mt-2">
+          <PaymentProviderOptions
+            providers={providers}
+            loadingProvider={loadingProvider}
+            onSelect={onSelect}
+          />
         </div>
       </DialogContent>
     </Dialog>

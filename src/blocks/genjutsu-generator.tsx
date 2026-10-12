@@ -84,6 +84,7 @@ export function GenjutsuGenerator() {
               m['landing.generator.remaining_generations']({ count }),
             generationRules: m['landing.pricing.per_video'](),
             legacyBalance: m['landing.generator.legacy_balance'](),
+            contentPolicy: m['landing.generator.content_policy'](),
             referenceDisclaimer: m['landing.generator.reference_disclaimer'](),
             removeReference: m['landing.generator.remove_reference'](),
             removePhoto: m['landing.generator.remove_photo'](),

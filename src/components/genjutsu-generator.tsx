@@ -383,6 +383,7 @@ export function GenjutsuGenerator({
     remainingGenerations: (count: number) => string;
     generationRules: string;
     legacyBalance: string;
+    contentPolicy: string;
     referenceDisclaimer: string;
     removeReference: string;
     removePhoto: string;
@@ -1110,12 +1111,16 @@ export function GenjutsuGenerator({
     },
   });
 
+  const failureMessage = (error?: string | null) =>
+    error?.startsWith('Content policy violation')
+      ? copy.contentPolicy
+      : error || 'Generation failed';
+
   useEffect(() => {
     if (!task || !isDone(task)) return;
     sessionStorage.removeItem(submissionStorageKey);
     queryClient.invalidateQueries({ queryKey: ['credits'] });
-    if (task.status === 'failed')
-      toast.error(task.error || 'Generation failed');
+    if (task.status === 'failed') toast.error(failureMessage(task.error));
   }, [queryClient, task]);
 
   const running = generate.isPending || Boolean(taskId && !isDone(task));
@@ -1810,7 +1815,7 @@ export function GenjutsuGenerator({
                       </button>
                     </>
                   ) : task?.status === 'failed' ? (
-                    task.error || 'Generation failed'
+                    failureMessage(task.error)
                   ) : task?.status === 'canceled' ? (
                     'Generation canceled'
                   ) : running ? (

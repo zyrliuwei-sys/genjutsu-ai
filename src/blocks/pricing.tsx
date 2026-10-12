@@ -2,7 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Film, Infinity as InfinityIcon, MonitorPlay } from 'lucide-react';
+import {
+  ArrowLeft,
+  Film,
+  Infinity as InfinityIcon,
+  MonitorPlay,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useSession } from '@/core/auth/client';
@@ -15,7 +20,9 @@ import { track } from '@/lib/track';
 import { m } from '@/paraglide/messages.js';
 import { usePublicConfig } from '@/hooks/use-public-config';
 import {
+  paymentForText,
   PaymentProviderModal,
+  PaymentProviderOptions,
   type PaymentProvider,
 } from '@/components/payment-provider-modal';
 import {
@@ -68,6 +75,7 @@ export function Pricing({
   const [pendingPlan, setPendingPlan] = useState<PricingPlan | null>(null);
   const [loadingProvider, setLoadingProvider] =
     useState<PaymentProvider | null>(null);
+  const dialog = variant === 'dialog';
 
   const enabledProviders = useMemo<PaymentProvider[]>(
     () => ALL_PROVIDERS.filter((p) => configs[`${p}_enabled`] === 'true'),
@@ -169,6 +177,8 @@ export function Pricing({
   });
 
   async function startCheckout(plan: PricingPlan, provider?: PaymentProvider) {
+    // Repeat clicks while a checkout is in flight would create duplicate orders.
+    if (checkoutMutation.isPending || loadingProvider) return;
     try {
       await beforeCheckout?.();
     } catch {
@@ -201,8 +211,11 @@ export function Pricing({
       | undefined;
 
     if (selectEnabled && enabled.length > 1) {
+      track('provider_modal_shown', { plan: plan.productId || '' });
       setPendingPlan(plan);
-      setModalOpen(true);
+      // Inside the paywall dialog the picker replaces the plans in place —
+      // a second stacked dialog is easy to lose.
+      if (!dialog) setModalOpen(true);
       return;
     }
 
@@ -211,10 +224,12 @@ export function Pricing({
 
   function handleProviderSelect(provider: PaymentProvider) {
     if (!pendingPlan) return;
+    track('provider_selected', {
+      plan: pendingPlan.productId || '',
+      provider,
+    });
     startCheckout(pendingPlan, provider);
   }
-
-  const dialog = variant === 'dialog';
   const Wrapper = dialog ? 'div' : 'section';
 
   return (
@@ -254,7 +269,32 @@ export function Pricing({
             </p>
           )}
         </div>
-        <PricingTable groups={groups} onCheckout={handleCheckout} />
+        {dialog && pendingPlan ? (
+          <div className="mx-auto max-w-md">
+            <p className="mb-1 font-medium">
+              {m['common.pricing.choose_payment']()}
+            </p>
+            <p className="text-muted-foreground mb-4 text-sm">
+              {paymentForText(pendingPlan.name, pendingPlan.price)}
+            </p>
+            <PaymentProviderOptions
+              providers={enabledProviders}
+              loadingProvider={loadingProvider}
+              onSelect={handleProviderSelect}
+            />
+            <button
+              type="button"
+              className="text-muted-foreground hover:text-foreground mt-4 inline-flex items-center gap-1 text-sm disabled:opacity-50"
+              disabled={!!loadingProvider}
+              onClick={() => setPendingPlan(null)}
+            >
+              <ArrowLeft className="size-4" />
+              {m['common.pricing.back_to_plans']()}
+            </button>
+          </div>
+        ) : (
+          <PricingTable groups={groups} onCheckout={handleCheckout} />
+        )}
       </div>
 
       <PaymentProviderModal
