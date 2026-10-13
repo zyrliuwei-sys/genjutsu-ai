@@ -109,7 +109,6 @@ const effect = (
 });
 
 const TEMPLATES: Template[] = [
-  effect('red-room-glamour', 'Red Room Glamour', 'glamour', 4, '16:9', 'New'),
   effect('colonial-stroll', 'Colonial Stroll', 'colonial', 10, '16:9', 'New'),
   effect('sunlit-laundry', 'Sunlit Laundry', 'laundry', 8, '16:9', 'New'),
   effect(

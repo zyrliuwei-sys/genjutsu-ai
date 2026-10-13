@@ -144,14 +144,6 @@ export const SHOWCASE_ITEMS: ShowcaseItem[] = [
       'A young man puts on a glowing VR visor and launches through deep space, over a blocky green world, then dives toward a planet at high speed, sci-fi journey',
   },
   {
-    key: 'glamour',
-    image: '/videos/showcase/glamour.webp',
-    video: '/videos/showcase/glamour.mp4',
-    kind: 'video',
-    prompt:
-      'A blonde woman in a wide-brim black hat, strapless black dress and long gloves poses against a red studio wall, slow tilt of the head, glamour fashion film',
-  },
-  {
     key: 'colonial',
     image: '/videos/showcase/colonial.webp',
     video: '/videos/showcase/colonial.mp4',

@@ -72,11 +72,6 @@ export const GENJUTSU_REFERENCES: Record<
     direction:
       'Preserve the jump from the bridge, the fall, the rope and the camera tracking downward.',
   },
-  'red-room-glamour': {
-    name: 'Red Room Glamour',
-    direction:
-      'Replace only the woman in the black hat; keep the red wall, the dress, the gloves, the pose and the static framing.',
-  },
   'colonial-stroll': {
     name: 'Colonial Stroll',
     direction:
@@ -172,8 +167,6 @@ export const GENJUTSU_DIRECTIONS: Record<string, string> = {
     'Replace the model using the supplied character image. Preserve the walk toward the camera, the striped shirt toss, the city street and the handheld follow shot. Natural daylight, realistic fabric motion, consistent face and wardrobe.',
   bungee:
     'Replace the jumper in the teal jacket using the supplied character image. Preserve the climb over the red steel bridge railing, the jump, the fall toward the turquoise river and the downward camera tracking. Photoreal scale and motion blur, consistent identity.',
-  glamour:
-    'Replace the woman in the wide-brim black hat using the supplied character image. Preserve the strapless black dress, the long black gloves, the hand-on-hip pose, the slow head tilt, the red studio wall and the static framing. Photoreal skin and fabric, consistent face, no flicker.',
   colonial:
     'Replace the man in the dark 18th-century frock coat using the supplied character image. Preserve his walk through the pine forest clearing, the kneel, the white cravat and costume, the campfire logs and the camera framing. Natural daylight, consistent face, no flicker.',
   saltflat:
