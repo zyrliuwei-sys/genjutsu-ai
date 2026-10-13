@@ -13,14 +13,18 @@ export function Audience() {
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
           <Reveal className="order-2 lg:order-1">
-            <div className="eg-screen aspect-[4/5] overflow-hidden rounded-md">
+            <div className="eg-screen relative aspect-[4/5] overflow-hidden rounded-md">
               <LoopVideo
                 src="/videos/showcase/tennis.mp4"
                 poster="/videos/showcase/tennis.webp"
                 label={m['landing.alt.audience']()}
                 width={540}
                 height={840}
-                className="size-full"
+                className="size-full opacity-60"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/60"
               />
             </div>
           </Reveal>
