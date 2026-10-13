@@ -1187,5 +1187,7 @@
   "landing.generator.paywall_first": "照片和视频已保存。首个视频只需 {price}，一次性付费，无订阅。",
   "landing.generator.paywall_top_up": "照片和视频已保存。充值余额即可生成这个视频。",
   "landing.generator.your_video": "你的视频",
-  "landing.pricing.paywall_trust": "安全支付 · 一次性付费，无订阅 · 生成失败自动退回"
+  "landing.generator.summary_motion": "动作参考",
+  "landing.generator.summary_photo": "你的照片",
+  "landing.pricing.secure_checkout": "安全支付"
 }

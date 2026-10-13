@@ -412,6 +412,8 @@ export function GenjutsuGenerator({
     paywallFirst: string;
     paywallTopUp: string;
     yourVideo: string;
+    summaryMotion: string;
+    summaryPhoto: string;
     retry: string;
     referenceDisclaimer: string;
     removeReference: string;
@@ -2238,7 +2240,7 @@ export function GenjutsuGenerator({
           setPaywall(open);
         }}
       >
-        <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5 sm:max-w-[60rem] sm:p-8">
+        <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5 sm:max-w-[40rem] sm:p-8">
           <Pricing
             variant="dialog"
             beforeCheckout={async () => {
@@ -2256,40 +2258,63 @@ export function GenjutsuGenerator({
                 : copy.paywallFirst
             }
             summary={
-              // The visitor's own inputs: what they already invested, and
-              // what the purchase turns into.
+              // The visitor's own inputs — what they already invested, and
+              // what the purchase turns them into.
               <div
                 aria-hidden="true"
-                className="mb-4 flex items-center justify-center gap-2 sm:gap-3"
+                className="mb-5 flex items-start justify-center gap-2 sm:gap-3"
               >
-                {lead?.preview ? (
-                  <img
-                    src={lead.preview}
-                    alt=""
-                    className="size-14 rounded-xl object-cover sm:size-16"
-                  />
-                ) : null}
-                <Plus className="text-muted-foreground size-4 shrink-0" />
-                {referenceSource === 'effect' ? (
-                  <img
-                    src={selected.image}
-                    alt=""
-                    className="size-14 rounded-xl object-cover sm:size-16"
-                  />
-                ) : referenceVideo?.preview ? (
-                  <video
-                    src={`${referenceVideo.preview}#t=0.1`}
-                    muted
-                    playsInline
-                    preload="metadata"
-                    className="size-14 rounded-xl bg-black object-cover sm:size-16"
-                  />
-                ) : null}
-                <ArrowRight className="text-muted-foreground size-4 shrink-0" />
-                <span className="border-primary/60 bg-primary/10 text-primary flex size-14 flex-col items-center justify-center gap-0.5 rounded-xl border border-dashed text-[10px] font-semibold sm:size-16">
-                  <Sparkles className="size-4" />
-                  {copy.yourVideo}
-                </span>
+                <figure className="flex flex-col items-center gap-1.5">
+                  {referenceSource === 'effect' ? (
+                    <video
+                      src={effectPreviewSrc ?? effectClip}
+                      poster={selected.image}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="size-20 rounded-xl bg-black object-cover sm:size-24"
+                    />
+                  ) : referenceVideo?.preview ? (
+                    <video
+                      src={referenceVideo.preview}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="size-20 rounded-xl bg-black object-cover sm:size-24"
+                    />
+                  ) : (
+                    <span className="bg-muted size-20 rounded-xl sm:size-24" />
+                  )}
+                  <figcaption className="text-muted-foreground text-[11px]">
+                    {copy.summaryMotion}
+                  </figcaption>
+                </figure>
+                <Plus className="text-muted-foreground mt-8 size-4 shrink-0 sm:mt-10" />
+                <figure className="flex flex-col items-center gap-1.5">
+                  {lead?.preview ? (
+                    <img
+                      src={lead.preview}
+                      alt=""
+                      className="size-20 rounded-xl object-cover sm:size-24"
+                    />
+                  ) : (
+                    <span className="bg-muted size-20 rounded-xl sm:size-24" />
+                  )}
+                  <figcaption className="text-muted-foreground text-[11px]">
+                    {copy.summaryPhoto}
+                  </figcaption>
+                </figure>
+                <ArrowRight className="text-primary mt-8 size-4 shrink-0 sm:mt-10" />
+                <figure className="flex flex-col items-center gap-1.5">
+                  <span className="border-primary/60 bg-primary/10 text-primary flex size-20 items-center justify-center rounded-xl border border-dashed sm:size-24">
+                    <Sparkles className="size-6" />
+                  </span>
+                  <figcaption className="text-primary text-[11px] font-medium">
+                    {copy.yourVideo}
+                  </figcaption>
+                </figure>
               </div>
             }
           />

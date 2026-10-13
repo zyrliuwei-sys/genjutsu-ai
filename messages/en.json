@@ -1187,5 +1187,7 @@
   "landing.generator.paywall_first": "Your photo and clip are saved. Make your first video for {price} — one-time payment, no subscription.",
   "landing.generator.paywall_top_up": "Your photo and clip are saved. Top up your balance to render this video.",
   "landing.generator.your_video": "Your video",
-  "landing.pricing.paywall_trust": "Secure checkout · One-time payment, no subscription · Failed generations are refunded automatically"
+  "landing.generator.summary_motion": "Motion",
+  "landing.generator.summary_photo": "Your photo",
+  "landing.pricing.secure_checkout": "Secure checkout"
 }

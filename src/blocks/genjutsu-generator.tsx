@@ -82,6 +82,8 @@ export function GenjutsuGenerator() {
             }),
             paywallTopUp: m['landing.generator.paywall_top_up'](),
             yourVideo: m['landing.generator.your_video'](),
+            summaryMotion: m['landing.generator.summary_motion'](),
+            summaryPhoto: m['landing.generator.summary_photo'](),
             firstPrice: m['landing.generator.first_price']({
               price: `$${(pricingCatalog.pack_first.priceInCents / 100).toFixed(2)}`,
             }),

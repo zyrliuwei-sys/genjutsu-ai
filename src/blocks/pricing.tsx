@@ -4,6 +4,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
+  Check,
   Film,
   Infinity as InfinityIcon,
   Lock,
@@ -32,6 +33,7 @@ import {
   type PricingGroup,
   type PricingPlan,
 } from '@/components/pricing-table';
+import { Button } from '@/components/ui/button';
 
 function usd(cents: number) {
   return `$${(cents / 100).toLocaleString('en-US', {
@@ -373,13 +375,22 @@ export function Pricing({
               />
             </div>
           </div>
+        ) : dialog ? (
+          <PaywallPlans
+            plans={groups.flatMap((group) => group.plans)}
+            quantity={(plan) =>
+              packVideos(plan.productId) || plan.description || ''
+            }
+            busy={checkoutMutation.isPending || !!loadingProvider}
+            onCheckout={handleCheckout}
+          />
         ) : (
           <PricingTable groups={groups} onCheckout={handleCheckout} />
         )}
         {dialog && (
           <p className="text-muted-foreground mt-5 flex items-center justify-center gap-1.5 text-center text-xs">
             <Lock className="size-3.5 shrink-0" aria-hidden="true" />
-            {m['landing.pricing.paywall_trust']()}
+            {m['landing.pricing.secure_checkout']()}
           </p>
         )}
       </div>
@@ -400,5 +411,121 @@ export function Pricing({
         price={pendingPlan?.price}
       />
     </Wrapper>
+  );
+}
+
+/**
+ * Paywall layout: one recommended pack as the obvious next step, the rest as
+ * compact alternatives, and the perks every pack shares stated once instead
+ * of repeated per card.
+ */
+function PaywallPlans({
+  plans,
+  quantity,
+  busy,
+  onCheckout,
+}: {
+  plans: PricingPlan[];
+  quantity: (plan: PricingPlan) => string;
+  busy: boolean;
+  onCheckout: (plan: PricingPlan) => void;
+}) {
+  const top = plans.find((plan) => plan.featured) ?? plans[0];
+  const rest = plans.filter((plan) => plan !== top);
+  // Per-plan notes without an icon (e.g. "doesn't cover this clip").
+  const warnings = (plan: PricingPlan) =>
+    plan.features.flatMap((feature) =>
+      typeof feature !== 'string' && !feature.icon ? [feature.label] : []
+    );
+  if (!top) return null;
+
+  return (
+    <div className="mx-auto flex max-w-xl flex-col gap-3">
+      <div
+        data-testid={`paywall-plan-${top.productId}`}
+        className="border-primary/70 bg-primary/[0.06] shadow-primary/60 relative rounded-2xl border p-5 shadow-[0_24px_60px_-36px]"
+      >
+        {top.badge && (
+          <span className="bg-primary text-primary-foreground absolute -top-3 left-5 rounded-full px-3 py-1 text-xs font-semibold">
+            {top.badge}
+          </span>
+        )}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1">
+            <p className="text-muted-foreground text-sm font-medium">
+              {top.name}
+            </p>
+            <p className="mt-1 flex items-baseline gap-2">
+              <span className="text-4xl font-semibold tracking-tight tabular-nums">
+                {top.price}
+              </span>
+              {top.originalPrice && (
+                <span className="text-muted-foreground text-base line-through">
+                  {top.originalPrice}
+                </span>
+              )}
+            </p>
+            <p className="text-foreground/80 mt-1 text-sm">{quantity(top)}</p>
+            {warnings(top).map((warning) => (
+              <p key={warning} className="text-destructive mt-1 text-xs">
+                {warning}
+              </p>
+            ))}
+          </div>
+          <Button
+            className="h-12 w-full rounded-xl px-8 text-base font-semibold sm:w-auto"
+            disabled={busy || top.disabled}
+            onClick={() => onCheckout(top)}
+          >
+            {busy ? m['common.pricing.processing']() : top.buttonText}
+          </Button>
+        </div>
+      </div>
+
+      {rest.map((plan) => (
+        <div
+          key={plan.id}
+          data-testid={`paywall-plan-${plan.productId}`}
+          className="border-border hover:border-foreground/30 flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">{plan.name}</p>
+            <p className="text-muted-foreground truncate text-xs">
+              {quantity(plan)}
+            </p>
+            {warnings(plan).map((warning) => (
+              <p key={warning} className="text-destructive text-xs">
+                {warning}
+              </p>
+            ))}
+          </div>
+          <span className="text-lg font-semibold tabular-nums">
+            {plan.price}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-lg"
+            disabled={busy || plan.disabled}
+            onClick={() => onCheckout(plan)}
+          >
+            {plan.buttonText}
+          </Button>
+        </div>
+      ))}
+
+      <ul className="text-muted-foreground mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs">
+        {[
+          m['landing.pricing.shared_modes'](),
+          m['landing.pricing.feature_no_subscription'](),
+          m['landing.pricing.failure_policy_short'](),
+        ].map((perk) => (
+          <li key={perk} className="flex items-center gap-1.5">
+            <Check className="text-primary size-3.5 shrink-0" aria-hidden />
+            {perk}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
