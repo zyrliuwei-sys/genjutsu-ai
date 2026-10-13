@@ -473,7 +473,7 @@ export function GenjutsuGenerator({
     });
     revealResult();
   };
-  // Phones only: length, size and own-video upload sit behind a toggle.
+  // Phones only: additional video settings sit behind a toggle.
   const [moreOpen, setMoreOpen] = useState(false);
   // Blob URL of a reference video being read/trimmed (drives the overlay).
   const [videoJob, setVideoJob] = useState<string>();
@@ -518,7 +518,7 @@ export function GenjutsuGenerator({
       '[data-testid="template-own-video"]'
     );
     const pinned =
-      upload && upload !== card
+      upload && upload.offsetWidth > 0 && upload !== card
         ? upload.getBoundingClientRect().right -
           strip.getBoundingClientRect().left +
           12
@@ -1447,9 +1447,6 @@ export function GenjutsuGenerator({
       (effectQuery.isFetching || effectQuery.isError || !effectQuery.data)) ||
     referenceClosed ||
     !referenceVideo;
-  // Phones show only the photo slot: the reference clip (effect or the
-  // visitor's own upload) already plays in the preview above.
-  const compactReference = !moreOpen;
 
   return (
     <>
@@ -1503,36 +1500,20 @@ export function GenjutsuGenerator({
               />
             </a>
           </div>
-          <div
-            className={cn(
-              // Desktop: the effect plays in the big preview, so only the
-              // photo slot stays here and fills the column height.
-              'grid grid-cols-2 gap-2 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2',
-              compactReference && 'max-lg:grid-cols-1'
-            )}
-          >
-            <div
-              className={cn(
-                'flex flex-col gap-2',
-                compactReference && 'max-lg:hidden'
-              )}
-            >
+          <div className="grid grid-cols-1 gap-4 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2">
+            <div className="flex flex-col gap-2">
               <div className="flex flex-col lg:hidden">
                 <label
                   htmlFor={referenceInputId}
                   className="text-sm font-medium"
                 >
-                  Reference video
+                  Your video
                 </label>
-                <span className="text-muted-foreground text-xs">
-                  {referenceSource === 'upload'
-                    ? copy.customReference
-                    : selected.name}
-                </span>
+                <span className="text-muted-foreground text-xs">MP4, MOV</span>
               </div>
               <div
                 data-testid="selected-reference-video"
-                className="border-border bg-muted relative aspect-[3/4] overflow-hidden rounded-xl border lg:hidden"
+                className="border-border bg-muted hover:border-primary/70 relative aspect-[4/3] overflow-hidden rounded-xl border border-dashed transition-colors lg:hidden"
               >
                 <input
                   id={referenceInputId}
@@ -1561,7 +1542,8 @@ export function GenjutsuGenerator({
                   }}
                 />
                 {referenceClosed ||
-                (referenceSource === 'upload' && !referenceVideo) ? (
+                referenceSource === 'effect' ||
+                !referenceVideo ? (
                   <div
                     data-testid="reference-video-empty"
                     className="flex size-full flex-col items-center justify-center gap-3 p-3 text-center"
@@ -1576,19 +1558,6 @@ export function GenjutsuGenerator({
                       {copy.referenceEmpty}
                     </span>
                   </div>
-                ) : referenceSource === 'effect' ? (
-                  <video
-                    key={effectPreviewSrc ?? effectClip}
-                    data-testid="selected-reference-preview"
-                    src={effectPreviewSrc}
-                    poster={selected.image}
-                    preload="metadata"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute inset-0 size-full object-cover"
-                  />
                 ) : referenceVideo ? (
                   <PreviewAsset
                     asset={referenceVideo}
@@ -1600,7 +1569,8 @@ export function GenjutsuGenerator({
                   </div>
                 )}
                 {!referenceClosed &&
-                  (referenceVideo || referenceSource === 'effect') && (
+                  referenceSource === 'upload' &&
+                  referenceVideo && (
                     <button
                       type="button"
                       data-testid="remove-reference-video"
@@ -1646,10 +1616,7 @@ export function GenjutsuGenerator({
               removeLabel={copy.removePhoto}
               testId="upload-lead"
               rootClassName="lg:min-h-0 lg:flex-1"
-              frameClassName={cn(
-                'lg:aspect-auto lg:min-h-48 lg:flex-1',
-                compactReference && 'max-lg:aspect-[4/3]'
-              )}
+              frameClassName="aspect-[4/3] lg:aspect-auto lg:min-h-48 lg:flex-1"
             />
           </div>
 
@@ -1760,7 +1727,7 @@ export function GenjutsuGenerator({
           }}
           className="bg-card order-2 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-2"
         >
-          <h2 className="text-lg font-semibold">Select Effect</h2>
+          <h2 className="text-sm font-semibold lg:text-lg">Select Effect</h2>
           <div className="relative">
             <div
               data-testid="template-list"
@@ -1772,7 +1739,7 @@ export function GenjutsuGenerator({
                 effectsLastScroll.current = performance.now();
                 if (effectsReturnPending.current) returnToSelectedEffect();
               }}
-              className="flex snap-x scroll-pl-[8rem] gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:scroll-pl-[9rem]"
+              className="flex snap-x scroll-pl-1 gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:scroll-pl-[9rem]"
             >
               {/* Opens the reference-video input kept in the Create column.
                   Pinned to the left edge so uploading stays one tap away while
@@ -1783,7 +1750,7 @@ export function GenjutsuGenerator({
                 data-selected={referenceSource === 'upload' && !ownVideo}
                 onClick={() => track('effect_select', { effect: 'own_video' })}
                 className={cn(
-                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[3/4] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-2 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 lg:w-32',
+                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[3/4] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-2 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 max-lg:hidden lg:w-32',
                   referenceSource === 'upload' && !ownVideo
                     ? 'ring-primary'
                     : 'ring-transparent'
@@ -1812,7 +1779,7 @@ export function GenjutsuGenerator({
                   }
                   onClick={selectOwnVideo}
                   className={cn(
-                    'group bg-muted relative aspect-[3/4] w-28 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
+                    'group bg-muted relative aspect-[3/4] w-20 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
                     referenceSource === 'upload'
                       ? 'ring-primary'
                       : 'ring-transparent'
@@ -1831,12 +1798,12 @@ export function GenjutsuGenerator({
                       <Check className="size-4" />
                     </span>
                   ) : null}
-                  <span className="absolute inset-x-2 bottom-2">
-                    <span className="block text-sm leading-tight font-semibold text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)]">
+                  <span className="absolute inset-x-1.5 bottom-1.5 lg:inset-x-2 lg:bottom-2">
+                    <span className="block text-[10px] leading-tight font-semibold text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)] lg:text-sm">
                       {copy.customReference}
                     </span>
                     {ownVideo.duration ? (
-                      <span className="block text-[11px] text-white/70">
+                      <span className="block text-[9px] text-white/70 lg:text-[11px]">
                         {Math.round(ownVideo.duration)}s
                       </span>
                     ) : null}
@@ -1852,7 +1819,7 @@ export function GenjutsuGenerator({
                   }
                   data-testid={`template-${template.id}`}
                   className={cn(
-                    'group relative aspect-[3/4] w-28 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
+                    'group relative aspect-[3/4] w-20 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
                     referenceSource === 'effect' && selected.id === template.id
                       ? 'ring-primary'
                       : 'ring-transparent'
@@ -1888,7 +1855,7 @@ export function GenjutsuGenerator({
                   <span className="absolute inset-0 bg-gradient-to-t from-neutral-950/90 via-neutral-700/50 to-neutral-400/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
                   {template.tag ? (
-                    <span className="bg-primary text-primary-foreground absolute top-2 left-2 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
+                    <span className="bg-primary text-primary-foreground absolute top-2 left-2 rounded-full px-1.5 py-0.5 text-[8px] font-bold tracking-wider uppercase lg:px-2 lg:text-[10px]">
                       {template.tag}
                     </span>
                   ) : null}
@@ -1898,11 +1865,11 @@ export function GenjutsuGenerator({
                       <Check className="size-4" />
                     </span>
                   ) : null}
-                  <span className="absolute inset-x-2 bottom-2">
-                    <span className="block text-sm leading-tight font-semibold text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)]">
+                  <span className="absolute inset-x-1.5 bottom-1.5 lg:inset-x-2 lg:bottom-2">
+                    <span className="block text-[10px] leading-tight font-semibold text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)] lg:text-sm">
                       {template.name}
                     </span>
-                    <span className="block text-[11px] text-white/70">
+                    <span className="block text-[9px] text-white/70 lg:text-[11px]">
                       {Math.min(template.duration, durationTier)}s ·{' '}
                       {template.ratios}
                     </span>
@@ -1911,7 +1878,7 @@ export function GenjutsuGenerator({
               ))}
               <div
                 aria-hidden="true"
-                className="w-[calc(100%-14rem-1.5rem)] shrink-0 lg:w-[calc(100%-16rem-1.5rem)]"
+                className="w-[calc(100%-5rem-0.75rem)] shrink-0 lg:w-[calc(100%-16rem-1.5rem)]"
               />
             </div>
           </div>
