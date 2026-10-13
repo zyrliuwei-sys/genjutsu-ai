@@ -24,6 +24,27 @@ function ensureCloudflareEnv(): Promise<void> {
   return cfEnvPromise;
 }
 
+// First-touch traffic source, stored in the `utm_source` cookie and copied to
+// user.utm_source on sign-up: the utm_source param, else the external
+// referrer host (e.g. "google.com"), else "direct" for a page load with no
+// referrer. Same-site navigations and API calls (OAuth/checkout returns) are
+// skipped so they never claim the first touch.
+function firstTouchSource(req: Request): string {
+  const url = new URL(req.url);
+  const utm = url.searchParams.get('utm_source');
+  if (utm) return utm;
+  if (req.method !== 'GET' || url.pathname.startsWith('/api/')) return '';
+  if (!req.headers.get('accept')?.includes('text/html')) return '';
+  const referer = req.headers.get('referer');
+  if (!referer) return 'direct';
+  try {
+    const host = new URL(referer).hostname.replace(/^www\./, '');
+    return host && host !== url.hostname.replace(/^www\./, '') ? host : '';
+  } catch {
+    return '';
+  }
+}
+
 // Custom server entry — wraps every request in Paraglide's middleware so
 // getLocale() resolves per-request (AsyncLocalStorage) during SSR.
 export default {
@@ -69,12 +90,12 @@ export default {
         'same-origin-allow-popups'
       );
     }
-    const utmSource = new URL(req.url).searchParams.get('utm_source');
     const existing = getCookieFromHeader(
       req.headers.get('cookie'),
       'utm_source'
     );
-    if (utmSource && !existing) {
+    const utmSource = existing ? '' : firstTouchSource(req);
+    if (utmSource) {
       const sanitized = utmSource.replace(/[^\w.\-]/g, '').slice(0, 100);
       if (sanitized) {
         response.headers.append(

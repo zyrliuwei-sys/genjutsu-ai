@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { getAuth } from '@/core/auth';
 import { isFunnelEvent, recordFunnelEvent } from '@/modules/funnel/service';
+import { getCookieFromHeader } from '@/lib/cookie';
 import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respErr, respOk } from '@/lib/resp';
 
@@ -14,6 +15,18 @@ function cleanProps(value: unknown): Props | undefined {
     if (['string', 'number', 'boolean'].includes(typeof v))
       props[key.slice(0, 40)] = typeof v === 'string' ? v.slice(0, 100) : v;
   }
+  return props;
+}
+
+// Server-side attribution on every event, so anonymous drop-off can be split
+// by source and country: `src` is the first-touch cookie set in server.ts,
+// `country` the edge-provided cf-ipcountry header.
+function trafficProps(request: Request): Props {
+  const props: Props = {};
+  const src = getCookieFromHeader(request.headers.get('cookie'), 'utm_source');
+  if (src) props.src = src.replace(/[^\w.\-]/g, '').slice(0, 100);
+  const country = request.headers.get('cf-ipcountry');
+  if (country) props.country = country.slice(0, 8);
   return props;
 }
 
@@ -39,7 +52,7 @@ async function POST({ request }: { request: Request }) {
       anonId,
       userId: session?.user?.id,
       path: typeof body.path === 'string' ? body.path : '',
-      props: cleanProps(body.props),
+      props: { ...cleanProps(body.props), ...trafficProps(request) },
     });
     return respOk();
   } catch {
