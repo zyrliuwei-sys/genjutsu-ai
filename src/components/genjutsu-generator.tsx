@@ -170,8 +170,7 @@ const TEMPLATES: Template[] = [
 
 // Preselected effect; the list order is display order only.
 const DEFAULT_TEMPLATE =
-  TEMPLATES.find((template) => template.id === 'sketch-glow-up') ??
-  TEMPLATES[0];
+  TEMPLATES.find((template) => template.id === 'street-runway') ?? TEMPLATES[0];
 
 const isDone = (task?: GenjutsuTask) =>
   task?.status === 'success' ||
