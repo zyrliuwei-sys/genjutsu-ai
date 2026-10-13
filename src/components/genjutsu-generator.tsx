@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  AlertTriangle,
   Check,
   ChevronDown,
   Download,
@@ -400,6 +401,12 @@ export function GenjutsuGenerator({
     remainingGenerations: (count: number) => string;
     generationRules: string;
     contentPolicy: string;
+    generationBusy: string;
+    generationFailed: string;
+    /** Shown under Generate until the first purchase, so the price is no surprise. */
+    firstPrice: string;
+    failedTitle: string;
+    retry: string;
     referenceDisclaimer: string;
     removeReference: string;
     removePhoto: string;
@@ -453,6 +460,19 @@ export function GenjutsuGenerator({
   const [previewMode, setPreviewMode] = useState<'example' | 'work'>('example');
   const [muted, setMuted] = useState(true);
   const [paywall, setPaywall] = useState(false);
+  // Last generation failure, kept on the preview until dismissed or retried
+  // (a toast alone vanished before customers read why or that they were refunded).
+  const [failure, setFailure] = useState<{
+    message: string;
+    retryable: boolean;
+  }>();
+  const showFailure = (error?: string | null) => {
+    setFailure({
+      message: failureMessage(error),
+      retryable: error !== 'Content policy violation',
+    });
+    revealResult();
+  };
   // Phones only: length, size and own-video upload sit behind a toggle.
   const [moreOpen, setMoreOpen] = useState(false);
   // Blob URL of a reference video being read/trimmed (drives the overlay).
@@ -1220,20 +1240,32 @@ export function GenjutsuGenerator({
       if (error.message === 'Insufficient credits') {
         track('paywall_shown', { reason: 'low_balance' });
         setPaywall(true);
-      } else toast.error(error.message);
+      } else {
+        track('generate_error', { stage: 'submit', error: error.message });
+        showFailure(error.message);
+      }
     },
   });
 
+  // The API reduces provider failures to these three messages (see
+  // publicTaskError); anything else is one of our own readable errors.
   const failureMessage = (error?: string | null) =>
-    error?.startsWith('Content policy violation')
+    error === 'Content policy violation'
       ? copy.contentPolicy
-      : error || 'Generation failed';
+      : error === 'Service busy'
+        ? copy.generationBusy
+        : !error || error === 'Generation failed'
+          ? copy.generationFailed
+          : error;
 
   useEffect(() => {
     if (!task || !isDone(task)) return;
     sessionStorage.removeItem(submissionStorageKey);
     queryClient.invalidateQueries({ queryKey: ['credits'] });
-    if (task.status === 'failed') toast.error(failureMessage(task.error));
+    if (task.status === 'failed') {
+      track('generate_failed', { kind: task.error || 'unknown' });
+      showFailure(task.error);
+    }
   }, [queryClient, task]);
 
   const running = generate.isPending || Boolean(taskId && !isDone(task));
@@ -1273,6 +1305,7 @@ export function GenjutsuGenerator({
     !validatingPhoto;
 
   async function startGeneration() {
+    setFailure(undefined);
     setSubmitting(true);
     setStartedAt(Date.now());
     revealResult();
@@ -1289,6 +1322,7 @@ export function GenjutsuGenerator({
       !referenceClosed &&
       (effectQuery.isFetching || effectQuery.isError || !effectQuery.data)
     ) {
+      track('generate_error', { stage: 'effect_loading' });
       toast.error('Wait for the selected reference video to load');
       return;
     }
@@ -1301,6 +1335,7 @@ export function GenjutsuGenerator({
     try {
       await persistDraft();
     } catch {
+      track('generate_error', { stage: 'draft' });
       toast.error('Could not save media for your return');
       return;
     } finally {
@@ -1314,6 +1349,7 @@ export function GenjutsuGenerator({
       return;
     }
     if (!assetIsReady(lead) || !assetIsReady(referenceVideo)) {
+      track('generate_error', { stage: 'assets' });
       toast.error('Upload a main character image and a reference video');
       return;
     }
@@ -1346,7 +1382,11 @@ export function GenjutsuGenerator({
       }
       generate.mutate();
     } catch (error) {
-      toast.error(
+      track('generate_error', {
+        stage: 'check',
+        error: error instanceof Error ? error.message : 'unknown',
+      });
+      showFailure(
         error instanceof Error ? error.message : copy.serviceUnavailable
       );
     } finally {
@@ -1693,6 +1733,17 @@ export function GenjutsuGenerator({
               )}
               Generate Now
             </button>
+            {/* 9 in 10 visitors who reached the paywall left without picking
+                a plan (Oct 2026) — state the price before they invest the
+                upload, not after. */}
+            {!creditsQuery.data?.hasPaidOrder && (
+              <p
+                data-testid="first-price"
+                className="text-muted-foreground text-center text-xs"
+              >
+                {copy.firstPrice}
+              </p>
+            )}
           </div>
         </section>
 
@@ -1814,6 +1865,7 @@ export function GenjutsuGenerator({
                   }
                   onClick={() => {
                     track('effect_select', { effect: template.id });
+                    setFailure(undefined);
                     setReferenceSource('effect');
                     setReferenceClosed(false);
                     if (
@@ -2106,6 +2158,43 @@ export function GenjutsuGenerator({
                   }
                   percent={trimProgress}
                 />
+              </div>
+            ) : failure ? (
+              <div
+                role="alert"
+                data-testid="generation-failure"
+                className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+              >
+                <button
+                  type="button"
+                  aria-label="Dismiss"
+                  onClick={() => setFailure(undefined)}
+                  className="absolute top-3 right-3 flex size-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+                >
+                  <X className="size-4" aria-hidden="true" />
+                </button>
+                <div className="flex w-full max-w-md flex-col items-center gap-3 text-center text-white">
+                  <span className="bg-destructive/20 text-destructive ring-destructive/50 flex size-12 items-center justify-center rounded-full ring-1">
+                    <AlertTriangle className="size-6" aria-hidden="true" />
+                  </span>
+                  <p className="text-base font-semibold sm:text-lg">
+                    {copy.failedTitle}
+                  </p>
+                  <p className="text-sm leading-relaxed text-white/80">
+                    {failure.message}
+                  </p>
+                  {failure.retryable && (
+                    <button
+                      type="button"
+                      disabled={generateDisabled}
+                      onClick={startGeneration}
+                      className="bg-primary text-primary-foreground mt-1 inline-flex h-10 items-center justify-center gap-1.5 rounded-xl px-5 text-sm font-semibold disabled:opacity-50"
+                    >
+                      <Sparkles className="size-4" aria-hidden="true" />
+                      {copy.retry}
+                    </button>
+                  )}
+                </div>
               </div>
             ) : generatingView ? (
               <div

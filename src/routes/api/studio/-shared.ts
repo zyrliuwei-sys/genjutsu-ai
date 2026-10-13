@@ -35,6 +35,22 @@ export function isStudioTask(task: any) {
   );
 }
 
+// Provider errors can carry internal details (our API key's remaining budget,
+// the account balance, task ids). Customers only ever get one of these stable
+// messages; the raw text stays in ai_task.task_result for admins.
+export function publicTaskError(error?: string | null) {
+  if (!error) return null;
+  if (/content policy|safety filter/i.test(error))
+    return 'Content policy violation';
+  if (
+    /busy|allocating resources|rate limit|too many requests|timed? ?out/i.test(
+      error
+    )
+  )
+    return 'Service busy';
+  return 'Generation failed';
+}
+
 export function taskView(task: any) {
   const result = parseJson<{
     video?: { url?: string };
@@ -55,7 +71,7 @@ export function taskView(task: any) {
     referenceName: options.referenceName,
     credits: Number(task.costCredits) || 0,
     url: result.video?.url ?? result.images?.[0]?.url ?? null,
-    error: result.error ?? null,
+    error: publicTaskError(result.error),
     archivePending: result.archivePending === true,
     createdAt: task.createdAt,
   };

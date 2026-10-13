@@ -20,6 +20,10 @@ export const FUNNEL_EVENTS = [
   'checkout_redirect',
   'checkout_failed',
   'generate_submitted',
+  // Generate click stopped by an error (props: stage, error).
+  'generate_error',
+  // Accepted task that the provider failed (props: kind).
+  'generate_failed',
 ] as const;
 
 export type FunnelEventName = (typeof FUNNEL_EVENTS)[number];

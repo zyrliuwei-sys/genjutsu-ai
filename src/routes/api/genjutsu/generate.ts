@@ -35,7 +35,7 @@ import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respData, respErr } from '@/lib/resp';
 import { verifyVideoReceipt } from '@/lib/video-receipt.server';
 
-import { taskView } from '../studio/-shared';
+import { publicTaskError, taskView } from '../studio/-shared';
 
 const MAX_PROMPT = 2000;
 
@@ -273,7 +273,9 @@ async function POST({ request }: { request: Request }) {
         status: AITaskStatus.FAILED,
         taskResult: { error: error?.message },
       });
-      throw error;
+      throw new Error(
+        publicTaskError(error?.message || 'Generation failed') ?? undefined
+      );
     }
 
     return respData(

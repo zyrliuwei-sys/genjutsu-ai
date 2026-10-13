@@ -2,6 +2,7 @@ import { and, desc, eq, gt, inArray, isNull, or } from 'drizzle-orm';
 
 import { ROLES, RoleStatus } from '@/core/auth/rbac';
 import { db } from '@/core/db';
+import { runD1AtomicBatch } from '@/core/db/d1';
 import {
   AlipayProvider,
   CreemProvider,
@@ -19,6 +20,7 @@ import {
   type PaymentEvent,
   type PaymentOrder,
 } from '@/core/payment/types';
+import { envConfigs } from '@/config';
 import {
   credit,
   order,
@@ -454,6 +456,62 @@ async function handleCheckoutSuccess(session: any, provider: string) {
       discountCode: paymentInfo?.discountCode || null,
       discountAmount: paymentInfo?.discountAmount || null,
     };
+
+    // The return-url callback and the provider webhook usually land within
+    // the same second. D1's `transaction` runs statements one by one, so both
+    // passed the "not paid yet" check above and granted the pack twice. One
+    // atomic batch now grants only while the order is still unpaid, then
+    // flips it — the second arrival finds it paid and writes nothing.
+    if (envConfigs.database_provider === 'd1' && !subscriptionInfo) {
+      const unpaid = and(
+        eq(order.id, existingOrder.id),
+        inArray(order.status, [OrderStatus.CREATED, OrderStatus.PENDING])
+      );
+      const queries: { toSQL(): { sql: string; params: unknown[] } }[] = [];
+      if (existingOrder.creditsAmount && existingOrder.creditsAmount > 0) {
+        const insert = db()
+          .insert(credit)
+          .values({
+            id: getUuid(),
+            userId: existingOrder.userId,
+            userEmail: existingOrder.userEmail || '',
+            orderNo: existingOrder.orderNo,
+            subscriptionNo: '',
+            transactionNo: getSnowId(),
+            transactionType: 'grant',
+            transactionScene: 'payment',
+            credits: existingOrder.creditsAmount,
+            remainingCredits: existingOrder.creditsAmount,
+            description: 'Grant credit',
+            expiresAt: calculateCreditExpirationTime({
+              creditsValidDays: existingOrder.creditsValidDays || 0,
+            }),
+            status: 'active',
+          })
+          .toSQL();
+        // INSERT ... VALUES (...) -> INSERT ... SELECT ... WHERE <order unpaid>
+        const guard = db()
+          .select({ id: order.id })
+          .from(order)
+          .where(unpaid)
+          .toSQL();
+        const at = insert.sql.lastIndexOf(' values (');
+        if (at < 0 || !insert.sql.endsWith(')'))
+          throw new Error('Unexpected credit insert SQL');
+        queries.push({
+          toSQL: () => ({
+            sql: `${insert.sql.slice(0, at)} select ${insert.sql.slice(
+              at + ' values ('.length,
+              -1
+            )} where exists (${guard.sql})`,
+            params: [...insert.params, ...guard.params],
+          }),
+        });
+      }
+      queries.push(db().update(order).set(orderUpdate).where(unpaid));
+      await runD1AtomicBatch(queries);
+      return;
+    }
 
     // Atomically update order + create subscription + grant credits
     await db().transaction(async (tx: any) => {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { pricingCatalog } from '@/config/pricing';
 import { m } from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
 import { GenjutsuGenerator as Generator } from '@/components/genjutsu-generator';
@@ -71,6 +72,13 @@ export function GenjutsuGenerator() {
               m['landing.generator.remaining_generations']({ count }),
             generationRules: m['landing.pricing.per_video'](),
             contentPolicy: m['landing.generator.content_policy'](),
+            generationBusy: m['landing.generator.generation_busy'](),
+            generationFailed: m['landing.generator.generation_failed'](),
+            failedTitle: m['landing.generator.failed_title'](),
+            retry: m['landing.generator.retry'](),
+            firstPrice: m['landing.generator.first_price']({
+              price: `$${(pricingCatalog.pack_first.priceInCents / 100).toFixed(2)}`,
+            }),
             referenceDisclaimer: m['landing.generator.reference_disclaimer'](),
             removeReference: m['landing.generator.remove_reference'](),
             removePhoto: m['landing.generator.remove_photo'](),
