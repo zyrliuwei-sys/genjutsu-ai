@@ -54,6 +54,21 @@ export default {
       'Permissions-Policy',
       'camera=(), microphone=(), geolocation=()'
     );
+    // Production-only: the dev server is embedded in the sandbox preview
+    // iframe, which frame-ancestors would block.
+    if (import.meta.env.PROD) {
+      response.headers.set(
+        'Strict-Transport-Security',
+        'max-age=31536000; includeSubDomains'
+      );
+      response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+      response.headers.set('Content-Security-Policy', "frame-ancestors 'self'");
+      // allow-popups keeps OAuth / checkout popups working.
+      response.headers.set(
+        'Cross-Origin-Opener-Policy',
+        'same-origin-allow-popups'
+      );
+    }
     const utmSource = new URL(req.url).searchParams.get('utm_source');
     const existing = getCookieFromHeader(
       req.headers.get('cookie'),

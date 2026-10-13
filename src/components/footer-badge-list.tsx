@@ -23,7 +23,7 @@ export function FooterBadgeList({ className }: { className?: string }) {
         rel="noopener noreferrer"
         aria-hidden={copy || undefined}
         tabIndex={copy ? -1 : undefined}
-        className="shrink-0 pr-4 opacity-70 transition-opacity hover:opacity-100"
+        className="mr-4 shrink-0 py-2 opacity-70 transition-opacity hover:opacity-100"
       >
         <img
           src={badge.src}

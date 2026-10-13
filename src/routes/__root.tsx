@@ -10,6 +10,7 @@ import {
   type ErrorComponentProps,
 } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
+import interTightLatin from '@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url';
 import { ThemeProvider } from 'next-themes';
 
 import { envConfigs } from '@/config';
@@ -23,7 +24,6 @@ import { GoogleOneTap } from '@/components/google-one-tap';
 import { SandboxPreviewBridge } from '@/components/sandbox-preview-bridge';
 import { Toaster } from '@/components/ui/sonner';
 
-import '@fontsource-variable/dm-sans';
 import '@fontsource-variable/inter-tight';
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource/instrument-serif/latin-400.css';
@@ -68,6 +68,14 @@ export const Route = createRootRoute({
       links: [
         { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
         { rel: 'apple-touch-icon', href: '/favicon.svg' },
+        // Body font: start downloading alongside the CSS instead of after it.
+        {
+          rel: 'preload',
+          href: interTightLatin,
+          as: 'font',
+          type: 'font/woff2',
+          crossOrigin: 'anonymous',
+        },
       ],
     };
   },

@@ -54,6 +54,7 @@ type Template = {
   id: string;
   name: string;
   image: string;
+  thumb: string;
   /** Reference clip id under /videos/effect-clips. */
   asset: string;
   duration: number;
@@ -100,7 +101,8 @@ const effect = (
 ): Template => ({
   id,
   name,
-  image: `/videos/effects/${asset}.jpg`,
+  image: `/videos/effects/${asset}.webp`,
+  thumb: `/videos/effects/${asset}-thumb.webp`,
   asset,
   duration,
   ratios,
@@ -681,9 +683,11 @@ export function GenjutsuGenerator({
   const example =
     TEMPLATES.find((template) => template.id === exampleId) ?? DEFAULT_TEMPLATE;
   const effectClip = `/videos/effect-clips/${selected.asset}-${durationTier}s.mp4`;
+  const effectQueryEnabled =
+    draftReady && !referenceClosed && referenceSource === 'effect';
   const effectQuery = useQuery({
     queryKey: ['effect-clip', effectClip],
-    enabled: draftReady && !referenceClosed && referenceSource === 'effect',
+    enabled: effectQueryEnabled,
     staleTime: Infinity,
     retry: 1,
     queryFn: async ({ signal }) => {
@@ -731,6 +735,17 @@ export function GenjutsuGenerator({
     referenceClosed,
     referenceSource,
   ]);
+  // The clip is fetched once (above) as the generation input; both previews
+  // play that same blob instead of each re-downloading the mp4. During SSR /
+  // draft restore and while the fetch is pending they show the poster; if the
+  // fetch is off or failed, fall back to streaming the static URL.
+  const effectPreviewSrc = !draftReady
+    ? undefined
+    : effectQueryEnabled && !effectQuery.isError
+      ? effectQuery.data
+        ? referenceVideo?.preview
+        : undefined
+      : effectClip;
   const readinessQuery = useQuery({
     queryKey: ['genjutsu-readiness'],
     queryFn: () => apiGet<GenjutsuReadiness>('/api/genjutsu/generate'),
@@ -1354,7 +1369,7 @@ export function GenjutsuGenerator({
                 </span>
               ) : (
                 <img
-                  src={selected.image}
+                  src={selected.thumb}
                   alt=""
                   className="aspect-[3/4] w-12 shrink-0 rounded-lg object-cover"
                 />
@@ -1453,9 +1468,9 @@ export function GenjutsuGenerator({
                   </div>
                 ) : referenceSource === 'effect' ? (
                   <video
-                    key={effectClip}
+                    key={effectPreviewSrc ?? effectClip}
                     data-testid="selected-reference-preview"
-                    src={effectClip}
+                    src={effectPreviewSrc}
                     poster={selected.image}
                     preload="metadata"
                     autoPlay
@@ -1626,7 +1641,7 @@ export function GenjutsuGenerator({
               <label
                 htmlFor={referenceInputId}
                 data-testid="template-own-video"
-                aria-pressed={referenceSource === 'upload' && !ownVideo}
+                data-selected={referenceSource === 'upload' && !ownVideo}
                 onClick={() => track('effect_select', { effect: 'own_video' })}
                 className={cn(
                   'border-border bg-muted hover:border-primary/70 relative flex aspect-[3/4] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-2 text-center ring-2 transition-colors lg:w-32',
@@ -1724,9 +1739,10 @@ export function GenjutsuGenerator({
                   }}
                 >
                   <img
-                    src={template.image}
+                    src={template.thumb}
                     alt={`${template.name} template`}
                     loading="lazy"
+                    decoding="async"
                     className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <span className="absolute inset-0 bg-gradient-to-t from-neutral-950/90 via-neutral-700/50 to-neutral-400/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -1800,6 +1816,8 @@ export function GenjutsuGenerator({
               src={example.image}
               alt=""
               aria-hidden="true"
+              // LCP element on mobile: fetch it ahead of other images.
+              fetchPriority="high"
               className="absolute inset-0 size-full scale-110 object-cover opacity-50 blur-2xl"
             />
             {showWork ? (
@@ -1854,13 +1872,13 @@ export function GenjutsuGenerator({
                 key={
                   referenceSource === 'upload'
                     ? referenceVideo?.preview
-                    : effectClip
+                    : (effectPreviewSrc ?? effectClip)
                 }
                 data-testid="reference-video"
                 src={
                   referenceSource === 'upload'
                     ? referenceVideo?.preview
-                    : effectClip
+                    : effectPreviewSrc
                 }
                 poster={
                   referenceSource === 'upload' ? undefined : example.image

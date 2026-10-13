@@ -32,6 +32,21 @@ export function BeforeAfterVideo({
   const afterRef = useRef<HTMLVideoElement>(null);
   const [position, setPosition] = useState(50);
   const [load, setLoad] = useState(false);
+  const [near, setNear] = useState(false);
+
+  // Defer the posters until the slider approaches the viewport.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || near) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) setNear(true);
+      },
+      { rootMargin: '600px' }
+    );
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, [near]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -85,7 +100,7 @@ export function BeforeAfterVideo({
       <video
         ref={afterRef}
         src={load ? after.src : undefined}
-        poster={after.poster}
+        poster={near || load ? after.poster : undefined}
         aria-label={labels.after}
         onTimeUpdate={sync}
         {...videoProps}
@@ -93,7 +108,7 @@ export function BeforeAfterVideo({
       <video
         ref={beforeRef}
         src={load ? before.src : undefined}
-        poster={before.poster}
+        poster={near || load ? before.poster : undefined}
         aria-label={labels.before}
         style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
         {...videoProps}

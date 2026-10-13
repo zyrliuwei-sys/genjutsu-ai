@@ -56,6 +56,15 @@ export const Route = createFileRoute('/')({
           href: urlFor(loc),
         })),
         { rel: 'alternate', hrefLang: 'x-default', href: urlFor('en') },
+        // Mobile LCP: the generator's backdrop for the default Street Runway
+        // effect (DEFAULT_TEMPLATE in genjutsu-generator.tsx).
+        {
+          rel: 'preload',
+          href: '/videos/effects/runway.webp',
+          as: 'image',
+          type: 'image/webp',
+          fetchPriority: 'high',
+        },
       ],
       scripts: [
         {

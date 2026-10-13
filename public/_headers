@@ -1,8 +1,11 @@
-/videos/effect-clips/*
-  Cache-Control: public, max-age=86400
+# Media files keep stable names, so cache them for 30 days and let the edge
+# revalidate in the background. Rename a file when its content must change
+# immediately for returning visitors.
+/videos/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
 
-/videos/higgsfield-reference/*
-  Cache-Control: public, max-age=86400
+/imgs/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
 
 /vendor/ffmpeg/core-0.12.10.wasm.gz
   Content-Type: application/octet-stream

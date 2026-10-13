@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { getAuthClient, useSession } from '@/core/auth/client';
 import { usePathname } from '@/core/i18n/navigation';
+import { afterFirstPaint } from '@/lib/after-first-paint';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { usePublicConfig } from '@/hooks/use-public-config';
 
@@ -36,21 +37,25 @@ export function GoogleOneTap() {
       return;
     }
 
-    triggered.current = true;
-    const client = getAuthClient(configs);
-    (client as any)
-      .oneTap?.({
-        // Stay put: One Tap fires on whatever page the visitor is reading.
-        callbackURL: currentPathWithQuery('/'),
-        onPromptNotification: () => {
-          // Silently ignore dismissals / FedCM hiccups — the user can still
-          // sign in via the normal /sign-in page.
-        },
-      })
-      .catch(() => {
-        // Same — One Tap cancellations throw NetworkError/AbortError that
-        // aren't actionable.
-      });
+    // Google's ~100 KiB GSI client is fetched by oneTap(); wait for the first
+    // interaction or idle time so it never competes with the page's LCP.
+    return afterFirstPaint(() => {
+      triggered.current = true;
+      const client = getAuthClient(configs);
+      (client as any)
+        .oneTap?.({
+          // Stay put: One Tap fires on whatever page the visitor is reading.
+          callbackURL: currentPathWithQuery('/'),
+          onPromptNotification: () => {
+            // Silently ignore dismissals / FedCM hiccups — the user can still
+            // sign in via the normal /sign-in page.
+          },
+        })
+        .catch(() => {
+          // Same — One Tap cancellations throw NetworkError/AbortError that
+          // aren't actionable.
+        });
+    });
   }, [configs, session, isPending, allowed]);
 
   return null;
