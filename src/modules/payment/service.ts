@@ -67,7 +67,11 @@ export async function hasPaidOrder(userId: string): Promise<boolean> {
     )
     .limit(1);
   if (admin.length > 0) return true;
+  return hasPaidPurchase(userId);
+}
 
+/** A real paid order, ignoring the admin exemption above. */
+export async function hasPaidPurchase(userId: string): Promise<boolean> {
   const rows = await db()
     .select({ id: order.id })
     .from(order)

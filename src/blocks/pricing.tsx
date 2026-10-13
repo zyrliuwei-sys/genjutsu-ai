@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
   Film,
@@ -15,7 +15,7 @@ import { useSession } from '@/core/auth/client';
 import { Link, useRouter } from '@/core/i18n/navigation';
 import { GENJUTSU_CREDITS, genjutsuCredits } from '@/config/genjutsu';
 import { pricingCatalog, type PricingProduct } from '@/config/pricing';
-import { apiPost } from '@/lib/api-client';
+import { apiGet, apiPost } from '@/lib/api-client';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { track } from '@/lib/track';
 import { cn } from '@/lib/utils';
@@ -69,6 +69,15 @@ export function Pricing({
 } = {}) {
   const router = useRouter();
   const { data: session } = useSession();
+  // Shares the generators' cache; signed-out visitors are first-time buyers.
+  const creditsQuery = useQuery({
+    queryKey: ['credits'],
+    queryFn: () =>
+      apiGet<{ balance: number; hasPaidOrder: boolean }>('/api/credits'),
+    enabled: Boolean(session?.user),
+  });
+  const firstOrder =
+    !session?.user || creditsQuery.data?.hasPaidOrder === false;
 
   const { data: configsData, refetch: refetchConfigs } = usePublicConfig();
   const configs = configsData ?? {};
@@ -152,7 +161,13 @@ export function Pricing({
       key: 'one-time',
       label: m['landing.pricing.one_time'](),
       plans: [
-        plan('pack_starter', m['landing.pricing.pack_starter']()),
+        firstOrder
+          ? {
+              ...plan('pack_first', m['landing.pricing.pack_first']()),
+              originalPrice: usd(pricingCatalog.pack_starter.priceInCents),
+              badge: m['landing.pricing.first_order_badge'](),
+            }
+          : plan('pack_starter', m['landing.pricing.pack_starter']()),
         plan('pack_plus', m['landing.pricing.pack_plus'](), true),
         plan('pack_pro', m['landing.pricing.pack_pro']()),
       ],

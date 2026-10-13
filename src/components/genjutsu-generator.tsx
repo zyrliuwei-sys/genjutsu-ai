@@ -109,6 +109,8 @@ const effect = (
 });
 
 const TEMPLATES: Template[] = [
+  effect('red-room-glamour', 'Red Room Glamour', 'glamour', 4, '16:9', 'New'),
+  effect('colonial-stroll', 'Colonial Stroll', 'colonial', 10, '16:9', 'New'),
   effect('sunlit-laundry', 'Sunlit Laundry', 'laundry', 8, '16:9', 'New'),
   effect(
     'holiday-homecoming',
@@ -127,13 +129,43 @@ const TEMPLATES: Template[] = [
     'New'
   ),
   effect('cosmic-dive', 'Cosmic Dive', 'cosmic', 10, '16:9', 'New'),
-  effect('sketch-glow-up', 'Sketch Glow-Up', 'glowup', 9, '9:16', 'Trending'),
-  effect('fire-skirt-spin', 'Fire Skirt Spin', 'fire-skirt', 9, '9:16', 'New'),
-  effect('red-suit-groove', 'Red Suit Groove', 'groove', 10, '9:16', 'New'),
   effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
   effect('moonlit-walk', 'Moonlit Walk', 'moonwalk', 5, '16:9', 'New'),
   effect('chess-float', 'Chess Float', 'chess', 3, '16:9', 'New'),
   effect('mural-style-shift', 'Mural Style Shift', 'mural', 4, '16:9', 'New'),
+  effect(
+    'salt-flat-astronaut',
+    'Salt Flat Astronaut',
+    'saltflat',
+    5,
+    '9:16',
+    'New'
+  ),
+  effect('origami-lookbook', 'Origami Lookbook', 'origami', 6, '9:16', 'New'),
+  effect(
+    'tennis-ball-picnic',
+    'Tennis Ball Picnic',
+    'tennis',
+    6,
+    '9:16',
+    'New'
+  ),
+  effect('desert-boardroom', 'Desert Boardroom', 'desert', 6, '9:16', 'New'),
+  effect(
+    'pinstripe-portrait',
+    'Pinstripe Portrait',
+    'pinstripe',
+    4,
+    '9:16',
+    'New'
+  ),
+  effect('corduroy-lounge', 'Corduroy Lounge', 'corduroy', 6, '9:16', 'New'),
+  effect('color-block-duo', 'Color Block Duo', 'colorblock', 6, '9:16', 'New'),
+  effect('pastel-picnic', 'Pastel Picnic', 'pastel', 6, '9:16', 'New'),
+  effect('cloud-lounge', 'Cloud Lounge', 'clouds', 6, '9:16', 'New'),
+  effect('sketch-glow-up', 'Sketch Glow-Up', 'glowup', 9, '9:16', 'Trending'),
+  effect('fire-skirt-spin', 'Fire Skirt Spin', 'fire-skirt', 9, '9:16', 'New'),
+  effect('red-suit-groove', 'Red Suit Groove', 'groove', 10, '9:16', 'New'),
   effect('rail-ollie', 'Rail Ollie', 'skate', 10, '9:16', 'New'),
 ];
 

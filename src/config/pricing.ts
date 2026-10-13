@@ -34,6 +34,8 @@ export type PricingProduct = {
   available?: boolean;
   /** Part of `credits` given on top of the 1 credit = $0.01 base (display). */
   bonusCredits?: number;
+  /** Only purchasable by accounts without a paid order (checkout enforces). */
+  firstOrderOnly?: boolean;
   creditsValidDays?: number;
   plan?: PricingPlanInfo;
 };
@@ -54,6 +56,19 @@ export type PricingProduct = {
  * so existing subscriptions keep resolving.
  */
 export const pricingCatalog: Record<string, PricingProduct> = {
+  // First-order entry price: one 10s video at ~$1.20 provider cost.
+  pack_first: {
+    productId: 'pack_first',
+    productName: 'First Video',
+    planName: 'First Video',
+    description: '$4.90 for one 10-second video, first order only',
+    type: PaymentType.ONE_TIME,
+    priceInCents: 490,
+    currency: 'usd',
+    credits: 990,
+    bonusCredits: 500,
+    firstOrderOnly: true,
+  },
   pack_starter: {
     productId: 'pack_starter',
     productName: 'Trial Pack',

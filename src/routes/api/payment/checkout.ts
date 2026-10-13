@@ -4,7 +4,7 @@ import { getAuth } from '@/core/auth';
 import { PaymentType } from '@/core/payment/types';
 import { getPricingProduct } from '@/config/pricing';
 import { getAllConfigs } from '@/modules/config/service';
-import { createCheckout } from '@/modules/payment/service';
+import { createCheckout, hasPaidPurchase } from '@/modules/payment/service';
 import { hasPermission } from '@/modules/rbac/service';
 import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respData, respErr } from '@/lib/resp';
@@ -58,6 +58,10 @@ async function POST({ request }: { request: Request }) {
       return respErr(
         'Monthly subscriptions are not currently available. Please choose a one-time credit pack.'
       );
+    }
+
+    if (product.firstOrderOnly && (await hasPaidPurchase(session.user.id))) {
+      return respErr('This offer is for your first order only');
     }
 
     // Optional per-provider "test amount" override (admin-configured).

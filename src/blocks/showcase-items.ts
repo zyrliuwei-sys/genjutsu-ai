@@ -143,6 +143,94 @@ export const SHOWCASE_ITEMS: ShowcaseItem[] = [
     prompt:
       'A young man puts on a glowing VR visor and launches through deep space, over a blocky green world, then dives toward a planet at high speed, sci-fi journey',
   },
+  {
+    key: 'glamour',
+    image: '/videos/showcase/glamour.webp',
+    video: '/videos/showcase/glamour.mp4',
+    kind: 'video',
+    prompt:
+      'A blonde woman in a wide-brim black hat, strapless black dress and long gloves poses against a red studio wall, slow tilt of the head, glamour fashion film',
+  },
+  {
+    key: 'colonial',
+    image: '/videos/showcase/colonial.webp',
+    video: '/videos/showcase/colonial.mp4',
+    kind: 'video',
+    prompt:
+      'A man in an 18th-century dark frock coat and white cravat walks through a pine forest clearing toward the camera and kneels, period drama',
+  },
+  {
+    key: 'saltflat',
+    image: '/videos/showcase/saltflat.webp',
+    video: '/videos/showcase/saltflat.mp4',
+    kind: 'video',
+    prompt:
+      'A blonde woman in a white sleeveless spacesuit holds a helmet under her arm on white salt flats, a giant planet hangs in the blue sky, hair blowing, sci-fi fashion',
+  },
+  {
+    key: 'origami',
+    image: '/videos/showcase/origami.webp',
+    video: '/videos/showcase/origami.mp4',
+    kind: 'video',
+    prompt:
+      'Models in color-block tailoring pose in front of yellow and blue walls around a giant paper origami crane, editorial fashion film',
+  },
+  {
+    key: 'tennis',
+    image: '/videos/showcase/tennis.webp',
+    video: '/videos/showcase/tennis.mp4',
+    kind: 'video',
+    prompt:
+      'A couple in tweed and knitwear sit on a picnic blanket on a grassy hill as hundreds of tennis balls rain down around them, surreal fashion film',
+  },
+  {
+    key: 'desert',
+    image: '/videos/showcase/desert.webp',
+    video: '/videos/showcase/desert.mp4',
+    kind: 'video',
+    prompt:
+      'Three people in pastel suits sit on office chairs in the middle of tire-tracked desert dunes under a clear blue sky, editorial fashion film',
+  },
+  {
+    key: 'pinstripe',
+    image: '/videos/showcase/pinstripe.webp',
+    video: '/videos/showcase/pinstripe.mp4',
+    kind: 'video',
+    prompt:
+      'A model in a navy pinstripe suit, white shirt and knit tie poses against a bright orange studio backdrop, slow push-in, tailoring ad',
+  },
+  {
+    key: 'corduroy',
+    image: '/videos/showcase/corduroy.webp',
+    video: '/videos/showcase/corduroy.mp4',
+    kind: 'video',
+    prompt:
+      'A woman in an olive corduroy blazer and orange turtleneck sits on the floor leaning against a grey wall in a minimalist studio, soft light, fashion editorial',
+  },
+  {
+    key: 'colorblock',
+    image: '/videos/showcase/colorblock.webp',
+    video: '/videos/showcase/colorblock.mp4',
+    kind: 'video',
+    prompt:
+      'A man in an oversized navy suit leans sideways against a woman in a white sculptural dress in front of yellow and blue walls, playful fashion film',
+  },
+  {
+    key: 'pastel',
+    image: '/videos/showcase/pastel.webp',
+    video: '/videos/showcase/pastel.mp4',
+    kind: 'video',
+    prompt:
+      'A woman in a pink 1950s dress cuts cake on a sunny hillside while two men wave pastel silk cloths and giant fabrics float overhead, dreamy retro picnic',
+  },
+  {
+    key: 'clouds',
+    image: '/videos/showcase/clouds.webp',
+    video: '/videos/showcase/clouds.mp4',
+    kind: 'video',
+    prompt:
+      'People in beige linen lounge on armchairs made of clouds high above the earth, chatting and reading, slow aerial drift, dreamy surreal ad',
+  },
 ];
 
 export function createHref(item: Pick<ShowcaseItem, 'kind' | 'prompt'>) {

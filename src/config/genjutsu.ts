@@ -72,6 +72,61 @@ export const GENJUTSU_REFERENCES: Record<
     direction:
       'Preserve the jump from the bridge, the fall, the rope and the camera tracking downward.',
   },
+  'red-room-glamour': {
+    name: 'Red Room Glamour',
+    direction:
+      'Replace only the woman in the black hat; keep the red wall, the dress, the gloves, the pose and the static framing.',
+  },
+  'colonial-stroll': {
+    name: 'Colonial Stroll',
+    direction:
+      'Replace only the man in the frock coat; keep the pine forest, the campfire logs, his walk and kneel, and the camera framing.',
+  },
+  'salt-flat-astronaut': {
+    name: 'Salt Flat Astronaut',
+    direction:
+      'Replace only the woman in the white suit; keep the helmet, the salt flats, the giant planet and the static framing.',
+  },
+  'origami-lookbook': {
+    name: 'Origami Lookbook',
+    direction:
+      'Replace only the front-left model; keep the other models, the origami crane, the yellow and blue walls and the camera framing.',
+  },
+  'tennis-ball-picnic': {
+    name: 'Tennis Ball Picnic',
+    direction:
+      'Replace only the man in the tweed jacket; keep the woman, the picnic blanket, the falling tennis balls and the camera framing.',
+  },
+  'desert-boardroom': {
+    name: 'Desert Boardroom',
+    direction:
+      'Replace only the woman in the lavender suit in the middle; keep the other two, the office chairs, the dunes and the camera framing.',
+  },
+  'pinstripe-portrait': {
+    name: 'Pinstripe Portrait',
+    direction:
+      'Replace only the model; keep the pinstripe suit, the tie, the orange backdrop and the camera move.',
+  },
+  'corduroy-lounge': {
+    name: 'Corduroy Lounge',
+    direction:
+      'Replace only the woman; keep the corduroy outfit, the grey studio, her seated pose and the camera framing.',
+  },
+  'color-block-duo': {
+    name: 'Color Block Duo',
+    direction:
+      'Replace only the man in the navy suit; keep the woman in white, the yellow and blue walls and the camera framing.',
+  },
+  'pastel-picnic': {
+    name: 'Pastel Picnic',
+    direction:
+      'Replace only the woman in the pink dress; keep the two men, the floating pastel fabrics, the hills and the camera framing.',
+  },
+  'cloud-lounge': {
+    name: 'Cloud Lounge',
+    direction:
+      'Replace only the man in the lower-left cloud chair; keep the other people, the cloud armchairs, the sky and the camera drift.',
+  },
   'sunlit-laundry': {
     name: 'Sunlit Laundry',
     direction:
@@ -117,6 +172,28 @@ export const GENJUTSU_DIRECTIONS: Record<string, string> = {
     'Replace the model using the supplied character image. Preserve the walk toward the camera, the striped shirt toss, the city street and the handheld follow shot. Natural daylight, realistic fabric motion, consistent face and wardrobe.',
   bungee:
     'Replace the jumper in the teal jacket using the supplied character image. Preserve the climb over the red steel bridge railing, the jump, the fall toward the turquoise river and the downward camera tracking. Photoreal scale and motion blur, consistent identity.',
+  glamour:
+    'Replace the woman in the wide-brim black hat using the supplied character image. Preserve the strapless black dress, the long black gloves, the hand-on-hip pose, the slow head tilt, the red studio wall and the static framing. Photoreal skin and fabric, consistent face, no flicker.',
+  colonial:
+    'Replace the man in the dark 18th-century frock coat using the supplied character image. Preserve his walk through the pine forest clearing, the kneel, the white cravat and costume, the campfire logs and the camera framing. Natural daylight, consistent face, no flicker.',
+  saltflat:
+    'Replace the woman in the white spacesuit using the supplied character image. Preserve the helmet under her arm, the glowing suit details, the windblown hair, the white salt flats, the giant planet in the sky and the static framing. Photoreal skin and fabric, consistent face.',
+  origami:
+    'Replace the model sitting at the front left using the supplied character image. Keep the other models, the giant origami crane, the color-block outfits, the yellow and blue walls, the window-light shadows and the camera framing. Photoreal, consistent face, no extra people.',
+  tennis:
+    'Replace the man in the tweed jacket using the supplied character image. Keep the woman beside him, the picnic blanket, the thermos and mugs, the tennis balls falling and bouncing across the hill, and the camera framing. Overcast daylight, consistent face, no flicker.',
+  desert:
+    'Replace the woman in the lavender suit sitting in the middle using the supplied character image. Keep the man in mint and the woman in yellow, the office chairs and briefcases, the tire-tracked dunes, the hard sunlight and the camera framing. Consistent face, no extra people.',
+  pinstripe:
+    'Replace the model in the navy pinstripe suit using the supplied character image. Preserve the white shirt, the knit tie, the pocket square, the bright orange backdrop, the pose and the slow camera move. Photoreal skin and fabric, consistent face.',
+  corduroy:
+    'Replace the woman in the olive corduroy blazer using the supplied character image. Preserve the orange turtleneck, the color-block jacket, the seated pose against the grey wall, the minimalist studio, the soft light and the camera framing. Consistent face, no flicker.',
+  colorblock:
+    'Replace the man in the oversized navy suit using the supplied character image. Keep his sideways lean, the woman in the white sculptural dress, the yellow and blue walls, the sunlit floor and the camera framing. Photoreal fabric, consistent face, no extra people.',
+  pastel:
+    'Replace the woman in the pink dress using the supplied character image. Keep the two men waving pastel cloths, the giant floating fabrics, the sun flare, the green hills and the camera framing. Retro styling, consistent face, no flicker.',
+  clouds:
+    'Replace the man lounging in the lower-left cloud armchair using the supplied character image. Keep the other people in beige linen, the cloud armchairs, the hazy landscape far below and the slow aerial camera drift. Consistent face, no extra people.',
   laundry:
     'Replace the woman in the red dress using the supplied character image. Preserve her hanging white shirts on the clothesline, the wooden laundry tub, the sunlit balcony plants, the rooftops behind and the static framing. Warm golden backlight, realistic fabric motion, consistent face.',
   homecoming:
