@@ -109,17 +109,38 @@ const effect = (
 });
 
 const TEMPLATES: Template[] = [
+  effect('sunlit-laundry', 'Sunlit Laundry', 'laundry', 8, '16:9', 'New'),
+  effect(
+    'holiday-homecoming',
+    'Holiday Homecoming',
+    'homecoming',
+    10,
+    '16:9',
+    'New'
+  ),
+  effect(
+    'shoreline-memory',
+    'Shoreline Memory',
+    'shoreline',
+    10,
+    '16:9',
+    'New'
+  ),
+  effect('cosmic-dive', 'Cosmic Dive', 'cosmic', 10, '16:9', 'New'),
   effect('sketch-glow-up', 'Sketch Glow-Up', 'glowup', 9, '9:16', 'Trending'),
   effect('fire-skirt-spin', 'Fire Skirt Spin', 'fire-skirt', 9, '9:16', 'New'),
-  effect('roller-rink', 'Roller Rink', 'rink', 10, '9:16', 'Trending'),
-  effect('street-strut', 'Street Strut', 'crew', 10, '9:16', 'Trending'),
   effect('red-suit-groove', 'Red Suit Groove', 'groove', 10, '9:16', 'New'),
   effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
-  effect('manhattan-meet', 'Manhattan Meet', 'manhattan', 10, '9:16', 'New'),
   effect('moonlit-walk', 'Moonlit Walk', 'moonwalk', 5, '16:9', 'New'),
   effect('chess-float', 'Chess Float', 'chess', 3, '16:9', 'New'),
+  effect('mural-style-shift', 'Mural Style Shift', 'mural', 4, '16:9', 'New'),
   effect('rail-ollie', 'Rail Ollie', 'skate', 10, '9:16', 'New'),
 ];
+
+// Preselected effect; the list order is display order only.
+const DEFAULT_TEMPLATE =
+  TEMPLATES.find((template) => template.id === 'sketch-glow-up') ??
+  TEMPLATES[0];
 
 const isDone = (task?: GenjutsuTask) =>
   task?.status === 'success' ||
@@ -369,8 +390,8 @@ export function GenjutsuGenerator({
   const queryClient = useQueryClient();
   const { data: session, isPending: sessionPending } = useSession();
   const user = session?.user;
-  const [selectedId, setSelectedId] = useState(TEMPLATES[0].id);
-  const [exampleId, setExampleId] = useState(TEMPLATES[0].id);
+  const [selectedId, setSelectedId] = useState(DEFAULT_TEMPLATE.id);
+  const [exampleId, setExampleId] = useState(DEFAULT_TEMPLATE.id);
   const [validatingMedia, setValidatingMedia] = useState(false);
   // Photos validate separately so they stay selectable while a video trims.
   const [validatingPhoto, setValidatingPhoto] = useState(false);
@@ -623,11 +644,12 @@ export function GenjutsuGenerator({
 
   const selected = useMemo(
     () =>
-      TEMPLATES.find((template) => template.id === selectedId) ?? TEMPLATES[0],
+      TEMPLATES.find((template) => template.id === selectedId) ??
+      DEFAULT_TEMPLATE,
     [selectedId]
   );
   const example =
-    TEMPLATES.find((template) => template.id === exampleId) ?? TEMPLATES[0];
+    TEMPLATES.find((template) => template.id === exampleId) ?? DEFAULT_TEMPLATE;
   const effectClip = `/videos/effect-clips/${selected.asset}-${durationTier}s.mp4`;
   const effectQuery = useQuery({
     queryKey: ['effect-clip', effectClip],

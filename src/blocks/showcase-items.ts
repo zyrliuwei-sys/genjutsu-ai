@@ -64,30 +64,6 @@ export const SHOWCASE_ITEMS: ShowcaseItem[] = [
       'A girl with pink hair clips sketches at a glossy table, flips the paper toward the camera and transforms into a platinum-blonde cover star climbing out of a magazine page, glow-up transition',
   },
   {
-    key: 'rink',
-    image: '/videos/showcase/rink.webp',
-    video: '/videos/showcase/rink.mp4',
-    kind: 'video',
-    prompt:
-      'A girl in a pink sweatshirt and jeans glides across a glossy roller rink under string lights and disco colors, hair flying, camera rolling alongside her, retro roller disco',
-  },
-  {
-    key: 'manhattan',
-    image: '/videos/showcase/manhattan.webp',
-    video: '/videos/showcase/manhattan.mp4',
-    kind: 'video',
-    prompt:
-      'A woman in a camel trench coat drops a stack of books on a snowy Manhattan street and a stranger stops to help, romantic film scene',
-  },
-  {
-    key: 'crew',
-    image: '/videos/showcase/crew.webp',
-    video: '/videos/showcase/crew.mp4',
-    kind: 'video',
-    prompt:
-      'Five friends in retro outfits strut and dance down a sunny city sidewalk toward the camera, tracking shot, comedy music video',
-  },
-  {
     key: 'moonwalk',
     image: '/videos/showcase/moonwalk.webp',
     video: '/videos/showcase/moonwalk.mp4',
@@ -102,6 +78,14 @@ export const SHOWCASE_ITEMS: ShowcaseItem[] = [
     kind: 'video',
     prompt:
       'A man in a pink pinstripe suit and headphones floats cross-legged above a flower meadow playing a beat pad, giant chess pieces drifting through a blue sky, low-angle orbit, surreal fashion film',
+  },
+  {
+    key: 'mural',
+    image: '/videos/showcase/mural.webp',
+    video: '/videos/showcase/mural.mp4',
+    kind: 'video',
+    prompt:
+      'A young man in a red beanie, glasses and an olive jacket dances in front of a giant painted mural, the art style flips every beat from anime to comic, crayon, Van Gogh and pixel art',
   },
   {
     key: 'runway',
@@ -126,6 +110,38 @@ export const SHOWCASE_ITEMS: ShowcaseItem[] = [
     kind: 'video',
     prompt:
       'A man in a red suit dances through a crowd in a moody blue hall, everyone moves around him, music video',
+  },
+  {
+    key: 'laundry',
+    image: '/videos/showcase/laundry.webp',
+    video: '/videos/showcase/laundry.mp4',
+    kind: 'video',
+    prompt:
+      'A woman in a red dress hangs white shirts on a sunlit balcony clothesline above old city rooftops, golden backlight, gentle breeze, lifestyle film',
+  },
+  {
+    key: 'homecoming',
+    image: '/videos/showcase/homecoming.webp',
+    video: '/videos/showcase/homecoming.mp4',
+    kind: 'video',
+    prompt:
+      'A man in a grey coat unlocks his apartment door, his dog and daughter rush to greet him, a woman smiles by the Christmas tree, warm holiday film',
+  },
+  {
+    key: 'shoreline',
+    image: '/videos/showcase/shoreline.webp',
+    video: '/videos/showcase/shoreline.mp4',
+    kind: 'video',
+    prompt:
+      'A barefoot woman in a white dress leaves footprints along a golden beach, aerial shots of turquoise waves, ending on a close-up by a lace curtain, art film',
+  },
+  {
+    key: 'cosmic',
+    image: '/videos/showcase/cosmic.webp',
+    video: '/videos/showcase/cosmic.mp4',
+    kind: 'video',
+    prompt:
+      'A young man puts on a glowing VR visor and launches through deep space, over a blocky green world, then dives toward a planet at high speed, sci-fi journey',
   },
 ];
 

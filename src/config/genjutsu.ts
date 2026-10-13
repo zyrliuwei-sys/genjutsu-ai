@@ -37,6 +37,11 @@ export const GENJUTSU_REFERENCES: Record<
     direction:
       'Replace only the astronaut; keep the slow walk away from the camera, the ripples, the giant moon, the mirror-still sea and the static framing.',
   },
+  'mural-style-shift': {
+    name: 'Mural Style Shift',
+    direction:
+      'Replace only the dancer; keep the choreography, the painted mural, the static framing and every art-style switch on the beat.',
+  },
   'chess-float': {
     name: 'Chess Float',
     direction:
@@ -52,16 +57,6 @@ export const GENJUTSU_REFERENCES: Record<
     direction:
       'Replace only the dancer; keep the skirt spins, floor work, sparks and camera framing unchanged.',
   },
-  'roller-rink': {
-    name: 'Roller Rink',
-    direction:
-      'Replace only the skater in the pink sweatshirt; keep the other skaters, the rink lights and the camera rolling alongside her.',
-  },
-  'street-strut': {
-    name: 'Street Strut',
-    direction:
-      'Replace only the front performer; keep the rest of the group, their dance steps and the tracking shot unchanged.',
-  },
   'red-suit-groove': {
     name: 'Red Suit Groove',
     direction:
@@ -72,15 +67,30 @@ export const GENJUTSU_REFERENCES: Record<
     direction:
       'Preserve the walk, the shirt toss and the handheld camera following the model.',
   },
-  'manhattan-meet': {
-    name: 'Manhattan Meet',
-    direction:
-      'Replace only the woman with the books; keep the stranger, the falling books, the snowy street and the edit rhythm.',
-  },
   'canyon-bungee': {
     name: 'Canyon Bungee',
     direction:
       'Preserve the jump from the bridge, the fall, the rope and the camera tracking downward.',
+  },
+  'sunlit-laundry': {
+    name: 'Sunlit Laundry',
+    direction:
+      'Replace only the woman in the red dress; keep the laundry, the clothesline, the sunlit balcony, the plants and the static framing.',
+  },
+  'holiday-homecoming': {
+    name: 'Holiday Homecoming',
+    direction:
+      'Replace only the man coming home; keep the keys, the door, the dog, the child, the woman by the Christmas tree and the edit rhythm.',
+  },
+  'shoreline-memory': {
+    name: 'Shoreline Memory',
+    direction:
+      'Replace only the woman; keep the chessboard, the footprints, the aerial beach shots, the window close-up and the edit rhythm.',
+  },
+  'cosmic-dive': {
+    name: 'Cosmic Dive',
+    direction:
+      'Replace only the man with the visor; keep the cockpit HUD, the flight through space, the blocky world and the dive toward the planet.',
   },
   'rail-ollie': {
     name: 'Rail Ollie',
@@ -93,22 +103,28 @@ export const GENJUTSU_REFERENCES: Record<
 export const GENJUTSU_DIRECTIONS: Record<string, string> = {
   moonwalk:
     'Replace the astronaut using the supplied character image, seen from behind. Preserve the slow walk away from the camera across the mirror-still water, the spreading ripples and reflection, the giant cracked moon, the distant lit platform, the pastel sunset sky and the static wide framing. Photoreal scale and lighting, consistent figure, no flicker.',
+  mural:
+    'Replace the dancer in the red beanie using the supplied character image. Preserve the choreography and hand gestures, the giant painted mural behind him, the static framing and the beat-synced switches between anime, comic, crayon, Van Gogh brushstroke and pixel-art styles, rendering the new character in each style. Consistent identity across styles, no extra limbs or flicker.',
   chess:
     'Replace the man in the pink pinstripe suit using the supplied character image. Preserve the cross-legged floating pose, the hands playing the beat pad, the headphones, the giant chess pieces drifting and standing in the flower meadow, the blue sky with clouds and the slow low-angle orbiting camera. Golden-hour light, realistic fabric, consistent face, no flicker.',
   glowup:
     'Replace the girl using the supplied character image in both looks. Preserve the sketching at the table, the paper flip toward the camera, the transition into the magazine-cover pose climbing out of the page, and the camera framing. Photoreal skin and hair, consistent face across the transformation, no extra limbs or flicker.',
   'fire-skirt':
     'Replace the solo dancer using the supplied character image. Preserve the exact skirt spins, handstand and floor work, the glowing spark trails, the empty studio and the camera framing. Photoreal skin and fabric, consistent face, no extra limbs or flicker.',
-  rink: 'Replace the skater in the pink sweatshirt using the supplied character image. Preserve her glide, turns and hair motion, the other skaters, the glossy rink floor, string lights and the tracking camera. Bright disco lighting, realistic skates and fabric, consistent face.',
-  crew: 'Replace the lead performer at the front of the group using the supplied character image. Keep the other four performers, their synchronized strut and dance moves, the sunny sidewalk and the backward tracking shot. Natural daylight, coherent occlusions, no extra people.',
   groove:
     'Replace the dancer in the red suit using the supplied character image. Preserve his choreography, the surrounding dancers and crowd, the moody blue hall and the camera framing. Photoreal fabric and skin, stable identity, no extra limbs or flicker.',
   runway:
     'Replace the model using the supplied character image. Preserve the walk toward the camera, the striped shirt toss, the city street and the handheld follow shot. Natural daylight, realistic fabric motion, consistent face and wardrobe.',
-  manhattan:
-    'Replace the woman in the camel trench coat using the supplied character image. Keep the falling books, the stranger who helps, the snowy Manhattan street and the original edit rhythm. Soft winter light, consistent identity across close-ups and wide shots.',
   bungee:
     'Replace the jumper in the teal jacket using the supplied character image. Preserve the climb over the red steel bridge railing, the jump, the fall toward the turquoise river and the downward camera tracking. Photoreal scale and motion blur, consistent identity.',
+  laundry:
+    'Replace the woman in the red dress using the supplied character image. Preserve her hanging white shirts on the clothesline, the wooden laundry tub, the sunlit balcony plants, the rooftops behind and the static framing. Warm golden backlight, realistic fabric motion, consistent face.',
+  homecoming:
+    'Replace the man in the grey coat and black scarf using the supplied character image. Preserve him unlocking the door, walking in, the dog and child greeting him, the woman by the Christmas tree and the original edit rhythm. Warm holiday lighting, consistent identity across close-ups and wide shots.',
+  shoreline:
+    'Replace the woman using the supplied character image. Preserve the chessboard opening, the barefoot walk leaving footprints in the sand, the aerial shoreline shots and the final close-up by the lace curtain. Soft golden light, consistent face and white dress.',
+  cosmic:
+    'Replace the young man putting on the glowing visor using the supplied character image. Preserve the green cockpit HUD, the jump into deep space, the flight over the blocky green world and the dive toward the planet, with the original camera motion. Consistent face, no flicker.',
   skate:
     'Replace the skater in the green jacket using the supplied character image. Preserve the push, the ollie over the metal rail, the landing, the kicked-up dust, the city skyline and the low-angle slow-motion camera. Golden-hour light, realistic board and fabric motion, consistent face.',
 };
