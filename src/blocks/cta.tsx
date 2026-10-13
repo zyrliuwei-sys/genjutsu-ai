@@ -6,7 +6,7 @@ import { Reveal } from '@/components/reveal';
 /** Closing frame: the Genjutsu STORM clip with the pitch set as its subtitle. */
 export function CTA() {
   return (
-    <section className="px-4 pb-24 sm:pb-32">
+    <section className="px-4 pb-6 sm:pb-32">
       <Reveal className="mx-auto max-w-7xl">
         <div className="eg-screen relative overflow-hidden rounded-lg">
           <LoopVideo

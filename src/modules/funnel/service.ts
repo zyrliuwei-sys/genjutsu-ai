@@ -14,6 +14,7 @@ export const FUNNEL_EVENTS = [
   'signin_redirect',
   'signin_resume',
   'paywall_shown',
+  'paywall_closed',
   'plan_click',
   'provider_modal_shown',
   'provider_selected',

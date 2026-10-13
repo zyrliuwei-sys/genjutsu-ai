@@ -45,7 +45,7 @@ export function Hero() {
   useExitTracking();
 
   return (
-    <section className="relative overflow-hidden px-4 pt-10 pb-20 sm:pt-14 lg:pt-16 lg:pb-28">
+    <section className="relative overflow-hidden px-4 pt-10 pb-6 sm:pt-14 sm:pb-20 lg:pt-16 lg:pb-28">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-7xl text-center">
           <p className="text-primary-text inline-flex items-center gap-2.5 text-xs font-medium tracking-[0.12em] uppercase">

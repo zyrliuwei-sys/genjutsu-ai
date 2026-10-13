@@ -43,7 +43,7 @@ export function Features() {
   return (
     <section
       id="tools"
-      className="border-border scroll-mt-20 border-t px-4 pt-24 pb-12 sm:py-32"
+      className="border-border scroll-mt-20 px-4 pt-6 pb-12 sm:border-t sm:py-32"
     >
       <div className="mx-auto max-w-7xl">
         <Reveal className="grid gap-6 lg:grid-cols-2 lg:items-end">

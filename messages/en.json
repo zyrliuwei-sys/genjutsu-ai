@@ -1182,5 +1182,10 @@
   "landing.faq.credits.answer_short": "Each pack covers a set number of videos. Failed generations are refunded automatically.",
   "landing.faq.commercial.answer_short": "Yes, within our Terms of Service.",
   "landing.faq.higgsfield.answer_short": "No. Genjutsu AI is an independent studio, not affiliated with Higgsfield.",
-  "landing.pricing.failure_policy_short": "Failed generations are refunded automatically."
+  "landing.pricing.failure_policy_short": "Failed generations are refunded automatically.",
+  "landing.generator.paywall_title": "Your video is ready to render",
+  "landing.generator.paywall_first": "Your photo and clip are saved. Make your first video for {price} — one-time payment, no subscription.",
+  "landing.generator.paywall_top_up": "Your photo and clip are saved. Top up your balance to render this video.",
+  "landing.generator.your_video": "Your video",
+  "landing.pricing.paywall_trust": "Secure checkout · One-time payment, no subscription · Failed generations are refunded automatically"
 }

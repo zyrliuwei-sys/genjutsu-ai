@@ -35,7 +35,7 @@ export function FAQ() {
   return (
     <section
       id="faq"
-      className="border-border scroll-mt-20 border-t px-4 py-24 sm:py-32"
+      className="border-border scroll-mt-20 px-4 pt-6 pb-24 sm:border-t sm:py-32"
     >
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
         <div className="lg:sticky lg:top-28 lg:self-start">

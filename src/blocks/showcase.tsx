@@ -13,7 +13,7 @@ export function Showcase() {
   return (
     <section
       id="ideas"
-      className="scroll-mt-20 overflow-hidden pt-12 pb-24 sm:py-32"
+      className="scroll-mt-20 overflow-hidden pt-12 pb-6 sm:py-32"
     >
       <Reveal className="mx-auto mb-12 flex max-w-7xl flex-wrap items-end justify-between gap-6 px-4">
         <div>

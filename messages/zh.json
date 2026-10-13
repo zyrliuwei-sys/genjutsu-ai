@@ -1182,5 +1182,10 @@
   "landing.faq.credits.answer_short": "每个套餐对应固定数量的视频，生成失败自动退回。",
   "landing.faq.commercial.answer_short": "可以，需遵守我们的服务条款。",
   "landing.faq.higgsfield.answer_short": "不是。Genjutsu AI 是独立的创作工具，与 Higgsfield 无关联。",
-  "landing.pricing.failure_policy_short": "生成失败自动退回。"
+  "landing.pricing.failure_policy_short": "生成失败自动退回。",
+  "landing.generator.paywall_title": "你的视频已准备好生成",
+  "landing.generator.paywall_first": "照片和视频已保存。首个视频只需 {price}，一次性付费，无订阅。",
+  "landing.generator.paywall_top_up": "照片和视频已保存。充值余额即可生成这个视频。",
+  "landing.generator.your_video": "你的视频",
+  "landing.pricing.paywall_trust": "安全支付 · 一次性付费，无订阅 · 生成失败自动退回"
 }

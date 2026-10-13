@@ -2,11 +2,13 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
+  ArrowRight,
   Check,
   ChevronDown,
   Download,
   ImageIcon,
   Loader2,
+  Plus,
   Sparkles,
   Upload,
   Video,
@@ -406,6 +408,10 @@ export function GenjutsuGenerator({
     /** Shown under Generate until the first purchase, so the price is no surprise. */
     firstPrice: string;
     failedTitle: string;
+    paywallTitle: string;
+    paywallFirst: string;
+    paywallTopUp: string;
+    yourVideo: string;
     retry: string;
     referenceDisclaimer: string;
     removeReference: string;
@@ -1513,7 +1519,7 @@ export function GenjutsuGenerator({
               </div>
               <div
                 data-testid="selected-reference-video"
-                className="border-border bg-muted hover:border-primary/70 relative aspect-[4/3] overflow-hidden rounded-xl border border-dashed transition-colors lg:hidden"
+                className="border-border bg-muted hover:border-primary/70 relative aspect-[2/1] overflow-hidden rounded-xl border border-dashed transition-colors sm:aspect-[4/3] lg:hidden"
               >
                 <input
                   id={referenceInputId}
@@ -1616,7 +1622,7 @@ export function GenjutsuGenerator({
               removeLabel={copy.removePhoto}
               testId="upload-lead"
               rootClassName="lg:min-h-0 lg:flex-1"
-              frameClassName="aspect-[4/3] lg:aspect-auto lg:min-h-48 lg:flex-1"
+              frameClassName="aspect-[2/1] sm:aspect-[4/3] lg:aspect-auto lg:min-h-48 lg:flex-1"
             />
           </div>
 
@@ -2225,7 +2231,13 @@ export function GenjutsuGenerator({
         </div>
       )}
 
-      <Dialog open={paywall} onOpenChange={setPaywall}>
+      <Dialog
+        open={paywall}
+        onOpenChange={(open) => {
+          if (!open) track('paywall_closed');
+          setPaywall(open);
+        }}
+      >
         <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5 sm:max-w-[60rem] sm:p-8">
           <Pricing
             variant="dialog"
@@ -2237,6 +2249,49 @@ export function GenjutsuGenerator({
             }}
             clipSeconds={referenceVideo?.duration || durationTier}
             balanceCredits={creditsQuery.data?.balance || 0}
+            title={copy.paywallTitle}
+            description={
+              creditsQuery.data?.hasPaidOrder
+                ? copy.paywallTopUp
+                : copy.paywallFirst
+            }
+            summary={
+              // The visitor's own inputs: what they already invested, and
+              // what the purchase turns into.
+              <div
+                aria-hidden="true"
+                className="mb-4 flex items-center justify-center gap-2 sm:gap-3"
+              >
+                {lead?.preview ? (
+                  <img
+                    src={lead.preview}
+                    alt=""
+                    className="size-14 rounded-xl object-cover sm:size-16"
+                  />
+                ) : null}
+                <Plus className="text-muted-foreground size-4 shrink-0" />
+                {referenceSource === 'effect' ? (
+                  <img
+                    src={selected.image}
+                    alt=""
+                    className="size-14 rounded-xl object-cover sm:size-16"
+                  />
+                ) : referenceVideo?.preview ? (
+                  <video
+                    src={`${referenceVideo.preview}#t=0.1`}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="size-14 rounded-xl bg-black object-cover sm:size-16"
+                  />
+                ) : null}
+                <ArrowRight className="text-muted-foreground size-4 shrink-0" />
+                <span className="border-primary/60 bg-primary/10 text-primary flex size-14 flex-col items-center justify-center gap-0.5 rounded-xl border border-dashed text-[10px] font-semibold sm:size-16">
+                  <Sparkles className="size-4" />
+                  {copy.yourVideo}
+                </span>
+              </div>
+            }
           />
         </DialogContent>
       </Dialog>

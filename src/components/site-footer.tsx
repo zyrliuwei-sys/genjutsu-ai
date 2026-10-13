@@ -39,8 +39,8 @@ export function SiteFooter({
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-background text-foreground border-border border-t">
-      <div className="mx-auto max-w-7xl px-6 pt-14 pb-6 sm:px-10 sm:pt-16 lg:px-16">
+    <footer className="bg-background text-foreground border-border sm:border-t">
+      <div className="mx-auto max-w-7xl px-6 pt-6 pb-6 sm:px-10 sm:pt-16 lg:px-16">
         {tagline && (
           <p className="eg-heading mb-12 max-w-2xl text-4xl leading-[1.05] max-md:hidden sm:text-5xl">
             {tagline}

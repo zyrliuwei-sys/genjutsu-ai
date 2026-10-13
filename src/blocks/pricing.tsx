@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
   Film,
   Infinity as InfinityIcon,
+  Lock,
   MonitorPlay,
   Video,
 } from 'lucide-react';
@@ -56,8 +57,14 @@ export function Pricing({
   clipSeconds,
   balanceCredits = 0,
   singleVideo,
+  description,
+  summary,
 }: {
   title?: string;
+  /** Replaces the default description line under the title. */
+  description?: string;
+  /** Shown above the title in the dialog, e.g. the visitor's own media. */
+  summary?: ReactNode;
   /** `h1` when the block is the page's main content (the /pricing route). */
   headingAs?: 'h1' | 'h2';
   /** `dialog` drops the page-section chrome for use inside a modal. */
@@ -163,12 +170,18 @@ export function Pricing({
       plans: [
         firstOrder
           ? {
-              ...plan('pack_first', m['landing.pricing.pack_first']()),
+              ...plan('pack_first', m['landing.pricing.pack_first'](), dialog),
               originalPrice: usd(pricingCatalog.pack_starter.priceInCents),
               badge: m['landing.pricing.first_order_badge'](),
             }
           : plan('pack_starter', m['landing.pricing.pack_starter']()),
-        plan('pack_plus', m['landing.pricing.pack_plus'](), true),
+        // A first-time buyer at the paywall is deciding on one video: the
+        // $4.90 entry pack is the recommendation there, not the $24.90 bundle.
+        plan(
+          'pack_plus',
+          m['landing.pricing.pack_plus'](),
+          !(dialog && firstOrder)
+        ),
         plan('pack_pro', m['landing.pricing.pack_pro']()),
       ],
     },
@@ -273,11 +286,12 @@ export function Pricing({
     <Wrapper
       id={dialog ? undefined : 'pricing'}
       className={
-        dialog ? undefined : 'border-border border-t px-4 py-24 sm:py-32'
+        dialog ? undefined : 'border-border px-4 py-6 sm:border-t sm:py-32'
       }
     >
       <div className="mx-auto max-w-6xl">
         <div className={dialog ? 'mb-6 px-8 text-center' : 'mb-20 text-center'}>
+          {dialog && summary}
           <Heading
             className={
               dialog
@@ -294,7 +308,7 @@ export function Pricing({
             )}
           >
             <span className={dialog ? undefined : 'max-md:hidden'}>
-              {m['landing.pricing.description']()}
+              {description ?? m['landing.pricing.description']()}
             </span>
             {!dialog && (
               <span className="md:hidden">
@@ -361,6 +375,12 @@ export function Pricing({
           </div>
         ) : (
           <PricingTable groups={groups} onCheckout={handleCheckout} />
+        )}
+        {dialog && (
+          <p className="text-muted-foreground mt-5 flex items-center justify-center gap-1.5 text-center text-xs">
+            <Lock className="size-3.5 shrink-0" aria-hidden="true" />
+            {m['landing.pricing.paywall_trust']()}
+          </p>
         )}
       </div>
 
