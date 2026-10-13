@@ -493,12 +493,22 @@ export function GenjutsuGenerator({
       '[aria-pressed="true"], [data-selected="true"]'
     );
     if (!strip || !card) return;
+    // Land the selected card just right of the pinned upload card.
+    const upload = strip.querySelector<HTMLElement>(
+      '[data-testid="template-own-video"]'
+    );
+    const pinned =
+      upload && upload !== card
+        ? upload.getBoundingClientRect().right -
+          strip.getBoundingClientRect().left +
+          12
+        : 4;
     strip.scrollTo({
       left:
         strip.scrollLeft +
         card.getBoundingClientRect().left -
         strip.getBoundingClientRect().left -
-        4,
+        pinned,
       behavior: 'instant',
     });
   };
@@ -1711,16 +1721,18 @@ export function GenjutsuGenerator({
                 effectsLastScroll.current = performance.now();
                 if (effectsReturnPending.current) returnToSelectedEffect();
               }}
-              className="flex snap-x gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin]"
+              className="flex snap-x scroll-pl-[8rem] gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:scroll-pl-[9rem]"
             >
-              {/* Opens the reference-video input kept in the Create column. */}
+              {/* Opens the reference-video input kept in the Create column.
+                  Pinned to the left edge so uploading stays one tap away while
+                  the effects scroll underneath. */}
               <label
                 htmlFor={referenceInputId}
                 data-testid="template-own-video"
                 data-selected={referenceSource === 'upload' && !ownVideo}
                 onClick={() => track('effect_select', { effect: 'own_video' })}
                 className={cn(
-                  'border-border bg-muted hover:border-primary/70 relative flex aspect-[3/4] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-2 text-center ring-2 transition-colors lg:w-32',
+                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[3/4] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-2 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 lg:w-32',
                   referenceSource === 'upload' && !ownVideo
                     ? 'ring-primary'
                     : 'ring-transparent'
@@ -1847,7 +1859,7 @@ export function GenjutsuGenerator({
               ))}
               <div
                 aria-hidden="true"
-                className="w-[calc(100%-7rem-0.75rem)] shrink-0 lg:w-[calc(100%-8rem-0.75rem)]"
+                className="w-[calc(100%-14rem-1.5rem)] shrink-0 lg:w-[calc(100%-16rem-1.5rem)]"
               />
             </div>
           </div>

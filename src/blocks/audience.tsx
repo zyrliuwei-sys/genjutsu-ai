@@ -15,11 +15,11 @@ export function Audience() {
           <Reveal className="order-2 lg:order-1">
             <div className="eg-screen aspect-[4/5] overflow-hidden rounded-md">
               <LoopVideo
-                src="/videos/higgsfield-reference/crowd.mp4"
-                poster="/videos/higgsfield-reference/crowd.webp"
+                src="/videos/showcase/tennis.mp4"
+                poster="/videos/showcase/tennis.webp"
                 label={m['landing.alt.audience']()}
-                width={576}
-                height={942}
+                width={540}
+                height={840}
                 className="size-full"
               />
             </div>
