@@ -37,6 +37,11 @@ export const GENJUTSU_REFERENCES: Record<
     direction:
       'Replace only the astronaut; keep the slow walk away from the camera, the ripples, the giant moon, the mirror-still sea and the static framing.',
   },
+  'chess-float': {
+    name: 'Chess Float',
+    direction:
+      'Replace only the man in the pink suit; keep the floating pose, the beat pad, the drifting chess pieces, the meadow, the sky and the low-angle orbit.',
+  },
   'sketch-glow-up': {
     name: 'Sketch Glow-Up',
     direction:
@@ -88,6 +93,8 @@ export const GENJUTSU_REFERENCES: Record<
 export const GENJUTSU_DIRECTIONS: Record<string, string> = {
   moonwalk:
     'Replace the astronaut using the supplied character image, seen from behind. Preserve the slow walk away from the camera across the mirror-still water, the spreading ripples and reflection, the giant cracked moon, the distant lit platform, the pastel sunset sky and the static wide framing. Photoreal scale and lighting, consistent figure, no flicker.',
+  chess:
+    'Replace the man in the pink pinstripe suit using the supplied character image. Preserve the cross-legged floating pose, the hands playing the beat pad, the headphones, the giant chess pieces drifting and standing in the flower meadow, the blue sky with clouds and the slow low-angle orbiting camera. Golden-hour light, realistic fabric, consistent face, no flicker.',
   glowup:
     'Replace the girl using the supplied character image in both looks. Preserve the sketching at the table, the paper flip toward the camera, the transition into the magazine-cover pose climbing out of the page, and the camera framing. Photoreal skin and hair, consistent face across the transformation, no extra limbs or flicker.',
   'fire-skirt':

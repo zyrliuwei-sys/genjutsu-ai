@@ -117,6 +117,7 @@ const TEMPLATES: Template[] = [
   effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
   effect('manhattan-meet', 'Manhattan Meet', 'manhattan', 10, '9:16', 'New'),
   effect('moonlit-walk', 'Moonlit Walk', 'moonwalk', 5, '16:9', 'New'),
+  effect('chess-float', 'Chess Float', 'chess', 3, '16:9', 'New'),
   effect('rail-ollie', 'Rail Ollie', 'skate', 10, '9:16', 'New'),
 ];
 

@@ -96,6 +96,14 @@ export const SHOWCASE_ITEMS: ShowcaseItem[] = [
       'A lone astronaut walks away from the camera across a mirror-still sea toward a giant cracked moon at sunset, ripples spreading, cinematic sci-fi',
   },
   {
+    key: 'chess',
+    image: '/videos/showcase/chess.webp',
+    video: '/videos/showcase/chess.mp4',
+    kind: 'video',
+    prompt:
+      'A man in a pink pinstripe suit and headphones floats cross-legged above a flower meadow playing a beat pad, giant chess pieces drifting through a blue sky, low-angle orbit, surreal fashion film',
+  },
+  {
     key: 'runway',
     image: '/videos/showcase/runway.webp',
     video: '/videos/showcase/runway.mp4',
