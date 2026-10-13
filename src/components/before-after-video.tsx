@@ -10,6 +10,8 @@ type BeforeAfterVideoProps = {
   labels: { before: string; after: string; slider: string };
   width: number;
   height: number;
+  /** Sound of the generated clip; the original always stays muted. */
+  muted?: boolean;
   className?: string;
 };
 
@@ -25,6 +27,7 @@ export function BeforeAfterVideo({
   labels,
   width,
   height,
+  muted = true,
   className,
 }: BeforeAfterVideoProps) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -104,6 +107,7 @@ export function BeforeAfterVideo({
         aria-label={labels.after}
         onTimeUpdate={sync}
         {...videoProps}
+        muted={muted}
       />
       <video
         ref={beforeRef}

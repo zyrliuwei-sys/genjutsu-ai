@@ -89,6 +89,11 @@ export function GenjutsuGenerator() {
               m['landing.generator.trimmed_reference']({ start, end, total }),
             chargeDetails: (credits, price) =>
               m['landing.generator.charge_details']({ price }),
+            compare: {
+              before: m['landing.swap.before'](),
+              after: m['landing.swap.after'](),
+              slider: m['landing.swap.slider'](),
+            },
           }}
         />
       )}

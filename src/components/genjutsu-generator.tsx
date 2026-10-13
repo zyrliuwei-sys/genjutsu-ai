@@ -48,6 +48,7 @@ import { cn } from '@/lib/utils';
 import { matchesVideoAspect } from '@/lib/video-dimensions';
 import { MAX_REFERENCE_VIDEO_MB } from '@/lib/video-trim-plan';
 import { Pricing } from '@/blocks/pricing';
+import { BeforeAfterVideo } from '@/components/before-after-video';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 type Template = {
@@ -111,8 +112,9 @@ const effect = (
 });
 
 const TEMPLATES: Template[] = [
+  effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
+  effect('moonlit-walk', 'Moonlit Walk', 'moonwalk', 5, '16:9', 'New'),
   effect('colonial-stroll', 'Colonial Stroll', 'colonial', 10, '16:9', 'New'),
-  effect('sunlit-laundry', 'Sunlit Laundry', 'laundry', 8, '16:9', 'New'),
   effect(
     'holiday-homecoming',
     'Holiday Homecoming',
@@ -130,8 +132,6 @@ const TEMPLATES: Template[] = [
     'New'
   ),
   effect('cosmic-dive', 'Cosmic Dive', 'cosmic', 10, '16:9', 'New'),
-  effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
-  effect('moonlit-walk', 'Moonlit Walk', 'moonwalk', 5, '16:9', 'New'),
   effect('chess-float', 'Chess Float', 'chess', 3, '16:9', 'New'),
   effect('mural-style-shift', 'Mural Style Shift', 'mural', 4, '16:9', 'New'),
   effect(
@@ -173,6 +173,12 @@ const TEMPLATES: Template[] = [
 // Preselected effect; the list order is display order only.
 const DEFAULT_TEMPLATE =
   TEMPLATES.find((template) => template.id === 'street-runway') ?? TEMPLATES[0];
+
+// Effects with a finished sample (16:9, `.mp4` + `.jpg` poster): the Reference
+// Example tab shows it as a drag-to-compare slider over the effect clip.
+const EFFECT_RESULTS: Partial<Record<string, string>> = {
+  runway: '/videos/swap/runway-after',
+};
 
 const isDone = (task?: GenjutsuTask) =>
   task?.status === 'success' ||
@@ -416,6 +422,7 @@ export function GenjutsuGenerator({
       aspect: string
     ) => string;
     ratioPadding: string;
+    compare: { before: string; after: string; slider: string };
   };
 }) {
   const router = useRouter();
@@ -462,6 +469,52 @@ export function GenjutsuGenerator({
   };
   const generatorRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLElement>(null);
+  const effectsRef = useRef<HTMLDivElement>(null);
+  const effectsPointerDown = useRef(false);
+  const effectsReturnPending = useRef(false);
+  const effectsLastScroll = useRef(0);
+  const effectsReturnTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+  const returnToSelectedEffect = () => {
+    clearTimeout(effectsReturnTimer.current);
+    if (!effectsReturnPending.current || effectsPointerDown.current) return;
+    const remaining = 150 - (performance.now() - effectsLastScroll.current);
+    if (remaining > 0) {
+      effectsReturnTimer.current = setTimeout(
+        returnToSelectedEffect,
+        remaining
+      );
+      return;
+    }
+    effectsReturnPending.current = false;
+    const strip = effectsRef.current;
+    const card = strip?.querySelector<HTMLElement>(
+      '[aria-pressed="true"], [data-selected="true"]'
+    );
+    if (!strip || !card) return;
+    strip.scrollTo({
+      left:
+        strip.scrollLeft +
+        card.getBoundingClientRect().left -
+        strip.getBoundingClientRect().left -
+        4,
+      behavior: 'instant',
+    });
+  };
+  useEffect(() => {
+    const releasePointer = () => {
+      effectsPointerDown.current = false;
+      returnToSelectedEffect();
+    };
+    window.addEventListener('pointerup', releasePointer);
+    window.addEventListener('pointercancel', releasePointer);
+    return () => {
+      window.removeEventListener('pointerup', releasePointer);
+      window.removeEventListener('pointercancel', releasePointer);
+      clearTimeout(effectsReturnTimer.current);
+    };
+  }, []);
   const [generatorVisible, setGeneratorVisible] = useState(false);
   const createRef = useRef<HTMLElement>(null);
   const [createVisible, setCreateVisible] = useState(false);
@@ -739,6 +792,13 @@ export function GenjutsuGenerator({
   // play that same blob instead of each re-downloading the mp4. During SSR /
   // draft restore and while the fetch is pending they show the poster; if the
   // fetch is off or failed, fall back to streaming the static URL.
+  const effectResult = EFFECT_RESULTS[selected.asset];
+  const showCompare =
+    previewMode === 'example' && referenceSource === 'effect' && !!effectResult;
+  // The slider has no metadata callback, so size the box for its clips.
+  useEffect(() => {
+    if (showCompare) setMediaRatio(16 / 9);
+  }, [showCompare]);
   const effectPreviewSrc = !draftReady
     ? undefined
     : effectQueryEnabled && !effectQuery.isError
@@ -1629,12 +1689,28 @@ export function GenjutsuGenerator({
         <section
           id="genjutsu-effects"
           aria-label="Select effect"
+          onMouseEnter={() => {
+            effectsReturnPending.current = false;
+            clearTimeout(effectsReturnTimer.current);
+          }}
+          onMouseLeave={() => {
+            effectsReturnPending.current = true;
+            returnToSelectedEffect();
+          }}
           className="bg-card order-2 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-2"
         >
           <h2 className="text-lg font-semibold">Select Effect</h2>
           <div className="relative">
             <div
               data-testid="template-list"
+              ref={effectsRef}
+              onPointerDown={() => {
+                effectsPointerDown.current = true;
+              }}
+              onScroll={() => {
+                effectsLastScroll.current = performance.now();
+                if (effectsReturnPending.current) returnToSelectedEffect();
+              }}
               className="flex snap-x gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin]"
             >
               {/* Opens the reference-video input kept in the Create column. */}
@@ -1769,6 +1845,10 @@ export function GenjutsuGenerator({
                   </span>
                 </button>
               ))}
+              <div
+                aria-hidden="true"
+                className="w-[calc(100%-7rem-0.75rem)] shrink-0 lg:w-[calc(100%-8rem-0.75rem)]"
+              />
             </div>
           </div>
         </section>
@@ -1867,6 +1947,22 @@ export function GenjutsuGenerator({
                   )}
                 </div>
               )
+            ) : showCompare ? (
+              <BeforeAfterVideo
+                before={{
+                  src: effectPreviewSrc ?? effectClip,
+                  poster: example.image,
+                }}
+                after={{
+                  src: `${effectResult}.mp4`,
+                  poster: `${effectResult}.jpg`,
+                }}
+                labels={copy.compare}
+                width={1280}
+                height={720}
+                muted={muted}
+                className="absolute inset-0 size-full rounded-none"
+              />
             ) : (
               <video
                 key={
