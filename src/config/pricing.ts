@@ -56,8 +56,9 @@ export type PricingProduct = {
  * so existing subscriptions keep resolving.
  */
 export const pricingCatalog: Record<string, PricingProduct> = {
-  // First-order entry price: one 10s video at ~$1.20 provider cost.
+  // Retired first-order deal: kept so earlier orders still resolve.
   pack_first: {
+    available: false,
     productId: 'pack_first',
     productName: 'First Video',
     planName: 'First Video',
