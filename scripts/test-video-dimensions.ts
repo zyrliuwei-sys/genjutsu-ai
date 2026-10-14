@@ -54,7 +54,7 @@ assert(matchesVideoAspect(1080, 1916, '9:16'));
 assert(!matchesVideoAspect(1920, 1080, '9:16'));
 assert(!matchesVideoAspect(0, 1080, '16:9'));
 assert.deepEqual(
-  mp4Dimensions(readFileSync('public/videos/effect-clips/runway-10s.mp4')),
+  mp4Dimensions(readFileSync('public/videos/effect-clips/runway-5s.mp4')),
   { width: 1280, height: 720 }
 );
 console.log(

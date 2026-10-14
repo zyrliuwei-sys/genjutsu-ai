@@ -13,6 +13,7 @@ import { getStudioModel, STUDIO_MODELS } from '@/config/studio-models';
 import {
   AITaskStatus,
   findTask,
+  getInflightTasks,
   mergeTaskInfo,
   retryFailedRefund,
   setProviderTaskId,
@@ -25,10 +26,12 @@ import { matchesVideoAspect, mp4Dimensions } from '@/lib/video-dimensions';
 // Retired fal models — still listed in history, never polled again.
 const LEGACY_MODEL_IDS = ['seedance-lite', 'seedance-pro'];
 const STUCK_AFTER_MS = 60 * 60 * 1000;
-// EvoLink accepts a run, then fails it with "Service busy" when it has no
-// capacity. Resubmit the same request a few times before failing the run.
-const BUSY_RESUBMITS = 3;
-const BUSY_RESUBMIT_WINDOW_MS = 30 * 60 * 1000;
+// EvoLink can accept a run and fail it later ("Service busy", "Task processing
+// failed", a wrong output ratio). Resubmit the same request a few times before
+// failing the paid run; errors a retry cannot fix fail at once.
+const GENJUTSU_RESUBMITS = 3;
+const RESUBMIT_WINDOW_MS = 40 * 60 * 1000;
+const SUBMIT_ATTEMPTS = 3;
 
 function parseJson<T>(value: unknown): T {
   try {
@@ -46,15 +49,41 @@ export function isStudioTask(task: any) {
   );
 }
 
-// Provider errors can carry internal details (our API key's remaining budget,
-// the account balance, task ids). Customers only ever get one of these stable
-// messages; the raw text stays in ai_task.task_result for admins.
 export function isBusyError(error?: string | null) {
   return /busy|allocating resources|rate limit|too many requests|timed? ?out/i.test(
     error || ''
   );
 }
 
+/**
+ * Failures the same request will hit again: moderation, our provider key's
+ * budget or credentials, and invalid input. Everything else is worth a retry.
+ */
+export function isRetryableError(error?: string | null) {
+  return !/content policy|safety filter|real person|credits?\b.*left|insufficient|quota|balance|unauthori[sz]ed|forbidden|api key|invalid|not supported|unsupported|\((400|401|402|403|404|422)\)/i.test(
+    error || ''
+  );
+}
+
+/** Submit a Genjutsu run to EvoLink, retrying transient submit errors. */
+export async function submitGenjutsuEvolink(
+  provider: EvolinkProvider,
+  body: ReturnType<typeof genjutsuEvolinkRequest>
+) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await provider.createVideo(body);
+    } catch (error: any) {
+      if (attempt >= SUBMIT_ATTEMPTS || !isRetryableError(error?.message))
+        throw error;
+      await new Promise((resolve) => setTimeout(resolve, 2000 * attempt));
+    }
+  }
+}
+
+// Provider errors can carry internal details (our API key's remaining budget,
+// the account balance, task ids). Customers only ever get one of these stable
+// messages; the raw text stays in ai_task.task_result for admins.
 export function publicTaskError(error?: string | null) {
   if (!error) return null;
   if (/content policy|safety filter/i.test(error))
@@ -271,10 +300,10 @@ async function pollFal(
 }
 
 /**
- * Resubmit a Genjutsu run EvoLink failed for lack of capacity. Returns true
+ * Resubmit a Genjutsu run EvoLink failed with a retryable error. Returns true
  * when the run stays alive (resubmitted, or another poll is resubmitting).
  */
-async function resubmitBusyGenjutsu(
+async function resubmitFailedGenjutsu(
   task: any,
   error: string,
   configs: Record<string, string>
@@ -282,13 +311,16 @@ async function resubmitBusyGenjutsu(
   if (
     task.model !== GENJUTSU_MODEL_ID ||
     task.provider !== 'evolink' ||
-    !isBusyError(error) ||
-    Date.now() - new Date(task.createdAt).getTime() > BUSY_RESUBMIT_WINDOW_MS
+    !task.taskId ||
+    !isRetryableError(error) ||
+    Date.now() - new Date(task.createdAt).getTime() > RESUBMIT_WINDOW_MS
   )
     return false;
-  const info = parseJson<{ busyResubmits?: number }>(task.taskInfo);
-  const resubmits = Number(info.busyResubmits) || 0;
-  if (resubmits >= BUSY_RESUBMITS) return false;
+  const info = parseJson<{ resubmits?: number; busyResubmits?: number }>(
+    task.taskInfo
+  );
+  const resubmits = Number(info.resubmits) || Number(info.busyResubmits) || 0;
+  if (resubmits >= GENJUTSU_RESUBMITS) return false;
   const options = parseJson<{
     referenceVideo?: string;
     leadImage?: string;
@@ -298,12 +330,16 @@ async function resubmitBusyGenjutsu(
   // Clearing the provider id claims the resubmit; a concurrent poll that
   // loses the swap just keeps waiting.
   if (!(await swapProviderTaskId(task.id, task.taskId, null))) return true;
-  await mergeTaskInfo(task.id, { busyResubmits: resubmits + 1 });
+  await mergeTaskInfo(task.id, {
+    resubmits: resubmits + 1,
+    lastError: error.slice(0, 300),
+  });
   try {
-    const id = await new EvolinkProvider({
-      apiKey: configs.evolink_api_key,
-      baseUrl: configs.evolink_base_url,
-    }).createVideo(
+    const id = await submitGenjutsuEvolink(
+      new EvolinkProvider({
+        apiKey: configs.evolink_api_key,
+        baseUrl: configs.evolink_base_url,
+      }),
       genjutsuEvolinkRequest({
         prompt: task.prompt,
         referenceVideo: options.referenceVideo,
@@ -312,9 +348,10 @@ async function resubmitBusyGenjutsu(
       })
     );
     await setProviderTaskId(task.id, id);
-    console.warn('[genjutsu] resubmitted busy run', {
+    console.warn('[genjutsu] resubmitted failed run', {
       taskId: task.id,
       attempt: resubmits + 1,
+      error,
     });
     return true;
   } catch (resubmitError: any) {
@@ -399,7 +436,7 @@ export async function refreshTask(task: any, configs: Record<string, string>) {
 
     if (
       outcome.status === 'failed' &&
-      (await resubmitBusyGenjutsu(task, outcome.error, configs))
+      (await resubmitFailedGenjutsu(task, outcome.error, configs))
     ) {
       return taskView(await findTask(task.id));
     }
@@ -449,4 +486,24 @@ export async function refreshTask(task: any, configs: Record<string, string>) {
   }
 
   return taskView(await findTask(task.id));
+}
+
+/**
+ * Cron sweep: poll unfinished Genjutsu runs even when nobody has the page
+ * open, so failed runs are resubmitted and stuck ones fail and refund.
+ */
+export async function refreshInflightGenjutsu(configs: Record<string, string>) {
+  const tasks = await getInflightTasks({
+    model: GENJUTSU_MODEL_ID,
+    // Past STUCK_AFTER_MS a refresh fails the run; keep a margin to reach it.
+    since: new Date(Date.now() - 2 * STUCK_AFTER_MS),
+  });
+  for (const task of tasks) {
+    try {
+      await refreshTask(task, configs);
+    } catch (error) {
+      console.error('[genjutsu] cron refresh failed', task.id, error);
+    }
+  }
+  return tasks.length;
 }

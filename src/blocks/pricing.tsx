@@ -104,7 +104,7 @@ export function Pricing({
   // One shared prepaid balance for every generation API.
   const clipCost =
     singleVideo?.credits ?? (clipSeconds ? genjutsuCredits(clipSeconds) : 0);
-  // "3 videos · $8.30 each · 10s" — packs are sized in whole 10s videos.
+  // "3 videos · $2.33 each · 5s" — packs are sized in whole 5s videos.
   function packVideos(productId?: string) {
     const product = productId ? pricingCatalog[productId] : undefined;
     if (!product) return '';
@@ -127,7 +127,7 @@ export function Pricing({
       productId,
       name,
       featured,
-      // Packs are sized in whole 10s Genjutsu videos; the text-to-video
+      // Packs are sized in whole 5s Genjutsu videos; the text-to-video
       // paywall keeps its own per-clip count.
       description: singleVideo
         ? m['landing.text_video.pack_count']({

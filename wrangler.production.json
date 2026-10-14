@@ -6,6 +6,9 @@
   "observability": {
     "enabled": true
   },
+  "triggers": {
+    "crons": ["*/2 * * * *"]
+  },
   "vars": {
     "DATABASE_PROVIDER": "d1",
     "VITE_APP_URL": "https://genjutsu-ai.org",

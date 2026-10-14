@@ -34,7 +34,11 @@ import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respData, respErr } from '@/lib/resp';
 import { verifyVideoReceipt } from '@/lib/video-receipt.server';
 
-import { isBusyError, publicTaskError, taskView } from '../studio/-shared';
+import {
+  publicTaskError,
+  submitGenjutsuEvolink,
+  taskView,
+} from '../studio/-shared';
 
 const MAX_PROMPT = 2000;
 
@@ -237,20 +241,8 @@ async function POST({ request }: { request: Request }) {
           leadImage,
           crowdImage,
         });
-        // A busy provider usually frees up within seconds; retry the submit
-        // before failing the paid run.
-        let id: string;
-        for (let attempt = 0; ; attempt++) {
-          try {
-            id = await provider.createVideo(body);
-            break;
-          } catch (error: any) {
-            if (attempt >= 2 || !isBusyError(error?.message)) throw error;
-            await new Promise((resolve) =>
-              setTimeout(resolve, 2000 * (attempt + 1))
-            );
-          }
-        }
+        // Transient submit errors are retried before failing the paid run.
+        const id = await submitGenjutsuEvolink(provider, body);
         await setProviderTaskId(task.id, id);
       } else {
         const imageRefs = crowdImage ? [crowdImage] : [];

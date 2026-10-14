@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { getAuth } from '@/core/auth';
 import { envConfigs } from '@/config';
+import { isGenjutsuDuration } from '@/config/genjutsu';
 import { getStorage } from '@/modules/storage/service';
 import { md5 } from '@/lib/hash';
 import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
@@ -93,8 +94,8 @@ async function POST({ request }: { request: Request }) {
     }
     const duration = mp4Duration(body);
     const dimensions = mp4Dimensions(body);
-    if (duration < 3 || duration > 10.05)
-      return respErr('Reference video must be 3–10 seconds long');
+    if (!isGenjutsuDuration(duration))
+      return respErr('Reference video must be 3–5 seconds long');
 
     const objectKey = `${md5(body)}.${ext}`;
     const storage = await getStorage();

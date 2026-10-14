@@ -242,9 +242,7 @@ await client.execute({
   args: [Date.now()],
 });
 const { readFileSync } = await import('node:fs');
-const landscapeBytes = readFileSync(
-  'public/videos/effect-clips/runway-10s.mp4'
-);
+const landscapeBytes = readFileSync('public/videos/effect-clips/runway-5s.mp4');
 globalThis.fetch = async (input) => {
   const url = String(input);
   if (url.includes('/v1/tasks/'))
@@ -261,12 +259,88 @@ const rejectedResult = await refreshTask(await findTask(wrongRatio.task.id), {
   evolink_api_key: 'fake',
 });
 assert.equal(rejectedResult.status, 'failed');
-assert.match(rejectedResult.error!, /different video ratio/);
+// Customers see a stable message; the raw cause stays on the task.
+assert.equal(rejectedResult.error, 'Generation failed');
+assert.match(
+  (await findTask(wrongRatio.task.id)).taskResult!,
+  /different video ratio/
+);
 assert.equal(await getBalance('user'), balanceBeforeRefund + 620);
 await refreshTask(await findTask(wrongRatio.task.id), {
   evolink_api_key: 'fake',
 });
 assert.equal(await getBalance('user'), balanceBeforeRefund + 620);
+// Retryable provider failures resubmit the same request; moderation fails.
+const busyRun = await createTaskOnce({
+  ...params,
+  id: 'busy-run',
+  model: GENJUTSU_MODEL_ID,
+  options: {
+    aspect: '16:9',
+    normalizedFrame: true,
+    referenceVideo: 'https://media.example.com/ref.mp4',
+    leadImage: 'https://media.example.com/lead.jpg',
+  },
+});
+await client.execute({
+  sql: "UPDATE ai_task SET task_id = 'provider-busy-1', created_at = ? WHERE id = 'busy-run'",
+  args: [Date.now()],
+});
+let busySubmits = 0;
+let busyError = 'Service busy. Allocating resources, please retry later.';
+globalThis.fetch = async (input, init) => {
+  const url = String(input);
+  if (url.includes('/v1/tasks/'))
+    return Response.json({
+      id: 'provider-busy',
+      status: 'failed',
+      error: { message: busyError },
+    });
+  if (url.includes('/v1/videos/generations') && init?.method === 'POST') {
+    busySubmits++;
+    return Response.json({ id: `provider-busy-${busySubmits + 1}` });
+  }
+  throw new Error(`Unexpected fetch ${url}`);
+};
+const balanceBeforeBusy = await getBalance('user');
+for (let i = 1; i <= 3; i++) {
+  const view = await refreshTask(await findTask(busyRun.task.id), {
+    evolink_api_key: 'fake',
+  });
+  assert.notEqual(view.status, 'failed');
+  assert.equal(busySubmits, i);
+  assert.equal(
+    (await findTask(busyRun.task.id)).taskId,
+    `provider-busy-${i + 1}`
+  );
+}
+// Retries are capped: the 4th failure fails the run and refunds it.
+const busyFinal = await refreshTask(await findTask(busyRun.task.id), {
+  evolink_api_key: 'fake',
+});
+assert.equal(busyFinal.status, 'failed');
+assert.equal(busySubmits, 3);
+assert.equal(await getBalance('user'), balanceBeforeBusy + 620);
+const moderated = await createTaskOnce({
+  ...params,
+  id: 'moderated-run',
+  model: GENJUTSU_MODEL_ID,
+  options: {
+    referenceVideo: 'https://media.example.com/ref.mp4',
+    leadImage: 'https://media.example.com/lead.jpg',
+  },
+});
+await client.execute({
+  sql: "UPDATE ai_task SET task_id = 'provider-mod', created_at = ? WHERE id = 'moderated-run'",
+  args: [Date.now()],
+});
+busyError = 'Content policy violation. Blocked by safety filters.';
+busySubmits = 0;
+const moderatedView = await refreshTask(await findTask(moderated.task.id), {
+  evolink_api_key: 'fake',
+});
+assert.equal(moderatedView.status, 'failed');
+assert.equal(busySubmits, 0);
 globalThis.fetch = originalFetch;
 const { runD1HttpAtomicBatch } = await import('../src/core/db/d1-http');
 process.env.CLOUDFLARE_ACCOUNT_ID = 'fake-account';
@@ -293,5 +367,5 @@ assert.equal(httpRequests, 1);
 globalThis.fetch = originalFetch;
 client.close();
 console.log(
-  'PASS: concurrent/durable dedupe, atomic D1 batch rollback, retryable/idempotent refunds, terminal-state guards, processing timeout, archive retry, owner-only download'
+  'PASS: concurrent/durable dedupe, capped provider-failure resubmits, atomic D1 batch rollback, retryable/idempotent refunds, terminal-state guards, processing timeout, archive retry, owner-only download'
 );

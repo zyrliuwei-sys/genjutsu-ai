@@ -1,4 +1,13 @@
-import { and, desc, eq, gt, isNull, notInArray, notLike } from 'drizzle-orm';
+import {
+  and,
+  desc,
+  eq,
+  gt,
+  inArray,
+  isNull,
+  notInArray,
+  notLike,
+} from 'drizzle-orm';
 
 import { db } from '@/core/db';
 import { runD1AtomicBatch } from '@/core/db/d1';
@@ -309,6 +318,27 @@ export async function getTasks(params: {
     .orderBy(desc(aiTask.createdAt))
     .limit(limit)
     .offset((page - 1) * limit);
+}
+
+/** Unfinished tasks of one model created after `since` (oldest first). */
+export async function getInflightTasks(params: {
+  model: string;
+  since: Date;
+  limit?: number;
+}) {
+  return db()
+    .select()
+    .from(aiTask)
+    .where(
+      and(
+        eq(aiTask.model, params.model),
+        inArray(aiTask.status, [AITaskStatus.PENDING, AITaskStatus.PROCESSING]),
+        gt(aiTask.createdAt, params.since),
+        isNull(aiTask.deletedAt)
+      )
+    )
+    .orderBy(aiTask.createdAt)
+    .limit(params.limit ?? 20);
 }
 
 /**

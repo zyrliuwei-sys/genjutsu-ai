@@ -93,6 +93,9 @@ export default defineConfig({
       },
     }),
     viteReact(),
-    nitro(),
+    nitro({
+      // Cron sweep for in-flight Genjutsu runs (wrangler.jsonc triggers).
+      plugins: ['./src/nitro/genjutsu-cron.ts'],
+    }),
   ],
 });

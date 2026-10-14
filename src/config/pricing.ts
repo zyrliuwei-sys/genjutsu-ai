@@ -45,7 +45,7 @@ export type PricingProduct = {
  * price × 7, e.g. 700 credits for a 5s 720p Seedance 2.0 clip) and
  * ./hotel-lobby-pricing.ts and ./genjutsu.ts.
  *
- * The visible packs are sized in whole 10-second Genjutsu videos (990 credits
+ * The visible packs are sized in whole 5-second Genjutsu videos (990 credits
  * each, see ./genjutsu.ts): 1 / 2 / 3 / 5 videos at $2.99 / $4.99 / $6.99 /
  * $9.99. Existing balances and already-created orders are unchanged; legacy
  * packs and subscriptions remain below.
@@ -55,14 +55,15 @@ export type PricingProduct = {
  * so existing subscriptions keep resolving.
  */
 export const pricingCatalog: Record<string, PricingProduct> = {
-  // Packs priced from cost (2026-10-14): one 10s video is ~$1.34 to make
-  // ($1.20 provider + retries/infra) plus ~4.4% + $0.30 payment fees, so every
-  // pack keeps a profit at its price. Larger packs lower the per-video price.
+  // Packs priced from cost (2026-10-14): a video is one clip of up to 5s,
+  // ~$0.68 to make ($0.60 provider + retries/infra), plus ~4.4% + $0.30
+  // payment fees per order — every pack keeps a profit at its price (priced
+  // when clips ran 10s / ~$1.34). Larger packs lower the per-video price.
   pack_1: {
     productId: 'pack_1',
     productName: 'Single Video',
     planName: 'Single Video',
-    description: '$2.99 for one 10-second video',
+    description: '$2.99 for one 5-second video',
     type: PaymentType.ONE_TIME,
     priceInCents: 299,
     currency: 'usd',
@@ -72,7 +73,7 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     productId: 'pack_2',
     productName: 'Duo Pack',
     planName: 'Duo Pack',
-    description: '$4.99 for two 10-second videos',
+    description: '$4.99 for two 5-second videos',
     type: PaymentType.ONE_TIME,
     priceInCents: 499,
     currency: 'usd',
@@ -82,7 +83,7 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     productId: 'pack_3',
     productName: 'Plus Pack',
     planName: 'Plus Pack',
-    description: '$6.99 for three 10-second videos',
+    description: '$6.99 for three 5-second videos',
     type: PaymentType.ONE_TIME,
     priceInCents: 699,
     currency: 'usd',
@@ -92,7 +93,7 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     productId: 'pack_5',
     productName: 'Batch Pack',
     planName: 'Batch Pack',
-    description: '$9.99 for five 10-second videos',
+    description: '$9.99 for five 5-second videos',
     type: PaymentType.ONE_TIME,
     priceInCents: 999,
     currency: 'usd',

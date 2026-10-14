@@ -1,4 +1,5 @@
 import { envConfigs } from '@/config';
+import { isGenjutsuDuration } from '@/config/genjutsu';
 
 import { matchesVideoAspect } from './video-dimensions';
 
@@ -75,9 +76,7 @@ export async function verifyVideoReceipt(
     data.owner !== owner ||
     data.url !== url ||
     data.expires < Date.now() ||
-    !Number.isFinite(data.duration) ||
-    data.duration < 3 ||
-    data.duration > 10.05
+    !isGenjutsuDuration(data.duration)
   )
     throw new Error(
       'Expired or invalid video receipt; upload the reference video again'
