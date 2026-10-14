@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
@@ -49,7 +50,24 @@ function workersDbProvider(): string {
 const workersDb = isCloudflareBuild ? workersDbProvider() : '';
 const keepPostgres = workersDb === 'postgresql' || workersDb === 'postgres';
 
+// Build version stamped on every funnel event ("<sha> <MM-DD HH:mm>" in
+// Beijing time), so conversion can be compared release by release.
+// Workers Builds exposes the commit as WORKERS_CI_COMMIT_SHA.
+function buildId(): string {
+  let sha = process.env.WORKERS_CI_COMMIT_SHA || '';
+  if (!sha) {
+    try {
+      sha = execSync('git rev-parse HEAD', { encoding: 'utf8' });
+    } catch {
+      sha = 'unknown';
+    }
+  }
+  const time = new Date(Date.now() + 8 * 3600_000).toISOString();
+  return `${sha.trim().slice(0, 7)} ${time.slice(5, 10)} ${time.slice(11, 16)}`;
+}
+
 export default defineConfig({
+  define: { __BUILD_ID__: JSON.stringify(buildId()) },
   optimizeDeps: { exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util'] },
   server: {
     port: 3000,

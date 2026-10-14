@@ -27,6 +27,8 @@ export function track(
       event,
       anonId: anonId(),
       path: window.location.pathname,
+      // Release the visitor saw; 'dev' rows are local testing (excluded from analytics).
+      v: import.meta.env.DEV ? 'dev' : __BUILD_ID__,
       props,
     });
     if (!navigator.sendBeacon?.('/api/events', body))
