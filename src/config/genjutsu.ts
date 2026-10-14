@@ -36,11 +36,11 @@ export function genjutsuEvolinkRequest(params: {
 // A/B against O1 / O1 Fast on 2026-10-12:
 // https://evolink.ai/kling-o3?model=kling-o3-video-edit#pricing
 export const GENJUTSU_USD_PER_SECOND = 0.12;
-// Every video is one clip of 3–5s (at most $0.60 provider cost, billed per
-// input second rounded up); longer uploads are trimmed to the middle 5s.
-export const GENJUTSU_SECONDS = 5;
+// Every video is one clip of 3–10s (at most $1.20 provider cost, billed per
+// input second rounded up); longer uploads are trimmed to the middle 10s.
+export const GENJUTSU_SECONDS = 10;
 export const GENJUTSU_MIN_SECONDS = 3;
-// Container durations run a few ms long; anything past this bills a 6th second.
+// Container durations run a few ms long; anything past this bills an 11th second.
 export const GENJUTSU_MAX_SECONDS = GENJUTSU_SECONDS + 0.05;
 export const GENJUTSU_CREDITS_PER_GENERATION = 990;
 export function isGenjutsuDuration(seconds: number) {
@@ -52,7 +52,7 @@ export function isGenjutsuDuration(seconds: number) {
 }
 export function genjutsuGenerations(seconds = GENJUTSU_SECONDS) {
   if (!isGenjutsuDuration(seconds))
-    throw new Error('Reference video must be 3–5 seconds long');
+    throw new Error('Reference video must be 3–10 seconds long');
   return 1;
 }
 export function genjutsuCredits(seconds = GENJUTSU_SECONDS) {

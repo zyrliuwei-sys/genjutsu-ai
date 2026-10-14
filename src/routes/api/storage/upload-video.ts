@@ -95,7 +95,7 @@ async function POST({ request }: { request: Request }) {
     const duration = mp4Duration(body);
     const dimensions = mp4Dimensions(body);
     if (!isGenjutsuDuration(duration))
-      return respErr('Reference video must be 3–5 seconds long');
+      return respErr('Reference video must be 3–10 seconds long');
 
     const objectKey = `${md5(body)}.${ext}`;
     const storage = await getStorage();

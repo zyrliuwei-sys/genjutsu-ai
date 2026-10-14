@@ -94,7 +94,7 @@ type GenjutsuTask = {
   createdAt?: string;
 };
 
-// Each effect plays /videos/effect-clips/<asset>-5s.mp4 and sends it as the
+// Each effect plays /videos/effect-clips/<asset>-10s.mp4 and sends it as the
 // motion reference; `asset` also keys GENJUTSU_DIRECTIONS.
 const effect = (
   id: string,
@@ -181,7 +181,7 @@ const DEFAULT_TEMPLATE =
 // Effects with a finished sample (16:9, `.mp4` + `.jpg` poster): the Reference
 // Example tab shows it as a drag-to-compare slider over the effect clip.
 const EFFECT_RESULTS: Partial<Record<string, string>> = {
-  runway: '/videos/swap/runway-after',
+  runway: '/videos/swap/runway-after-10s',
 };
 
 const isDone = (task?: GenjutsuTask) =>
@@ -454,7 +454,7 @@ export function GenjutsuGenerator({
   const clipController = useRef<AbortController | undefined>(undefined);
   useEffect(() => () => clipController.current?.abort(), []);
   const [aspect, setAspect] = useState<GenjutsuAspect>('16:9');
-  // Every video is a single clip of up to 5s; there is no length choice.
+  // Every video is a single clip of up to 10s; there is no length choice.
   const durationTier = GENJUTSU_SECONDS;
   const [lead, setLead] = useState<Asset>();
   const [referenceVideo, setReferenceVideo] = useState<Asset>();
@@ -622,7 +622,7 @@ export function GenjutsuGenerator({
         if (!active) return;
         const restore = (asset?: DraftAsset): Asset | undefined => {
           if (!asset || (!asset.file && !asset.url)) return;
-          // Drafts saved when clips ran up to 10s no longer fit the 5s limit.
+          // Drop drafted clips longer than the current length limit.
           if (
             asset.kind === 'video' &&
             Number(asset.duration) > GENJUTSU_MAX_SECONDS

@@ -104,7 +104,7 @@ export function Pricing({
   // One shared prepaid balance for every generation API.
   const clipCost =
     singleVideo?.credits ?? (clipSeconds ? genjutsuCredits(clipSeconds) : 0);
-  // "3 videos · $2.33 each · 5s" — packs are sized in whole 5s videos.
+  // "3 videos · $8.30 each · 10s" — packs are sized in whole 10s videos.
   function packVideos(productId?: string) {
     const product = productId ? pricingCatalog[productId] : undefined;
     if (!product) return '';
@@ -127,7 +127,7 @@ export function Pricing({
       productId,
       name,
       featured,
-      // Packs are sized in whole 5s Genjutsu videos; the text-to-video
+      // Packs are sized in whole 10s Genjutsu videos; the text-to-video
       // paywall keeps its own per-clip count.
       description: singleVideo
         ? m['landing.text_video.pack_count']({
@@ -170,20 +170,21 @@ export function Pricing({
       key: 'one-time',
       label: m['landing.pricing.one_time'](),
       plans: [
+        firstOrder
+          ? {
+              ...plan('pack_first', m['landing.pricing.pack_first'](), dialog),
+              originalPrice: usd(pricingCatalog.pack_starter.priceInCents),
+              badge: m['landing.pricing.first_order_badge'](),
+            }
+          : plan('pack_starter', m['landing.pricing.pack_starter']()),
         // A first-time buyer at the paywall is deciding on one video: the
-        // single video is the recommendation there, not a bundle.
+        // $4.90 entry pack is the recommendation there, not the $24.90 bundle.
         plan(
-          'pack_1',
-          m['landing.pricing.pack_single'](),
-          dialog && firstOrder
-        ),
-        plan('pack_2', m['landing.pricing.pack_double']()),
-        plan(
-          'pack_3',
+          'pack_plus',
           m['landing.pricing.pack_plus'](),
           !(dialog && firstOrder)
         ),
-        plan('pack_5', m['landing.pricing.pack_pro']()),
+        plan('pack_pro', m['landing.pricing.pack_pro']()),
       ],
     },
   ];

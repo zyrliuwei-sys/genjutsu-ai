@@ -31,7 +31,7 @@ Object.defineProperty(globalThis, 'document', {
   },
 });
 try {
-  for (const [tier, cost] of [[5, 990]]) {
+  for (const [tier, cost] of [[10, 990]]) {
     const bytes = await readFile(
       `public/videos/effect-clips/runway-${tier}s.mp4`
     );

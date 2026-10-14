@@ -45,63 +45,19 @@ export type PricingProduct = {
  * price × 7, e.g. 700 credits for a 5s 720p Seedance 2.0 clip) and
  * ./hotel-lobby-pricing.ts and ./genjutsu.ts.
  *
- * The visible packs are sized in whole 5-second Genjutsu videos (990 credits
- * each, see ./genjutsu.ts): 1 / 2 / 3 / 5 videos at $2.99 / $4.99 / $6.99 /
- * $9.99. Existing balances and already-created orders are unchanged; legacy
- * packs and subscriptions remain below.
+ * Packs grant shared balance at 1 internal credit = $0.01. The visible packs
+ * are sized in whole 10-second Genjutsu videos (990 credits each, see
+ * ./genjutsu.ts): 1 / 3 / 5 videos, larger packs carrying a bonus.
+ * Each generation charges at least 7× its provider list cost. Existing balances
+ * and already-created orders are unchanged; legacy subscriptions remain below.
  * Keys MUST match what the pricing UI sends as product_id.
  *
  * The monthly plans are no longer shown on the pricing page; they stay here
  * so existing subscriptions keep resolving.
  */
 export const pricingCatalog: Record<string, PricingProduct> = {
-  // Packs priced from cost (2026-10-14): a video is one clip of up to 5s,
-  // ~$0.68 to make ($0.60 provider + retries/infra), plus ~4.4% + $0.30
-  // payment fees per order — every pack keeps a profit at its price (priced
-  // when clips ran 10s / ~$1.34). Larger packs lower the per-video price.
-  pack_1: {
-    productId: 'pack_1',
-    productName: 'Single Video',
-    planName: 'Single Video',
-    description: '$2.99 for one 5-second video',
-    type: PaymentType.ONE_TIME,
-    priceInCents: 299,
-    currency: 'usd',
-    credits: 990,
-  },
-  pack_2: {
-    productId: 'pack_2',
-    productName: 'Duo Pack',
-    planName: 'Duo Pack',
-    description: '$4.99 for two 5-second videos',
-    type: PaymentType.ONE_TIME,
-    priceInCents: 499,
-    currency: 'usd',
-    credits: 1980,
-  },
-  pack_3: {
-    productId: 'pack_3',
-    productName: 'Plus Pack',
-    planName: 'Plus Pack',
-    description: '$6.99 for three 5-second videos',
-    type: PaymentType.ONE_TIME,
-    priceInCents: 699,
-    currency: 'usd',
-    credits: 2970,
-  },
-  pack_5: {
-    productId: 'pack_5',
-    productName: 'Batch Pack',
-    planName: 'Batch Pack',
-    description: '$9.99 for five 5-second videos',
-    type: PaymentType.ONE_TIME,
-    priceInCents: 999,
-    currency: 'usd',
-    credits: 4950,
-  },
-  // Retired packs: kept so earlier orders still resolve, no longer sold.
+  // First-order entry price: one 10s video at ~$1.20 provider cost.
   pack_first: {
-    available: false,
     productId: 'pack_first',
     productName: 'First Video',
     planName: 'First Video',
@@ -114,7 +70,6 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     firstOrderOnly: true,
   },
   pack_starter: {
-    available: false,
     productId: 'pack_starter',
     productName: 'Trial Pack',
     planName: 'Trial Pack',
@@ -126,7 +81,6 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     bonusCredits: 0,
   },
   pack_plus: {
-    available: false,
     productId: 'pack_plus',
     productName: 'Plus Pack',
     planName: 'Plus Pack',
@@ -162,7 +116,6 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     bonusCredits: 0,
   },
   pack_pro: {
-    available: false,
     productId: 'pack_pro',
     productName: 'Batch Pack',
     planName: 'Batch Pack',
