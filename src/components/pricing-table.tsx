@@ -137,7 +137,7 @@ export function PricingTable({
       {/* Plans grid */}
       <div
         className={cn(
-          'mx-auto grid gap-6',
+          'mx-auto grid gap-6 max-md:gap-3',
           currentGroup?.plans.length === 2
             ? 'max-w-3xl @min-[36rem]:grid-cols-2'
             : currentGroup?.plans.length === 3
@@ -149,7 +149,7 @@ export function PricingTable({
           <div
             key={plan.id}
             className={cn(
-              'relative flex min-w-0 flex-col rounded-lg border p-6 transition-all',
+              'relative flex min-w-0 flex-col rounded-lg border p-6 transition-all max-md:p-4',
               plan.featured
                 ? 'bg-card border-primary/70 shadow-[0_30px_60px_-40px_rgb(0_0_0/0.6)]'
                 : 'bg-background border-border hover:border-foreground/30'
@@ -170,7 +170,7 @@ export function PricingTable({
 
             {/* Price */}
             <div className="mb-2 flex items-baseline gap-1">
-              <span className="font-serif text-6xl leading-none whitespace-nowrap">
+              <span className="font-serif text-6xl leading-none whitespace-nowrap max-md:text-4xl">
                 {plan.price}
               </span>
               {plan.interval && (
@@ -186,8 +186,8 @@ export function PricingTable({
             )}
 
             {plan.quantity && (
-              <div className="bg-primary/10 ring-primary/30 mb-3 flex items-baseline justify-between gap-2 rounded-md px-3 py-2 ring-1">
-                <span className="text-foreground text-lg font-semibold">
+              <div className="bg-primary/10 ring-primary/30 mb-3 flex items-baseline justify-between gap-2 rounded-md px-3 py-2 ring-1 max-md:mb-2 max-md:py-1.5">
+                <span className="text-foreground text-lg font-semibold max-md:text-base">
                   {plan.quantity}
                 </span>
                 {plan.quantityNote && (
@@ -200,7 +200,7 @@ export function PricingTable({
 
             {/* Description */}
             {plan.description && (
-              <p className="text-muted-foreground mb-8 text-sm">
+              <p className="text-muted-foreground mb-8 text-sm max-md:mb-4">
                 {plan.description}
               </p>
             )}
@@ -218,7 +218,7 @@ export function PricingTable({
             </Button>
 
             {/* Features */}
-            <ul className="mt-8 space-y-3">
+            <ul className="mt-8 space-y-3 max-md:mt-4 max-md:space-y-2">
               {plan.features.map((feature, i) => {
                 const isObj = typeof feature !== 'string';
                 const Icon: IconComponent = (isObj && feature.icon) || Check;
