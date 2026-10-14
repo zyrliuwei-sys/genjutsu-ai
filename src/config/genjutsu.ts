@@ -9,6 +9,28 @@ export const GENJUTSU_MODEL_ID = 'genjutsu-storm';
 export const GENJUTSU_ENDPOINT = 'fal-ai/kling-video/o1/video-to-video/edit';
 export const GENJUTSU_EVOLINK_MODEL = 'kling-o3-video-edit';
 export const GENJUTSU_EVOLINK_QUALITY = '720p';
+
+/** EvoLink submission body — shared by the first submit and busy resubmits. */
+export function genjutsuEvolinkRequest(params: {
+  prompt: string;
+  referenceVideo: string;
+  leadImage: string;
+  crowdImage?: string | null;
+}) {
+  return {
+    model: GENJUTSU_EVOLINK_MODEL,
+    prompt: params.prompt,
+    video_urls: [params.referenceVideo],
+    image_urls: params.crowdImage
+      ? [params.leadImage, params.crowdImage]
+      : [params.leadImage],
+    // O3 edits keep the input framing (the clip is already normalized to the
+    // chosen aspect), so no aspect_ratio — same body as the EvoLink
+    // playground request.
+    quality: GENJUTSU_EVOLINK_QUALITY,
+    keep_original_sound: true,
+  };
+}
 // EvoLink Kling O3 Video Edit 720p: $0.120/input second, rounded up, keeps
 // the original sound. Verified in the model pricing panel and a playground
 // A/B against O1 / O1 Fast on 2026-10-12:

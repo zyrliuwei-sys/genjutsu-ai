@@ -4,12 +4,19 @@ import {
   FalProvider,
   AITaskStatus as FalStatus,
 } from '@/core/ai';
-import { GENJUTSU_ENDPOINT, GENJUTSU_MODEL_ID } from '@/config/genjutsu';
+import {
+  GENJUTSU_ENDPOINT,
+  GENJUTSU_MODEL_ID,
+  genjutsuEvolinkRequest,
+} from '@/config/genjutsu';
 import { getStudioModel, STUDIO_MODELS } from '@/config/studio-models';
 import {
   AITaskStatus,
   findTask,
+  mergeTaskInfo,
   retryFailedRefund,
+  setProviderTaskId,
+  swapProviderTaskId,
   updateTask,
 } from '@/modules/ai-tasks/service';
 import { getStorage } from '@/modules/storage/service';
@@ -18,6 +25,10 @@ import { matchesVideoAspect, mp4Dimensions } from '@/lib/video-dimensions';
 // Retired fal models — still listed in history, never polled again.
 const LEGACY_MODEL_IDS = ['seedance-lite', 'seedance-pro'];
 const STUCK_AFTER_MS = 60 * 60 * 1000;
+// EvoLink accepts a run, then fails it with "Service busy" when it has no
+// capacity. Resubmit the same request a few times before failing the run.
+const BUSY_RESUBMITS = 3;
+const BUSY_RESUBMIT_WINDOW_MS = 30 * 60 * 1000;
 
 function parseJson<T>(value: unknown): T {
   try {
@@ -38,16 +49,17 @@ export function isStudioTask(task: any) {
 // Provider errors can carry internal details (our API key's remaining budget,
 // the account balance, task ids). Customers only ever get one of these stable
 // messages; the raw text stays in ai_task.task_result for admins.
+export function isBusyError(error?: string | null) {
+  return /busy|allocating resources|rate limit|too many requests|timed? ?out/i.test(
+    error || ''
+  );
+}
+
 export function publicTaskError(error?: string | null) {
   if (!error) return null;
   if (/content policy|safety filter/i.test(error))
     return 'Content policy violation';
-  if (
-    /busy|allocating resources|rate limit|too many requests|timed? ?out/i.test(
-      error
-    )
-  )
-    return 'Service busy';
+  if (isBusyError(error)) return 'Service busy';
   return 'Generation failed';
 }
 
@@ -258,6 +270,63 @@ async function pollFal(
   return { status: 'running' };
 }
 
+/**
+ * Resubmit a Genjutsu run EvoLink failed for lack of capacity. Returns true
+ * when the run stays alive (resubmitted, or another poll is resubmitting).
+ */
+async function resubmitBusyGenjutsu(
+  task: any,
+  error: string,
+  configs: Record<string, string>
+) {
+  if (
+    task.model !== GENJUTSU_MODEL_ID ||
+    task.provider !== 'evolink' ||
+    !isBusyError(error) ||
+    Date.now() - new Date(task.createdAt).getTime() > BUSY_RESUBMIT_WINDOW_MS
+  )
+    return false;
+  const info = parseJson<{ busyResubmits?: number }>(task.taskInfo);
+  const resubmits = Number(info.busyResubmits) || 0;
+  if (resubmits >= BUSY_RESUBMITS) return false;
+  const options = parseJson<{
+    referenceVideo?: string;
+    leadImage?: string;
+    crowdImage?: string | null;
+  }>(task.options);
+  if (!options.referenceVideo || !options.leadImage) return false;
+  // Clearing the provider id claims the resubmit; a concurrent poll that
+  // loses the swap just keeps waiting.
+  if (!(await swapProviderTaskId(task.id, task.taskId, null))) return true;
+  await mergeTaskInfo(task.id, { busyResubmits: resubmits + 1 });
+  try {
+    const id = await new EvolinkProvider({
+      apiKey: configs.evolink_api_key,
+      baseUrl: configs.evolink_base_url,
+    }).createVideo(
+      genjutsuEvolinkRequest({
+        prompt: task.prompt,
+        referenceVideo: options.referenceVideo,
+        leadImage: options.leadImage,
+        crowdImage: options.crowdImage,
+      })
+    );
+    await setProviderTaskId(task.id, id);
+    console.warn('[genjutsu] resubmitted busy run', {
+      taskId: task.id,
+      attempt: resubmits + 1,
+    });
+    return true;
+  } catch (resubmitError: any) {
+    await updateTask({
+      taskId: task.id,
+      status: AITaskStatus.FAILED,
+      taskResult: { error: resubmitError?.message || error },
+    });
+    return true;
+  }
+}
+
 /** Poll the provider once and persist a terminal status. Safe to repeat. */
 export async function refreshTask(task: any, configs: Record<string, string>) {
   if (task.status === AITaskStatus.FAILED) {
@@ -328,6 +397,12 @@ export async function refreshTask(task: any, configs: Record<string, string>) {
             configs
           );
 
+    if (
+      outcome.status === 'failed' &&
+      (await resubmitBusyGenjutsu(task, outcome.error, configs))
+    ) {
+      return taskView(await findTask(task.id));
+    }
     if (outcome.status === 'failed') {
       await updateTask({
         taskId: task.id,

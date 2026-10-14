@@ -224,6 +224,23 @@ export async function setProviderTaskId(
 }
 
 /**
+ * Compare-and-swap the provider task id. Returns false when another poll
+ * already replaced it — guards a resubmit from running twice.
+ */
+export async function swapProviderTaskId(
+  taskId: string,
+  from: string,
+  to: string | null
+): Promise<boolean> {
+  const rows = await db()
+    .update(aiTask)
+    .set({ taskId: to })
+    .where(and(eq(aiTask.id, taskId), eq(aiTask.taskId, from)))
+    .returning({ id: aiTask.id });
+  return rows.length > 0;
+}
+
+/**
  * Merge fields into a task's taskInfo JSON (keeps creditId for revocation).
  */
 export async function mergeTaskInfo(

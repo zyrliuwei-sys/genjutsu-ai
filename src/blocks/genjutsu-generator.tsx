@@ -78,14 +78,14 @@ export function GenjutsuGenerator() {
             retry: m['landing.generator.retry'](),
             paywallTitle: m['landing.generator.paywall_title'](),
             paywallFirst: m['landing.generator.paywall_first']({
-              price: `$${(pricingCatalog.pack_first.priceInCents / 100).toFixed(2)}`,
+              price: `$${(pricingCatalog.pack_1.priceInCents / 100).toFixed(2)}`,
             }),
             paywallTopUp: m['landing.generator.paywall_top_up'](),
             yourVideo: m['landing.generator.your_video'](),
             summaryMotion: m['landing.generator.summary_motion'](),
             summaryPhoto: m['landing.generator.summary_photo'](),
             firstPrice: m['landing.generator.first_price']({
-              price: `$${(pricingCatalog.pack_first.priceInCents / 100).toFixed(2)}`,
+              price: `$${(pricingCatalog.pack_1.priceInCents / 100).toFixed(2)}`,
             }),
             referenceDisclaimer: m['landing.generator.reference_disclaimer'](),
             removeReference: m['landing.generator.remove_reference'](),

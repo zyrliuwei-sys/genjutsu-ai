@@ -9,11 +9,10 @@ import {
 import {
   buildGenjutsuPrompt,
   GENJUTSU_ENDPOINT,
-  GENJUTSU_EVOLINK_MODEL,
-  GENJUTSU_EVOLINK_QUALITY,
   GENJUTSU_MODEL_ID,
   GENJUTSU_REFERENCES,
   genjutsuCredits,
+  genjutsuEvolinkRequest,
   genjutsuReadiness,
   isGenjutsuAspect,
 } from '@/config/genjutsu';
@@ -35,7 +34,7 @@ import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respData, respErr } from '@/lib/resp';
 import { verifyVideoReceipt } from '@/lib/video-receipt.server';
 
-import { publicTaskError, taskView } from '../studio/-shared';
+import { isBusyError, publicTaskError, taskView } from '../studio/-shared';
 
 const MAX_PROMPT = 2000;
 
@@ -232,17 +231,26 @@ async function POST({ request }: { request: Request }) {
           apiKey: configs.evolink_api_key,
           baseUrl: configs.evolink_base_url,
         });
-        const id = await provider.createVideo({
-          model: GENJUTSU_EVOLINK_MODEL,
+        const body = genjutsuEvolinkRequest({
           prompt,
-          video_urls: [referenceVideo],
-          image_urls: crowdImage ? [leadImage, crowdImage] : [leadImage],
-          // O3 edits keep the input framing (the clip is already normalized
-          // to the chosen aspect), so no aspect_ratio — same body as the
-          // EvoLink playground request.
-          quality: GENJUTSU_EVOLINK_QUALITY,
-          keep_original_sound: true,
+          referenceVideo,
+          leadImage,
+          crowdImage,
         });
+        // A busy provider usually frees up within seconds; retry the submit
+        // before failing the paid run.
+        let id: string;
+        for (let attempt = 0; ; attempt++) {
+          try {
+            id = await provider.createVideo(body);
+            break;
+          } catch (error: any) {
+            if (attempt >= 2 || !isBusyError(error?.message)) throw error;
+            await new Promise((resolve) =>
+              setTimeout(resolve, 2000 * (attempt + 1))
+            );
+          }
+        }
         await setProviderTaskId(task.id, id);
       } else {
         const imageRefs = crowdImage ? [crowdImage] : [];

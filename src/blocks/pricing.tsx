@@ -170,21 +170,20 @@ export function Pricing({
       key: 'one-time',
       label: m['landing.pricing.one_time'](),
       plans: [
-        firstOrder
-          ? {
-              ...plan('pack_first', m['landing.pricing.pack_first'](), dialog),
-              originalPrice: usd(pricingCatalog.pack_starter.priceInCents),
-              badge: m['landing.pricing.first_order_badge'](),
-            }
-          : plan('pack_starter', m['landing.pricing.pack_starter']()),
         // A first-time buyer at the paywall is deciding on one video: the
-        // $4.90 entry pack is the recommendation there, not the $24.90 bundle.
+        // single video is the recommendation there, not a bundle.
         plan(
-          'pack_plus',
+          'pack_1',
+          m['landing.pricing.pack_single'](),
+          dialog && firstOrder
+        ),
+        plan('pack_2', m['landing.pricing.pack_double']()),
+        plan(
+          'pack_3',
           m['landing.pricing.pack_plus'](),
           !(dialog && firstOrder)
         ),
-        plan('pack_pro', m['landing.pricing.pack_pro']()),
+        plan('pack_5', m['landing.pricing.pack_pro']()),
       ],
     },
   ];
