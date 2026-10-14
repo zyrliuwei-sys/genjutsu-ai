@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 import {
   BadgeCheck,
+  ChartNoAxesCombined,
   CreditCard,
   Home,
   LayoutDashboard,
@@ -30,6 +31,12 @@ function AdminLayout() {
       href: '/admin',
       label: m['admin.nav.overview'](),
       icon: LayoutDashboard,
+      group,
+    },
+    {
+      href: '/admin/analytics',
+      label: m['admin.nav.analytics'](),
+      icon: ChartNoAxesCombined,
       group,
     },
     {

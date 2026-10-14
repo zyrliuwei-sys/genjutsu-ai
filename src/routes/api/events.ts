@@ -20,7 +20,8 @@ function cleanProps(value: unknown): Props | undefined {
 
 // Server-side attribution on every event, so anonymous drop-off can be split
 // by source and country: `src` is the first-touch cookie set in server.ts,
-// `country` the edge-provided cf-ipcountry header.
+// `country` the edge-provided cf-ipcountry header. `v` (release build id) is
+// added from the body.
 function trafficProps(request: Request): Props {
   const props: Props = {};
   const src = getCookieFromHeader(request.headers.get('cookie'), 'utm_source');
@@ -52,7 +53,11 @@ async function POST({ request }: { request: Request }) {
       anonId,
       userId: session?.user?.id,
       path: typeof body.path === 'string' ? body.path : '',
-      props: { ...cleanProps(body.props), ...trafficProps(request) },
+      props: {
+        ...cleanProps(body.props),
+        ...trafficProps(request),
+        ...(typeof body.v === 'string' && { v: body.v.slice(0, 40) }),
+      },
     });
     return respOk();
   } catch {

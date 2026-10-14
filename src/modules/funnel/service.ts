@@ -3,6 +3,8 @@ import { funnelEvent } from '@/config/db/schema';
 import { getUuid } from '@/lib/hash';
 
 export const FUNNEL_EVENTS = [
+  // Every client-side page load / navigation (public pages only).
+  'page_view',
   'create_view',
   'hero_cta',
   'sticky_cta',
@@ -33,6 +35,22 @@ export function isFunnelEvent(value: unknown): value is FunnelEventName {
   return FUNNEL_EVENTS.includes(value as FunnelEventName);
 }
 
+// Attribution keys added server-side; kept when the client props overflow.
+const ATTRIBUTION_KEYS = ['src', 'country', 'v'];
+const MAX_PROPS_LENGTH = 1000;
+
+// Never cut the JSON mid-string: analytics queries json_extract these rows.
+function serializeProps(props?: Record<string, string | number | boolean>) {
+  if (!props) return '';
+  const json = JSON.stringify(props);
+  if (json.length <= MAX_PROPS_LENGTH) return json;
+  return JSON.stringify(
+    Object.fromEntries(
+      Object.entries(props).filter(([key]) => ATTRIBUTION_KEYS.includes(key))
+    )
+  );
+}
+
 export async function recordFunnelEvent(input: {
   event: FunnelEventName;
   anonId: string;
@@ -48,6 +66,6 @@ export async function recordFunnelEvent(input: {
       anonId: input.anonId,
       userId: input.userId || null,
       path: (input.path || '').slice(0, 200),
-      props: input.props ? JSON.stringify(input.props).slice(0, 500) : '',
+      props: serializeProps(input.props),
     });
 }

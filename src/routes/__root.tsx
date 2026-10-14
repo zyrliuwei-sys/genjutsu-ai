@@ -21,6 +21,7 @@ import { GoogleAnalytics } from '@/components/analytics/google-analytics';
 import { Plausible } from '@/components/analytics/plausible';
 import { CustomerService } from '@/components/customer-service';
 import { GoogleOneTap } from '@/components/google-one-tap';
+import { PageViewTracker } from '@/components/page-view-tracker';
 import { SandboxPreviewBridge } from '@/components/sandbox-preview-bridge';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -99,6 +100,7 @@ function RootComponent() {
       >
         <Outlet />
         <SandboxPreviewBridge />
+        <PageViewTracker />
         <Toaster theme="dark" position="top-center" richColors />
         <GoogleOneTap />
         {analytics?.gaId ? (
