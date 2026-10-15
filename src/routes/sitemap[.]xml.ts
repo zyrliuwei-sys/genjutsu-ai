@@ -9,6 +9,7 @@ const STATIC_PATHS = [
   '/pricing',
   '/privacy-policy',
   '/terms-of-service',
+  '/aup',
   '/ai-genjutsu-generator',
   '/genjutsu-video-ai',
   '/genjutsu-free',

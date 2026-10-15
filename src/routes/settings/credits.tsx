@@ -5,6 +5,7 @@ import { Coins } from 'lucide-react';
 
 import { tDynamic } from '@/core/i18n/dynamic';
 import { Link } from '@/core/i18n/navigation';
+import { GENJUTSU_CREDITS } from '@/config/genjutsu';
 import { apiGet, type PageResult } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
@@ -162,6 +163,13 @@ function CreditsPage() {
           <p className="text-3xl font-bold">
             {balanceLoaded ? (balance ?? 0) : '…'}
           </p>
+          {balanceLoaded && (
+            <p className="text-muted-foreground mt-1 text-sm">
+              {m['settings.overview.balance_hint']({
+                count: Math.floor((balance ?? 0) / GENJUTSU_CREDITS),
+              })}
+            </p>
+          )}
         </CardContent>
       </Card>
 

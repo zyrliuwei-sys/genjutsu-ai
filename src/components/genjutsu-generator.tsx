@@ -601,6 +601,7 @@ export function GenjutsuGenerator({
       });
   };
   const [draftReady, setDraftReady] = useState(false);
+  const linkedEffectPending = useRef(true);
   const [draftOwner, setDraftOwner] = useState<string>();
   const [savingDraft, setSavingDraft] = useState(false);
   const [checkingGeneration, setCheckingGeneration] = useState(false);
@@ -666,6 +667,24 @@ export function GenjutsuGenerator({
         }
         if (draft && GENJUTSU_ASPECTS.includes(draft.aspect as GenjutsuAspect))
           setAspect(draft.aspect as GenjutsuAspect);
+        // A showcase card links to /create?effect=<asset>: open that effect
+        // once, the way clicking its card in the strip would.
+        const linked = linkedEffectPending.current
+          ? TEMPLATES.find(
+              (t) =>
+                t.asset ===
+                new URLSearchParams(window.location.search).get('effect')
+            )
+          : undefined;
+        linkedEffectPending.current = false;
+        if (linked) {
+          setReferenceSource('effect');
+          setReferenceClosed(false);
+          setReferenceVideo(undefined);
+          setSelectedId(linked.id);
+          setExampleId(linked.id);
+          setPreviewMode('example');
+        }
       })
       .catch(() => {
         if (active) {

@@ -1,6 +1,6 @@
 /**
  * Example creations shown on the landing page. Each one opens the studio
- * with its prompt pre-filled, so every card is a one-click starting point.
+ * on the matching effect, so every card is a one-click starting point.
  */
 export type ShowcaseItem = {
   key: string;
@@ -112,14 +112,6 @@ export const SHOWCASE_ITEMS: ShowcaseItem[] = [
       'A man in a red suit dances through a crowd in a moody blue hall, everyone moves around him, music video',
   },
   {
-    key: 'laundry',
-    image: '/videos/showcase/laundry.webp',
-    video: '/videos/showcase/laundry.mp4',
-    kind: 'video',
-    prompt:
-      'A woman in a red dress hangs white shirts on a sunlit balcony clothesline above old city rooftops, golden backlight, gentle breeze, lifestyle film',
-  },
-  {
     key: 'homecoming',
     image: '/videos/showcase/homecoming.webp',
     video: '/videos/showcase/homecoming.mp4',
@@ -225,7 +217,7 @@ export const SHOWCASE_ITEMS: ShowcaseItem[] = [
   },
 ];
 
-export function createHref(item: Pick<ShowcaseItem, 'kind' | 'prompt'>) {
-  const params = new URLSearchParams({ kind: item.kind, prompt: item.prompt });
-  return `/create?${params.toString()}`;
+/** Showcase keys are effect asset ids: open the studio on that effect. */
+export function createHref(item: Pick<ShowcaseItem, 'key'>) {
+  return `/create?effect=${encodeURIComponent(item.key)}`;
 }

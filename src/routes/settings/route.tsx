@@ -3,7 +3,6 @@ import {
   Coins,
   CreditCard,
   Home,
-  Key,
   LayoutDashboard,
   LifeBuoy,
   Receipt,
@@ -52,12 +51,6 @@ function SettingsLayout() {
       href: '/settings/credits',
       label: m['settings.nav.credits'](),
       icon: Coins,
-      group,
-    },
-    {
-      href: '/settings/apikeys',
-      label: m['settings.nav.apikeys'](),
-      icon: Key,
       group,
     },
     {

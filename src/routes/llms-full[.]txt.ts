@@ -13,12 +13,13 @@ const STATIC_PAGES: { path: string; title: string; description: string }[] = [
   {
     path: '/create',
     title: 'Create',
-    description: 'AI video creation and motion transfer studio',
+    description:
+      'Character swap studio: put yourself into an effect clip or your own video from one photo',
   },
   {
     path: '/pricing',
     title: 'Pricing',
-    description: 'One-time credit packs with no automatic renewal',
+    description: 'One-time video packs from $9.90 with no automatic renewal',
   },
   {
     path: '/privacy-policy',

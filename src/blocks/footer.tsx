@@ -8,8 +8,8 @@ export function Footer() {
       title: m['landing.footer.product'](),
       hideOnMobile: true,
       links: [
-        { label: m['landing.footer.video'](), href: '/create?kind=video' },
-        { label: m['landing.footer.image'](), href: '/create?kind=video' },
+        { label: m['landing.footer.video'](), href: '/create' },
+        { label: m['landing.footer.image'](), href: '/genjutsu-video-ai' },
         { label: m['landing.nav.pricing'](), href: '/pricing' },
         { label: m['landing.footer.guide'](), href: '/#guide' },
       ],

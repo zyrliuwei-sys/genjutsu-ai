@@ -11,6 +11,8 @@ type Search = {
   kind?: 'video' | 'image';
   prompt?: string;
   model?: string;
+  /** Effect asset id from a showcase card; the generator preselects it. */
+  effect?: string;
 };
 
 export const Route = createFileRoute('/create')({
@@ -24,6 +26,10 @@ export const Route = createFileRoute('/create')({
         ? search.prompt.slice(0, 2000)
         : undefined,
     model: typeof search.model === 'string' ? search.model : undefined,
+    effect:
+      typeof search.effect === 'string'
+        ? search.effect.slice(0, 64)
+        : undefined,
   }),
   loader: () => {
     const locale = getLocale();

@@ -13,7 +13,6 @@ import { Footer } from '@/blocks/footer';
 import { Compare, Guide } from '@/blocks/guide';
 import { Header } from '@/blocks/header';
 import { Hero } from '@/blocks/hero';
-import { Models } from '@/blocks/models';
 import { Pricing } from '@/blocks/pricing';
 import { Showcase } from '@/blocks/showcase';
 
@@ -124,9 +123,6 @@ function HomePage() {
           <ContentLinks />
         </div>
         <Features />
-        <div className="max-md:hidden">
-          <Models />
-        </div>
         <Showcase />
         <div className="max-md:hidden">
           <About />
