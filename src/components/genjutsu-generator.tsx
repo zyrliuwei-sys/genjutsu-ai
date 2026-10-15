@@ -191,6 +191,18 @@ const isDone = (task?: GenjutsuTask) =>
 
 const RESUME_KEY = 'genjutsu-resume-after-signin';
 
+// Draft saves go to IndexedDB, which fails in private mode or on full storage;
+// keep the browser's reason so the funnel shows why.
+function trackDraftError(stage: string, error: unknown) {
+  track('generate_error', {
+    stage,
+    error: (error instanceof Error
+      ? `${error.name}: ${error.message}`
+      : String(error)
+    ).slice(0, 200),
+  });
+}
+
 function assetIsReady(asset?: Asset) {
   return Boolean(asset?.url || asset?.file) && !asset?.uploading;
 }
@@ -702,6 +714,8 @@ export function GenjutsuGenerator({
       savedAt: Date.now(),
     });
   }
+  // Autosave reruns on every input change; report its failure once per visit.
+  const autosaveErrorTracked = useRef(false);
   useEffect(() => {
     if (
       !draftReady ||
@@ -711,9 +725,12 @@ export function GenjutsuGenerator({
       return;
     // A committed binary save is required before the checkout dialog opens.
     // Autosave also covers ordinary navigation and reloads.
-    void persistDraft().catch(() =>
-      toast.error('Could not save media for your return')
-    );
+    // Failures stay silent here: Generate and checkout warn when it matters.
+    void persistDraft().catch((error) => {
+      if (autosaveErrorTracked.current) return;
+      autosaveErrorTracked.current = true;
+      trackDraftError('draft_autosave', error);
+    });
   }, [
     draftReady,
     draftOwner,
@@ -1346,26 +1363,39 @@ export function GenjutsuGenerator({
       leadReady: assetIsReady(lead),
       referenceReady: assetIsReady(referenceVideo),
     });
+    // Check the inputs before sending the visitor to sign in, so they never
+    // sign in only to be told something is missing.
+    if (!assetIsReady(lead) || !assetIsReady(referenceVideo)) {
+      track('generate_error', { stage: 'assets' });
+      toast.error('Upload a main character image and a reference video');
+      return;
+    }
     setSavingDraft(true);
+    let draftSaved = true;
     try {
       await persistDraft();
-    } catch {
-      track('generate_error', { stage: 'draft' });
-      toast.error('Could not save media for your return');
-      return;
+    } catch (error) {
+      // The draft only restores media after a redirect; a failed save (private
+      // mode, full storage) must not block sign-in or generation.
+      draftSaved = false;
+      trackDraftError('draft', error);
     } finally {
       setSavingDraft(false);
     }
     if (!user) {
-      if (assetIsReady(lead) && assetIsReady(referenceVideo))
-        sessionStorage.setItem(RESUME_KEY, 'generate');
+      if (draftSaved) {
+        try {
+          sessionStorage.setItem(RESUME_KEY, 'generate');
+        } catch {
+          /* Storage unavailable — the user can click again. */
+        }
+      } else {
+        toast.warning(
+          'Could not save your media — you may need to upload it again after signing in'
+        );
+      }
       track('signin_redirect');
       router.push(`/sign-in?callbackUrl=${encodeURIComponent('/create')}`);
-      return;
-    }
-    if (!assetIsReady(lead) || !assetIsReady(referenceVideo)) {
-      track('generate_error', { stage: 'assets' });
-      toast.error('Upload a main character image and a reference video');
       return;
     }
     setCheckingGeneration(true);
@@ -1416,6 +1446,14 @@ export function GenjutsuGenerator({
   useEffect(() => {
     if (resumed.current || !user || !canGenerate) return;
     if (!assetIsReady(lead) || !assetIsReady(referenceVideo)) return;
+    // Wait for the restored reference effect to load; resuming earlier trips
+    // the effect_loading guard in runGeneration.
+    if (
+      referenceSource === 'effect' &&
+      !referenceClosed &&
+      (effectQuery.isFetching || effectQuery.isError || !effectQuery.data)
+    )
+      return;
     let pending: string | null = null;
     try {
       pending = sessionStorage.getItem(RESUME_KEY);
@@ -2254,7 +2292,14 @@ export function GenjutsuGenerator({
               const current = await readinessQuery.refetch();
               if (current.isError || !current.data?.ready)
                 throw new Error(copy.serviceUnavailable);
-              await persistDraft();
+              // The draft only restores media after checkout returns; a failed
+              // save must not block payment.
+              await persistDraft().catch((error) => {
+                trackDraftError('draft_checkout', error);
+                toast.warning(
+                  'Could not save your media — you may need to upload it again after checkout'
+                );
+              });
             }}
             clipSeconds={referenceVideo?.duration || durationTier}
             balanceCredits={creditsQuery.data?.balance || 0}
