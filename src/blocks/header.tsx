@@ -4,6 +4,7 @@ import { SiteHeader } from '@/components/site-header';
 export function Header() {
   const navLinks = [
     { href: '/create', label: m['landing.nav.create']() },
+    { href: '/crazy-frog-ai', label: m['frog.nav']() },
     { href: '/genjutsu-video-ai', label: m['landing.nav.features']() },
     {
       href: '/higgsfield-genjutsu-alternative',

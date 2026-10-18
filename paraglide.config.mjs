@@ -8,15 +8,33 @@ export const paraglideConfig = {
   urlPatterns: [
     {
       pattern: '/api/:path(.*)?',
-      localized: [['en', '/api/:path(.*)?']],
+      localized: [
+        ['en', '/api/:path(.*)?'],
+        ['de', '/api/:path(.*)?'],
+        ['fr', '/api/:path(.*)?'],
+        ['es', '/api/:path(.*)?'],
+        ['pt-BR', '/api/:path(.*)?'],
+      ],
     },
     {
       pattern: '/',
-      localized: [['en', '/']],
+      localized: [
+        ['de', '/de'],
+        ['fr', '/fr'],
+        ['es', '/es'],
+        ['pt-BR', '/pt-br'],
+        ['en', '/'],
+      ],
     },
     {
       pattern: '/:path(.*)?',
-      localized: [['en', '/:path(.*)?']],
+      localized: [
+        ['de', '/de/:path(.*)?'],
+        ['fr', '/fr/:path(.*)?'],
+        ['es', '/es/:path(.*)?'],
+        ['pt-BR', '/pt-br/:path(.*)?'],
+        ['en', '/:path(.*)?'],
+      ],
     },
   ],
 };

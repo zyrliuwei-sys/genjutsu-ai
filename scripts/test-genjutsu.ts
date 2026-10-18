@@ -36,7 +36,7 @@ assert.equal(
 );
 assert.equal(ready.provider, 'evolink');
 assert.deepEqual(ready.aspects, ['16:9', '9:16']);
-assert.equal(ready.maxVideoMB, 100);
+assert.equal(ready.maxVideoMB, 30);
 assert.equal(
   genjutsuReadiness({ ...storage, fal_api_key: 'test' }).provider,
   'fal'
@@ -140,7 +140,7 @@ try {
     keep_original_sound: true,
   });
   assert.equal(id, 'test-evo-id');
-  assert.equal(calls.at(-1)?.body.model, 'kling-o1-video-edit');
+  assert.equal(calls.at(-1)?.body.model, 'kling-o3-video-edit');
   assert.equal(calls.at(-1)?.body.aspect_ratio, '9:16');
   responses = [
     {

@@ -222,6 +222,157 @@
     0 0 12px rgb(0 0 0 / 0.6);
 }
 
+/* Studio surfaces follow the page theme; only loaded footage stays dark. */
+.eg-generator {
+  --studio-panel: oklch(0.995 0.003 85);
+  --studio-upload: oklch(0.95 0.012 78);
+  --studio-screen: oklch(0.965 0.009 80);
+  --studio-line: oklch(0.79 0.018 70);
+  background: var(--secondary);
+  border-color: var(--studio-line);
+}
+.dark .eg-generator {
+  --studio-panel: oklch(0.255 0.009 60);
+  --studio-upload: oklch(0.315 0.014 65);
+  --studio-screen: oklch(0.205 0.008 55);
+  --studio-line: oklch(0.43 0.018 65);
+}
+.eg-generator-controls,
+.eg-generator-preview {
+  background: var(--studio-panel);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.eg-generator-effect {
+  background: var(--studio-screen);
+  border-color: var(--studio-line);
+}
+.eg-generator-upload {
+  background: var(--studio-upload);
+  border-color: var(--studio-line);
+}
+.eg-generator-upload:has(input:not(:disabled)):is(:hover, :focus-within) {
+  background: color-mix(in oklch, var(--primary) 10%, var(--studio-upload));
+  border-color: var(--primary-text);
+}
+.eg-generator-upload:has(input:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+.eg-generator-tabs {
+  background: var(--studio-screen);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.eg-generator-tabs button[aria-pressed='true'] {
+  background: var(--studio-upload);
+  color: var(--foreground);
+  box-shadow:
+    inset 0 0 0 1px var(--border),
+    0 1px 2px rgb(0 0 0 / 0.06);
+}
+.eg-generator-screen {
+  background: var(--screen);
+}
+.eg-generator-screen[data-empty='true'] {
+  background: var(--studio-screen);
+  box-shadow: inset 0 0 0 1px var(--border);
+  color: var(--foreground);
+}
+.eg-generator-empty-icon {
+  background: color-mix(in oklch, var(--primary) 16%, var(--studio-panel));
+  color: var(--primary-text);
+  border: 1px solid color-mix(in oklch, var(--primary) 25%, var(--card));
+}
+.eg-generator-submit {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
+}
+.eg-generator-submit:disabled {
+  background: color-mix(in oklch, var(--primary) 24%, var(--studio-panel));
+  color: var(--foreground);
+  border-color: color-mix(in oklch, var(--primary) 40%, var(--studio-panel));
+  box-shadow: none;
+}
+
+/* A custom-reference studio has no effects row beneath its preview. */
+.eg-generator[data-themed='true'] .eg-generator-controls > h2,
+.eg-generator[data-themed='true'] #genjutsu-effects > h2,
+.eg-generator[data-reference-only='true'] .eg-generator-controls > h2 {
+  font-family: var(--font-sans);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.025em;
+}
+.eg-generator[data-themed='true'] .eg-generator-template-list {
+  scroll-padding: 0;
+}
+/* Theme cards sit in one row: a swipeable strip on small screens, every card
+   side by side on desktop. */
+.eg-generator[data-themed='true'] .eg-generator-template-list > button,
+.eg-generator[data-themed='true'] .eg-generator-template-list > label {
+  width: 42%;
+  aspect-ratio: 16 / 9;
+}
+/* Own-video card leads the theme row on every breakpoint. */
+.eg-generator[data-themed='true'] .eg-generator-template-list > label {
+  display: flex;
+  position: relative;
+  gap: 4px;
+}
+.eg-generator[data-themed='true'] .eg-generator-template-list > label::before {
+  display: none;
+}
+@media (min-width: 640px) {
+  .eg-generator[data-themed='true'] .eg-generator-template-list > button,
+  .eg-generator[data-themed='true'] .eg-generator-template-list > label {
+    width: 28%;
+  }
+}
+@media (min-width: 1024px) {
+  .eg-generator[data-themed='true'] .eg-generator-template-list {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+  .eg-generator[data-themed='true'] .eg-generator-template-list > button,
+  .eg-generator[data-themed='true'] .eg-generator-template-list > label {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+  }
+}
+@media (min-width: 1024px) {
+  .eg-generator[data-reference-only='true'] {
+    grid-template-rows: auto;
+    align-items: stretch;
+  }
+  .eg-generator[data-reference-only='true'] .eg-generator-controls {
+    grid-row: 1;
+    gap: 18px;
+  }
+  .eg-generator[data-reference-only='true'] .eg-generator-assets {
+    flex: none;
+    gap: 16px;
+  }
+  .eg-generator[data-reference-only='true'] .eg-generator-assets > * {
+    flex: none;
+  }
+  .eg-generator[data-reference-only='true'] .eg-generator-upload {
+    aspect-ratio: auto;
+    height: 152px;
+    min-height: 0;
+    flex: none;
+  }
+  .eg-generator[data-reference-only='true'] .eg-generator-preview {
+    grid-row: 1;
+  }
+  .eg-generator[data-reference-only='true'] .eg-generator-screen {
+    flex: 1;
+    width: 100%;
+    height: auto;
+    min-height: 360px;
+  }
+}
+
 @layer components {
   /* Film grain, used as a quiet texture behind the hero and studio. */
   .eg-glow {

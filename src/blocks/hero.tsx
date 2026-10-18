@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { ArrowRight, Clapperboard } from 'lucide-react';
+import { ArrowRight, ChevronRight } from 'lucide-react';
 
+import { Link } from '@/core/i18n/navigation';
 import { track } from '@/lib/track';
 import { m } from '@/paraglide/messages.js';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
@@ -48,10 +49,35 @@ export function Hero() {
     <section className="relative overflow-hidden px-4 pt-10 pb-6 sm:pt-14 sm:pb-20 lg:pt-16 lg:pb-28">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-7xl text-center">
-          <p className="text-primary-text inline-flex items-center gap-2.5 text-xs font-medium tracking-[0.12em] uppercase">
-            <Clapperboard aria-hidden className="size-4" strokeWidth={1.5} />
-            {m['landing.hero.eyebrow']()}
-          </p>
+          {/* Newest effect gets the eyebrow slot: an announcement pill into
+              its own landing page. */}
+          <Link
+            href="/crazy-frog-ai"
+            onClick={() => track('hero_cta', { target: 'crazy_frog' })}
+            className="border-border bg-card/60 hover:border-primary/60 group inline-flex max-w-full items-center gap-2.5 rounded-full border py-1 pr-3 pl-1 text-sm transition-colors"
+          >
+            <img
+              src="/videos/crazy-frog/overpass.jpg"
+              alt=""
+              aria-hidden
+              width={28}
+              height={28}
+              className="size-7 shrink-0 rounded-full object-cover"
+            />
+            <span className="bg-primary text-primary-foreground shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase">
+              {m['landing.hero.new_badge']()}
+            </span>
+            <span className="truncate font-medium max-sm:hidden">
+              {m['landing.hero.new_label']()}
+            </span>
+            <span className="truncate font-medium sm:hidden">
+              {m['landing.hero.new_label_short']()}
+            </span>
+            <ChevronRight
+              aria-hidden
+              className="text-muted-foreground size-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+            />
+          </Link>
           <h1 className="mx-auto mt-5 max-w-5xl font-sans text-[clamp(2.75rem,5.5vw,4.75rem)] leading-[1.06] font-semibold tracking-[-0.055em] text-balance">
             {m['landing.hero.headline']()}
           </h1>

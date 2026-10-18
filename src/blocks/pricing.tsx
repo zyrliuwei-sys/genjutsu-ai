@@ -212,7 +212,7 @@ export function Pricing({
       }),
     onSuccess: (data) => {
       if (!data?.checkout_url) {
-        toast.error('Checkout failed');
+        toast.error(m['landing.pricing.checkout_failed']());
         setLoadingProvider(null);
         return;
       }
@@ -221,7 +221,7 @@ export function Pricing({
     },
     onError: (err: any) => {
       track('checkout_failed', { error: String(err?.message || '') });
-      toast.error(err?.message || 'Checkout failed');
+      toast.error(err?.message || m['landing.pricing.checkout_failed']());
       setLoadingProvider(null);
     },
   });
@@ -232,7 +232,7 @@ export function Pricing({
     try {
       await beforeCheckout?.();
     } catch {
-      toast.error('Could not save media for your return');
+      toast.error(m['landing.pricing.save_media_failed']());
       return;
     }
     setLoadingProvider(provider ?? null);

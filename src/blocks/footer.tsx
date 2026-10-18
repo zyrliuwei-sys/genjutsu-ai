@@ -9,6 +9,7 @@ export function Footer() {
       hideOnMobile: true,
       links: [
         { label: m['landing.footer.video'](), href: '/create' },
+        { label: m['frog.nav'](), href: '/crazy-frog-ai' },
         { label: m['landing.footer.image'](), href: '/genjutsu-video-ai' },
         { label: m['landing.nav.pricing'](), href: '/pricing' },
         { label: m['landing.footer.guide'](), href: '/#guide' },

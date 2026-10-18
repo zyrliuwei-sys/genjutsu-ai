@@ -60,11 +60,34 @@ export function genjutsuCredits(seconds = GENJUTSU_SECONDS) {
 }
 export const GENJUTSU_CREDITS = genjutsuCredits();
 
+/** Built-in chase scenes use prepared 10s / 1280×720 generation inputs. */
+export const CRAZY_FROG_THEMES = [
+  { slug: 'overpass', name: 'The overpass chase' },
+  { slug: 'neon-city', name: 'Neon city getaway' },
+  { slug: 'chocolate', name: 'Chocolate factory escape' },
+  { slug: 'pixel-world', name: 'Pixel world pursuit' },
+  { slug: 'circuit-board', name: 'Inside a circuit board' },
+  { slug: 'halloween', name: 'Halloween chase' },
+] as const;
+const CRAZY_FROG_DIRECTION =
+  'Replace only the main crouching rider with the person from the image. Preserve the invisible motorcycle illusion: no bike, wheels, seat or handlebars under the main rider. Keep the pursuer, scenery, camera movement, riding pose, jumps and escape from the supplied reference video. Do not introduce a frog character or new actions absent from the reference.';
+
 /** Trusted reference context: never transform scenery when replacing a performer. */
 export const GENJUTSU_REFERENCES: Record<
   string,
   { name: string; direction: string }
 > = {
+  ...Object.fromEntries(
+    CRAZY_FROG_THEMES.map((theme) => [
+      `crazy-frog-${theme.slug}`,
+      { name: theme.name, direction: CRAZY_FROG_DIRECTION },
+    ])
+  ),
+  'crazy-frog-ai': {
+    name: 'Crazy Frog AI',
+    direction:
+      'Replace only the main crouching rider with the person from the image. Preserve the invisible motorcycle illusion: no bike, wheels, seat or handlebars under the main rider. Keep the pursuer, road, camera movement, riding pose, jumps and escape from the supplied reference video. Do not introduce a frog character or new actions absent from the reference.',
+  },
   'moonlit-walk': {
     name: 'Moonlit Walk',
     direction:

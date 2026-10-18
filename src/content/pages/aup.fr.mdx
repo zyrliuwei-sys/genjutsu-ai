@@ -1,0 +1,78 @@
+export const meta = {
+  title: 'Politique d’utilisation acceptable AIGC (AUP) | Genjutsu AI',
+  description:
+    'Standards de contenu, catégories interdites, canaux de signalement et modération chez Genjutsu AI.',
+  updated_at: '2026-10-09',
+};
+
+Cette Politique d’utilisation acceptable AIGC (AUP) explique les standards de contenu qui s’appliquent lorsque vous utilisez Genjutsu AI pour créer, importer, stocker ou partager des images et vidéos générées par IA. Elle complète nos [Conditions d’utilisation](/terms-of-service). Si cette AUP entre en conflit avec une obligation légale impérative, l’obligation légale prévaut.
+
+## Standards de contenu
+
+Vous devez utiliser Genjutsu AI de manière responsable et uniquement à des fins licites et autorisées. En particulier :
+
+- Utilisez des prompts, images de référence, logos, personnages et autres éléments que vous avez le droit et l’autorisation d’utiliser.
+- Obtenez le consentement réel des personnes identifiables avant d’importer leur image ou de générer un contenu qui les représente.
+- N’utilisez pas les médias générés pour tromper, frauder, harceler, menacer, exploiter ou mettre une autre personne en danger.
+- Respectez la vie privée, la propriété intellectuelle, le droit à l’image, les marques et les autres droits.
+- N’essayez pas de contourner les contrôles de sécurité, les filtres, les limites de compte ou la modération en dissimulant un prompt ou en utilisant un autre compte.
+- Lorsqu’une création générée pourrait être confondue avec un enregistrement ou une déclaration réels, indiquez qu’elle est générée par IA lorsque vous la partagez.
+
+## Catégories de contenu interdites
+
+Les contenus suivants sont interdits. Selon la gravité et les circonstances, nous pouvons bloquer un prompt ou un résultat avant publication, supprimer un contenu, restreindre des fonctionnalités, suspendre ou résilier un compte.
+
+### 1. Pornographie et contenus NSFW
+
+Ne générez pas de pornographie, d’actes sexuels explicites, de nudité sexualisée, de contenus fétichistes, de sollicitation sexuelle ni d’images intimes non consenties. Les contenus sexuels impliquant une personne qui n’a pas consenti sont interdits, même si cette personne est adulte. N’importez pas d’images intimes d’une autre personne sans son autorisation.
+
+### 2. Violence et images gore
+
+Ne générez pas d’images gore, de représentations réalistes de démembrement ou de blessures graves, de violence sexualisée, de glorification de violences réelles ni de contenus facilitant concrètement des actes violents. Les menaces et les instructions pour causer des dommages physiques sont également interdites.
+
+### 3. Discours haineux
+
+Ne générez pas de contenus qui attaquent, déshumanisent, font l’apologie de la violence contre une personne ou un groupe, ou appellent à la discrimination à leur encontre, en raison de caractéristiques protégées telles que l’origine ethnique, la nationalité, la religion, le handicap, le sexe, l’orientation sexuelle, l’identité de genre ou un statut protégé similaire.
+
+### 4. Contenus d’abus sexuels sur enfants (CSAM) et protection de l’enfance
+
+Nous appliquons une tolérance zéro envers les CSAM ou tout contenu sexualisé impliquant un mineur. Cela inclut l’exploitation sexuelle, le pédopiégeage (grooming), la nudité sexualisée, les actes sexuels ou toute tentative de faire apparaître un mineur dans un contexte sexuel. N’utilisez pas Genjutsu AI pour faciliter l’exploitation, la traite ou les abus envers des enfants. Nous pouvons conserver les informations pertinentes et signaler les CSAM présumés ou les menaces imminentes pour la sécurité d’un enfant aux autorités compétentes lorsque la loi l’exige ou le permet.
+
+### 5. Deepfakes et usurpation d’identité
+
+Ne créez pas de deepfakes trompeurs et n’usurpez pas l’identité d’une personne réelle sans son autorisation, en particulier à des fins de fraude, d’extorsion, de harcèlement, de manipulation politique, d’activité financière ou de contenu sexuel non consenti. Ne faites pas dire ou faire à une personne ce qu’elle n’a pas dit ou fait lorsque le résultat vise à tromper. Des transformations autorisées accompagnées d’une mention appropriée peuvent être permises, mais vous restez responsable du consentement et de la mention.
+
+### 6. Atteintes au droit d’auteur et aux marques
+
+N’utilisez pas Genjutsu AI pour reproduire des œuvres protégées sans autorisation, créer des contrefaçons ou des supports de marque trompeurs, copier des personnages ou logos protégés en violation des droits, ou utiliser abusivement la marque d’un tiers. Il vous incombe d’obtenir les licences et autorisations nécessaires et de vérifier que votre prompt, vos imports ou votre résultat peuvent être utilisés légalement.
+
+## Canal de signalement
+
+Vous pouvez signaler un contenu qui, selon vous, enfreint cette AUP en écrivant à [support@genjutsu-ai.org](mailto:support@genjutsu-ai.org). Les utilisateurs connectés peuvent aussi ouvrir un ticket dans [Tickets de support](/settings/tickets).
+
+Indiquez autant que possible les éléments suivants :
+
+- L’URL, l’identifiant de tâche ou le compte concerné.
+- Une description de l’infraction présumée et la catégorie de la politique concernée.
+- Des captures d’écran ou une copie du prompt/résultat lorsque cela est sûr et légal.
+- Tout risque immédiat pour la sécurité, toute personne dont l’identité est usurpée, tout titulaire de droits ou tout mineur concerné.
+
+N’envoyez et n’importez jamais de CSAM. Si un signalement concerne une menace immédiate pour la vie, un danger physique imminent ou un enfant en danger immédiat, contactez d’abord les services d’urgence locaux ou l’autorité de protection de l’enfance compétente, puis informez-nous lorsque vous pouvez le faire en sécurité.
+
+## Mécanisme de modération de la plateforme
+
+Genjutsu AI applique un processus de modération fondé sur les risques, qui peut inclure :
+
+1. **Contrôles avant génération.** Chaque prompt en texte libre est filtré par l’API Prompt Screening de Waffo Pancake avant d’être envoyé à un fournisseur d’images ou de vidéos. Seul un verdict `allow` lance une tâche ; les verdicts `review` et `block` arrêtent la génération avant toute consommation de crédits. Waffo décrit cette analyse comme sans état, et les prompts bloqués ou mis en révision ne sont pas envoyés au fournisseur de modèle choisi. Les imports concernés peuvent aussi être contrôlés au moyen de classificateurs automatiques, de règles et des systèmes de sécurité des fournisseurs.
+2. **Contrôles après génération.** Nous pouvons examiner les médias générés et leurs métadonnées lorsque des systèmes automatiques signalent un risque, lorsqu’un utilisateur signale un contenu ou lorsque cela est nécessaire pour enquêter sur un abus, une réclamation juridique ou un incident de sécurité.
+3. **Tri des signalements.** Nous traitons en priorité les signalements concernant les CSAM, les menaces crédibles, les images intimes non consenties, le harcèlement ciblé et les fraudes en cours. Nous pouvons restreindre temporairement l’accès pendant l’enquête.
+4. **Application.** Selon les conclusions, nous pouvons refuser une génération, supprimer ou désactiver l’accès à un contenu, limiter des fonctionnalités du compte, suspendre ou résilier des comptes, annuler des tâches associées, ou coopérer aux demandes légitimes des titulaires de droits et des autorités.
+5. **Infractions répétées et recours.** Des infractions répétées ou délibérées peuvent entraîner des mesures définitives sur le compte. Si vous pensez qu’une décision est erronée, répondez à la notification ou contactez le support avec l’identifiant de la tâche et le contexte utile pour un réexamen.
+
+Nous ne pouvons pas garantir que chaque contenu interdit sera détecté automatiquement. Les utilisateurs doivent tout de même respecter cette AUP et signaler les contenus préoccupants. Un prompt bloqué ne remplace ni les services d’urgence ni l’aide des forces de l’ordre.
+
+## Contact
+
+Questions sur cette AUP ou sur une décision de modération : [support@genjutsu-ai.org](mailto:support@genjutsu-ai.org).
+
+_Cette traduction est fournie à titre informatif. En cas de divergence, la version anglaise prévaut._

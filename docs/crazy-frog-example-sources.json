@@ -1,0 +1,62 @@
+[
+  {
+    "slug": "overpass",
+    "url": "https://cdn.remakeyourmeme.com/wm/crazyfrogai/examples/crazy-frog/sample-1/v3/video.mp4",
+    "site": "https://crazyfrogai.org/",
+    "sha256": "1c722304e057cc40948c2a26aad12bee531cddcfa4caa78d9024c83bbcb1f0ea",
+    "localSha256": "246b48a93d782cfaaa8eba28d5e9a00497331dd529fbbafca0e3cac169c42faa",
+    "bytes": 4032277,
+    "localBytes": 1519976,
+    "displayEdit": "Small bottom-right URL area repaired using surrounding-edge interpolation at user request, replacing the earlier blur block. Original framing and audio preserved."
+  },
+  {
+    "slug": "neon-city",
+    "url": "https://cdn.remakeyourmeme.com/wm/crazyfrogai/examples/crazy-frog/sample-2/v3/video.mp4",
+    "site": "https://crazyfrogai.org/",
+    "sha256": "c7d61a6e8a813159398f7417d5a76d32d21387db5fc1bc59f0398774078a7a01",
+    "localSha256": "c5a2c0ac3e4cd19056e79db8c17fab2c2e74d2978256b0de318058757664ddee",
+    "bytes": 6014002,
+    "localBytes": 2267750,
+    "displayEdit": "Small bottom-right URL area repaired using surrounding-edge interpolation at user request, replacing the earlier blur block. Original framing and audio preserved."
+  },
+  {
+    "slug": "chocolate",
+    "url": "https://cdn.remakeyourmeme.com/wm/crazyfrogai/examples/crazy-frog/sample-4/v2/video.mp4",
+    "site": "https://crazyfrogai.org/",
+    "sha256": "df42a80c34ad9962ec7f81b483b0d028e3cf3f7b0404f59f82e9c22f9f7c554a",
+    "localSha256": "1a327ff2b8c367ffedeec901097817f7cbcb65349a5bd54a7513443a6cf15a6a",
+    "bytes": 5399386,
+    "localBytes": 2509562,
+    "displayEdit": "Small bottom-right URL area repaired using surrounding-edge interpolation at user request, replacing the earlier blur block. Original framing and audio preserved."
+  },
+  {
+    "slug": "pixel-world",
+    "url": "https://cdn.remakeyourmeme.com/wm/crazyfrogai/examples/crazy-frog/sample-5/video.mp4",
+    "site": "https://crazyfrogai.org/",
+    "sha256": "2af0fa940e2016205a0d8e3079eabd8a342b5e7226d1ac1658d1216cc7a411ac",
+    "localSha256": "352ed27ceaff5177f3b97ee86b6f9e7ef8c5f1877be058ea1bf8b2b39a0e0a84",
+    "bytes": 5240590,
+    "localBytes": 2166015,
+    "displayEdit": "Small bottom-right URL area repaired using surrounding-edge interpolation at user request, replacing the earlier blur block. Original framing and audio preserved."
+  },
+  {
+    "slug": "circuit-board",
+    "url": "https://cdn.remakeyourmeme.com/wm/crazyfrogai/examples/crazy-frog/sample-6/video.mp4",
+    "site": "https://crazyfrogai.org/",
+    "sha256": "c9b94c5d137d3eb693c03d4638e739a4ea545fbbfb4ade90e0b89a5160fc6983",
+    "localSha256": "a821d91cfffd113e0a41990358833c6bcd6236b2b40e0bc94988fb65439566ba",
+    "bytes": 6210154,
+    "localBytes": 2494043,
+    "displayEdit": "Small bottom-right URL area repaired using surrounding-edge interpolation at user request, replacing the earlier blur block. Original framing and audio preserved."
+  },
+  {
+    "slug": "halloween",
+    "url": "https://cdn.remakeyourmeme.com/wm/crazyfrogai/examples/crazy-frog/sample-7/video.mp4",
+    "site": "https://crazyfrogai.org/",
+    "sha256": "fe62091c3831c68f1fa2a4510d57d8fdd181fb98ce83f73c09c4f866444e113f",
+    "localSha256": "0d82e6facb7c1097a279142453dfee574c5856447aeb8567cdfa015ff8385cbd",
+    "bytes": 5717145,
+    "localBytes": 2277083,
+    "displayEdit": "Small bottom-right URL area repaired using surrounding-edge interpolation at user request, replacing the earlier blur block. Original framing and audio preserved."
+  }
+]

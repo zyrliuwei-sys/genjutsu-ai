@@ -1,14 +1,56 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
+import { CRAZY_FROG_THEMES } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
 import { m } from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
 import { GenjutsuGenerator as Generator } from '@/components/genjutsu-generator';
 import { TextVideoGenerator } from '@/components/text-video-generator';
 
-export function GenjutsuGenerator() {
+export function GenjutsuGenerator({
+  referenceOnly = false,
+  returnPath,
+  theme,
+}: {
+  referenceOnly?: boolean;
+  returnPath?: string;
+  theme?: 'crazy-frog';
+} = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
+  const locale = getLocale();
+  const themed = useMemo(() => {
+    if (theme !== 'crazy-frog') return undefined;
+    const names = [
+      m['frog.examples.overpass'](),
+      m['frog.examples.neon'](),
+      m['frog.examples.chocolate'](),
+      m['frog.examples.pixel'](),
+      m['frog.examples.circuit'](),
+      m['frog.examples.halloween'](),
+    ];
+    return {
+      title: m['frog.generator.title'](),
+      choose: m['frog.generator.choose'](),
+      photo: m['frog.generator.photo'](),
+      photoHint: m['frog.generator.photo_hint'](),
+      generate: m['frog.generator.generate'](),
+      loading: m['frog.generator.loading'](),
+      retry: m['frog.generator.retry'](),
+      templates: CRAZY_FROG_THEMES.map((item, i) => ({
+        id: `crazy-frog-${item.slug}`,
+        name: names[i],
+        asset: `crazy-frog-${item.slug}`,
+        image: `/videos/crazy-frog/${item.slug}.jpg`,
+        thumb: `/videos/crazy-frog/${item.slug}.jpg`,
+        clip: `/videos/crazy-frog/references/${item.slug}.mp4?v=fill`,
+        duration: 10,
+        ratios: '16:9',
+        prompt: '',
+      })),
+    };
+  }, [theme, locale]);
+
   return (
     <div>
       {mode === 'text' && (
@@ -49,6 +91,9 @@ export function GenjutsuGenerator() {
       )}
       {mode === 'edit' && (
         <Generator
+          referenceOnly={referenceOnly}
+          returnPath={returnPath}
+          theme={themed}
           copy={{
             serviceUnavailable: m['landing.generator.service_unavailable'](),
             archivePending: m['landing.generator.archive_pending'](),
@@ -109,6 +154,38 @@ export function GenjutsuGenerator() {
               before: m['landing.swap.before'](),
               after: m['landing.swap.after'](),
               slider: m['landing.swap.slider'](),
+            },
+            ui: {
+              aiEffects: m['landing.generator.ui.ai_effects'](),
+              effect: m['landing.generator.ui.effect'](),
+              selectEffect: m['landing.generator.ui.select_effect'](),
+              yourPhoto: m['landing.generator.ui.your_photo'](),
+              photoHint: m['landing.generator.ui.photo_hint'](),
+              uploadPhoto: m['landing.generator.ui.upload_photo'](),
+              generateNow: m['landing.generator.ui.generate_now'](),
+              videoSize: m['landing.generator.ui.video_size'](),
+              referenceExample: m['landing.generator.ui.reference_example'](),
+              myWork: m['landing.generator.ui.my_work'](),
+              download: m['landing.generator.ui.download'](),
+              loadVideoFailed: m['landing.generator.ui.load_video_failed'](),
+              restoreFailed: m['landing.generator.ui.restore_failed'](),
+              onlyImages: m['landing.generator.ui.only_images'](),
+              onlyVideos: m['landing.generator.ui.only_videos'](),
+              imageTooSmall: m['landing.generator.ui.image_too_small'](),
+              needAssets: m['landing.generator.ui.need_assets'](),
+              waitReference: m['landing.generator.ui.wait_reference'](),
+              unsupportedSize: m['landing.generator.ui.unsupported_size'](),
+              unsupportedRatio: m['landing.generator.ui.unsupported_ratio'](),
+              verifyBalanceFailed:
+                m['landing.generator.ui.verify_balance_failed'](),
+              saveMediaSignIn: m['landing.generator.ui.save_media_sign_in'](),
+              saveMediaCheckout:
+                m['landing.generator.ui.save_media_checkout'](),
+              generationCanceled:
+                m['landing.generator.ui.generation_canceled'](),
+              noGeneratedVideo: m['landing.generator.ui.no_generated_video'](),
+              closeVideo: m['landing.generator.ui.close_video'](),
+              dismiss: m['landing.generator.ui.dismiss'](),
             },
           }}
         />

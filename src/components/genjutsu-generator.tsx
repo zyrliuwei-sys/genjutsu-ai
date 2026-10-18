@@ -55,11 +55,12 @@ import { Pricing } from '@/blocks/pricing';
 import { BeforeAfterVideo } from '@/components/before-after-video';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
-type Template = {
+export type GeneratorTemplate = {
   id: string;
   name: string;
   image: string;
   thumb: string;
+  clip?: string;
   /** Reference clip id under /videos/effect-clips. */
   asset: string;
   duration: number;
@@ -102,8 +103,8 @@ const effect = (
   asset: string,
   duration: number,
   ratios: string,
-  tag?: Template['tag']
-): Template => ({
+  tag?: GeneratorTemplate['tag']
+): GeneratorTemplate => ({
   id,
   name,
   image: `/videos/effects/${asset}.webp`,
@@ -115,7 +116,7 @@ const effect = (
   prompt: GENJUTSU_DIRECTIONS[asset] ?? '',
 });
 
-const TEMPLATES: Template[] = [
+const TEMPLATES: GeneratorTemplate[] = [
   effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
   effect('moonlit-walk', 'Moonlit Walk', 'moonwalk', 5, '16:9', 'New'),
   effect('colonial-stroll', 'Colonial Stroll', 'colonial', 10, '16:9', 'New'),
@@ -258,7 +259,7 @@ function ProgressPanel({
         onMedia ? 'text-white' : 'text-foreground'
       )}
     >
-      <span className="bg-primary/15 text-primary ring-primary/40 flex size-10 items-center justify-center rounded-full ring-1 sm:size-12">
+      <span className="bg-primary/15 text-primary-text ring-primary/40 flex size-10 items-center justify-center rounded-full ring-1 sm:size-12">
         {icon}
       </span>
       <p className="text-sm font-semibold sm:text-base">{title}</p>
@@ -306,6 +307,7 @@ function UploadSlot({
   onFile,
   onRemove,
   removeLabel,
+  uploadLabel,
   testId,
   frameClassName,
   rootClassName,
@@ -319,6 +321,7 @@ function UploadSlot({
   onFile: (file: File | undefined) => void;
   onRemove: () => void;
   removeLabel: string;
+  uploadLabel: string;
   testId: string;
   frameClassName?: string;
   rootClassName?: string;
@@ -334,14 +337,14 @@ function UploadSlot({
       </div>
       <div
         className={cn(
-          'group hover:border-primary/70 border-border bg-muted relative aspect-[3/4] overflow-hidden rounded-xl border border-dashed transition-colors',
+          'eg-generator-upload group hover:border-primary/70 border-border bg-muted relative aspect-[3/4] overflow-hidden rounded-xl border border-dashed transition-colors',
           disabled && 'opacity-70',
           frameClassName
         )}
       >
         <input
           id={inputId}
-          aria-label={kind === 'video' ? 'Upload video' : 'Upload photo'}
+          aria-label={uploadLabel}
           disabled={disabled}
           data-testid={testId}
           data-filled={assetIsReady(asset)}
@@ -381,7 +384,7 @@ function UploadSlot({
         >
           {!asset && (
             <>
-              <span className="bg-primary/15 text-primary ring-primary/40 relative flex size-11 items-center justify-center rounded-full ring-1 transition-transform duration-300 group-hover:scale-110">
+              <span className="bg-primary/15 text-primary-text ring-primary/40 relative flex size-11 items-center justify-center rounded-full ring-1 transition-transform duration-300 group-hover:scale-110">
                 {kind === 'video' ? (
                   <Upload className="size-5" />
                 ) : (
@@ -389,7 +392,7 @@ function UploadSlot({
                 )}
               </span>
               <span className="relative text-sm font-medium">
-                {kind === 'video' ? 'Upload video' : 'Upload photo'}
+                {uploadLabel}
               </span>
               <span className="text-muted-foreground relative text-[11px]">
                 {kind === 'video' ? 'MP4, MOV · 30MB' : 'JPG, PNG, WEBP · 10MB'}
@@ -402,9 +405,54 @@ function UploadSlot({
   );
 }
 
+export type GeneratorUiCopy = {
+  aiEffects: string;
+  effect: string;
+  selectEffect: string;
+  yourPhoto: string;
+  photoHint: string;
+  uploadPhoto: string;
+  generateNow: string;
+  videoSize: string;
+  referenceExample: string;
+  myWork: string;
+  download: string;
+  loadVideoFailed: string;
+  restoreFailed: string;
+  onlyImages: string;
+  onlyVideos: string;
+  imageTooSmall: string;
+  needAssets: string;
+  waitReference: string;
+  unsupportedSize: string;
+  unsupportedRatio: string;
+  verifyBalanceFailed: string;
+  saveMediaSignIn: string;
+  saveMediaCheckout: string;
+  generationCanceled: string;
+  noGeneratedVideo: string;
+  closeVideo: string;
+  dismiss: string;
+};
+
 export function GenjutsuGenerator({
   copy,
+  referenceOnly = false,
+  returnPath = '/create',
+  theme,
 }: {
+  referenceOnly?: boolean;
+  returnPath?: string;
+  theme?: {
+    templates: GeneratorTemplate[];
+    title: string;
+    choose: string;
+    photo: string;
+    photoHint: string;
+    generate: string;
+    loading: string;
+    retry: string;
+  };
   copy: {
     moreSettings: string;
     generatingTitle: string;
@@ -451,14 +499,17 @@ export function GenjutsuGenerator({
     ) => string;
     ratioPadding: string;
     compare: { before: string; after: string; slider: string };
+    ui: GeneratorUiCopy;
   };
 }) {
+  const templates = theme?.templates ?? TEMPLATES;
+  const defaultTemplate = theme?.templates[0] ?? DEFAULT_TEMPLATE;
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session, isPending: sessionPending } = useSession();
   const user = session?.user;
-  const [selectedId, setSelectedId] = useState(DEFAULT_TEMPLATE.id);
-  const [exampleId, setExampleId] = useState(DEFAULT_TEMPLATE.id);
+  const [selectedId, setSelectedId] = useState(defaultTemplate.id);
+  const [exampleId, setExampleId] = useState(defaultTemplate.id);
   const [validatingMedia, setValidatingMedia] = useState(false);
   // Photos validate separately so they stay selectable while a video trims.
   const [validatingPhoto, setValidatingPhoto] = useState(false);
@@ -474,7 +525,7 @@ export function GenjutsuGenerator({
   const [ownVideo, setOwnVideo] = useState<Asset>();
   const [referenceClosed, setReferenceClosed] = useState(false);
   const [referenceSource, setReferenceSource] = useState<'effect' | 'upload'>(
-    'effect'
+    referenceOnly ? 'upload' : 'effect'
   );
   const referenceInputId = useId();
   const [taskId, setTaskId] = useState<string>();
@@ -659,9 +710,11 @@ export function GenjutsuGenerator({
         );
         setReferenceClosed(draft?.referenceClosed === true);
         setReferenceSource(
-          draft?.referenceSource === 'upload' ? 'upload' : 'effect'
+          referenceOnly || draft?.referenceSource === 'upload'
+            ? 'upload'
+            : 'effect'
         );
-        if (draft && TEMPLATES.some((t) => t.id === draft.selectedId)) {
+        if (draft && templates.some((t) => t.id === draft.selectedId)) {
           setSelectedId(draft.selectedId);
           setExampleId(draft.selectedId);
         }
@@ -670,14 +723,31 @@ export function GenjutsuGenerator({
         // A showcase card links to /create?effect=<asset>: open that effect
         // once, the way clicking its card in the strip would.
         const linked = linkedEffectPending.current
-          ? TEMPLATES.find(
+          ? templates.find(
               (t) =>
                 t.asset ===
                 new URLSearchParams(window.location.search).get('effect')
             )
           : undefined;
+        if (theme) {
+          // Keep a drafted own video (e.g. resuming after sign-in); otherwise
+          // open on a theme scene.
+          if (draft?.referenceSource !== 'upload' || !draft.referenceVideo) {
+            setReferenceSource('effect');
+            setReferenceClosed(false);
+            setReferenceVideo(undefined);
+          }
+          const saved = templates.find((t) => t.id === draft?.selectedId);
+          setSelectedId(saved?.id ?? defaultTemplate.id);
+          setExampleId(saved?.id ?? defaultTemplate.id);
+        }
+        if (referenceOnly) {
+          setReferenceSource('upload');
+          setReferenceClosed(false);
+          if (draft?.referenceSource !== 'upload') setReferenceVideo(undefined);
+        }
         linkedEffectPending.current = false;
-        if (linked) {
+        if (linked && !referenceOnly) {
           setReferenceSource('effect');
           setReferenceClosed(false);
           setReferenceVideo(undefined);
@@ -690,7 +760,7 @@ export function GenjutsuGenerator({
         if (active) {
           setLead(undefined);
           setReferenceVideo(undefined);
-          toast.error('Could not restore saved media');
+          toast.error(copy.ui.restoreFailed);
         }
       })
       .finally(() => {
@@ -702,7 +772,14 @@ export function GenjutsuGenerator({
     return () => {
       active = false;
     };
-  }, [sessionPending, user?.id]);
+  }, [
+    sessionPending,
+    user?.id,
+    referenceOnly,
+    templates,
+    defaultTemplate,
+    Boolean(theme),
+  ]);
 
   function persistDraft() {
     if (!draftReady || draftOwner !== (user?.id || 'anonymous'))
@@ -810,13 +887,15 @@ export function GenjutsuGenerator({
 
   const selected = useMemo(
     () =>
-      TEMPLATES.find((template) => template.id === selectedId) ??
-      DEFAULT_TEMPLATE,
-    [selectedId]
+      templates.find((template) => template.id === selectedId) ??
+      defaultTemplate,
+    [selectedId, templates, defaultTemplate]
   );
   const example =
-    TEMPLATES.find((template) => template.id === exampleId) ?? DEFAULT_TEMPLATE;
-  const effectClip = `/videos/effect-clips/${selected.asset}-${durationTier}s.mp4`;
+    templates.find((template) => template.id === exampleId) ?? defaultTemplate;
+  const effectClip =
+    selected.clip ??
+    `/videos/effect-clips/${selected.asset}-${durationTier}s.mp4`;
   const effectQueryEnabled =
     draftReady && !referenceClosed && referenceSource === 'effect';
   const effectQuery = useQuery({
@@ -979,11 +1058,11 @@ export function GenjutsuGenerator({
       type === 'image' &&
       !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
     ) {
-      toast.error('Only image files are supported');
+      toast.error(copy.ui.onlyImages);
       return;
     }
     if (type === 'video' && !isVideo) {
-      toast.error('Only video files are supported');
+      toast.error(copy.ui.onlyVideos);
       return;
     }
     const maxMB = isVideo ? MAX_REFERENCE_VIDEO_MB : 10;
@@ -1020,9 +1099,7 @@ export function GenjutsuGenerator({
           metadata.width / metadata.height < 0.4 ||
           metadata.width / metadata.height > 2.5)
       )
-        throw new Error(
-          'Character image must be at least 300×300px with a supported aspect ratio'
-        );
+        throw new Error(copy.ui.imageTooSmall);
       const sourceDuration = metadata.duration;
       let preparedFile = file;
       let trimStart = 0;
@@ -1137,8 +1214,7 @@ export function GenjutsuGenerator({
 
   const generate = useMutation({
     mutationFn: async () => {
-      if (!lead || !referenceVideo)
-        throw new Error('Upload a main character image and a reference video');
+      if (!lead || !referenceVideo) throw new Error(copy.ui.needAssets);
       const current = await readinessQuery.refetch();
       if (current.isError) throw new Error(copy.serviceUnavailable);
       if (!current.data?.provider)
@@ -1154,7 +1230,7 @@ export function GenjutsuGenerator({
           'Configure prompt safety screening in Admin Settings before generating'
         );
       if (!current.data.aspects.includes(aspect))
-        throw new Error('This API does not support the selected video size');
+        throw new Error(copy.ui.unsupportedSize);
       // Editing models preserve source framing: prepare the actual input, not
       // only the API's aspect_ratio flag. Pad to keep the entire performance.
       let preparedReference = referenceVideo;
@@ -1252,7 +1328,12 @@ export function GenjutsuGenerator({
         );
         throw error;
       }
-      const signature = JSON.stringify([leadImage, videoUrl, aspect]);
+      const signature = JSON.stringify([
+        leadImage,
+        videoUrl,
+        aspect,
+        selected.id,
+      ]);
       let submission: { signature: string; requestId: string } | undefined;
       try {
         submission = JSON.parse(
@@ -1271,7 +1352,12 @@ export function GenjutsuGenerator({
       return apiPost<GenjutsuTask>('/api/genjutsu/generate', {
         requestId: submission.requestId,
         aspect,
-        templateId: referenceSource === 'effect' ? selected.id : undefined,
+        templateId:
+          referenceOnly || (theme && referenceSource === 'upload')
+            ? 'crazy-frog-ai'
+            : referenceSource === 'effect'
+              ? selected.id
+              : undefined,
         leadImage,
         referenceVideo: videoUrl,
         videoReceipt,
@@ -1320,6 +1406,34 @@ export function GenjutsuGenerator({
   }, [queryClient, task]);
 
   const running = generate.isPending || Boolean(taskId && !isDone(task));
+
+  function chooseTemplate(template: GeneratorTemplate) {
+    track('effect_select', { effect: template.id });
+    setFailure(undefined);
+    setReferenceSource('effect');
+    setReferenceClosed(false);
+    if (selectedId !== template.id || referenceSource === 'upload')
+      setReferenceVideo(undefined);
+    setSelectedId(template.id);
+    setExampleId(template.id);
+    setPreviewMode('example');
+  }
+  // Page sections outside the generator (e.g. a theme gallery) pick a
+  // template by dispatching `genjutsu:select-template` with its id.
+  const chooseTemplateRef = useRef(chooseTemplate);
+  chooseTemplateRef.current = chooseTemplate;
+  const selectionLocked =
+    running || checkingGeneration || validatingMedia || savingDraft;
+  useEffect(() => {
+    const onSelect = (event: Event) => {
+      const id = (event as CustomEvent<string>).detail;
+      const template = templates.find((t) => t.id === id);
+      if (template && !selectionLocked) chooseTemplateRef.current(template);
+    };
+    window.addEventListener('genjutsu:select-template', onSelect);
+    return () =>
+      window.removeEventListener('genjutsu:select-template', onSelect);
+  }, [templates, selectionLocked]);
   // Generation overlay: the provider reports no progress, so the bar is an
   // estimate from observed render times.
   const generatingView = submitting || running;
@@ -1374,7 +1488,7 @@ export function GenjutsuGenerator({
       (effectQuery.isFetching || effectQuery.isError || !effectQuery.data)
     ) {
       track('generate_error', { stage: 'effect_loading' });
-      toast.error('Wait for the selected reference video to load');
+      toast.error(copy.ui.waitReference);
       return;
     }
     track('generate_click', {
@@ -1386,7 +1500,7 @@ export function GenjutsuGenerator({
     // sign in only to be told something is missing.
     if (!assetIsReady(lead) || !assetIsReady(referenceVideo)) {
       track('generate_error', { stage: 'assets' });
-      toast.error('Upload a main character image and a reference video');
+      toast.error(copy.ui.needAssets);
       return;
     }
     setSavingDraft(true);
@@ -1409,12 +1523,10 @@ export function GenjutsuGenerator({
           /* Storage unavailable — the user can click again. */
         }
       } else {
-        toast.warning(
-          'Could not save your media — you may need to upload it again after signing in'
-        );
+        toast.warning(copy.ui.saveMediaSignIn);
       }
       track('signin_redirect');
-      router.push(`/sign-in?callbackUrl=${encodeURIComponent('/create')}`);
+      router.push(`/sign-in?callbackUrl=${encodeURIComponent(returnPath)}`);
       return;
     }
     setCheckingGeneration(true);
@@ -1431,10 +1543,10 @@ export function GenjutsuGenerator({
       if (current.isError || !current.data?.ready)
         throw new Error(copy.serviceUnavailable);
       if (!current.data.aspects.includes(aspect))
-        throw new Error('This API does not support the selected video size');
+        throw new Error(copy.ui.unsupportedSize);
       const credits = await creditsQuery.refetch();
       if (credits.isError || !credits.data)
-        throw new Error('Could not verify your balance. Please retry.');
+        throw new Error(copy.ui.verifyBalanceFailed);
       if (!credits.data.hasPaidOrder || credits.data.balance < costCredits) {
         track('paywall_shown', {
           reason: credits.data.hasPaidOrder ? 'low_balance' : 'no_paid_order',
@@ -1515,6 +1627,7 @@ export function GenjutsuGenerator({
     savingDraft;
   const generateDisabled =
     !canGenerate ||
+    (Boolean(theme) && !assetIsReady(lead)) ||
     (referenceSource === 'effect' &&
       (effectQuery.isFetching || effectQuery.isError || !effectQuery.data)) ||
     referenceClosed ||
@@ -1525,25 +1638,39 @@ export function GenjutsuGenerator({
       <div
         ref={generatorRef}
         id="generator"
-        className="border-border bg-muted text-foreground grid scroll-mt-24 grid-cols-1 gap-3 rounded-3xl border p-3 lg:grid-cols-[minmax(0,1fr)_320px]"
+        data-reference-only={referenceOnly}
+        data-themed={Boolean(theme)}
+        className="eg-generator border-border bg-muted text-foreground grid scroll-mt-24 grid-cols-1 gap-3 rounded-3xl border p-3 lg:grid-cols-[minmax(0,1fr)_320px]"
       >
         <section
           ref={createRef}
           id="genjutsu-upload"
           aria-label="Create"
-          className="bg-card order-3 flex min-h-0 scroll-mt-24 flex-col gap-4 rounded-2xl p-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:gap-5 lg:p-5"
+          className="eg-generator-controls bg-card order-3 flex min-h-0 scroll-mt-24 flex-col gap-4 rounded-2xl p-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:gap-5 lg:p-5"
         >
-          <h2 className="text-lg font-semibold max-lg:hidden">AI Effects</h2>
+          <h2 className="text-lg font-semibold max-lg:hidden">
+            {theme?.title ??
+              (referenceOnly ? copy.customReference : copy.ui.aiEffects)}
+          </h2>
           {/* Desktop: the effect picked below the preview, echoed here so the
               panel reads as effect → photo → size → generate. */}
-          <div className="flex flex-col gap-2 max-lg:hidden">
-            <span className="text-sm font-medium">Effect</span>
+          <div
+            className={cn(
+              'flex flex-col gap-2 max-lg:hidden',
+              referenceOnly && 'hidden lg:hidden'
+            )}
+          >
+            <span className="text-sm font-medium">
+              {theme?.choose ?? copy.ui.effect}
+            </span>
             <a
-              href="#genjutsu-effects"
-              className="border-border bg-muted hover:border-primary/50 group flex items-center gap-3 rounded-xl border p-2 transition-colors"
+              href={
+                referenceOnly ? `#${referenceInputId}` : '#genjutsu-effects'
+              }
+              className="eg-generator-effect border-border bg-muted hover:border-primary/50 group flex items-center gap-3 rounded-xl border p-2 transition-colors"
             >
               {referenceSource === 'upload' ? (
-                <span className="bg-primary/15 text-primary flex aspect-[3/4] w-12 shrink-0 items-center justify-center rounded-lg">
+                <span className="bg-primary/15 text-primary-text flex aspect-[3/4] w-12 shrink-0 items-center justify-center rounded-lg">
                   <Video className="size-5" aria-hidden="true" />
                 </span>
               ) : (
@@ -1572,20 +1699,23 @@ export function GenjutsuGenerator({
               />
             </a>
           </div>
-          <div className="grid grid-cols-1 gap-4 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2">
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col lg:hidden">
+          <div className="eg-generator-assets grid grid-cols-1 gap-4 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2">
+            <div className={cn('flex flex-col gap-2', theme && 'hidden')}>
+              <div
+                className={cn('flex flex-col', !referenceOnly && 'lg:hidden')}
+              >
                 <label
                   htmlFor={referenceInputId}
                   className="text-sm font-medium"
                 >
-                  Your video
+                  {copy.customReference}
                 </label>
                 <span className="text-muted-foreground text-xs">MP4, MOV</span>
               </div>
               <div
+                style={referenceOnly ? { display: 'block' } : undefined}
                 data-testid="selected-reference-video"
-                className="border-border bg-muted hover:border-primary/70 relative aspect-[2/1] overflow-hidden rounded-xl border border-dashed transition-colors sm:aspect-[4/3] lg:hidden"
+                className="eg-generator-upload border-border bg-muted hover:border-primary/70 relative aspect-[2/1] overflow-hidden rounded-xl border border-dashed transition-colors sm:aspect-[4/3] lg:hidden"
               >
                 <input
                   id={referenceInputId}
@@ -1620,7 +1750,7 @@ export function GenjutsuGenerator({
                     data-testid="reference-video-empty"
                     className="flex size-full flex-col items-center justify-center gap-3 p-3 text-center"
                   >
-                    <span className="bg-primary/15 text-primary ring-primary/40 relative flex size-11 items-center justify-center rounded-full ring-1">
+                    <span className="bg-primary/15 text-primary-text ring-primary/40 relative flex size-11 items-center justify-center rounded-full ring-1">
                       <Video className="size-5" aria-hidden="true" />
                     </span>
                     <span className="text-sm font-medium">
@@ -1672,13 +1802,14 @@ export function GenjutsuGenerator({
                     onClick={() => effectQuery.refetch()}
                     className="text-destructive text-xs"
                   >
-                    Could not load video. Retry
+                    {copy.ui.loadVideoFailed}
                   </button>
                 )}
             </div>
             <UploadSlot
-              label="Your photo"
-              hint="One person, face clearly visible"
+              label={theme?.photo ?? copy.ui.yourPhoto}
+              hint={theme?.photoHint ?? copy.ui.photoHint}
+              uploadLabel={copy.ui.uploadPhoto}
               kind="image"
               disabled={leadDisabled}
               accept="image/jpeg,image/png,image/webp"
@@ -1715,7 +1846,9 @@ export function GenjutsuGenerator({
             )}
           >
             <fieldset className="flex flex-col gap-2">
-              <legend className="mb-2 text-sm font-medium">Video size</legend>
+              <legend className="mb-2 text-sm font-medium">
+                {copy.ui.videoSize}
+              </legend>
               <div className="flex gap-2">
                 {GENJUTSU_ASPECTS.map((ratio) => (
                   <button
@@ -1733,14 +1866,14 @@ export function GenjutsuGenerator({
                     }
                     title={
                       readiness && !readiness.aspects.includes(ratio)
-                        ? 'This editing API does not support this ratio'
+                        ? copy.ui.unsupportedRatio
                         : undefined
                     }
                     onClick={() => setAspect(ratio)}
                     className={cn(
                       'flex flex-1 items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-colors disabled:opacity-60',
                       aspect === ratio
-                        ? 'border-primary bg-primary/15 text-primary'
+                        ? 'border-primary bg-primary/15 text-primary-text'
                         : 'border-border hover:border-primary/40'
                     )}
                   >
@@ -1762,7 +1895,7 @@ export function GenjutsuGenerator({
               type="button"
               disabled={generateDisabled}
               data-testid="generate-button"
-              className="group/button bg-primary text-primary-foreground shadow-primary/70 hover:bg-primary/80 hover:shadow-primary inline-flex h-12 w-full shrink-0 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2.5 text-base font-semibold shadow-[0_0_30px_-6px] transition-shadow outline-none disabled:pointer-events-none disabled:opacity-50"
+              className="eg-generator-submit group/button bg-primary text-primary-foreground focus-visible:ring-ring focus-visible:ring-offset-card inline-flex h-12 w-full shrink-0 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2.5 text-base font-semibold transition-colors outline-none hover:brightness-110 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none"
               onClick={startGeneration}
             >
               {running ? (
@@ -1770,8 +1903,30 @@ export function GenjutsuGenerator({
               ) : (
                 <Sparkles className="size-5" />
               )}
-              Generate Now
+              {running
+                ? copy.generatingTitle
+                : (theme?.generate ?? copy.ui.generateNow)}
             </button>
+            {theme &&
+              effectQueryEnabled &&
+              (effectQuery.isPending || effectQuery.isError) && (
+                <div
+                  role="status"
+                  className="text-muted-foreground text-center text-xs"
+                >
+                  {effectQuery.isError ? (
+                    <button
+                      type="button"
+                      onClick={() => effectQuery.refetch()}
+                      className="text-primary-text underline"
+                    >
+                      {theme.retry}
+                    </button>
+                  ) : (
+                    theme.loading
+                  )}
+                </div>
+              )}
             {/* 9 in 10 visitors who reached the paywall left without picking
                 a plan (Oct 2026) — state the price before they invest the
                 upload, not after. */}
@@ -1787,8 +1942,9 @@ export function GenjutsuGenerator({
         </section>
 
         <section
+          style={referenceOnly ? { display: 'none' } : undefined}
           id="genjutsu-effects"
-          aria-label="Select effect"
+          aria-label={copy.ui.selectEffect}
           onMouseEnter={() => {
             effectsReturnPending.current = false;
             clearTimeout(effectsReturnTimer.current);
@@ -1799,7 +1955,9 @@ export function GenjutsuGenerator({
           }}
           className="bg-card order-2 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-2"
         >
-          <h2 className="text-sm font-semibold lg:text-lg">Select Effect</h2>
+          <h2 className="text-sm font-semibold lg:text-lg">
+            {theme?.choose ?? copy.ui.selectEffect}
+          </h2>
           <div className="relative">
             <div
               data-testid="template-list"
@@ -1811,7 +1969,7 @@ export function GenjutsuGenerator({
                 effectsLastScroll.current = performance.now();
                 if (effectsReturnPending.current) returnToSelectedEffect();
               }}
-              className="flex snap-x scroll-pl-1 gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:scroll-pl-[9rem]"
+              className="eg-generator-template-list flex snap-x scroll-pl-1 gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:scroll-pl-[9rem]"
             >
               {/* Opens the reference-video input kept in the Create column.
                   Pinned to the left edge so uploading stays one tap away while
@@ -1828,7 +1986,7 @@ export function GenjutsuGenerator({
                     : 'ring-transparent'
                 )}
               >
-                <span className="bg-primary/15 text-primary ring-primary/40 flex size-10 items-center justify-center rounded-full ring-1">
+                <span className="bg-primary/15 text-primary-text ring-primary/40 flex size-10 items-center justify-center rounded-full ring-1">
                   <Video className="size-5" aria-hidden="true" />
                 </span>
                 <span className="text-sm leading-tight font-semibold">
@@ -1871,7 +2029,7 @@ export function GenjutsuGenerator({
                     </span>
                   ) : null}
                   <span className="absolute inset-x-1.5 bottom-1.5 lg:inset-x-2 lg:bottom-2">
-                    <span className="block text-[10px] leading-tight font-semibold text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)] lg:text-sm">
+                    <span className="block text-[10px] leading-tight font-semibold [overflow-wrap:anywhere] hyphens-auto text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)] lg:text-sm">
                       {copy.customReference}
                     </span>
                     {ownVideo.duration ? (
@@ -1882,7 +2040,7 @@ export function GenjutsuGenerator({
                   </span>
                 </button>
               ) : null}
-              {TEMPLATES.map((template) => (
+              {templates.map((template) => (
                 <button
                   key={template.id}
                   type="button"
@@ -1902,20 +2060,7 @@ export function GenjutsuGenerator({
                     validatingMedia ||
                     savingDraft
                   }
-                  onClick={() => {
-                    track('effect_select', { effect: template.id });
-                    setFailure(undefined);
-                    setReferenceSource('effect');
-                    setReferenceClosed(false);
-                    if (
-                      selectedId !== template.id ||
-                      referenceSource === 'upload'
-                    )
-                      setReferenceVideo(undefined);
-                    setSelectedId(template.id);
-                    setExampleId(template.id);
-                    setPreviewMode('example');
-                  }}
+                  onClick={() => chooseTemplate(template)}
                 >
                   <img
                     src={template.thumb}
@@ -1938,7 +2083,7 @@ export function GenjutsuGenerator({
                     </span>
                   ) : null}
                   <span className="absolute inset-x-1.5 bottom-1.5 lg:inset-x-2 lg:bottom-2">
-                    <span className="block text-[10px] leading-tight font-semibold text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)] lg:text-sm">
+                    <span className="block text-[10px] leading-tight font-semibold [overflow-wrap:anywhere] hyphens-auto text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)] lg:text-sm">
                       {template.name}
                     </span>
                     <span className="block text-[9px] text-white/70 lg:text-[11px]">
@@ -1950,7 +2095,10 @@ export function GenjutsuGenerator({
               ))}
               <div
                 aria-hidden="true"
-                className="w-[calc(100%-5rem-0.75rem)] shrink-0 lg:w-[calc(100%-16rem-1.5rem)]"
+                className={cn(
+                  'w-[calc(100%-5rem-0.75rem)] shrink-0 lg:w-[calc(100%-16rem-1.5rem)]',
+                  theme && 'hidden'
+                )}
               />
             </div>
           </div>
@@ -1959,9 +2107,9 @@ export function GenjutsuGenerator({
         <section
           ref={previewRef}
           aria-label="Preview"
-          className="bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-1"
+          className="eg-generator-preview bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-1"
         >
-          <div className="bg-muted flex w-fit gap-1 rounded-xl p-1">
+          <div className="eg-generator-tabs bg-muted flex w-fit gap-1 rounded-xl p-1">
             <button
               type="button"
               data-testid="preview-example"
@@ -1974,7 +2122,7 @@ export function GenjutsuGenerator({
               )}
               onClick={() => setPreviewMode('example')}
             >
-              Reference Example
+              {copy.ui.referenceExample}
             </button>
             <button
               type="button"
@@ -1988,21 +2136,38 @@ export function GenjutsuGenerator({
               )}
               onClick={() => setPreviewMode('work')}
             >
-              My Work
+              {copy.ui.myWork}
             </button>
           </div>
           <div
             style={{ '--media-ratio': mediaRatio } as React.CSSProperties}
-            className="relative flex items-center justify-center overflow-hidden rounded-xl bg-black max-lg:aspect-(--media-ratio) lg:mx-auto lg:h-[min(560px,calc(100cqw/var(--media-ratio)))] lg:w-[min(100cqw,calc(560px*var(--media-ratio)))]"
+            data-empty={referenceOnly && !referenceVideo && !showWork}
+            className="eg-generator-screen relative flex items-center justify-center overflow-hidden rounded-xl bg-black max-lg:aspect-(--media-ratio) lg:mx-auto lg:h-[min(560px,calc(100cqw/var(--media-ratio)))] lg:w-[min(100cqw,calc(560px*var(--media-ratio)))]"
           >
-            <img
-              src={example.image}
-              alt=""
-              aria-hidden="true"
-              // LCP element on mobile: fetch it ahead of other images.
-              fetchPriority="high"
-              className="absolute inset-0 size-full scale-110 object-cover opacity-50 blur-2xl"
-            />
+            {!referenceOnly && (
+              <img
+                src={example.image}
+                alt=""
+                aria-hidden="true"
+                // LCP element on mobile: fetch it ahead of other images.
+                fetchPriority="high"
+                className="absolute inset-0 size-full scale-110 object-cover opacity-50 blur-2xl"
+              />
+            )}
+            {referenceOnly && !referenceVideo && !showWork && (
+              <label
+                htmlFor={referenceInputId}
+                className="eg-generator-empty relative z-10 flex max-w-md cursor-pointer flex-col items-center gap-4 p-8 text-center"
+              >
+                <span className="eg-generator-empty-icon flex size-16 items-center justify-center rounded-2xl">
+                  <Video aria-hidden className="size-8" />
+                </span>
+                <p className="font-semibold">{copy.uploadReference}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {copy.referenceRequirements}
+                </p>
+              </label>
+            )}
             {showWork ? (
               workUrl ? (
                 <video
@@ -2036,17 +2201,17 @@ export function GenjutsuGenerator({
                         className="rounded-lg border border-white/30 px-4 py-2"
                         onClick={() => taskQuery.refetch()}
                       >
-                        Retry
+                        {copy.retry}
                       </button>
                     </>
                   ) : task?.status === 'failed' ? (
                     failureMessage(task.error)
                   ) : task?.status === 'canceled' ? (
-                    'Generation canceled'
+                    copy.ui.generationCanceled
                   ) : running ? (
-                    'Generating…'
+                    copy.generatingTitle
                   ) : (
-                    'No generated video yet'
+                    copy.ui.noGeneratedVideo
                   )}
                 </div>
               )
@@ -2119,8 +2284,8 @@ export function GenjutsuGenerator({
               <button
                 type="button"
                 data-testid="close-work"
-                aria-label="Close video"
-                title="Close video"
+                aria-label={copy.ui.closeVideo}
+                title={copy.ui.closeVideo}
                 onClick={() => {
                   // The result stays in My videos; this only clears the panel.
                   if (user)
@@ -2149,7 +2314,7 @@ export function GenjutsuGenerator({
                 ) : (
                   <Download className="size-3.5" />
                 )}{' '}
-                Download
+                {copy.ui.download}
               </button>
             ) : null}
             {showWork && workRatioMismatch && (
@@ -2206,7 +2371,7 @@ export function GenjutsuGenerator({
               >
                 <button
                   type="button"
-                  aria-label="Dismiss"
+                  aria-label={copy.ui.dismiss}
                   onClick={() => setFailure(undefined)}
                   className="absolute top-3 right-3 flex size-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
                 >
@@ -2289,7 +2454,9 @@ export function GenjutsuGenerator({
                   ) : (
                     <Sparkles className="size-5" />
                   )}
-                  Generate Now
+                  {running
+                    ? copy.generatingTitle
+                    : (theme?.generate ?? copy.ui.generateNow)}
                 </button>
               </div>
             </div>
@@ -2315,9 +2482,7 @@ export function GenjutsuGenerator({
               // save must not block payment.
               await persistDraft().catch((error) => {
                 trackDraftError('draft_checkout', error);
-                toast.warning(
-                  'Could not save your media — you may need to upload it again after checkout'
-                );
+                toast.warning(copy.ui.saveMediaCheckout);
               });
             }}
             clipSeconds={referenceVideo?.duration || durationTier}

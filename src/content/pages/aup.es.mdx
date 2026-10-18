@@ -1,0 +1,78 @@
+export const meta = {
+  title: 'Política de uso aceptable de AIGC (AUP) | Genjutsu AI',
+  description:
+    'Estándares de contenido, categorías prohibidas, canales de denuncia y moderación en Genjutsu AI.',
+  updated_at: '2026-10-09',
+};
+
+Esta Política de uso aceptable de AIGC (AUP) explica los estándares de contenido que se aplican cuando usas Genjutsu AI para crear, subir, almacenar o compartir imágenes y vídeos generados con IA. Complementa nuestros [Términos del servicio](/terms-of-service). Si esta AUP entra en conflicto con un requisito legal obligatorio, prevalece el requisito legal.
+
+## Estándares de contenido
+
+Debes usar Genjutsu AI de forma responsable y solo con fines lícitos y autorizados. En particular:
+
+- Usa prompts, imágenes de referencia, logotipos, personajes y otros materiales que tengas derecho y permiso a usar.
+- Obtén el consentimiento real de las personas identificables antes de subir su imagen o generar contenido que las represente.
+- No uses los medios generados para engañar, estafar, acosar, amenazar, explotar o poner en riesgo a otra persona.
+- Respeta la privacidad, la propiedad intelectual, los derechos de imagen, las marcas y otros derechos.
+- No intentes eludir los controles de seguridad, los filtros, los límites de la cuenta o la moderación ocultando un prompt o usando otra cuenta.
+- Cuando una obra generada pueda confundirse con una grabación o declaración real, indica que está generada con IA al compartirla.
+
+## Categorías de contenido prohibidas
+
+El siguiente contenido está prohibido. Según la gravedad y las circunstancias, podemos bloquear un prompt o un resultado antes de su publicación, eliminar contenido, restringir funciones, suspender una cuenta o cancelarla.
+
+### 1. Pornografía y contenido NSFW
+
+No generes pornografía, actos sexuales explícitos, desnudos sexualizados, contenido fetichista, solicitudes sexuales ni imágenes íntimas no consentidas. El contenido sexual que involucre a una persona que no ha dado su consentimiento está prohibido aunque sea adulta. No subas imágenes íntimas de otra persona sin su permiso.
+
+### 2. Violencia y gore explícito
+
+No generes gore explícito, representaciones realistas de desmembramientos o lesiones graves, violencia sexualizada, glorificación de la violencia real ni contenido que facilite de forma relevante actos violentos. Las amenazas y las instrucciones para causar daño físico también están prohibidas.
+
+### 3. Discurso de odio
+
+No generes contenido que ataque, deshumanice, ensalce la violencia contra una persona o un grupo, o incite a discriminarlos, por características protegidas como el origen étnico, la nacionalidad, la religión, la discapacidad, el sexo, la orientación sexual, la identidad de género u otra condición protegida similar.
+
+### 4. Material de abuso sexual infantil (CSAM) y seguridad infantil
+
+Tenemos tolerancia cero con el CSAM o cualquier contenido sexualizado que involucre a un menor. Esto incluye la explotación sexual, el grooming, los desnudos sexualizados, los actos sexuales o los intentos de hacer que un menor aparezca en un contexto sexual. No uses Genjutsu AI para facilitar la explotación, la trata o el abuso de menores. Podemos conservar la información pertinente y denunciar el presunto CSAM o las amenazas inminentes a la seguridad infantil ante las autoridades competentes cuando la ley lo exija o lo permita.
+
+### 5. Deepfakes y suplantación de identidad
+
+No crees deepfakes engañosos ni suplantes a una persona real sin su autorización, especialmente para fraude, extorsión, acoso, engaño político, actividades financieras o contenido sexual no consentido. No hagas que una persona parezca decir o hacer algo que no dijo ni hizo cuando el resultado pretenda engañar. Las transformaciones autorizadas con la debida indicación pueden estar permitidas, pero sigues siendo responsable del consentimiento y de la indicación.
+
+### 6. Infracciones de derechos de autor y marcas
+
+No uses Genjutsu AI para reproducir obras protegidas sin autorización, crear productos falsificados o materiales de marca engañosos, copiar personajes o logotipos protegidos infringiendo derechos, ni hacer un uso indebido de la marca de un tercero. Eres responsable de obtener licencias y permisos y de comprobar si tu prompt, tus archivos subidos o tu resultado pueden usarse legalmente.
+
+## Canal de denuncia
+
+Puedes denunciar contenido que creas que infringe esta AUP escribiendo a [support@genjutsu-ai.org](mailto:support@genjutsu-ai.org). Los usuarios con sesión iniciada también pueden abrir un ticket en [Tickets de soporte](/settings/tickets).
+
+Incluye toda la información posible de la siguiente lista:
+
+- La URL, el ID de la tarea o la cuenta implicada.
+- Una descripción de la presunta infracción y la categoría de la política correspondiente.
+- Capturas de pantalla o una copia del prompt/resultado cuando sea seguro y legal aportarlas.
+- Cualquier riesgo inmediato para la seguridad, persona suplantada, titular de derechos o menor afectado.
+
+No envíes ni subas CSAM. Si una denuncia se refiere a una amenaza inmediata para la vida, un daño físico inminente o un menor en peligro inmediato, contacta primero con los servicios de emergencia locales o la autoridad de protección de menores correspondiente y avísanos cuando sea seguro hacerlo.
+
+## Mecanismo de moderación de la plataforma
+
+Genjutsu AI aplica un proceso de moderación basado en el riesgo que puede incluir:
+
+1. **Comprobaciones previas a la generación.** Cada prompt de texto libre se filtra con la API Prompt Screening de Waffo Pancake antes de enviarse a un proveedor de imagen o vídeo. Solo un veredicto `allow` inicia una tarea; los veredictos `review` y `block` detienen la generación antes de consumir créditos. Waffo describe este análisis como sin estado, y los prompts bloqueados o en revisión no se envían al proveedor del modelo seleccionado. Los archivos subidos pertinentes también pueden revisarse con clasificadores automáticos, comprobaciones basadas en reglas y sistemas de seguridad de los proveedores.
+2. **Comprobaciones posteriores a la generación.** Podemos revisar los medios generados y sus metadatos cuando los sistemas automáticos detecten un riesgo, cuando un usuario denuncie contenido o cuando sea necesario investigar abusos, reclamaciones legales o incidentes de seguridad.
+3. **Clasificación de denuncias.** Damos prioridad a las denuncias sobre CSAM, amenazas creíbles, imágenes íntimas no consentidas, acoso dirigido y fraudes en curso. Podemos restringir temporalmente el acceso mientras investigamos.
+4. **Aplicación.** Según lo que determinemos, podemos rechazar una generación, eliminar o desactivar el acceso a contenido, limitar funciones de la cuenta, suspender o cancelar cuentas, cancelar tareas relacionadas o colaborar con solicitudes legales de titulares de derechos y autoridades.
+5. **Infracciones reiteradas y recursos.** Las infracciones reiteradas o deliberadas pueden dar lugar a medidas permanentes sobre la cuenta. Si crees que una decisión fue incorrecta, responde al aviso o contacta con soporte indicando el ID de la tarea y el contexto relevante para su revisión.
+
+No podemos garantizar que todo el contenido prohibido se detecte automáticamente. Los usuarios deben cumplir igualmente esta AUP y denunciar el contenido preocupante. Un prompt bloqueado no sustituye a los servicios de emergencia ni a la ayuda de las fuerzas de seguridad.
+
+## Contacto
+
+Preguntas sobre esta AUP o una decisión de moderación: [support@genjutsu-ai.org](mailto:support@genjutsu-ai.org).
+
+_Esta traducción se ofrece a título informativo. En caso de discrepancia, prevalece la versión en inglés._

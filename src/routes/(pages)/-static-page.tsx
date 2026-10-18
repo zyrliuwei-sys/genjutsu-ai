@@ -93,7 +93,7 @@ function StaticPage() {
           aria-label="Breadcrumb"
           className="text-muted-foreground mb-6 flex flex-wrap gap-2 text-sm"
         >
-          <Link href="/">{locale === 'zh' ? '首页' : 'Home'}</Link>
+          <Link href="/">{m['common.systems.home']()}</Link>
           <span aria-hidden="true">/</span>
           <span aria-current="page">{meta.h1}</span>
         </nav>
