@@ -557,6 +557,11 @@
   .frog-studio {
     padding: 16px 12px 52px;
   }
+  .frog-chips,
+  .frog-actions .frog-text-link,
+  .frog-lane {
+    display: none;
+  }
   .frog-studio-head {
     flex-direction: column;
     align-items: flex-start;
@@ -574,6 +579,14 @@
   }
   .frog-section-head {
     margin-bottom: 28px;
+  }
+  /* Tighter breathing room around the road lanes. */
+  .frog-studio:has(+ .frog-lane),
+  .frog-section:has(+ .frog-lane) {
+    padding-bottom: 28px;
+  }
+  .frog-lane + .frog-section {
+    padding-top: 28px;
   }
   .frog-section-head > p {
     justify-self: start;

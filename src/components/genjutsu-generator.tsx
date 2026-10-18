@@ -1699,8 +1699,19 @@ export function GenjutsuGenerator({
               />
             </a>
           </div>
-          <div className="eg-generator-assets grid grid-cols-1 gap-4 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2">
-            <div className={cn('flex flex-col gap-2', theme && 'hidden')}>
+          <div
+            className={cn(
+              'eg-generator-assets grid grid-cols-1 gap-4 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2',
+              // Themed (phones/tablets): video and photo uploads side by side.
+              theme && 'grid-cols-2 gap-3'
+            )}
+          >
+            <div
+              className={cn(
+                'flex min-w-0 flex-col gap-2',
+                theme && 'lg:hidden'
+              )}
+            >
               <div
                 className={cn('flex flex-col', !referenceOnly && 'lg:hidden')}
               >
@@ -1715,7 +1726,10 @@ export function GenjutsuGenerator({
               <div
                 style={referenceOnly ? { display: 'block' } : undefined}
                 data-testid="selected-reference-video"
-                className="eg-generator-upload border-border bg-muted hover:border-primary/70 relative aspect-[2/1] overflow-hidden rounded-xl border border-dashed transition-colors sm:aspect-[4/3] lg:hidden"
+                className={cn(
+                  'eg-generator-upload border-border bg-muted hover:border-primary/70 relative overflow-hidden rounded-xl border border-dashed transition-colors lg:hidden',
+                  theme ? 'aspect-square' : 'aspect-[2/1] sm:aspect-[4/3]'
+                )}
               >
                 <input
                   id={referenceInputId}
@@ -1756,7 +1770,12 @@ export function GenjutsuGenerator({
                     <span className="text-sm font-medium">
                       {copy.uploadReference}
                     </span>
-                    <span className="text-muted-foreground text-[11px]">
+                    <span
+                      className={cn(
+                        'text-muted-foreground text-[11px]',
+                        theme && 'hidden'
+                      )}
+                    >
                       {copy.referenceEmpty}
                     </span>
                   </div>
@@ -1819,7 +1838,10 @@ export function GenjutsuGenerator({
               removeLabel={copy.removePhoto}
               testId="upload-lead"
               rootClassName="lg:min-h-0 lg:flex-1"
-              frameClassName="aspect-[2/1] sm:aspect-[4/3] lg:aspect-auto lg:min-h-48 lg:flex-1"
+              frameClassName={cn(
+                'lg:aspect-auto lg:min-h-48 lg:flex-1',
+                theme ? 'aspect-square' : 'aspect-[2/1] sm:aspect-[4/3]'
+              )}
             />
           </div>
 

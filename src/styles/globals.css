@@ -312,14 +312,19 @@
   width: 42%;
   aspect-ratio: 16 / 9;
 }
-/* Own-video card leads the theme row on every breakpoint. */
-.eg-generator[data-themed='true'] .eg-generator-template-list > label {
-  display: flex;
-  position: relative;
-  gap: 4px;
-}
-.eg-generator[data-themed='true'] .eg-generator-template-list > label::before {
-  display: none;
+/* Own-video card leads the theme row on desktop; below lg it sits beside the
+   photo upload instead. */
+@media (min-width: 1024px) {
+  .eg-generator[data-themed='true'] .eg-generator-template-list > label {
+    display: flex;
+    position: relative;
+    gap: 4px;
+  }
+  .eg-generator[data-themed='true']
+    .eg-generator-template-list
+    > label::before {
+    display: none;
+  }
 }
 @media (min-width: 640px) {
   .eg-generator[data-themed='true'] .eg-generator-template-list > button,
