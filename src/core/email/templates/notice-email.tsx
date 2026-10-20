@@ -6,6 +6,7 @@ import {
   Heading,
   Html,
   Img,
+  Link,
   Preview,
   Section,
   Text,
@@ -23,6 +24,7 @@ export function NoticeEmail({
   ctaText,
   ctaUrl,
   footer,
+  unsubscribeUrl,
 }: {
   appName: string;
   logoUrl?: string;
@@ -32,6 +34,8 @@ export function NoticeEmail({
   ctaText: string;
   ctaUrl: string;
   footer?: string;
+  /** Rendered as an "Unsubscribe" link under the footer. */
+  unsubscribeUrl?: string;
 }) {
   return (
     <Html>
@@ -65,6 +69,13 @@ export function NoticeEmail({
               </Button>
             </Section>
             {footer ? <Text style={styles.footer}>{footer}</Text> : null}
+            {unsubscribeUrl ? (
+              <Text style={styles.footer}>
+                <Link href={unsubscribeUrl} style={styles.footer}>
+                  Unsubscribe
+                </Link>
+              </Text>
+            ) : null}
           </Section>
         </Container>
       </Body>
