@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { CRAZY_FROG_THEMES } from '@/config/genjutsu';
+import { CRAZY_FROG_THEMES, OZIL_THEMES } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
 import { m } from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
@@ -14,12 +14,41 @@ export function GenjutsuGenerator({
 }: {
   referenceOnly?: boolean;
   returnPath?: string;
-  theme?: 'crazy-frog';
+  theme?: 'crazy-frog' | 'ozil';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
   const locale = getLocale();
   const themed = useMemo(() => {
+    if (theme === 'ozil') {
+      const names = [
+        m['ozil.examples.red_hoodie'](),
+        m['ozil.examples.five_a_side'](),
+        m['ozil.examples.office_shirt'](),
+      ];
+      return {
+        title: m['ozil.generator.title'](),
+        choose: m['ozil.generator.choose'](),
+        photo: m['ozil.generator.photo'](),
+        photoHint: m['ozil.generator.photo_hint'](),
+        generate: m['ozil.generator.generate'](),
+        loading: m['ozil.generator.loading'](),
+        retry: m['ozil.generator.retry'](),
+        uploadTemplateId: 'ozil-ai',
+        pickerInPanel: true,
+        templates: OZIL_THEMES.map((item, i) => ({
+          id: `ozil-${item.slug}`,
+          name: names[i],
+          asset: `ozil-${item.slug}`,
+          image: `/videos/ozil/${item.slug}.jpg`,
+          thumb: `/videos/ozil/${item.slug}.jpg`,
+          clip: `/videos/ozil/references/${item.slug}.mp4`,
+          duration: 10,
+          ratios: '9:16',
+          prompt: '',
+        })),
+      };
+    }
     if (theme !== 'crazy-frog') return undefined;
     const names = [
       m['frog.examples.overpass'](),
@@ -37,6 +66,7 @@ export function GenjutsuGenerator({
       generate: m['frog.generator.generate'](),
       loading: m['frog.generator.loading'](),
       retry: m['frog.generator.retry'](),
+      uploadTemplateId: 'crazy-frog-ai',
       templates: CRAZY_FROG_THEMES.map((item, i) => ({
         id: `crazy-frog-${item.slug}`,
         name: names[i],

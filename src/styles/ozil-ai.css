@@ -1,0 +1,844 @@
+/* Ozil AI landing page. Inherits the site's light/dark tokens and type;
+   the signature motif is pitch marking — a halfway line with a centre
+   circle between sections and touchline stripes behind the CTA. */
+.ozil-page {
+  background: var(--background);
+  color: var(--foreground);
+  overflow: clip;
+}
+.ozil-page :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+.ozil-page h2 {
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.ozil-page h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+.ozil-page p {
+  line-height: 1.7;
+}
+
+/* ---------- Buttons ---------- */
+.ozil-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    filter 0.2s,
+    transform 0.2s;
+}
+.ozil-button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.ozil-button svg {
+  transition: transform 0.2s;
+}
+.ozil-button:hover svg {
+  transform: translateX(3px);
+}
+.ozil-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.ozil-text-link:hover {
+  color: var(--foreground);
+}
+
+/* ---------- Hero ---------- */
+/* Copy on the left, a broadcast-style replay console on the right. */
+.ozil-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 560px);
+  align-items: center;
+  gap: 56px;
+  max-width: 1280px;
+  margin: auto;
+  padding: 72px 24px 56px;
+}
+.ozil-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary-text);
+}
+.ozil-hero h1 {
+  margin-top: 20px;
+  font-size: clamp(3.5rem, 6.4vw, 6rem);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.06em;
+}
+.ozil-hero h1 span {
+  display: block;
+  margin-top: 12px;
+  font-family: var(--font-serif-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.5em;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--primary-text);
+}
+.ozil-intro {
+  max-width: 540px;
+  margin-top: 22px;
+  font-size: 17px;
+  color: var(--muted-foreground);
+}
+.ozil-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 28px;
+  margin-top: 30px;
+}
+.ozil-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 34px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  list-style: none;
+}
+.ozil-facts li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+.ozil-facts svg {
+  flex-shrink: 0;
+  color: var(--primary-text);
+}
+
+/* Replay console: floodlit panel with faint penalty-box markings. */
+.ozil-replay {
+  position: relative;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  align-items: center;
+  gap: 28px;
+  padding: 28px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      120% 80% at 50% -10%,
+      color-mix(in oklch, var(--primary) 16%, transparent),
+      transparent 60%
+    ),
+    var(--card);
+  isolation: isolate;
+}
+.ozil-replay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 56px,
+    color-mix(in oklch, var(--foreground) 3%, transparent) 56px 112px
+  );
+  mask-image: linear-gradient(to top, #000, transparent 75%);
+}
+.ozil-replay-screen {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #000;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 30px 60px -20px rgb(0 0 0 / 0.6);
+  transform: rotate(-2deg);
+}
+.ozil-replay-screen video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ozil-replay-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 0.8),
+    transparent 32%,
+    transparent 82%,
+    rgb(0 0 0 / 0.45)
+  );
+}
+.ozil-replay-tag,
+.ozil-replay-clock {
+  position: absolute;
+  top: 12px;
+  z-index: 1;
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.ozil-replay-tag {
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--primary);
+}
+.ozil-replay-tag::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #fff;
+  animation: ozil-rec 1.2s steps(2) infinite;
+}
+@keyframes ozil-rec {
+  50% {
+    opacity: 0.2;
+  }
+}
+.ozil-replay-clock {
+  right: 12px;
+  padding: 4px 0;
+  font-variant-numeric: tabular-nums;
+}
+.ozil-replay-caption {
+  position: absolute;
+  inset: auto 14px 14px;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+.ozil-replay-caption span {
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  color: color-mix(in oklch, var(--primary) 70%, #fff);
+}
+
+/* The three beats of the move, timed to the replay. */
+.ozil-beats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+}
+.ozil-beats button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 12px;
+  width: 100%;
+  padding: 14px 14px 16px;
+  border-radius: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.ozil-beats li[data-active] button {
+  background: color-mix(in oklch, var(--foreground) 6%, transparent);
+}
+.ozil-beat-time {
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  line-height: 2;
+  color: var(--muted-foreground);
+}
+.ozil-beat-label {
+  font-family: var(--font-serif-display);
+  font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+  line-height: 1.15;
+  color: var(--muted-foreground);
+  transition: color 0.3s;
+}
+.ozil-beats li[data-active] .ozil-beat-label {
+  color: var(--foreground);
+}
+.ozil-beat-bar {
+  grid-column: 2;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--border);
+}
+.ozil-beat-bar span {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  transform-origin: left;
+}
+
+/* ---------- Studio ---------- */
+.ozil-studio {
+  max-width: 1336px;
+  margin: auto;
+  padding: 24px 24px 72px;
+  scroll-margin-top: 80px;
+}
+.ozil-studio-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  margin: 0 4px 22px;
+}
+.ozil-studio-head h2 {
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+}
+.ozil-studio-head p {
+  max-width: 460px;
+  font-size: 15px;
+  color: var(--muted-foreground);
+}
+.ozil-price {
+  margin: 14px 4px 0;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+/* ---------- Halfway line ---------- */
+.ozil-halfway {
+  position: relative;
+  max-width: 1232px;
+  height: 64px;
+  margin: 0 auto;
+  background: linear-gradient(var(--border), var(--border)) center / 100% 2px
+    no-repeat;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
+}
+.ozil-halfway::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 64px;
+  height: 64px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  transform: translateX(-50%);
+}
+.ozil-halfway::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  transform: translate(-50%, -50%);
+}
+
+/* ---------- Generic section ---------- */
+.ozil-section {
+  max-width: 1280px;
+  margin: auto;
+  padding: 88px 24px;
+  scroll-margin-top: 80px;
+}
+.ozil-section-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: end;
+  margin-bottom: 40px;
+}
+.ozil-section-head > p {
+  max-width: 500px;
+  justify-self: end;
+  font-size: 16px;
+  color: var(--muted-foreground);
+}
+.ozil-note {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.ozil-kicker {
+  margin-bottom: 18px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary-text);
+}
+
+/* ---------- Take reel (vertical 9:16 clips) ---------- */
+.ozil-reel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 980px;
+  margin-inline: auto;
+}
+.ozil-page .reel-card {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--muted);
+  isolation: isolate;
+}
+.ozil-page .reel-card video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.6s ease;
+}
+.ozil-page .reel-card:hover video {
+  transform: scale(1.03);
+}
+.ozil-page .reel-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 0.85),
+    rgb(0 0 0 / 0.1) 35%,
+    transparent 55%
+  );
+}
+.ozil-page .reel-card-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+}
+.ozil-page .reel-card[data-playing='true'] .reel-card-play {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+.ozil-page .reel-card figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  color: #fff;
+  pointer-events: none;
+}
+.ozil-page .reel-card-index {
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  color: rgb(255 255 255 / 0.6);
+}
+.ozil-page .reel-card figcaption h3 {
+  font-size: 17px;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.7);
+}
+.ozil-page .reel-card figcaption button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.92);
+  color: #111;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.2s;
+}
+.ozil-page .reel-card figcaption button:hover {
+  background: #fff;
+}
+
+/* ---------- About ---------- */
+.ozil-about {
+  border-block: 1px solid var(--border);
+  background: var(--muted);
+}
+.ozil-about-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 80px;
+}
+.ozil-about-line {
+  margin-top: 28px;
+  font-family: var(--font-serif-display);
+  font-style: italic;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  line-height: 1.2;
+  color: var(--primary-text);
+}
+.ozil-prose {
+  font-size: 17px;
+  color: var(--muted-foreground);
+}
+.ozil-prose p + p {
+  margin-top: 20px;
+}
+
+/* ---------- Steps ---------- */
+.ozil-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  list-style: none;
+}
+.ozil-steps li {
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+}
+.ozil-step-number {
+  display: block;
+  margin-bottom: 26px;
+  font-family: var(--font-serif-display);
+  font-size: 56px;
+  line-height: 0.9;
+  color: var(--primary-text);
+}
+.ozil-steps p {
+  margin-top: 12px;
+  font-size: 15px;
+  color: var(--muted-foreground);
+}
+
+/* ---------- Checks ---------- */
+.ozil-checks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px;
+}
+.ozil-checks article {
+  padding-left: 24px;
+  border-left: 1px solid var(--border);
+}
+.ozil-checks svg {
+  box-sizing: content-box;
+  margin-bottom: 18px;
+  padding: 8px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--primary) 15%, transparent);
+  color: var(--primary-text);
+}
+.ozil-checks p {
+  margin-top: 12px;
+  font-size: 15px;
+  color: var(--muted-foreground);
+}
+
+/* ---------- Compare ---------- */
+.ozil-compare {
+  padding-top: 0;
+}
+.ozil-approaches {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.ozil-approaches article {
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+}
+.ozil-approaches article[data-ours] {
+  border-color: color-mix(in oklch, var(--primary) 55%, var(--border));
+  background: color-mix(in oklch, var(--primary) 7%, var(--card));
+}
+.ozil-approaches p {
+  margin-top: 12px;
+  font-size: 15px;
+  color: var(--muted-foreground);
+}
+
+/* ---------- FAQ ---------- */
+.ozil-faq {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 70px;
+}
+.ozil-faq details {
+  border-bottom: 1px solid var(--border);
+}
+.ozil-faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 0;
+  font-size: 16px;
+  font-weight: 500;
+  list-style: none;
+  cursor: pointer;
+}
+.ozil-faq summary::-webkit-details-marker {
+  display: none;
+}
+.ozil-faq summary span {
+  font-size: 24px;
+  line-height: 1;
+  color: var(--primary-text);
+  transition: transform 0.2s;
+}
+.ozil-faq details[open] summary span {
+  transform: rotate(45deg);
+}
+.ozil-faq details p {
+  padding: 0 28px 24px 0;
+  font-size: 15px;
+  color: var(--muted-foreground);
+}
+
+/* ---------- CTA ---------- */
+.ozil-cta {
+  max-width: 1280px;
+  margin: 0 auto 88px;
+  padding: 0 24px;
+}
+.ozil-cta-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  padding: 72px 24px;
+  border-radius: 24px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  text-align: center;
+  isolation: isolate;
+}
+/* Mown-grass stripes and a centre circle behind the CTA copy. */
+.ozil-cta-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 129px,
+      rgb(255 255 255 / 0.14) 130px 132px,
+      transparent 133px
+    ),
+    linear-gradient(rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.14)) center /
+      2px 100% no-repeat,
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 80px,
+      rgb(255 255 255 / 0.05) 80px 160px
+    );
+}
+.ozil-cta h2 {
+  max-width: 820px;
+}
+.ozil-cta p {
+  max-width: 560px;
+  margin-top: 16px;
+  opacity: 0.85;
+}
+.ozil-button-light {
+  margin-top: 28px;
+  background: #fff;
+  color: #111;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1180px) {
+  .ozil-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 470px);
+    gap: 40px;
+  }
+  .ozil-replay {
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 18px;
+    padding: 22px;
+  }
+}
+@media (max-width: 900px) {
+  /* Phones: centred copy only; the generator right below shows the take. */
+  .ozil-hero {
+    grid-template-columns: 1fr;
+    padding: 52px 20px 32px;
+    text-align: center;
+  }
+  .ozil-intro {
+    margin-inline: auto;
+  }
+  .ozil-actions {
+    justify-content: center;
+  }
+  .ozil-studio {
+    padding: 16px 12px 52px;
+  }
+  .ozil-replay,
+  .ozil-facts,
+  .ozil-actions .ozil-text-link {
+    display: none;
+  }
+  .ozil-studio-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-inline: 8px;
+  }
+  .ozil-section {
+    padding: 60px 20px;
+  }
+  .ozil-compare {
+    padding-top: 0;
+  }
+  .ozil-section-head,
+  .ozil-about-grid,
+  .ozil-faq {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .ozil-section-head {
+    margin-bottom: 28px;
+  }
+  .ozil-section-head > p {
+    justify-self: start;
+  }
+  .ozil-halfway {
+    height: 40px;
+  }
+  .ozil-halfway::before {
+    width: 40px;
+    height: 40px;
+  }
+  /* Phones: swipe through the three takes. */
+  .ozil-reel {
+    display: flex;
+    gap: 10px;
+    margin-inline: -20px;
+    padding-inline: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .ozil-page .reel-card {
+    flex: 0 0 62%;
+    scroll-snap-align: center;
+  }
+  .ozil-page .reel-card figcaption {
+    padding: 12px;
+  }
+  .ozil-page .reel-card figcaption h3 {
+    font-size: 15px;
+  }
+  .ozil-steps,
+  .ozil-checks,
+  .ozil-approaches {
+    grid-template-columns: 1fr;
+  }
+  .ozil-checks {
+    gap: 28px;
+  }
+  .ozil-step-number {
+    margin-bottom: 16px;
+    font-size: 44px;
+  }
+  .ozil-cta {
+    margin-bottom: 60px;
+    padding: 0 12px;
+  }
+  .ozil-cta-inner {
+    padding: 52px 20px;
+  }
+}
+/* Phones/tablets: a full-width 9:16 take would push the photo upload a
+   whole screen down, so cap the preview at about half the viewport. */
+@media (max-width: 1023px) {
+  .ozil-page .eg-generator-screen {
+    align-self: center;
+    width: auto;
+    height: min(48svh, calc(100cqw / var(--media-ratio)));
+  }
+  /* The goal takes are vertical clips: show all three upright and uncropped
+     instead of the shared 16:9 theme strip. */
+  .ozil-page
+    .eg-generator[data-themed='true']
+    .eg-generator-template-list
+    > button {
+    width: min(calc((100% - 24px) / 3), 10rem);
+    aspect-ratio: 9 / 16;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ozil-page *,
+  .ozil-page *::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
