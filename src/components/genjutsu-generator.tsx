@@ -2038,10 +2038,12 @@ export function GenjutsuGenerator({
                   )}
                 >
                   <video
-                    src={`${ownVideo.preview}#t=0.1`}
+                    src={ownVideo.preview}
+                    autoPlay
+                    loop
                     muted
                     playsInline
-                    preload="metadata"
+                    preload="auto"
                     className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
