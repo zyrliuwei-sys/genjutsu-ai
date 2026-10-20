@@ -72,6 +72,15 @@ export const CRAZY_FROG_THEMES = [
 const CRAZY_FROG_DIRECTION =
   'Replace only the main crouching rider with the person from the image. Preserve the invisible motorcycle illusion: no bike, wheels, seat or handlebars under the main rider. Keep the pursuer, scenery, camera movement, riding pose, jumps and escape from the supplied reference video. Do not introduce a frog character or new actions absent from the reference.';
 
+/** Built-in goal takes use prepared 10s / 720×1280 generation inputs. */
+export const OZIL_THEMES = [
+  { slug: 'red-hoodie', name: 'Red hoodie finish', lead: 'red hoodie' },
+  { slug: 'five-a-side', name: 'Five-a-side kit', lead: 'orange kit' },
+  { slug: 'office-shirt', name: 'Office shirt goal', lead: 'light blue shirt' },
+] as const;
+const ozilDirection = (lead: string) =>
+  `Replace only the attacking player${lead ? ` in the ${lead}` : ''} who chips the ball over the goalkeeper, stops as the defenders slide past and rolls the ball into the empty net, using the person from the image. Keep the goalkeeper, both sliding defenders, the ball path, the stadium, the crowd, the floodlights, the camera pan and the timing exactly as in the reference video. Do not add players, crests or new actions.`;
+
 /** Trusted reference context: never transform scenery when replacing a performer. */
 export const GENJUTSU_REFERENCES: Record<
   string,
@@ -83,6 +92,13 @@ export const GENJUTSU_REFERENCES: Record<
       { name: theme.name, direction: CRAZY_FROG_DIRECTION },
     ])
   ),
+  ...Object.fromEntries(
+    OZIL_THEMES.map((theme) => [
+      `ozil-${theme.slug}`,
+      { name: theme.name, direction: ozilDirection(theme.lead) },
+    ])
+  ),
+  'ozil-ai': { name: 'Ozil AI', direction: ozilDirection('') },
   'crazy-frog-ai': {
     name: 'Crazy Frog AI',
     direction:

@@ -445,6 +445,10 @@ export function GenjutsuGenerator({
   returnPath?: string;
   theme?: {
     templates: GeneratorTemplate[];
+    /** Direction key for a visitor's own upload on this themed page. */
+    uploadTemplateId: string;
+    /** Desktop: pick takes inside the side panel instead of a strip under the preview. */
+    pickerInPanel?: boolean;
     title: string;
     choose: string;
     photo: string;
@@ -503,6 +507,7 @@ export function GenjutsuGenerator({
   };
 }) {
   const templates = theme?.templates ?? TEMPLATES;
+  const panelPicker = Boolean(theme?.pickerInPanel);
   const defaultTemplate = theme?.templates[0] ?? DEFAULT_TEMPLATE;
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -1353,11 +1358,13 @@ export function GenjutsuGenerator({
         requestId: submission.requestId,
         aspect,
         templateId:
-          referenceOnly || (theme && referenceSource === 'upload')
-            ? 'crazy-frog-ai'
-            : referenceSource === 'effect'
-              ? selected.id
-              : undefined,
+          theme && referenceSource === 'upload'
+            ? theme.uploadTemplateId
+            : referenceOnly
+              ? 'crazy-frog-ai'
+              : referenceSource === 'effect'
+                ? selected.id
+                : undefined,
         leadImage,
         referenceVideo: videoUrl,
         videoReceipt,
@@ -1654,10 +1661,65 @@ export function GenjutsuGenerator({
           </h2>
           {/* Desktop: the effect picked below the preview, echoed here so the
               panel reads as effect → photo → size → generate. */}
+          {panelPicker && (
+            <div className="flex flex-col gap-2 max-lg:hidden">
+              <span className="text-sm font-medium">{theme?.choose}</span>
+              <div
+                className="grid grid-cols-3 gap-2"
+                data-testid="panel-template-list"
+              >
+                {templates.map((template) => {
+                  const active =
+                    referenceSource === 'effect' && selected.id === template.id;
+                  return (
+                    <button
+                      key={template.id}
+                      type="button"
+                      aria-pressed={active}
+                      title={template.name}
+                      disabled={selectionLocked}
+                      onClick={() => chooseTemplate(template)}
+                      className="group flex min-w-0 flex-col gap-1.5 text-left disabled:cursor-not-allowed"
+                    >
+                      <span
+                        className={cn(
+                          'bg-muted relative block aspect-[9/16] overflow-hidden rounded-lg ring-2 transition-all',
+                          active
+                            ? 'ring-primary'
+                            : 'group-hover:ring-primary/40 ring-transparent'
+                        )}
+                      >
+                        <img
+                          src={template.thumb}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        {active ? (
+                          <span className="bg-primary text-primary-foreground absolute top-1.5 right-1.5 flex size-5 items-center justify-center rounded-full">
+                            <Check className="size-3.5" />
+                          </span>
+                        ) : null}
+                      </span>
+                      <span
+                        className={cn(
+                          'line-clamp-2 text-[11px] leading-tight font-medium',
+                          active ? 'text-foreground' : 'text-muted-foreground'
+                        )}
+                      >
+                        {template.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <div
             className={cn(
               'flex flex-col gap-2 max-lg:hidden',
-              referenceOnly && 'hidden lg:hidden'
+              (referenceOnly || panelPicker) && 'hidden lg:hidden'
             )}
           >
             <span className="text-sm font-medium">
@@ -1701,19 +1763,26 @@ export function GenjutsuGenerator({
           </div>
           <div
             className={cn(
-              'eg-generator-assets grid grid-cols-1 gap-4 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2',
-              // Themed (phones/tablets): video and photo uploads side by side.
+              'eg-generator-assets grid grid-cols-1 gap-4',
+              panelPicker
+                ? 'grid-cols-2 gap-3'
+                : 'lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2',
+              // Themed (phones/tablets): video and photo uploads side by side;
+              // with the in-panel picker they stay paired on desktop too.
               theme && 'grid-cols-2 gap-3'
             )}
           >
             <div
               className={cn(
                 'flex min-w-0 flex-col gap-2',
-                theme && 'lg:hidden'
+                theme && !panelPicker && 'lg:hidden'
               )}
             >
               <div
-                className={cn('flex flex-col', !referenceOnly && 'lg:hidden')}
+                className={cn(
+                  'flex flex-col',
+                  !referenceOnly && !panelPicker && 'lg:hidden'
+                )}
               >
                 <label
                   htmlFor={referenceInputId}
@@ -1727,8 +1796,10 @@ export function GenjutsuGenerator({
                 style={referenceOnly ? { display: 'block' } : undefined}
                 data-testid="selected-reference-video"
                 className={cn(
-                  'eg-generator-upload border-border bg-muted hover:border-primary/70 relative overflow-hidden rounded-xl border border-dashed transition-colors lg:hidden',
-                  theme ? 'aspect-square' : 'aspect-[2/1] sm:aspect-[4/3]'
+                  'eg-generator-upload border-border bg-muted hover:border-primary/70 relative overflow-hidden rounded-xl border border-dashed transition-colors',
+                  !panelPicker && 'lg:hidden',
+                  theme ? 'aspect-square' : 'aspect-[2/1] sm:aspect-[4/3]',
+                  panelPicker && 'lg:aspect-[3/4]'
                 )}
               >
                 <input
@@ -1837,10 +1908,11 @@ export function GenjutsuGenerator({
               onRemove={() => setLead(undefined)}
               removeLabel={copy.removePhoto}
               testId="upload-lead"
-              rootClassName="lg:min-h-0 lg:flex-1"
+              rootClassName={panelPicker ? undefined : 'lg:min-h-0 lg:flex-1'}
               frameClassName={cn(
-                'lg:aspect-auto lg:min-h-48 lg:flex-1',
-                theme ? 'aspect-square' : 'aspect-[2/1] sm:aspect-[4/3]'
+                !panelPicker && 'lg:aspect-auto lg:min-h-48 lg:flex-1',
+                theme ? 'aspect-square' : 'aspect-[2/1] sm:aspect-[4/3]',
+                panelPicker && 'lg:aspect-[3/4]'
               )}
             />
           </div>
@@ -1867,7 +1939,13 @@ export function GenjutsuGenerator({
               !moreOpen && 'max-lg:hidden'
             )}
           >
-            <fieldset className="flex flex-col gap-2">
+            <fieldset
+              className={cn(
+                'flex flex-col gap-2',
+                // A built-in take fixes the framing; only an own clip needs it.
+                panelPicker && referenceSource === 'effect' && 'lg:hidden'
+              )}
+            >
               <legend className="mb-2 text-sm font-medium">
                 {copy.ui.videoSize}
               </legend>
@@ -1975,7 +2053,10 @@ export function GenjutsuGenerator({
             effectsReturnPending.current = true;
             returnToSelectedEffect();
           }}
-          className="bg-card order-2 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-2"
+          className={cn(
+            'bg-card order-2 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-2',
+            panelPicker && 'lg:hidden'
+          )}
         >
           <h2 className="text-sm font-semibold lg:text-lg">
             {theme?.choose ?? copy.ui.selectEffect}
@@ -2131,7 +2212,10 @@ export function GenjutsuGenerator({
         <section
           ref={previewRef}
           aria-label="Preview"
-          className="eg-generator-preview bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-1"
+          className={cn(
+            'eg-generator-preview bg-card @container order-1 flex min-h-0 scroll-mt-24 flex-col gap-3 rounded-2xl p-4 lg:col-start-1 lg:row-start-1',
+            panelPicker && 'lg:row-span-2'
+          )}
         >
           <div className="eg-generator-tabs bg-muted flex w-fit gap-1 rounded-xl p-1">
             <button
