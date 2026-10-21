@@ -29,7 +29,7 @@ export const DUET_SIZES = {
     width: 1280,
     height: 720,
     framing:
-      'Use a wide horizontal 16:9 composition with generous orange space on both sides, both subjects framed from about the waist up.',
+      'Use a wide horizontal 16:9 composition with generous background space on both sides, both subjects framed from about the waist up.',
   },
 } as const;
 

@@ -26,7 +26,7 @@ export function creditsForCost(usd: number) {
   return Math.ceil(credits / CREDIT_UNIT) * CREDIT_UNIT;
 }
 
-// Length of the shipped reference video (public/videos/hotel-lobby-reference.mp4).
+// Length of the shipped reference video (public/videos/hotel-lobby/reference.mp4).
 // Set hotel_lobby_video_seconds in admin if a different video is configured.
 export const DEFAULT_REFERENCE_SECONDS = 8;
 

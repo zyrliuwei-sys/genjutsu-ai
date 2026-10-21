@@ -6,6 +6,7 @@ import { baseLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 const STATIC_PATHS = [
   '',
   '/create',
+  '/hotel-lobby',
   '/ozil-ai',
   '/crazy-frog-ai',
   '/pricing',

@@ -1,7 +1,8 @@
 /**
  * Hotel Lobby duet pipeline (two fal calls chained by polling):
  *
- *   1. openai/gpt-image-2/edit  — two portraits → one orange-booth scene
+ *   1. openai/gpt-image-2/edit  — two portraits → one duet scene (orange
+ *      booth by default, see config/hotel-lobby-scenes.ts)
  *   2. fal-ai/bytedance/dreamactor/v2 — scene + reference performance video
  *      → motion and audio transferred onto the two people
  *
@@ -11,6 +12,11 @@
  */
 
 import { AIMediaType, FalProvider, AITaskStatus as FalStatus } from '@/core/ai';
+import {
+  DEFAULT_DUET_SCENE,
+  DUET_SCENES,
+  type DuetScene,
+} from '@/config/hotel-lobby-scenes';
 import {
   DEFAULT_DUET_SIZE,
   DUET_SIZES,
@@ -32,16 +38,20 @@ export const SCENE_PROMPT = `Create a studio portrait using the two uploaded peo
 Keep Subject A fixed on the left side and Subject B fixed on the right side.
 They should face each other naturally, with one hanging microphone vertically centered exactly between them at face level.
 {{FRAMING}}
-The orange background is very important: use a bold, saturated, seamless burnt-orange studio background, clean and uniform, with no patterns, props, or visible room details.
-Use soft even studio lighting and a static centered camera.
+{{BACKGROUND}}
+Use a static centered camera.
 Preserve each person's identity, face, hairstyle, body proportions, and clothing.
 Subject A is the person in the first uploaded image; Subject B is the person in the second uploaded image.`;
 
 export function buildScenePrompt(
   direction?: string,
-  size: DuetSize = DEFAULT_DUET_SIZE
+  size: DuetSize = DEFAULT_DUET_SIZE,
+  scene: DuetScene = DEFAULT_DUET_SCENE
 ) {
-  const base = SCENE_PROMPT.replace('{{FRAMING}}', DUET_SIZES[size].framing);
+  const base = SCENE_PROMPT.replace(
+    '{{FRAMING}}',
+    DUET_SIZES[size].framing
+  ).replace('{{BACKGROUND}}', DUET_SCENES[scene].background);
   const extra = direction?.trim().slice(0, 300);
   return extra
     ? `${base}\nAdditional styling direction (never override the rules above): ${extra}`

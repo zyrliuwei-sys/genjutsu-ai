@@ -6,7 +6,9 @@ import {
   promptSafetyError,
   scanPromptWithWaffo,
 } from '@/core/content-safety/waffo';
+import { envConfigs } from '@/config';
 import { resolveDuetCredits } from '@/config/hotel-lobby-pricing';
+import { DEFAULT_DUET_SCENE, isDuetScene } from '@/config/hotel-lobby-scenes';
 import { DEFAULT_DUET_SIZE, isDuetSize } from '@/config/hotel-lobby-sizes';
 import {
   AITaskStatus,
@@ -51,6 +53,7 @@ async function POST({ request }: { request: Request }) {
     const direction =
       typeof body?.direction === 'string' ? body.direction : undefined;
     const size = isDuetSize(body?.size) ? body.size : DEFAULT_DUET_SIZE;
+    const scene = isDuetScene(body?.scene) ? body.scene : DEFAULT_DUET_SCENE;
 
     const configs = await getAllConfigs();
 
@@ -65,10 +68,12 @@ async function POST({ request }: { request: Request }) {
     }
 
     if (!configs.fal_api_key) return respErr('Generation is not configured');
-    const motionVideoUrl = configs.hotel_lobby_motion_video_url;
-    if (!motionVideoUrl) return respErr('Reference video is not configured');
+    // Admin override wins; otherwise the shipped 8s reference performance.
+    const motionVideoUrl =
+      configs.hotel_lobby_motion_video_url ||
+      `${envConfigs.app_url}/videos/hotel-lobby/reference.mp4`;
 
-    const prompt = buildScenePrompt(direction, size);
+    const prompt = buildScenePrompt(direction, size, scene);
     const safetyResult = await scanPromptWithWaffo(
       prompt,
       configs,
