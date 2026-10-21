@@ -1510,5 +1510,7 @@
   "hotel.faq.six.q": "Can I use photos of other people? Is this affiliated with the artists?",
   "hotel.faq.six.a": "Only use photos of people who have agreed to it, never to impersonate or mislead, and label realistic AI videos when you post them. This generator is an independent tool and is not affiliated with Quavo, Takeoff, their label or A COLORS SHOW.",
   "hotel.cta.title": "Two photos. One mic. Your Hotel Lobby video.",
-  "hotel.cta.body": "Pick your duo and make the clip your group chat will replay all week."
+  "hotel.cta.body": "Pick your duo and make the clip your group chat will replay all week.",
+  "landing.nav.trending": "Trending videos",
+  "landing.hero.hotel_tag": "Two photos, one mic"
 }

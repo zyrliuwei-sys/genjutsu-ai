@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { LogIn, Menu, ShieldIcon, X } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { ChevronDown, LogIn, Menu, ShieldIcon, X } from 'lucide-react';
 
 import { useSession } from '@/core/auth/client';
 import { Link } from '@/core/i18n/navigation';
@@ -18,14 +18,110 @@ export interface NavLink {
   external?: boolean;
 }
 
+export interface NavGroupItem {
+  href: string;
+  label: string;
+  description?: string;
+  /** Square thumbnail shown beside the label in the dropdown. */
+  thumb?: string;
+}
+
+/** A nav entry that opens a dropdown of internal pages. */
+export interface NavGroup {
+  label: string;
+  items: NavGroupItem[];
+}
+
+export type NavItem = NavLink | NavGroup;
+
+const isGroup = (item: NavItem): item is NavGroup => 'items' in item;
+
 /** Off-site URLs render as plain <a>; internal paths use the locale-aware Link. */
 const isExternalHref = (href: string) => /^https?:\/\//.test(href);
+
+/** Desktop dropdown: opens on hover, click or keyboard; closes on leave/Escape. */
+function NavDropdown({ group }: { group: NavGroup }) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const show = () => {
+    clearTimeout(closeTimer.current);
+    setOpen(true);
+  };
+  // A short delay so crossing the gap to the panel doesn't close it.
+  const hide = () => {
+    closeTimer.current = setTimeout(() => setOpen(false), 120);
+  };
+  return (
+    <div
+      className="relative"
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+          setOpen(false);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') setOpen(false);
+      }}
+    >
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="true"
+        onClick={() => setOpen((v) => !v)}
+        className="text-muted-foreground hover:text-foreground aria-expanded:text-foreground inline-flex items-center gap-1 text-sm transition-colors"
+      >
+        {group.label}
+        <ChevronDown
+          aria-hidden
+          className={`size-3.5 transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open && (
+        <div className="absolute top-full left-1/2 z-50 -translate-x-1/2 pt-3">
+          <div className="border-border bg-popover text-popover-foreground w-72 rounded-xl border p-1.5 shadow-xl">
+            {group.items.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className="hover:bg-accent flex items-center gap-3 rounded-lg p-2 transition-colors"
+              >
+                {item.thumb && (
+                  <img
+                    src={item.thumb}
+                    alt=""
+                    aria-hidden
+                    width={40}
+                    height={40}
+                    loading="lazy"
+                    className="size-10 shrink-0 rounded-md object-cover"
+                  />
+                )}
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium">
+                    {item.label}
+                  </span>
+                  {item.description && (
+                    <span className="text-muted-foreground block truncate text-xs">
+                      {item.description}
+                    </span>
+                  )}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function SiteHeader({
   navLinks,
   logoAlt,
 }: {
-  navLinks?: NavLink[];
+  navLinks?: NavItem[];
   logoAlt: string;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -54,7 +150,9 @@ export function SiteHeader({
         {/* Desktop nav */}
         <nav className="hidden items-center gap-6 md:flex">
           {navLinks?.map((link) =>
-            isExternalHref(link.href) ? (
+            isGroup(link) ? (
+              <NavDropdown key={link.label} group={link} />
+            ) : isExternalHref(link.href) ? (
               <a
                 key={link.href}
                 href={link.href}
@@ -119,7 +217,34 @@ export function SiteHeader({
         <div className="border-border mx-auto max-w-7xl border-t px-4 pt-2 pb-4 md:hidden">
           <nav className="flex flex-col gap-2">
             {navLinks?.map((link) =>
-              isExternalHref(link.href) ? (
+              isGroup(link) ? (
+                <div key={link.label} className="flex flex-col gap-1">
+                  <span className="text-muted-foreground/70 px-3 pt-1 text-xs font-medium tracking-wide uppercase">
+                    {link.label}
+                  </span>
+                  {link.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {item.thumb && (
+                        <img
+                          src={item.thumb}
+                          alt=""
+                          aria-hidden
+                          width={28}
+                          height={28}
+                          loading="lazy"
+                          className="size-7 shrink-0 rounded-md object-cover"
+                        />
+                      )}
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : isExternalHref(link.href) ? (
                 <a
                   key={link.href}
                   href={link.href}

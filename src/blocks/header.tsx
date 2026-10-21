@@ -1,12 +1,32 @@
 import { m } from '@/paraglide/messages.js';
-import { SiteHeader } from '@/components/site-header';
+import { SiteHeader, type NavItem } from '@/components/site-header';
 
 export function Header() {
-  const navLinks = [
+  const navLinks: NavItem[] = [
     { href: '/create', label: m['landing.nav.create']() },
-    { href: '/hotel-lobby', label: m['hotel.nav']() },
-    { href: '/ozil-ai', label: m['ozil.nav']() },
-    { href: '/crazy-frog-ai', label: m['frog.nav']() },
+    {
+      label: m['landing.nav.trending'](),
+      items: [
+        {
+          href: '/hotel-lobby',
+          label: m['hotel.nav'](),
+          description: m['landing.hero.hotel_tag'](),
+          thumb: '/videos/hotel-lobby/orange-studio.jpg',
+        },
+        {
+          href: '/ozil-ai',
+          label: m['ozil.nav'](),
+          description: m['landing.hero.ozil_tag'](),
+          thumb: '/videos/ozil/red-hoodie.jpg',
+        },
+        {
+          href: '/crazy-frog-ai',
+          label: m['frog.nav'](),
+          description: m['landing.hero.frog_tag'](),
+          thumb: '/videos/crazy-frog/neon-city.jpg',
+        },
+      ],
+    },
     { href: '/genjutsu-video-ai', label: m['landing.nav.features']() },
     {
       href: '/higgsfield-genjutsu-alternative',

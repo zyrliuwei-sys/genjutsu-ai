@@ -778,5 +778,7 @@
   "hotel.faq.six.q": "Puis-je utiliser des photos d’autres personnes ? Est-ce lié aux artistes ?",
   "hotel.faq.six.a": "N’utilisez que des photos de personnes qui ont donné leur accord, jamais pour usurper une identité ou tromper, et signalez les vidéos IA réalistes lorsque vous les publiez. Ce générateur est un outil indépendant, sans lien avec Quavo, Takeoff, leur label ou A COLORS SHOW.",
   "hotel.cta.title": "Deux photos. Un micro. Votre vidéo Hotel Lobby.",
-  "hotel.cta.body": "Choisissez votre duo et créez le clip que votre groupe va repasser toute la semaine."
+  "hotel.cta.body": "Choisissez votre duo et créez le clip que votre groupe va repasser toute la semaine.",
+  "landing.nav.trending": "Vidéos tendance",
+  "landing.hero.hotel_tag": "Deux photos, un micro"
 }

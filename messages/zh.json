@@ -1510,5 +1510,7 @@
   "hotel.faq.six.q": "可以用别人的照片吗？和歌手有关联吗？",
   "hotel.faq.six.a": "只能使用本人同意的照片，不得用于冒充或误导，发布逼真的 AI 视频时请注明。本生成器是独立工具，与 Quavo、Takeoff、其唱片公司或 A COLORS SHOW 均无关联。",
   "hotel.cta.title": "两张照片，一支麦，你的 Hotel Lobby 视频。",
-  "hotel.cta.body": "选好你的搭档，做一条能让群聊循环播放一整周的视频。"
+  "hotel.cta.body": "选好你的搭档，做一条能让群聊循环播放一整周的视频。",
+  "landing.nav.trending": "热门视频",
+  "landing.hero.hotel_tag": "两张照片，一支麦"
 }
