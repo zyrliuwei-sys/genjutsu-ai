@@ -8,6 +8,12 @@ export function Header() {
       label: m['landing.nav.trending'](),
       items: [
         {
+          href: '/flying-car-ai',
+          label: m['flycar.nav'](),
+          description: m['landing.hero.flycar_tag'](),
+          thumb: '/videos/flying-car/car.jpg',
+        },
+        {
           href: '/hotel-lobby',
           label: m['hotel.nav'](),
           description: m['landing.hero.hotel_tag'](),

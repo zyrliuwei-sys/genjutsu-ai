@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react';
 
-import { CRAZY_FROG_THEMES, OZIL_THEMES } from '@/config/genjutsu';
+import {
+  CRAZY_FROG_THEMES,
+  FLYING_CAR_THEMES,
+  OZIL_THEMES,
+} from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
 import { m } from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
@@ -14,12 +18,36 @@ export function GenjutsuGenerator({
 }: {
   referenceOnly?: boolean;
   returnPath?: string;
-  theme?: 'crazy-frog' | 'ozil';
+  theme?: 'crazy-frog' | 'flying-car' | 'ozil';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
   const locale = getLocale();
   const themed = useMemo(() => {
+    if (theme === 'flying-car') {
+      const names = [m['flycar.examples.ramp_flip']()];
+      return {
+        title: m['flycar.generator.title'](),
+        choose: m['flycar.generator.choose'](),
+        photo: m['flycar.generator.photo'](),
+        photoHint: m['flycar.generator.photo_hint'](),
+        generate: m['flycar.generator.generate'](),
+        loading: m['flycar.generator.loading'](),
+        retry: m['flycar.generator.retry'](),
+        uploadTemplateId: 'flying-car-ai',
+        templates: FLYING_CAR_THEMES.map((item, i) => ({
+          id: `flying-car-${item.slug}`,
+          name: names[i],
+          asset: `flying-car-${item.slug}`,
+          image: `/videos/flying-car/references/${item.slug}.jpg`,
+          thumb: `/videos/flying-car/references/${item.slug}.jpg`,
+          clip: `/videos/flying-car/references/${item.slug}.mp4`,
+          duration: 10,
+          ratios: '16:9',
+          prompt: '',
+        })),
+      };
+    }
     if (theme === 'ozil') {
       const names = [
         m['ozil.examples.red_hoodie'](),

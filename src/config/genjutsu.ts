@@ -81,11 +81,36 @@ export const OZIL_THEMES = [
 const ozilDirection = (lead: string) =>
   `Replace only the attacking player${lead ? ` in the ${lead}` : ''} who chips the ball over the goalkeeper, stops as the defenders slide past and rolls the ball into the empty net, using the person from the image. Keep the goalkeeper, both sliding defenders, the ball path, the stadium, the crowd, the floodlights, the camera pan and the timing exactly as in the reference video. Do not add players, crests or new actions.`;
 
+/** Built-in stunt takes use prepared 10s / 1280×720 generation inputs. */
+export const FLYING_CAR_THEMES = [
+  { slug: 'ramp-flip', name: 'Ramp flip and smoke landing' },
+] as const;
+const FLYING_CAR_DIRECTION =
+  'Replace only the silver minivan with the vehicle from the image, keeping its exact body shape, paint colour, wheels, lights and badges from every angle. Keep the curved ramp with its red edge lights, the climb until the vehicle is upside down, the launch off the top, the mid-air flip, the smoke-filled landing, the night setting, every camera angle and every cut exactly as in the reference video. Do not add people, text, logos or new actions.';
+
+export type GenjutsuSubject = 'person' | 'vehicle';
+
 /** Trusted reference context: never transform scenery when replacing a performer. */
 export const GENJUTSU_REFERENCES: Record<
   string,
-  { name: string; direction: string }
+  { name: string; direction: string; subject?: GenjutsuSubject }
 > = {
+  ...Object.fromEntries(
+    FLYING_CAR_THEMES.map((theme) => [
+      `flying-car-${theme.slug}`,
+      {
+        name: theme.name,
+        direction: FLYING_CAR_DIRECTION,
+        subject: 'vehicle' as const,
+      },
+    ])
+  ),
+  'flying-car-ai': {
+    name: 'Flying Car AI',
+    direction:
+      'Replace only the main vehicle with the vehicle from the image, keeping its exact body shape, paint colour, wheels and lights. Keep the stunt path, the scenery, the camera movement and every cut from the supplied reference video. Do not add people, text or new actions.',
+    subject: 'vehicle',
+  },
   ...Object.fromEntries(
     CRAZY_FROG_THEMES.map((theme) => [
       `crazy-frog-${theme.slug}`,
@@ -322,12 +347,23 @@ export function genjutsuReadiness(
 export function buildGenjutsuPrompt(
   prompt: unknown,
   hasCrowd: boolean,
-  provider: 'evolink' | 'fal'
+  provider: 'evolink' | 'fal',
+  subject: GenjutsuSubject = 'person'
 ) {
-  const character =
-    provider === 'fal' ? '@Element1' : 'the person in reference image 1';
   const crowd = provider === 'fal' ? '@Image1' : 'reference image 2';
   const extra = typeof prompt === 'string' ? prompt.trim().slice(0, 500) : '';
+  if (subject === 'vehicle') {
+    const vehicle =
+      provider === 'fal' ? '@Element1' : 'the vehicle in reference image 1';
+    const base = [
+      'Edit the input video, do not invent an unrelated new shot. Preserve the original background, environment, scenery, props, lighting and camera work. Do not replace or restyle the background.',
+      `Replace only the main vehicle with ${vehicle}. Preserve the original driving path, stunt trajectory, rotation, timing, cuts, camera path and perspective.`,
+      'Photoreal live-action footage of a rigid vehicle: consistent body shape, proportions, paint, wheels, glass and lights across frames, grounded contact with the ramp and road, coherent occlusion, smoke and reflections. No warping or melting panels, extra wheels, flicker or unrelated cuts.',
+    ].join(' ');
+    return extra ? `${base}\nAdditional direction: ${extra}` : base;
+  }
+  const character =
+    provider === 'fal' ? '@Element1' : 'the person in reference image 1';
   const base = [
     'Edit the input video, do not invent an unrelated new shot. Preserve the original background, environment, scenery, props, lighting and all non-target people. Do not replace or restyle the background.',
     `Replace only the main performer with ${character}. Preserve the original choreography, action trajectory, timing, cuts, camera path and perspective.`,

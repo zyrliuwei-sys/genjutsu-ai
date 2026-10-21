@@ -176,7 +176,8 @@ async function POST({ request }: { request: Request }) {
     const prompt = buildGenjutsuPrompt(
       reference?.direction ?? '',
       Boolean(crowdImage),
-      readiness.provider
+      readiness.provider,
+      reference?.subject
     );
     if (prompt.length > MAX_PROMPT) return respErr('Prompt is too long');
     const duration = await verifyVideoReceipt(
