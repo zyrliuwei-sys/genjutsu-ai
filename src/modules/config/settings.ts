@@ -185,13 +185,6 @@ export function getSettingGroups(): SettingGroup[] {
       tab: 'ai',
     },
     {
-      name: 'hotel_lobby',
-      title: 'Duet video template',
-      description:
-        'Two photos → GPT Image 2 scene → DreamActor motion transfer (uses the Fal key)',
-      tab: 'ai',
-    },
-    {
       name: 'prompt_safety',
       title: 'Prompt Safety',
       description:
@@ -925,33 +918,6 @@ export function getSettings(): Setting[] {
       type: 'password',
       placeholder: 'xxx',
       group: 'fal',
-      tab: 'ai',
-    },
-
-    // ─── AI / Hotel Lobby duet ───────────────────────────────────────
-    {
-      name: 'hotel_lobby_motion_video_url',
-      title: 'Reference video URL',
-      type: 'text',
-      placeholder: 'https://…/hotel-lobby-reference.mp4 (MP4, ≤30s, 9:16)',
-      group: 'hotel_lobby',
-      tab: 'ai',
-    },
-    {
-      name: 'hotel_lobby_video_seconds',
-      title: 'Reference video length (seconds)',
-      type: 'number',
-      placeholder:
-        '8 (default; set the real length if you change the video — prices each video at 7× fal cost)',
-      group: 'hotel_lobby',
-      tab: 'ai',
-    },
-    {
-      name: 'hotel_lobby_credits',
-      title: 'Credits per video (override)',
-      type: 'number',
-      placeholder: 'Leave empty = auto (7× fal cost, 1 credit = $0.01)',
-      group: 'hotel_lobby',
       tab: 'ai',
     },
 

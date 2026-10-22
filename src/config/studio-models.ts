@@ -3,7 +3,7 @@
  * imports). The generate API re-computes the price from this file, so the
  * client can only pick options — never set what it pays.
  *
- * Same rule as the duet video (./hotel-lobby-pricing.ts): every run is
+ * Same rule as ./credit-pricing.ts: every run is
  * charged at ≥ 7× its provider cost, 1 credit = $0.01, rounded up to a
  * whole CREDIT_UNIT ($3.50).
  *
@@ -15,7 +15,7 @@
  *   per image (measured $0.10 on 2026-10-06) — budgeted at $0.12.
  */
 
-import { creditsForCost } from './hotel-lobby-pricing';
+import { creditsForCost } from './credit-pricing';
 
 export type StudioKind = 'video' | 'image';
 export type StudioProvider = 'evolink' | 'fal';

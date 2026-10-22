@@ -7,7 +7,6 @@ const STATIC_PATHS = [
   '',
   '/create',
   '/flying-car-ai',
-  '/hotel-lobby',
   '/ozil-ai',
   '/crazy-frog-ai',
   '/pricing',

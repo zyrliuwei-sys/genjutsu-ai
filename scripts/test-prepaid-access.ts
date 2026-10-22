@@ -29,7 +29,6 @@ assert.equal(await hasPaidOrder('free-user'), false);
 for (const path of [
   'src/routes/api/studio/generate.ts',
   'src/routes/api/genjutsu/generate.ts',
-  'src/routes/api/hotel-lobby/generate.ts',
 ]) {
   const source = await readFile(path, 'utf8');
   assert.ok(source.includes('await hasPaidOrder(session.user.id)'));

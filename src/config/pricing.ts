@@ -43,7 +43,7 @@ export type PricingProduct = {
 /**
  * Credit catalog. Generation is priced in ./studio-models.ts (provider list
  * price × 7, e.g. 700 credits for a 5s 720p Seedance 2.0 clip) and
- * ./hotel-lobby-pricing.ts and ./genjutsu.ts.
+ * ./credit-pricing.ts and ./genjutsu.ts.
  *
  * Packs grant shared balance at 1 internal credit = $0.01. The visible packs
  * are sized in whole 10-second Genjutsu videos (990 credits each, see

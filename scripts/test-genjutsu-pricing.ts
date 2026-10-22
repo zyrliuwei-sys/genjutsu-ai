@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
+import { CREDIT_UNIT } from '../src/config/credit-pricing';
 import {
   GENJUTSU_CREDITS_PER_GENERATION,
   GENJUTSU_USD_PER_SECOND,
   genjutsuCredits,
   genjutsuGenerations,
 } from '../src/config/genjutsu';
-import { CREDIT_UNIT } from '../src/config/hotel-lobby-pricing';
 import { getPricingProduct, pricingCatalog } from '../src/config/pricing';
 import { CreemProvider } from '../src/core/payment/creem';
 import { PaymentType } from '../src/core/payment/types';
