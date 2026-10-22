@@ -699,6 +699,7 @@
   "flycar.generator.generate": "Gerar meu vídeo de carro voador",
   "flycar.generator.loading": "Carregando a manobra…",
   "flycar.generator.retry": "Não foi possível carregar a manobra. Clique para tentar de novo.",
+  "flycar.generator.sample": "Exemplo",
   "flycar.examples.title": "Uma manobra, quatro versões",
   "flycar.examples.description": "Todo clipe segue o mesmo trajeto: sobe a rampa curva, fica de cabeça para baixo no topo, dá um flip no ar e pousa na fumaça. Passe o mouse ou toque para assistir.",
   "flycar.examples.ramp_flip": "Flip na rampa e pouso na fumaça",

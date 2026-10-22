@@ -1431,6 +1431,7 @@
   "flycar.generator.generate": "生成我的飞车视频",
   "flycar.generator.loading": "正在加载特技…",
   "flycar.generator.retry": "特技加载失败，点击重试。",
+  "flycar.generator.sample": "示例",
   "flycar.examples.title": "同一个特技，四种玩法",
   "flycar.examples.description": "每段视频都是同一条路线：冲上弧形坡道，在顶端倒挂，空中翻转，最后在烟雾里落地。鼠标悬停或点击播放。",
   "flycar.examples.ramp_flip": "坡道空翻 + 烟雾落地",

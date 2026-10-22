@@ -699,6 +699,7 @@
   "flycar.generator.generate": "Mein Flying-Car-Video generieren",
   "flycar.generator.loading": "Stunt wird geladen…",
   "flycar.generator.retry": "Stunt konnte nicht geladen werden. Klicke für einen neuen Versuch.",
+  "flycar.generator.sample": "Beispiel",
   "flycar.examples.title": "Ein Stunt, vier Varianten",
   "flycar.examples.description": "Jeder Clip fährt dieselbe Strecke: die gebogene Rampe hinauf, kopfüber an der Spitze, ein Flip durch die Luft und eine Landung im Rauch. Zum Abspielen darüberfahren oder tippen.",
   "flycar.examples.ramp_flip": "Rampen-Flip mit Landung im Rauch",

@@ -1431,6 +1431,7 @@
   "flycar.generator.generate": "Generate my flying car video",
   "flycar.generator.loading": "Loading the stunt…",
   "flycar.generator.retry": "Stunt could not load. Click to retry.",
+  "flycar.generator.sample": "Sample",
   "flycar.examples.title": "The stunt, four ways",
   "flycar.examples.description": "Every clip runs the same route: up the curved ramp, upside down at the top, a flip through the air and a landing in smoke. Hover or tap to play.",
   "flycar.examples.ramp_flip": "Ramp flip and smoke landing",

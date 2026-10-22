@@ -35,6 +35,20 @@ export function GenjutsuGenerator({
         loading: m['flycar.generator.loading'](),
         retry: m['flycar.generator.retry'](),
         uploadTemplateId: 'flying-car-ai',
+        sampleLabel: m['flycar.generator.sample'](),
+        samples: (
+          [
+            ['car', m['flycar.examples.car']()],
+            ['bicycle', m['flycar.examples.bicycle']()],
+            ['carriage', m['flycar.examples.carriage']()],
+            ['skateboard', m['flycar.examples.skateboard']()],
+          ] as const
+        ).map(([slug, name]) => ({
+          id: slug,
+          name,
+          clip: `/videos/flying-car/${slug}.mp4`,
+          poster: `/videos/flying-car/${slug}.jpg`,
+        })),
         templates: FLYING_CAR_THEMES.map((item, i) => ({
           id: `flying-car-${item.slug}`,
           name: names[i],

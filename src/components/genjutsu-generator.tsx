@@ -8,6 +8,7 @@ import {
   Download,
   ImageIcon,
   Loader2,
+  Play,
   Plus,
   Sparkles,
   Upload,
@@ -449,6 +450,9 @@ export function GenjutsuGenerator({
     uploadTemplateId: string;
     /** Desktop: pick takes inside the side panel instead of a strip under the preview. */
     pickerInPanel?: boolean;
+    /** Finished results shown after the templates; a tap plays one in the preview. */
+    samples?: { id: string; name: string; clip: string; poster: string }[];
+    sampleLabel?: string;
     title: string;
     choose: string;
     photo: string;
@@ -515,6 +519,7 @@ export function GenjutsuGenerator({
   const user = session?.user;
   const [selectedId, setSelectedId] = useState(defaultTemplate.id);
   const [exampleId, setExampleId] = useState(defaultTemplate.id);
+  const [sampleId, setSampleId] = useState<string>();
   const [validatingMedia, setValidatingMedia] = useState(false);
   // Photos validate separately so they stay selectable while a video trims.
   const [validatingPhoto, setValidatingPhoto] = useState(false);
@@ -1423,6 +1428,7 @@ export function GenjutsuGenerator({
       setReferenceVideo(undefined);
     setSelectedId(template.id);
     setExampleId(template.id);
+    setSampleId(undefined);
     setPreviewMode('example');
   }
   // Page sections outside the generator (e.g. a theme gallery) pick a
@@ -1607,6 +1613,10 @@ export function GenjutsuGenerator({
 
   const workUrl = task?.status === 'success' ? task.url : null;
   const showWork = previewMode === 'work';
+  const sample =
+    previewMode === 'example' && referenceSource === 'effect'
+      ? theme?.samples?.find((item) => item.id === sampleId)
+      : undefined;
   const [workDimensions, setWorkDimensions] = useState<{
     url: string;
     width: number;
@@ -2198,6 +2208,45 @@ export function GenjutsuGenerator({
                   </span>
                 </button>
               ))}
+              {theme?.samples?.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={sample?.id === item.id}
+                  data-testid={`sample-${item.id}`}
+                  className={cn(
+                    'group relative aspect-[3/4] w-20 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all lg:w-32',
+                    sample?.id === item.id
+                      ? 'ring-primary/70'
+                      : 'hover:ring-primary/40 ring-transparent'
+                  )}
+                  onClick={() => {
+                    track('sample_play', { sample: item.id });
+                    setPreviewMode('example');
+                    setSampleId((id) => (id === item.id ? undefined : item.id));
+                  }}
+                >
+                  <img
+                    src={item.poster}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                  <span className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur">
+                    <Play className="size-3 fill-current" aria-hidden="true" />
+                  </span>
+                  <span className="absolute inset-x-1.5 bottom-1.5 lg:inset-x-2 lg:bottom-2">
+                    <span className="block text-[10px] leading-tight font-semibold [overflow-wrap:anywhere] hyphens-auto text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)] lg:text-sm">
+                      {item.name}
+                    </span>
+                    <span className="block text-[9px] text-white/70 lg:text-[11px]">
+                      {theme.sampleLabel}
+                    </span>
+                  </span>
+                </button>
+              ))}
               <div
                 aria-hidden="true"
                 className={cn(
@@ -2323,6 +2372,24 @@ export function GenjutsuGenerator({
                   )}
                 </div>
               )
+            ) : sample ? (
+              <video
+                key={sample.clip}
+                data-testid="sample-video"
+                src={sample.clip}
+                poster={sample.poster}
+                autoPlay
+                loop
+                muted={muted}
+                playsInline
+                onLoadedMetadata={(event) =>
+                  fitMedia(
+                    event.currentTarget.videoWidth,
+                    event.currentTarget.videoHeight
+                  )
+                }
+                className="absolute inset-0 size-full object-contain"
+              />
             ) : showCompare ? (
               <BeforeAfterVideo
                 before={{
@@ -2380,6 +2447,11 @@ export function GenjutsuGenerator({
                 <Volume2 className="size-4" />
               )}
             </button>
+            {sample && (
+              <span className="absolute top-3 left-3 rounded-full bg-black/70 px-2.5 py-1 text-xs text-white backdrop-blur">
+                {theme?.sampleLabel} · {sample.name}
+              </span>
+            )}
             {(showWork || referenceSource === 'upload') && (
               <span className="absolute top-3 left-3 rounded-full bg-black/70 px-2.5 py-1 text-xs text-white backdrop-blur">
                 {showWork

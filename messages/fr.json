@@ -699,6 +699,7 @@
   "flycar.generator.generate": "Générer ma vidéo de voiture volante",
   "flycar.generator.loading": "Chargement de la cascade…",
   "flycar.generator.retry": "La cascade n'a pas pu se charger. Cliquez pour réessayer.",
+  "flycar.generator.sample": "Exemple",
   "flycar.examples.title": "Une cascade, quatre versions",
   "flycar.examples.description": "Chaque clip suit le même parcours : la rampe incurvée, la tête en bas au sommet, un flip dans les airs et un atterrissage dans la fumée. Survolez ou touchez pour lancer.",
   "flycar.examples.ramp_flip": "Flip sur rampe et atterrissage dans la fumée",

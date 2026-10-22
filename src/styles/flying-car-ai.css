@@ -769,3 +769,50 @@
     transition: none !important;
   }
 }
+
+/* ---------- Studio picker ---------- */
+/* Stunt, own-video and the four sample results share one row of small
+   landscape cards instead of two tall half-width ones. */
+@media (min-width: 1024px) {
+  .fc-page
+    .eg-generator[data-themed='true']
+    .eg-generator-template-list
+    > button,
+  .fc-page
+    .eg-generator[data-themed='true']
+    .eg-generator-template-list
+    > label {
+    aspect-ratio: 4 / 3;
+  }
+  .fc-page
+    .eg-generator[data-themed='true']
+    .eg-generator-template-list
+    > label {
+    gap: 4px;
+  }
+  .fc-page
+    .eg-generator[data-themed='true']
+    .eg-generator-template-list
+    > label
+    > span:first-child {
+    width: 2rem;
+    height: 2rem;
+  }
+  .fc-page
+    .eg-generator[data-themed='true']
+    .eg-generator-template-list
+    > label
+    > span:first-child
+    svg {
+    width: 1rem;
+    height: 1rem;
+  }
+  .fc-page
+    .eg-generator[data-themed='true']
+    .eg-generator-template-list
+    > *
+    > span:last-child
+    > span:first-child {
+    font-size: 12px;
+  }
+}

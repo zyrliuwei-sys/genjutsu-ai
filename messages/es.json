@@ -699,6 +699,7 @@
   "flycar.generator.generate": "Generar mi vídeo de coche volador",
   "flycar.generator.loading": "Cargando la acrobacia…",
   "flycar.generator.retry": "No se pudo cargar la acrobacia. Haz clic para reintentar.",
+  "flycar.generator.sample": "Ejemplo",
   "flycar.examples.title": "Una acrobacia, cuatro versiones",
   "flycar.examples.description": "Cada clip sigue la misma ruta: rampa curva arriba, boca abajo en la cima, un flip en el aire y un aterrizaje entre humo. Pasa el cursor o toca para reproducir.",
   "flycar.examples.ramp_flip": "Flip en rampa y aterrizaje entre humo",
