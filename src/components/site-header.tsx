@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { ChevronDown, LogIn, Menu, ShieldIcon, X } from 'lucide-react';
+import { ChevronDown, Flame, LogIn, Menu, ShieldIcon, X } from 'lucide-react';
 
 import { useSession } from '@/core/auth/client';
 import { Link } from '@/core/i18n/navigation';
@@ -69,8 +69,9 @@ function NavDropdown({ group }: { group: NavGroup }) {
         aria-expanded={open}
         aria-haspopup="true"
         onClick={() => setOpen((v) => !v)}
-        className="text-muted-foreground hover:text-foreground aria-expanded:text-foreground inline-flex items-center gap-1 text-sm transition-colors"
+        className="text-foreground hover:text-primary aria-expanded:text-primary inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
       >
+        <Flame aria-hidden className="text-primary size-4" />
         {group.label}
         <ChevronDown
           aria-hidden
@@ -219,7 +220,8 @@ export function SiteHeader({
             {navLinks?.map((link) =>
               isGroup(link) ? (
                 <div key={link.label} className="flex flex-col gap-1">
-                  <span className="text-muted-foreground/70 px-3 pt-1 text-xs font-medium tracking-wide uppercase">
+                  <span className="text-primary inline-flex items-center gap-1.5 px-3 pt-1 text-xs font-semibold tracking-wide uppercase">
+                    <Flame aria-hidden className="size-3.5" />
                     {link.label}
                   </span>
                   {link.items.map((item) => (

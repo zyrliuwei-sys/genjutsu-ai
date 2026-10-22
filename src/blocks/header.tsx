@@ -3,7 +3,6 @@ import { SiteHeader, type NavItem } from '@/components/site-header';
 
 export function Header() {
   const navLinks: NavItem[] = [
-    { href: '/create', label: m['landing.nav.create']() },
     {
       label: m['landing.nav.trending'](),
       items: [
@@ -27,6 +26,7 @@ export function Header() {
         },
       ],
     },
+    { href: '/create', label: m['landing.nav.create']() },
     { href: '/genjutsu-video-ai', label: m['landing.nav.features']() },
     {
       href: '/higgsfield-genjutsu-alternative',
