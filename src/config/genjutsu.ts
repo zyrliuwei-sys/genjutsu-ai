@@ -81,6 +81,23 @@ export const OZIL_THEMES = [
 const ozilDirection = (lead: string) =>
   `Replace only the attacking player${lead ? ` in the ${lead}` : ''} who chips the ball over the goalkeeper, stops as the defenders slide past and rolls the ball into the empty net, using the person from the image. Keep the goalkeeper, both sliding defenders, the ball path, the stadium, the crowd, the floodlights, the camera pan and the timing exactly as in the reference video. Do not add players, crests or new actions.`;
 
+/** Built-in street freestyle takes use prepared 10s / 720×1280 generation inputs. */
+export const BULIN_THEMES = [
+  { slug: 'cap', name: 'Cap and pink tee', lead: 'grey cap and pink T-shirt' },
+  {
+    slug: 'cat',
+    name: 'Cat in shades',
+    lead: 'ginger cat with the gold chain',
+  },
+  {
+    slug: 'shades',
+    name: 'Pink shirt and shades',
+    lead: 'woman in the pink shirt',
+  },
+] as const;
+const bulinDirection = (lead: string) =>
+  `Replace only the freestyling rapper${lead ? ` (the ${lead})` : ''} facing the camera with the person from the image, dressed in a pink short-sleeve shirt and dark sunglasses. Keep the fan holding up the portable speaker, the crowd filming on their phones, the red-lit restaurant entrance at night, the hand gestures, the bounce, the pointing at the lens, the handheld vertical camera and the timing exactly as in the reference video. Do not add people, text, logos or new actions.`;
+
 /** Built-in stunt takes use prepared 10s / 1280×720 generation inputs. */
 export const FLYING_CAR_THEMES = [
   { slug: 'ramp-flip', name: 'Ramp flip and smoke landing' },
@@ -124,6 +141,13 @@ export const GENJUTSU_REFERENCES: Record<
     ])
   ),
   'ozil-ai': { name: 'Ozil AI', direction: ozilDirection('') },
+  ...Object.fromEntries(
+    BULIN_THEMES.map((theme) => [
+      `bulin-${theme.slug}`,
+      { name: theme.name, direction: bulinDirection(theme.lead) },
+    ])
+  ),
+  'bulin-47-ai': { name: 'Bulin 47 AI', direction: bulinDirection('') },
   'crazy-frog-ai': {
     name: 'Crazy Frog AI',
     direction:

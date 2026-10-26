@@ -36,7 +36,7 @@ export function GuideCard({
     >
       <div
         aria-hidden="true"
-        className="grid aspect-[16/9] grid-cols-[1fr_0.62fr] gap-3 bg-[oklch(0.97_0.01_80)] p-3 text-[oklch(0.22_0.02_50)]"
+        className="grid aspect-[16/9] grid-cols-[1fr_0.62fr] gap-3 bg-[oklch(0.24_0.012_40)] p-3 text-[oklch(0.93_0.012_80)]"
       >
         <div className="flex min-w-0 flex-col p-2">
           <span className="flex items-center gap-1.5 text-[10px] font-semibold">
@@ -52,7 +52,7 @@ export function GuideCard({
             {coverTitle}
           </span>
         </div>
-        <div className="from-primary grid place-items-center rounded-xl bg-gradient-to-br to-[oklch(0.45_0.17_28)] text-white">
+        <div className="grid place-items-center rounded-xl bg-gradient-to-br from-[oklch(0.45_0.15_30)] to-[oklch(0.3_0.1_28)] text-white/90">
           <Sparkles className="size-10 transition duration-500 group-hover:scale-110 group-hover:rotate-12" />
         </div>
       </div>

@@ -12,6 +12,7 @@ export function Footer() {
         { label: m['flycar.nav'](), href: '/flying-car-ai' },
         { label: m['ozil.nav'](), href: '/ozil-ai' },
         { label: m['frog.nav'](), href: '/crazy-frog-ai' },
+        { label: m['bulin.nav'](), href: '/bulin-47-ai' },
       ],
     },
     {

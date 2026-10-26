@@ -24,6 +24,12 @@ export function Header() {
           description: m['landing.hero.frog_tag'](),
           thumb: '/videos/crazy-frog/neon-city.jpg',
         },
+        {
+          href: '/bulin-47-ai',
+          label: m['bulin.nav'](),
+          description: m['landing.hero.bulin_tag'](),
+          thumb: '/videos/bulin/cap.jpg',
+        },
       ],
     },
     { href: '/create', label: m['landing.nav.create']() },

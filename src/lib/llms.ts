@@ -40,6 +40,12 @@ const EFFECTS: Entry[] = [
     title: 'Flying Car AI',
     description: 'Put your own car into the ramp-and-flip stunt from one photo',
   },
+  {
+    path: '/bulin-47-ai',
+    title: 'Bulin 47 AI',
+    description:
+      'Take the rapper’s place in the Bulin 47 street freestyle from one photo',
+  },
 ];
 
 const RESOURCES: Entry[] = [

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 
 import {
+  BULIN_THEMES,
   CRAZY_FROG_THEMES,
   FLYING_CAR_THEMES,
   OZIL_THEMES,
@@ -18,7 +19,7 @@ export function GenjutsuGenerator({
 }: {
   referenceOnly?: boolean;
   returnPath?: string;
-  theme?: 'crazy-frog' | 'flying-car' | 'ozil';
+  theme?: 'crazy-frog' | 'flying-car' | 'ozil' | 'bulin';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
@@ -58,6 +59,35 @@ export function GenjutsuGenerator({
           clip: `/videos/flying-car/references/${item.slug}.mp4`,
           duration: 10,
           ratios: '16:9',
+          prompt: '',
+        })),
+      };
+    }
+    if (theme === 'bulin') {
+      const names = [
+        m['bulin.examples.cap'](),
+        m['bulin.examples.cat'](),
+        m['bulin.examples.shades'](),
+      ];
+      return {
+        title: m['bulin.generator.title'](),
+        choose: m['bulin.generator.choose'](),
+        photo: m['bulin.generator.photo'](),
+        photoHint: m['bulin.generator.photo_hint'](),
+        generate: m['bulin.generator.generate'](),
+        loading: m['bulin.generator.loading'](),
+        retry: m['bulin.generator.retry'](),
+        uploadTemplateId: 'bulin-47-ai',
+        pickerInPanel: true,
+        templates: BULIN_THEMES.map((item, i) => ({
+          id: `bulin-${item.slug}`,
+          name: names[i],
+          asset: `bulin-${item.slug}`,
+          image: `/videos/bulin/${item.slug}.jpg`,
+          thumb: `/videos/bulin/${item.slug}.jpg`,
+          clip: `/videos/bulin/references/${item.slug}.mp4`,
+          duration: 10,
+          ratios: '9:16',
           prompt: '',
         })),
       };

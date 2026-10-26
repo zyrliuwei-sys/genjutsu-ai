@@ -1,0 +1,532 @@
+/* Bulin 47 AI landing page. Night street freestyle: a red neon sign glow,
+   the pink-shirt accent and a speaker "level meter" as the section motif. */
+.bulin-page {
+  --bulin-neon: oklch(0.63 0.24 25);
+  --bulin-pink: oklch(0.78 0.11 0);
+  background: var(--background);
+  color: var(--foreground);
+  overflow: clip;
+}
+.bulin-page :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--bulin-neon);
+  outline-offset: 4px;
+}
+.bulin-page h2 {
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.bulin-page p {
+  line-height: 1.7;
+}
+
+/* ---------- Hero ---------- */
+.bulin-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: 56px;
+  max-width: 1240px;
+  margin: auto;
+  padding: 132px 24px 56px;
+}
+.bulin-hero::before {
+  content: '';
+  position: absolute;
+  inset: 40px -10% auto auto;
+  width: 640px;
+  height: 640px;
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklch, var(--bulin-neon) 32%, transparent),
+    transparent
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+.bulin-hero > * {
+  position: relative;
+  z-index: 1;
+}
+.bulin-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in oklch, var(--bulin-neon) 55%, transparent);
+  border-radius: 999px;
+  color: var(--bulin-pink);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.bulin-hero h1 {
+  margin-top: 22px;
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+.bulin-hero h1 span {
+  display: block;
+  margin-top: 10px;
+  color: var(--bulin-neon);
+  font-size: 0.45em;
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 24px color-mix(in oklch, var(--bulin-neon) 60%, transparent);
+}
+.bulin-intro {
+  max-width: 560px;
+  margin-top: 22px;
+  color: var(--muted-foreground);
+  font-size: 17px;
+}
+.bulin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 30px;
+}
+.bulin-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--bulin-neon);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0 32px color-mix(in oklch, var(--bulin-neon) 45%, transparent);
+  transition:
+    filter 0.2s,
+    transform 0.2s;
+}
+.bulin-button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.bulin-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  text-decoration: none;
+}
+.bulin-text-link:hover {
+  color: var(--foreground);
+}
+.bulin-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 30px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.bulin-facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.bulin-facts svg {
+  color: var(--bulin-pink);
+}
+
+/* Phone-shaped stage with the take on loop. */
+.bulin-stage {
+  justify-self: center;
+  position: relative;
+  width: min(330px, 100%);
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--bulin-neon) 45%, var(--border));
+  border-radius: 34px;
+  background: #000;
+  box-shadow:
+    0 0 0 8px color-mix(in oklch, var(--foreground) 6%, transparent),
+    0 30px 90px -20px color-mix(in oklch, var(--bulin-neon) 55%, transparent);
+  transform: rotate(2deg);
+}
+.bulin-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.bulin-live {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.55);
+  color: #fff;
+  font-family: var(--font-mono-display);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+.bulin-live::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--bulin-neon);
+  box-shadow: 0 0 10px var(--bulin-neon);
+  animation: bulin-pulse 1.4s ease-in-out infinite;
+}
+@keyframes bulin-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- Level meter divider ---------- */
+.bulin-meter {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 5px;
+  height: 34px;
+  margin: 8px auto;
+}
+.bulin-meter span {
+  width: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to top, var(--bulin-pink), var(--bulin-neon));
+  opacity: 0.75;
+  animation: bulin-meter 1.2s ease-in-out infinite alternate;
+}
+@keyframes bulin-meter {
+  from {
+    transform: scaleY(0.35);
+  }
+}
+.bulin-meter span {
+  transform-origin: bottom;
+}
+
+/* ---------- Sections ---------- */
+.bulin-studio {
+  max-width: 1336px;
+  margin: auto;
+  padding: 24px 24px 72px;
+  scroll-margin-top: 80px;
+}
+.bulin-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  margin: 0 4px 26px;
+}
+.bulin-section-head p {
+  max-width: 460px;
+  color: var(--muted-foreground);
+  font-size: 15px;
+}
+.bulin-price {
+  margin: 14px 4px 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.bulin-section {
+  max-width: 1180px;
+  margin: auto;
+  padding: 88px 24px;
+  scroll-margin-top: 80px;
+}
+.bulin-note {
+  margin-top: 18px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Examples */
+.bulin-reel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 980px;
+  margin-inline: auto;
+}
+.bulin-page .reel-card {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--muted);
+  isolation: isolate;
+}
+.bulin-page .reel-card video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.6s ease;
+}
+.bulin-page .reel-card:hover video {
+  transform: scale(1.03);
+}
+.bulin-page .reel-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.85), transparent 50%);
+}
+.bulin-page .reel-card-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+}
+.bulin-page .reel-card[data-playing='true'] .reel-card-play {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+.bulin-page .reel-card figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  color: #fff;
+  pointer-events: none;
+}
+.bulin-page .reel-card-index {
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  color: rgb(255 255 255 / 0.6);
+}
+.bulin-page .reel-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.bulin-page .reel-card figcaption button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--bulin-neon);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: auto;
+}
+
+/* About */
+.bulin-about {
+  border-block: 1px solid var(--border);
+  background: color-mix(in oklch, var(--bulin-neon) 6%, var(--background));
+}
+.bulin-about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 56px;
+}
+.bulin-kicker {
+  color: var(--bulin-pink);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.bulin-about-grid h2 {
+  margin-top: 14px;
+}
+.bulin-about-line {
+  margin-top: 20px;
+  color: var(--bulin-neon);
+  font-family: var(--font-serif-display);
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+.bulin-prose p + p {
+  margin-top: 16px;
+}
+.bulin-prose p {
+  color: var(--muted-foreground);
+}
+
+/* Steps & checks */
+.bulin-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.bulin-card {
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+}
+.bulin-card h3 {
+  margin-top: 14px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.bulin-card p {
+  margin-top: 8px;
+  color: var(--muted-foreground);
+  font-size: 14.5px;
+}
+.bulin-step-number {
+  font-family: var(--font-mono-display);
+  font-size: 12px;
+  color: var(--bulin-neon);
+}
+.bulin-card svg {
+  color: var(--bulin-pink);
+}
+
+/* FAQ */
+.bulin-faq {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: 56px;
+}
+.bulin-faq details {
+  border-bottom: 1px solid var(--border);
+}
+.bulin-faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.bulin-faq summary::-webkit-details-marker {
+  display: none;
+}
+.bulin-faq summary span {
+  color: var(--bulin-neon);
+  transition: transform 0.2s;
+}
+.bulin-faq details[open] summary span {
+  transform: rotate(45deg);
+}
+.bulin-faq details p {
+  padding-bottom: 20px;
+  color: var(--muted-foreground);
+}
+
+/* CTA */
+.bulin-cta {
+  padding: 0 24px 96px;
+}
+.bulin-cta-inner {
+  max-width: 1180px;
+  margin: auto;
+  padding: 72px 32px;
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      ellipse at top,
+      color-mix(in oklch, var(--bulin-neon) 55%, transparent),
+      transparent 70%
+    ),
+    #120808;
+  color: #fff;
+  text-align: center;
+}
+.bulin-cta-inner p {
+  margin: 14px auto 28px;
+  max-width: 480px;
+  color: rgb(255 255 255 / 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bulin-live::before,
+  .bulin-meter span {
+    animation: none;
+  }
+}
+
+@media (max-width: 899px) {
+  .bulin-hero {
+    grid-template-columns: 1fr;
+    padding: 108px 20px 32px;
+  }
+  .bulin-stage,
+  .bulin-facts,
+  .bulin-actions .bulin-text-link {
+    display: none;
+  }
+  .bulin-studio {
+    padding: 16px 12px 52px;
+  }
+  .bulin-section-head,
+  .bulin-about-grid,
+  .bulin-faq {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .bulin-section {
+    padding: 60px 20px;
+  }
+  .bulin-grid3 {
+    grid-template-columns: 1fr;
+  }
+  .bulin-reel {
+    display: flex;
+    gap: 10px;
+    margin-inline: -20px;
+    padding-inline: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .bulin-page .reel-card {
+    flex: 0 0 62%;
+    scroll-snap-align: center;
+  }
+  .bulin-cta {
+    padding: 0 12px 64px;
+  }
+}
