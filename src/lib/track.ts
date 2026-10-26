@@ -1,13 +1,16 @@
 // Funnel tracking: mirrors each event to GA4 (when gtag is loaded) and to
 // /api/events (D1 `funnel_event`) so conversion drop-off can be queried.
 
+import { v4 as uuidv4 } from 'uuid';
+
 const ANON_KEY = 'genjutsu-anon-id';
 
 function anonId() {
   try {
     let id = localStorage.getItem(ANON_KEY);
     if (!id) {
-      id = crypto.randomUUID();
+      // uuid falls back to getRandomValues where crypto.randomUUID is missing.
+      id = uuidv4();
       localStorage.setItem(ANON_KEY, id);
     }
     return id;

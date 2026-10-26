@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useSession } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
@@ -797,8 +798,10 @@ export function GenjutsuGenerator({
     const store = (asset?: Asset): DraftAsset | undefined =>
       asset && {
         kind: asset.kind,
+        // The original picker File (sourceFile) is never read after trimming;
+        // storing it only doubles the draft and adds a blob that some Android
+        // browsers can't write to IndexedDB.
         file: asset.file,
-        sourceFile: asset.sourceFile,
         sourceDuration: asset.sourceDuration,
         trimStart: asset.trimStart,
         url: asset.url,
@@ -1353,7 +1356,8 @@ export function GenjutsuGenerator({
         /* New submission. */
       }
       if (!submission || submission.signature !== signature) {
-        submission = { signature, requestId: crypto.randomUUID() };
+        // uuid falls back to getRandomValues where crypto.randomUUID is missing.
+        submission = { signature, requestId: uuidv4() };
         sessionStorage.setItem(
           submissionStorageKey,
           JSON.stringify(submission)

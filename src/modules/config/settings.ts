@@ -200,6 +200,12 @@ export function getSettingGroups(): SettingGroup[] {
       tab: 'analytics',
     },
     {
+      name: 'clarity',
+      title: 'Microsoft Clarity',
+      description: 'Inject the Clarity tag for session recordings and heatmaps',
+      tab: 'analytics',
+    },
+    {
       name: 'plausible',
       title: 'Plausible',
       description: 'Inject plausible.js for self-hosted or cloud Plausible',
@@ -970,6 +976,17 @@ export function getSettings(): Setting[] {
       type: 'text',
       placeholder: 'G-XXXXXXXXXX',
       group: 'google_analytics',
+      tab: 'analytics',
+    },
+
+    // ─── Analytics / Microsoft Clarity ───────────────────────────────
+    {
+      name: 'clarity_project_id',
+      title: 'Project ID',
+      type: 'text',
+      placeholder: 'abcdefghij',
+      tip: 'Clarity → Settings → Overview → Project ID',
+      group: 'clarity',
       tab: 'analytics',
     },
 
