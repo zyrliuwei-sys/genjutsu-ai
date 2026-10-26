@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { GUIDES } from '@/lib/guides';
 import { baseLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 
 const STATIC_PATHS = [
@@ -59,6 +60,23 @@ function entryXml(e: Entry): string {
     .join('\n');
 }
 
+// Guides are English-only: one <url> each, no translated alternates.
+function guideXml(path: string, lastModified?: string): string {
+  const loc = `${envConfigs.app_url}${path}`;
+  return [
+    '  <url>',
+    `    <loc>${loc}</loc>`,
+    `    <xhtml:link rel="alternate" hreflang="en" href="${loc}"/>`,
+    `    <xhtml:link rel="alternate" hreflang="x-default" href="${loc}"/>`,
+    lastModified ? `    <lastmod>${lastModified}</lastmod>` : null,
+    '    <changefreq>weekly</changefreq>',
+    '    <priority>0.7</priority>',
+    '  </url>',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
 export const Route = createFileRoute('/sitemap.xml')({
   server: {
     handlers: {
@@ -73,6 +91,8 @@ export const Route = createFileRoute('/sitemap.xml')({
           '<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
           ...entries.map(entryXml),
+          guideXml('/guides', GUIDES[0]?.meta.updated_at),
+          ...GUIDES.map((guide) => guideXml(guide.href, guide.meta.updated_at)),
           '</urlset>',
           '',
         ].join('\n');

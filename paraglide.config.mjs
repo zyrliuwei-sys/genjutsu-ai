@@ -16,6 +16,19 @@ export const paraglideConfig = {
         ['pt-BR', '/api/:path(.*)?'],
       ],
     },
+    // English-only guides: every locale links to the same unprefixed URL
+    // (en first, so /guides resolves to English); /de/guides/… is 301-redirected
+    // in src/server.ts.
+    {
+      pattern: '/guides/:path(.*)?',
+      localized: [
+        ['en', '/guides/:path(.*)?'],
+        ['de', '/guides/:path(.*)?'],
+        ['fr', '/guides/:path(.*)?'],
+        ['es', '/guides/:path(.*)?'],
+        ['pt-BR', '/guides/:path(.*)?'],
+      ],
+    },
     {
       pattern: '/',
       localized: [

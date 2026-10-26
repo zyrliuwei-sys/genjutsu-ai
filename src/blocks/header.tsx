@@ -32,6 +32,7 @@ export function Header() {
       href: '/higgsfield-genjutsu-alternative',
       label: m['landing.resources.compare_nav'](),
     },
+    { href: '/guides', label: m['guides.title']() },
     { href: '/pricing', label: m['landing.nav.pricing']() },
   ];
 

@@ -68,6 +68,14 @@ export default {
       reqUrl.pathname = reqUrl.pathname.slice(3) || '/';
       return Response.redirect(reqUrl.toString(), 301);
     }
+    // Guides are English-only: /de/guides/… etc. move to the single /guides URL.
+    const guidesMatch = reqUrl.pathname.match(
+      /^\/(?:de|fr|es|pt-br)(\/guides(?:\/.*)?)$/
+    );
+    if (guidesMatch) {
+      reqUrl.pathname = guidesMatch[1];
+      return Response.redirect(reqUrl.toString(), 301);
+    }
     const response = await paraglideMiddleware(req, () => handler.fetch(req));
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');

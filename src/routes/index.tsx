@@ -5,12 +5,12 @@ import { m } from '@/paraglide/messages.js';
 import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { About } from '@/blocks/about';
 import { Audience } from '@/blocks/audience';
-import { ContentLinks } from '@/blocks/content-links';
 import { CTA } from '@/blocks/cta';
 import { FAQ, FAQ_KEYS } from '@/blocks/faq';
 import { Features } from '@/blocks/features';
 import { Footer } from '@/blocks/footer';
 import { Compare, Guide } from '@/blocks/guide';
+import { Guides } from '@/blocks/guides';
 import { Header } from '@/blocks/header';
 import { Hero } from '@/blocks/hero';
 import { Pricing } from '@/blocks/pricing';
@@ -118,10 +118,6 @@ function HomePage() {
       <Header />
       <main>
         <Hero />
-        {/* Phones get a shorter page; the text stays in the HTML for SEO. */}
-        <div className="max-md:hidden">
-          <ContentLinks />
-        </div>
         <Features />
         <Showcase />
         <div className="max-md:hidden">
@@ -131,6 +127,7 @@ function HomePage() {
           <Audience />
         </div>
         <Pricing />
+        <Guides />
         <FAQ />
         <CTA />
       </main>

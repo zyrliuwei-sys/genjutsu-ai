@@ -19,6 +19,7 @@ export function Footer() {
       hideOnMobile: true,
       links: [
         { label: m['landing.footer.image'](), href: '/genjutsu-video-ai' },
+        { label: m['guides.title'](), href: '/guides' },
         { label: m['landing.nav.pricing'](), href: '/pricing' },
         { label: m['landing.footer.aup'](), href: '/aup' },
       ],

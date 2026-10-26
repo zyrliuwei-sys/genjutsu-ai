@@ -1,0 +1,112 @@
+**The short answer:** a good Genjutsu prompt does two things in this order — it names **the one thing to replace**, then lists **everything that must stay exactly as filmed**. Most failed Genjutsu videos come from prompts that only describe the new character and forget to protect the motion, the camera and the background.
+
+You do not need to write any of this on Genjutsu AI (this site): every effect already carries a tested instruction, and you only add a photo. But if you are using a prompt-based editor such as [Higgsfield Genjutsu](https://higgsfield.ai/genjutsu), or you want to understand why an effect behaves the way it does, the patterns below are the ones we use in production.
+
+## The universal Genjutsu prompt template
+
+Copy this and fill in the brackets:
+
+```text
+Replace only [the subject: e.g. the dancer in the red suit] with the [person / vehicle] from the image.
+Keep [the motion: walk, jump, spin, choreography], [the other people or objects],
+[the location and lighting], the camera movement and every cut exactly as in the reference video.
+Do not add [people, text, logos or new actions].
+```
+
+Why each part matters:
+
+- **"Replace only …"** — models are eager to "improve" a scene. Naming one subject, with a visual detail ("the man in the pink suit", "the front-left model"), stops them from restyling everyone.
+- **"Keep …"** — list the moves and the camera explicitly. If you do not, the model may simplify a dance or stabilise a handheld shot.
+- **"Do not add …"** — blocks the most common artefacts: extra people, captions, logos and invented gestures.
+
+## 12 Genjutsu prompt examples
+
+These are the actual effect-specific instructions used on this site. Each one is added on top of a shared base instruction that follows the template above, so you can see how specific they get.
+
+### Character swaps (one person)
+
+1. **Street Runway** — "Preserve the walk, the shirt toss and the handheld camera following the model."
+2. **Red Suit Groove** — "Replace only the dancer in the red suit; keep the surrounding crowd and their choreography."
+3. **Moonlit Walk** — "Replace only the astronaut; keep the slow walk away from the camera, the ripples, the giant moon, the mirror-still sea and the static framing."
+4. **Fire Skirt Spin** — "Replace only the dancer; keep the skirt spins, floor work, sparks and camera framing unchanged."
+5. **Canyon Bungee** — "Preserve the jump from the bridge, the fall, the rope and the camera tracking downward."
+
+### Swaps inside a group
+
+6. **Origami Lookbook** — "Replace only the front-left model; keep the other models, the origami crane, the yellow and blue walls and the camera framing."
+7. **Desert Boardroom** — "Replace only the woman in the lavender suit in the middle; keep the other two, the office chairs, the dunes and the camera framing."
+8. **Tennis Ball Picnic** — "Replace only the man in the tweed jacket; keep the woman, the picnic blanket, the falling tennis balls and the camera framing."
+
+Group shots are where vague prompts fail most: always say _which_ person by position and clothing.
+
+### Trend effects with a twist
+
+9. **Crazy Frog chase** — "Replace only the main crouching rider with the person from the image. Preserve the invisible motorcycle illusion: no bike, wheels, seat or handlebars under the main rider. Keep the pursuer, scenery, camera movement, riding pose, jumps and escape. Do not introduce a frog character or new actions." The "no bike" line matters: without it, models helpfully draw the motorcycle back in.
+10. **Mural Style Shift** — "Replace only the dancer; keep the choreography, the painted mural, the static framing and every art-style switch on the beat."
+
+### Vehicle swaps
+
+11. **Flying Car** — "Replace only the silver minivan with the vehicle from the image, keeping its exact body shape, paint colour, wheels, lights and badges from every angle. Keep the curved ramp, the climb until the vehicle is upside down, the launch, the mid-air flip, the smoke-filled landing, every camera angle and every cut. Do not add people, text, logos or new actions."
+
+### Transformation shots
+
+12. **Sketch Glow-Up** — "Preserve the drawing, the paper flip transition, the magazine-cover pose and the camera framing." For transition effects, protect the transition itself, not just the person.
+
+## Why Genjutsu prompts fail (and how to fix them)
+
+<div className="border-border my-6 overflow-x-auto rounded-xl border">
+  <table className="w-full min-w-[620px] text-left text-sm">
+    <thead>
+      <tr className="border-border border-b">
+        <th className="p-4">Problem in the result</th>
+        <th className="p-4">Usual cause</th>
+        <th className="p-4">Fix in the prompt</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="border-border border-b">
+        <td className="p-4">Everyone in the shot changed</td>
+        <td className="p-4">Subject not specific</td>
+        <td className="p-4">Name one person by position and clothing</td>
+      </tr>
+      <tr className="border-border border-b">
+        <td className="p-4">Dance looks simpler or slower</td>
+        <td className="p-4">Motion not protected</td>
+        <td className="p-4">List the moves: "spins, floor work, the jump"</td>
+      </tr>
+      <tr className="border-border border-b">
+        <td className="p-4">Camera became smooth or static</td>
+        <td className="p-4">Camera not mentioned</td>
+        <td className="p-4">
+          "Keep the handheld camera / the orbit / every cut"
+        </td>
+      </tr>
+      <tr className="border-border border-b">
+        <td className="p-4">Extra people, text or logos appear</td>
+        <td className="p-4">Nothing forbids them</td>
+        <td className="p-4">End with "Do not add people, text or logos"</td>
+      </tr>
+      <tr>
+        <td className="p-4">Face does not look like the photo</td>
+        <td className="p-4">Photo, not prompt</td>
+        <td className="p-4">
+          Use one sharp, front-facing photo; no sunglasses or filters
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+The last row is worth repeating: no prompt rescues a blurry or side-on photo. Photo quality decides likeness far more than wording does.
+
+## Adapting the template to your own clip
+
+Before you write anything, watch your clip once and note three things — that list becomes your prompt:
+
+1. **Who changes** — describe them the way a stranger would spot them: position in frame, clothing colour, what they are holding.
+2. **What must survive** — every move you would miss if it disappeared: the jump, the spin, the hand gesture, the camera push-in.
+3. **What the model must not invent** — usually people, text, logos and extra actions.
+
+Keep it under about 80 words. Longer prompts tend to bury the "replace only" instruction, and the model starts restyling the whole scene.
+
+On Genjutsu AI you can skip this step: every scene on the [create page](/create) applies its instruction for you, and your own uploads get the shared "replace the main person, keep everything else" base. New to the tool? Start with [How to use Genjutsu AI](/guides/how-to-use-genjutsu-ai), or read [What is Genjutsu AI?](/guides/what-is-genjutsu-ai) for the background.
