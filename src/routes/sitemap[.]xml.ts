@@ -11,6 +11,7 @@ const STATIC_PATHS = [
   '/ozil-ai',
   '/crazy-frog-ai',
   '/bulin-47-ai',
+  '/pollo-ai-kissing',
   '/pricing',
   '/privacy-policy',
   '/terms-of-service',

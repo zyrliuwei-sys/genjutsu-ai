@@ -46,6 +46,11 @@ const EFFECTS: Entry[] = [
     description:
       'Take the rapper’s place in the Bulin 47 street freestyle from one photo',
   },
+  {
+    path: '/pollo-ai-kissing',
+    title: 'AI Kissing (Pollo AI kissing alternative)',
+    description: 'Recast a filmed kiss scene with two people, one photo each',
+  },
 ];
 
 const RESOURCES: Entry[] = [

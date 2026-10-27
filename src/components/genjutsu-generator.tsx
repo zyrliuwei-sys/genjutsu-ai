@@ -454,6 +454,8 @@ export function GenjutsuGenerator({
     /** Finished results shown after the templates; a tap plays one in the preview. */
     samples?: { id: string; name: string; clip: string; poster: string }[];
     sampleLabel?: string;
+    /** Two-photo theme: a second person's photo replaces the own-video upload. */
+    partner?: { photo: string; photoHint: string };
     title: string;
     choose: string;
     photo: string;
@@ -531,6 +533,8 @@ export function GenjutsuGenerator({
   // Every video is a single clip of up to 10s; there is no length choice.
   const durationTier = GENJUTSU_SECONDS;
   const [lead, setLead] = useState<Asset>();
+  const [partner, setPartner] = useState<Asset>();
+  const needsPartner = Boolean(theme?.partner);
   const [referenceVideo, setReferenceVideo] = useState<Asset>();
   // The visitor's last uploaded video, kept as a card in the effects strip.
   const [ownVideo, setOwnVideo] = useState<Asset>();
@@ -710,6 +714,7 @@ export function GenjutsuGenerator({
           };
         };
         setLead(restore(draft?.lead));
+        setPartner(restore(draft?.partner));
         setReferenceVideo(restore(draft?.referenceVideo));
         setOwnVideo(
           restore(
@@ -743,7 +748,11 @@ export function GenjutsuGenerator({
         if (theme) {
           // Keep a drafted own video (e.g. resuming after sign-in); otherwise
           // open on a theme scene.
-          if (draft?.referenceSource !== 'upload' || !draft.referenceVideo) {
+          if (
+            needsPartner ||
+            draft?.referenceSource !== 'upload' ||
+            !draft.referenceVideo
+          ) {
             setReferenceSource('effect');
             setReferenceClosed(false);
             setReferenceVideo(undefined);
@@ -770,6 +779,7 @@ export function GenjutsuGenerator({
       .catch(() => {
         if (active) {
           setLead(undefined);
+          setPartner(undefined);
           setReferenceVideo(undefined);
           toast.error(copy.ui.restoreFailed);
         }
@@ -790,6 +800,7 @@ export function GenjutsuGenerator({
     templates,
     defaultTemplate,
     Boolean(theme),
+    needsPartner,
   ]);
 
   function persistDraft() {
@@ -818,6 +829,7 @@ export function GenjutsuGenerator({
       referenceClosed,
       referenceSource,
       lead: store(lead),
+      partner: store(partner),
       referenceVideo: store(referenceVideo),
       ownVideo: store(ownVideo),
       savedAt: Date.now(),
@@ -846,6 +858,7 @@ export function GenjutsuGenerator({
     sessionPending,
     user?.id,
     lead,
+    partner,
     referenceVideo,
     ownVideo,
     selectedId,
@@ -859,6 +872,13 @@ export function GenjutsuGenerator({
       if (lead?.preview.startsWith('blob:')) URL.revokeObjectURL(lead.preview);
     },
     [lead?.preview]
+  );
+  useEffect(
+    () => () => {
+      if (partner?.preview.startsWith('blob:'))
+        URL.revokeObjectURL(partner.preview);
+    },
+    [partner?.preview]
   );
   useEffect(
     () => () => {
@@ -1227,7 +1247,8 @@ export function GenjutsuGenerator({
 
   const generate = useMutation({
     mutationFn: async () => {
-      if (!lead || !referenceVideo) throw new Error(copy.ui.needAssets);
+      if (!lead || !referenceVideo || (needsPartner && !partner))
+        throw new Error(copy.ui.needAssets);
       const current = await readinessQuery.refetch();
       if (current.isError) throw new Error(copy.serviceUnavailable);
       if (!current.data?.provider)
@@ -1308,16 +1329,33 @@ export function GenjutsuGenerator({
         }
       }
       setLead({ ...lead, uploading: true });
+      if (partner) setPartner({ ...partner, uploading: true });
       setReferenceVideo({ ...preparedReference, uploading: true });
       let leadImage: string;
+      let crowdImage: string | undefined;
       let videoUrl: string;
       let videoReceipt: Asset['videoReceipt'];
       try {
         // Parallel transfer; each successful asset is retained even if the other fails.
         const [imageUpload, videoUpload] = await parallelMediaUpload(
           async () => {
-            const uploaded = await uploadAsset(lead);
-            setLead({ ...lead, url: uploaded.url, uploading: false });
+            const [uploaded, partnerUpload] = await Promise.all([
+              uploadAsset(lead).then((result) => {
+                setLead({ ...lead, url: result.url, uploading: false });
+                return result;
+              }),
+              needsPartner && partner
+                ? uploadAsset(partner).then((result) => {
+                    setPartner({
+                      ...partner,
+                      url: result.url,
+                      uploading: false,
+                    });
+                    return result;
+                  })
+                : undefined,
+            ]);
+            crowdImage = partnerUpload?.url;
             return uploaded;
           },
           async () => {
@@ -1336,6 +1374,7 @@ export function GenjutsuGenerator({
         videoReceipt = videoUpload.videoReceipt;
       } catch (error) {
         setLead((value) => (value ? { ...value, uploading: false } : value));
+        setPartner((value) => (value ? { ...value, uploading: false } : value));
         setReferenceVideo((value) =>
           value ? { ...value, uploading: false } : value
         );
@@ -1343,6 +1382,7 @@ export function GenjutsuGenerator({
       }
       const signature = JSON.stringify([
         leadImage,
+        crowdImage,
         videoUrl,
         aspect,
         selected.id,
@@ -1375,6 +1415,7 @@ export function GenjutsuGenerator({
                 ? selected.id
                 : undefined,
         leadImage,
+        crowdImage,
         referenceVideo: videoUrl,
         videoReceipt,
         referenceWidth: preparedReference.width,
@@ -1473,7 +1514,10 @@ export function GenjutsuGenerator({
     : elapsedSecs < expectedSecs
       ? 8 + (82 * elapsedSecs) / expectedSecs
       : 90 + 9 * (1 - Math.exp(-(elapsedSecs - expectedSecs) / expectedSecs));
-  const uploading = Boolean(lead?.uploading || referenceVideo?.uploading);
+  const uploading = Boolean(
+    lead?.uploading || partner?.uploading || referenceVideo?.uploading
+  );
+  const partnerMissing = needsPartner && !assetIsReady(partner);
   const canGenerate =
     draftReady &&
     draftOwner === (user?.id || 'anonymous') &&
@@ -1515,7 +1559,11 @@ export function GenjutsuGenerator({
     });
     // Check the inputs before sending the visitor to sign in, so they never
     // sign in only to be told something is missing.
-    if (!assetIsReady(lead) || !assetIsReady(referenceVideo)) {
+    if (
+      !assetIsReady(lead) ||
+      partnerMissing ||
+      !assetIsReady(referenceVideo)
+    ) {
       track('generate_error', { stage: 'assets' });
       toast.error(copy.ui.needAssets);
       return;
@@ -1593,7 +1641,8 @@ export function GenjutsuGenerator({
   const resumed = useRef(false);
   useEffect(() => {
     if (resumed.current || !user || !canGenerate) return;
-    if (!assetIsReady(lead) || !assetIsReady(referenceVideo)) return;
+    if (!assetIsReady(lead) || partnerMissing || !assetIsReady(referenceVideo))
+      return;
     // Wait for the restored reference effect to load; resuming earlier trips
     // the effect_loading guard in runGeneration.
     if (
@@ -1649,6 +1698,7 @@ export function GenjutsuGenerator({
   const generateDisabled =
     !canGenerate ||
     (Boolean(theme) && !assetIsReady(lead)) ||
+    partnerMissing ||
     (referenceSource === 'effect' &&
       (effectQuery.isFetching || effectQuery.isError || !effectQuery.data)) ||
     referenceClosed ||
@@ -1789,7 +1839,8 @@ export function GenjutsuGenerator({
             <div
               className={cn(
                 'flex min-w-0 flex-col gap-2',
-                theme && !panelPicker && 'lg:hidden'
+                theme && !panelPicker && 'lg:hidden',
+                needsPartner && 'hidden'
               )}
             >
               <div
@@ -1929,13 +1980,36 @@ export function GenjutsuGenerator({
                 panelPicker && 'lg:aspect-[3/4]'
               )}
             />
+            {theme?.partner && (
+              <UploadSlot
+                label={theme.partner.photo}
+                hint={theme.partner.photoHint}
+                uploadLabel={copy.ui.uploadPhoto}
+                kind="image"
+                disabled={leadDisabled}
+                accept="image/jpeg,image/png,image/webp"
+                asset={partner}
+                onFile={(file) => selectAsset(file, 'image', setPartner)}
+                onRemove={() => setPartner(undefined)}
+                removeLabel={copy.removePhoto}
+                testId="upload-partner"
+                frameClassName={cn(
+                  'aspect-square',
+                  panelPicker && 'lg:aspect-[3/4]'
+                )}
+              />
+            )}
           </div>
 
           <button
             type="button"
             aria-expanded={moreOpen}
             onClick={() => setMoreOpen((open) => !open)}
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 self-start text-sm lg:hidden"
+            className={cn(
+              'text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 self-start text-sm lg:hidden',
+              // Two-photo themes use fixed scenes only: no size or own video.
+              needsPartner && 'hidden'
+            )}
           >
             <ChevronDown
               aria-hidden
@@ -1950,7 +2024,8 @@ export function GenjutsuGenerator({
           <div
             className={cn(
               'flex flex-col gap-4 lg:contents',
-              !moreOpen && 'max-lg:hidden'
+              !moreOpen && 'max-lg:hidden',
+              needsPartner && 'hidden'
             )}
           >
             <fieldset
@@ -2607,7 +2682,7 @@ export function GenjutsuGenerator({
 
       {generatorVisible && !createVisible && !paywall && (
         <div className="border-border bg-background/95 fixed inset-x-0 bottom-0 z-40 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
-          {!lead ? (
+          {!lead || (needsPartner && !partner) ? (
             <button
               type="button"
               disabled={leadDisabled}
@@ -2615,7 +2690,7 @@ export function GenjutsuGenerator({
                 track('sticky_cta', { action: 'upload' });
                 document
                   .querySelector<HTMLInputElement>(
-                    '[data-testid="upload-lead"]'
+                    `[data-testid="${lead ? 'upload-partner' : 'upload-lead'}"]`
                   )
                   ?.click();
               }}
@@ -2714,11 +2789,20 @@ export function GenjutsuGenerator({
                 <Plus className="text-muted-foreground mt-8 size-4 shrink-0 sm:mt-10" />
                 <figure className="flex flex-col items-center gap-1.5">
                   {lead?.preview ? (
-                    <img
-                      src={lead.preview}
-                      alt=""
-                      className="size-20 rounded-xl object-cover sm:size-24"
-                    />
+                    <span className="flex gap-1">
+                      <img
+                        src={lead.preview}
+                        alt=""
+                        className="size-20 rounded-xl object-cover sm:size-24"
+                      />
+                      {partner?.preview && (
+                        <img
+                          src={partner.preview}
+                          alt=""
+                          className="size-20 rounded-xl object-cover sm:size-24"
+                        />
+                      )}
+                    </span>
                   ) : (
                     <span className="bg-muted size-20 rounded-xl sm:size-24" />
                   )}

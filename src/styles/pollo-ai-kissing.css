@@ -1,0 +1,599 @@
+/* AI kissing landing page. Late-night cinema romance: a rose glow, a warm
+   blush accent and two dots leaning in as the section motif. */
+.kiss-page {
+  --kiss-neon: oklch(0.62 0.2 10);
+  --kiss-pink: oklch(0.82 0.08 20);
+  background: var(--background);
+  color: var(--foreground);
+  overflow: clip;
+}
+.kiss-page :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--kiss-neon);
+  outline-offset: 4px;
+}
+.kiss-page h2 {
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.kiss-page p {
+  line-height: 1.7;
+}
+
+/* ---------- Hero ---------- */
+.kiss-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 56px;
+  max-width: 1240px;
+  margin: auto;
+  padding: 132px 24px 56px;
+}
+.kiss-hero::before {
+  content: '';
+  position: absolute;
+  inset: 40px -10% auto auto;
+  width: 640px;
+  height: 640px;
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklch, var(--kiss-neon) 32%, transparent),
+    transparent
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+.kiss-hero > * {
+  position: relative;
+  z-index: 1;
+}
+.kiss-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in oklch, var(--kiss-neon) 55%, transparent);
+  border-radius: 999px;
+  color: var(--kiss-pink);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.kiss-hero h1 {
+  margin-top: 22px;
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+.kiss-hero h1 span {
+  display: block;
+  margin-top: 10px;
+  color: var(--kiss-neon);
+  font-size: 0.45em;
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 24px color-mix(in oklch, var(--kiss-neon) 60%, transparent);
+}
+.kiss-intro {
+  max-width: 560px;
+  margin-top: 22px;
+  color: var(--muted-foreground);
+  font-size: 17px;
+}
+.kiss-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 30px;
+}
+.kiss-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--kiss-neon);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0 32px color-mix(in oklch, var(--kiss-neon) 45%, transparent);
+  transition:
+    filter 0.2s,
+    transform 0.2s;
+}
+.kiss-button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.kiss-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  text-decoration: none;
+}
+.kiss-text-link:hover {
+  color: var(--foreground);
+}
+.kiss-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 30px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.kiss-facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.kiss-facts svg {
+  color: var(--kiss-pink);
+}
+
+/* Widescreen frame with the take on loop. */
+.kiss-stage {
+  justify-self: center;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--kiss-neon) 40%, var(--border));
+  border-radius: 22px;
+  background: #000;
+  box-shadow:
+    0 0 0 8px color-mix(in oklch, var(--foreground) 5%, transparent),
+    0 30px 90px -24px color-mix(in oklch, var(--kiss-neon) 55%, transparent);
+}
+.kiss-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.kiss-tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.55);
+  color: #fff;
+  font-family: var(--font-mono-display);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+.kiss-tag::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--kiss-neon);
+  box-shadow: 0 0 10px var(--kiss-neon);
+  animation: kiss-pulse 1.6s ease-in-out infinite;
+}
+@keyframes kiss-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- Lean-in divider ---------- */
+.kiss-lean {
+  position: relative;
+  width: 120px;
+  height: 34px;
+  margin: 8px auto;
+}
+.kiss-lean::before {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in oklch, var(--kiss-neon) 45%, transparent),
+    transparent
+  );
+}
+.kiss-lean span {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 999px;
+  background: var(--kiss-neon);
+  box-shadow: 0 0 14px var(--kiss-neon);
+  animation: kiss-lean-left 2.4s ease-in-out infinite alternate;
+}
+.kiss-lean span + span {
+  background: var(--kiss-pink);
+  box-shadow: 0 0 14px var(--kiss-pink);
+  animation-name: kiss-lean-right;
+}
+@keyframes kiss-lean-left {
+  from {
+    left: 10px;
+  }
+  to {
+    left: 50px;
+  }
+}
+@keyframes kiss-lean-right {
+  from {
+    left: 100px;
+  }
+  to {
+    left: 60px;
+  }
+}
+
+/* ---------- Sections ---------- */
+.kiss-studio {
+  max-width: 1336px;
+  margin: auto;
+  padding: 24px 24px 72px;
+  scroll-margin-top: 80px;
+}
+.kiss-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  margin: 0 4px 26px;
+}
+.kiss-section-head p {
+  max-width: 460px;
+  color: var(--muted-foreground);
+  font-size: 15px;
+}
+.kiss-price {
+  margin: 14px 4px 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.kiss-section {
+  max-width: 1180px;
+  margin: auto;
+  padding: 88px 24px;
+  scroll-margin-top: 80px;
+}
+.kiss-note {
+  margin-top: 18px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Examples */
+.kiss-reel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 1080px;
+  margin-inline: auto;
+}
+.kiss-page .reel-card {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--muted);
+  isolation: isolate;
+}
+.kiss-page .reel-card video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.6s ease;
+}
+.kiss-page .reel-card:hover video {
+  transform: scale(1.03);
+}
+.kiss-page .reel-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.85), transparent 50%);
+}
+.kiss-page .reel-card-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+}
+.kiss-page .reel-card[data-playing='true'] .reel-card-play {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+.kiss-page .reel-card figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  color: #fff;
+  pointer-events: none;
+}
+.kiss-page .reel-card-index {
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  color: rgb(255 255 255 / 0.6);
+}
+.kiss-page .reel-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.kiss-page .reel-card figcaption button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--kiss-neon);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: auto;
+}
+
+/* About */
+.kiss-about {
+  border-block: 1px solid var(--border);
+  background: color-mix(in oklch, var(--kiss-neon) 6%, var(--background));
+}
+.kiss-about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 56px;
+}
+.kiss-kicker {
+  color: var(--kiss-pink);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.kiss-about-grid h2 {
+  margin-top: 14px;
+}
+.kiss-about-line {
+  margin-top: 20px;
+  color: var(--kiss-neon);
+  font-family: var(--font-serif-display);
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+.kiss-prose p + p {
+  margin-top: 16px;
+}
+.kiss-prose p {
+  color: var(--muted-foreground);
+}
+
+/* Steps & checks */
+.kiss-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.kiss-card {
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+}
+.kiss-card h3 {
+  margin-top: 14px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.kiss-card p {
+  margin-top: 8px;
+  color: var(--muted-foreground);
+  font-size: 14.5px;
+}
+.kiss-step-number {
+  font-family: var(--font-mono-display);
+  font-size: 12px;
+  color: var(--kiss-neon);
+}
+.kiss-card svg {
+  color: var(--kiss-pink);
+}
+
+/* FAQ */
+.kiss-faq {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: 56px;
+}
+.kiss-faq details {
+  border-bottom: 1px solid var(--border);
+}
+.kiss-faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.kiss-faq summary::-webkit-details-marker {
+  display: none;
+}
+.kiss-faq summary span {
+  color: var(--kiss-neon);
+  transition: transform 0.2s;
+}
+.kiss-faq details[open] summary span {
+  transform: rotate(45deg);
+}
+.kiss-faq details p {
+  padding-bottom: 20px;
+  color: var(--muted-foreground);
+}
+
+/* CTA */
+.kiss-cta {
+  padding: 0 24px 96px;
+}
+.kiss-cta-inner {
+  max-width: 1180px;
+  margin: auto;
+  padding: 72px 32px;
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      ellipse at top,
+      color-mix(in oklch, var(--kiss-neon) 55%, transparent),
+      transparent 70%
+    ),
+    #14080b;
+  color: #fff;
+  text-align: center;
+}
+.kiss-cta-inner p {
+  margin: 14px auto 28px;
+  max-width: 480px;
+  color: rgb(255 255 255 / 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kiss-tag::before,
+  .kiss-lean span {
+    animation: none;
+  }
+}
+
+/* Phones swap in a shorter line (see .kiss-short in the block). */
+.kiss-short {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .kiss-hero {
+    grid-template-columns: 1fr;
+    padding: 108px 20px 32px;
+    text-align: center;
+  }
+  .kiss-long {
+    display: none;
+  }
+  .kiss-short {
+    display: inline;
+  }
+  .kiss-intro {
+    margin-inline: auto;
+  }
+  /* Phones go straight from the intro into the generator. */
+  .kiss-actions,
+  .kiss-page .kiss-studio-head {
+    display: none;
+  }
+  .kiss-stage,
+  .kiss-facts,
+  .kiss-actions .kiss-text-link {
+    display: none;
+  }
+  .kiss-studio {
+    padding: 16px 12px 52px;
+  }
+  .kiss-section-head,
+  .kiss-about-grid,
+  .kiss-faq {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .kiss-section {
+    padding: 60px 20px;
+  }
+  .kiss-grid3 {
+    grid-template-columns: 1fr;
+  }
+  .kiss-reel {
+    display: flex;
+    gap: 10px;
+    margin-inline: -20px;
+    padding-inline: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .kiss-page .reel-card {
+    flex: 0 0 84%;
+    scroll-snap-align: center;
+  }
+  /* Widescreen cards are short on phones: one caption row along the bottom. */
+  .kiss-page .reel-card figcaption {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+  }
+  .kiss-page .reel-card-index,
+  .kiss-page .reel-card-play {
+    display: none;
+  }
+  .kiss-page .reel-card h3 {
+    font-size: 0.95rem;
+    line-height: 1.25;
+  }
+  .kiss-page .reel-card figcaption button {
+    flex: none;
+    padding: 6px 11px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .kiss-cta {
+    padding: 0 12px 64px;
+  }
+}

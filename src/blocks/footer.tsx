@@ -13,6 +13,7 @@ export function Footer() {
         { label: m['ozil.nav'](), href: '/ozil-ai' },
         { label: m['frog.nav'](), href: '/crazy-frog-ai' },
         { label: m['bulin.nav'](), href: '/bulin-47-ai' },
+        { label: m['kiss.nav'](), href: '/pollo-ai-kissing' },
       ],
     },
     {

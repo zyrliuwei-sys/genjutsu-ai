@@ -21,6 +21,8 @@ export type GenjutsuDraft = {
   referenceClosed?: boolean;
   referenceSource?: 'effect' | 'upload';
   lead?: DraftAsset;
+  /** Second person's photo on two-photo themes (the AI kissing page). */
+  partner?: DraftAsset;
   referenceVideo?: DraftAsset;
   /** Last uploaded own video, kept selectable after switching effects. */
   ownVideo?: DraftAsset;
@@ -113,6 +115,7 @@ async function withMemoryCopies(draft: GenjutsuDraft): Promise<GenjutsuDraft> {
   return {
     ...draft,
     lead: await copyAsset(draft.lead),
+    partner: await copyAsset(draft.partner),
     referenceVideo: await copyAsset(draft.referenceVideo),
     ownVideo: await copyAsset(draft.ownVideo),
   };
@@ -138,9 +141,12 @@ async function storeDraft(draft: GenjutsuDraft) {
   try {
     return await writeDraft(draft);
   } catch (error) {
-    const hasFiles = [draft.lead, draft.referenceVideo, draft.ownVideo].some(
-      (asset) => asset?.file
-    );
+    const hasFiles = [
+      draft.lead,
+      draft.partner,
+      draft.referenceVideo,
+      draft.ownVideo,
+    ].some((asset) => asset?.file);
     if (!hasFiles) throw error;
     copyBlobs = true;
     // A failure here (e.g. NotReadableError) replaces the original error, so

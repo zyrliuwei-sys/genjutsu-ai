@@ -30,6 +30,12 @@ export function Header() {
           description: m['landing.hero.bulin_tag'](),
           thumb: '/videos/bulin/cap.jpg',
         },
+        {
+          href: '/pollo-ai-kissing',
+          label: m['kiss.nav'](),
+          description: m['landing.hero.kiss_tag'](),
+          thumb: '/videos/pollo-kissing/spring-park.jpg',
+        },
       ],
     },
     { href: '/create', label: m['landing.nav.create']() },

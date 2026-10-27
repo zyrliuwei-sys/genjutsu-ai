@@ -98,6 +98,32 @@ export const BULIN_THEMES = [
 const bulinDirection = (lead: string) =>
   `Replace only the freestyling rapper${lead ? ` (the ${lead})` : ''} facing the camera with the person from the image, dressed in a pink short-sleeve shirt and dark sunglasses. Keep the fan holding up the portable speaker, the crowd filming on their phones, the red-lit restaurant entrance at night, the hand gestures, the bounce, the pointing at the lens, the handheld vertical camera and the timing exactly as in the reference video. Do not add people, text, logos or new actions.`;
 
+/** Built-in kiss takes use prepared 5s / 1280×720 generation inputs. */
+export const KISS_THEMES = [
+  {
+    slug: 'city-lights',
+    name: 'City lights kiss',
+    scene: 'backlit against blurred city traffic lights at night',
+  },
+  {
+    slug: 'night-market',
+    name: 'Night market kiss',
+    scene: 'holding drinks in a crowded night market',
+  },
+  {
+    slug: 'spring-park',
+    name: 'Spring park kiss',
+    scene: 'standing close in a sunny green park',
+  },
+  {
+    slug: 'hoop-earrings',
+    name: 'Hoop earrings kiss',
+    scene: 'leaning in by a dark green door in warm light',
+  },
+] as const;
+const kissDirection = (scene: string) =>
+  `Replace the two people who lean in and kiss${scene ? ` (${scene})` : ''} with the two people from the reference images, keeping who stands on the left and who stands on the right. Keep the slow lean-in, the closed eyes, the kiss itself, the hands, the background, the lighting, the camera framing and the timing exactly as in the reference video. Do not add people, text, logos or new actions.`;
+
 /** Built-in stunt takes use prepared 10s / 1280×720 generation inputs. */
 export const FLYING_CAR_THEMES = [
   { slug: 'ramp-flip', name: 'Ramp flip and smoke landing' },
@@ -105,7 +131,7 @@ export const FLYING_CAR_THEMES = [
 const FLYING_CAR_DIRECTION =
   'Replace only the silver minivan with the vehicle from the image, keeping its exact body shape, paint colour, wheels, lights and badges from every angle. Keep the curved ramp with its red edge lights, the climb until the vehicle is upside down, the launch off the top, the mid-air flip, the smoke-filled landing, the night setting, every camera angle and every cut exactly as in the reference video. Do not add people, text, logos or new actions.';
 
-export type GenjutsuSubject = 'person' | 'vehicle';
+export type GenjutsuSubject = 'person' | 'vehicle' | 'couple';
 
 /** Trusted reference context: never transform scenery when replacing a performer. */
 export const GENJUTSU_REFERENCES: Record<
@@ -148,6 +174,21 @@ export const GENJUTSU_REFERENCES: Record<
     ])
   ),
   'bulin-47-ai': { name: 'Bulin 47 AI', direction: bulinDirection('') },
+  ...Object.fromEntries(
+    KISS_THEMES.map((theme) => [
+      `kiss-${theme.slug}`,
+      {
+        name: theme.name,
+        direction: kissDirection(theme.scene),
+        subject: 'couple' as const,
+      },
+    ])
+  ),
+  'pollo-ai-kissing': {
+    name: 'AI Kissing',
+    direction: kissDirection(''),
+    subject: 'couple',
+  },
   'crazy-frog-ai': {
     name: 'Crazy Frog AI',
     direction:
@@ -383,6 +424,22 @@ export function buildGenjutsuPrompt(
       'Edit the input video, do not invent an unrelated new shot. Preserve the original background, environment, scenery, props, lighting and camera work. Do not replace or restyle the background.',
       `Replace only the main vehicle with ${vehicle}. Preserve the original driving path, stunt trajectory, rotation, timing, cuts, camera path and perspective.`,
       'Photoreal live-action footage of a rigid vehicle: consistent body shape, proportions, paint, wheels, glass and lights across frames, grounded contact with the ramp and road, coherent occlusion, smoke and reflections. No warping or melting panels, extra wheels, flicker or unrelated cuts.',
+    ].join(' ');
+    return extra ? `${base}\nAdditional direction: ${extra}` : base;
+  }
+  if (subject === 'couple') {
+    // Two photos: image 1 is the person on the left, image 2 the one on the right.
+    const left =
+      provider === 'fal' ? '@Element1' : 'the person in reference image 1';
+    const right =
+      provider === 'fal' ? '@Image1' : 'the person in reference image 2';
+    const swap = hasCrowd
+      ? `Replace the person on the left of the frame with ${left} and the person on the right with ${right}; each keeps their own face, hair and skin tone.`
+      : `Replace only the two people who kiss with the two people in ${provider === 'fal' ? '@Element1' : 'reference image 1'}, keeping each person on the same side of the frame as in the image.`;
+    const base = [
+      'Edit the input video, do not invent an unrelated new shot. Preserve the original background, environment, scenery, props, lighting and all bystanders. Do not replace or restyle the background.',
+      `${swap} Preserve the original lean-in, kiss, hand placement, timing, cuts, camera path and perspective.`,
+      'Photoreal live-action footage of two adults: consistent faces, hair and wardrobe across frames, natural head contact and occlusion, coherent lighting. No merged faces, swapped identities, extra limbs, flicker or unrelated cuts.',
     ].join(' ');
     return extra ? `${base}\nAdditional direction: ${extra}` : base;
   }

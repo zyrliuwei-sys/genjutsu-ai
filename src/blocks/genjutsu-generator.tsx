@@ -4,6 +4,7 @@ import {
   BULIN_THEMES,
   CRAZY_FROG_THEMES,
   FLYING_CAR_THEMES,
+  KISS_THEMES,
   OZIL_THEMES,
 } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
@@ -19,7 +20,7 @@ export function GenjutsuGenerator({
 }: {
   referenceOnly?: boolean;
   returnPath?: string;
-  theme?: 'crazy-frog' | 'flying-car' | 'ozil' | 'bulin';
+  theme?: 'crazy-frog' | 'flying-car' | 'ozil' | 'bulin' | 'kiss';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
@@ -58,6 +59,40 @@ export function GenjutsuGenerator({
           thumb: `/videos/flying-car/references/${item.slug}.jpg`,
           clip: `/videos/flying-car/references/${item.slug}.mp4`,
           duration: 10,
+          ratios: '16:9',
+          prompt: '',
+        })),
+      };
+    }
+    if (theme === 'kiss') {
+      const names = [
+        m['kiss.examples.city_lights'](),
+        m['kiss.examples.night_market'](),
+        m['kiss.examples.spring_park'](),
+        m['kiss.examples.hoop_earrings'](),
+      ];
+      return {
+        title: m['kiss.generator.title'](),
+        choose: m['kiss.generator.choose'](),
+        photo: m['kiss.generator.photo'](),
+        photoHint: m['kiss.generator.photo_hint'](),
+        generate: m['kiss.generator.generate'](),
+        loading: m['kiss.generator.loading'](),
+        retry: m['kiss.generator.retry'](),
+        uploadTemplateId: 'pollo-ai-kissing',
+        pickerInPanel: true,
+        partner: {
+          photo: m['kiss.generator.partner'](),
+          photoHint: m['kiss.generator.partner_hint'](),
+        },
+        templates: KISS_THEMES.map((item, i) => ({
+          id: `kiss-${item.slug}`,
+          name: names[i],
+          asset: `kiss-${item.slug}`,
+          image: `/videos/pollo-kissing/${item.slug}.jpg`,
+          thumb: `/videos/pollo-kissing/${item.slug}.jpg`,
+          clip: `/videos/pollo-kissing/references/${item.slug}.mp4`,
+          duration: 5,
           ratios: '16:9',
           prompt: '',
         })),
