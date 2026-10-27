@@ -23,6 +23,8 @@ export function NoticeEmail({
   paragraphs,
   ctaText,
   ctaUrl,
+  options,
+  optionsTitle,
   footer,
   unsubscribeUrl,
 }: {
@@ -31,8 +33,12 @@ export function NoticeEmail({
   preview: string;
   heading: string;
   paragraphs: string[];
-  ctaText: string;
-  ctaUrl: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  /** Stacked link buttons (e.g. one-click survey answers). */
+  options?: { text: string; url: string }[];
+  /** Line shown above `options` (they come after the call-to-action). */
+  optionsTitle?: string;
   footer?: string;
   /** Rendered as an "Unsubscribe" link under the footer. */
   unsubscribeUrl?: string;
@@ -63,11 +69,29 @@ export function NoticeEmail({
                 {text}
               </Text>
             ))}
-            <Section style={styles.buttonWrap}>
-              <Button href={ctaUrl} style={styles.button}>
-                {ctaText}
-              </Button>
-            </Section>
+            {ctaText && ctaUrl ? (
+              <Section style={styles.buttonWrap}>
+                <Button href={ctaUrl} style={styles.button}>
+                  {ctaText}
+                </Button>
+              </Section>
+            ) : null}
+            {optionsTitle && options?.length ? (
+              <Text style={styles.p}>{optionsTitle}</Text>
+            ) : null}
+            {options?.length ? (
+              <Section style={optionStyles.list}>
+                {options.map((option) => (
+                  <Button
+                    key={option.url}
+                    href={option.url}
+                    style={optionStyles.option}
+                  >
+                    {option.text}
+                  </Button>
+                ))}
+              </Section>
+            ) : null}
             {footer ? <Text style={styles.footer}>{footer}</Text> : null}
             {unsubscribeUrl ? (
               <Text style={styles.footer}>
@@ -82,3 +106,17 @@ export function NoticeEmail({
     </Html>
   );
 }
+
+const optionStyles: Record<string, React.CSSProperties> = {
+  list: { margin: '14px 0 6px' },
+  option: {
+    display: 'block',
+    margin: '0 0 8px',
+    padding: '11px 14px',
+    border: '1px solid rgba(15, 23, 42, 0.14)',
+    borderRadius: 10,
+    color: '#111827',
+    fontSize: 14,
+    textDecoration: 'none',
+  },
+};

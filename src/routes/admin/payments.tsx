@@ -7,7 +7,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { Pencil } from 'lucide-react';
+import { MailQuestion, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { tDynamic } from '@/core/i18n/dynamic';
@@ -36,6 +36,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
+import { CheckoutFeedbackDialog } from './-checkout-feedback-dialog';
 
 const ORDER_STATUSES = [
   'pending',
@@ -75,6 +77,7 @@ function PaymentsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const editForm = useForm({
     defaultValues: {
@@ -217,12 +220,23 @@ function PaymentsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold">{m['admin.payments.title']()}</h1>
-        <p className="text-muted-foreground">
-          {m['admin.payments.description']()}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">{m['admin.payments.title']()}</h1>
+          <p className="text-muted-foreground">
+            {m['admin.payments.description']()}
+          </p>
+        </div>
+        <Button variant="outline" onClick={() => setFeedbackOpen(true)}>
+          <MailQuestion className="size-4" />
+          {m['admin.checkout_feedback.open']()}
+        </Button>
       </div>
+
+      <CheckoutFeedbackDialog
+        open={feedbackOpen}
+        onOpenChange={setFeedbackOpen}
+      />
 
       <div className="border-border flex gap-1 overflow-x-auto overflow-y-hidden border-b">
         {TABS.map((tb) => (
