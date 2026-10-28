@@ -98,6 +98,36 @@ export const BULIN_THEMES = [
 const bulinDirection = (lead: string) =>
   `Replace only the freestyling rapper${lead ? ` (the ${lead})` : ''} facing the camera with the person from the image, dressed in a pink short-sleeve shirt and dark sunglasses. Keep the fan holding up the portable speaker, the crowd filming on their phones, the red-lit restaurant entrance at night, the hand gestures, the bounce, the pointing at the lens, the handheld vertical camera and the timing exactly as in the reference video. Do not add people, text, logos or new actions.`;
 
+/** Built-in shoulder-dance takes use prepared 6–10s / 720×1280 generation inputs. */
+export const DAME_HOMBRO_THEMES = [
+  {
+    slug: 'crowd',
+    name: 'Red-lit crowd',
+    lead: 'man in the red T-shirt in front of the crowd',
+    seconds: 10,
+  },
+  {
+    slug: 'dog',
+    name: 'Golden retriever',
+    lead: 'golden retriever with the blue bandana',
+    seconds: 6,
+  },
+  {
+    slug: 'terrace',
+    name: 'Sunny terrace',
+    lead: 'man in the red T-shirt on the terrace',
+    seconds: 6,
+  },
+  {
+    slug: 'studio',
+    name: 'Studio bounce',
+    lead: 'man in the red T-shirt in the studio',
+    seconds: 10,
+  },
+] as const;
+const dameHombroDirection = (lead: string) =>
+  `Replace only the dancer${lead ? ` (the ${lead})` : ''} with the person from the image, dressed in a red short-sleeve T-shirt and grey trousers. Keep the shoulder bounce, the fists and the hands pulling at the shirt, the pointing, the people around the dancer, the portable speaker if one is held up, the background, the camera and the timing exactly as in the reference video. Do not add people, text, logos or new actions.`;
+
 /** Built-in party takes use prepared 10s / 1280×720 generation inputs. */
 export const BURNING_BRIDGES_THEMES = [
   {
@@ -200,6 +230,16 @@ export const GENJUTSU_REFERENCES: Record<
     ])
   ),
   'bulin-47-ai': { name: 'Bulin 47 AI', direction: bulinDirection('') },
+  ...Object.fromEntries(
+    DAME_HOMBRO_THEMES.map((theme) => [
+      `hombro-${theme.slug}`,
+      { name: theme.name, direction: dameHombroDirection(theme.lead) },
+    ])
+  ),
+  'dame-hombro-ai': {
+    name: 'Dame Hombro AI',
+    direction: dameHombroDirection(''),
+  },
   ...Object.fromEntries(
     BURNING_BRIDGES_THEMES.map((theme) => [
       `bridges-${theme.slug}`,

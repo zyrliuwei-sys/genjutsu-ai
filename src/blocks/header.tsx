@@ -42,6 +42,12 @@ export function Header() {
           description: m['landing.hero.bridges_tag'](),
           thumb: '/videos/burning-bridges/black-tee.jpg',
         },
+        {
+          href: '/dame-hombro-ai',
+          label: m['hombro.nav'](),
+          description: m['landing.hero.hombro_tag'](),
+          thumb: '/videos/dame-hombro/crowd.jpg',
+        },
       ],
     },
     { href: '/create', label: m['landing.nav.create']() },

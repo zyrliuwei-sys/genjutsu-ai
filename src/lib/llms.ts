@@ -57,6 +57,12 @@ const EFFECTS: Entry[] = [
     description:
       'Host the chandelier party from the Drake Burning Bridges trend from one photo',
   },
+  {
+    path: '/dame-hombro-ai',
+    title: 'Dame Hombro AI',
+    description:
+      'Do the Dame Hombro shoulder dance from the Bulin 47 trend from one photo, in four scenes including a dog take',
+  },
 ];
 
 const RESOURCES: Entry[] = [

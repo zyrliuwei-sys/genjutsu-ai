@@ -1,0 +1,577 @@
+/* Dame Hombro AI landing page. A warm dembow night that runs into a sunny
+   terrace: the brick red of the dancer's tee, a late-afternoon amber and a row
+   of bouncing shoulders as the section motif. */
+.hombro-page {
+  --hombro-red: oklch(0.6 0.19 31);
+  --hombro-sun: oklch(0.82 0.13 68);
+  /* The generator follows the page's brick red and amber. */
+  --primary: var(--hombro-red);
+  --primary-foreground: #fff;
+  --primary-text: var(--hombro-sun);
+  --ring: var(--hombro-red);
+  background: var(--background);
+  color: var(--foreground);
+  overflow: clip;
+}
+.hombro-page :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--hombro-red);
+  outline-offset: 4px;
+}
+.hombro-page h2 {
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.hombro-page p {
+  line-height: 1.7;
+}
+
+/* ---------- Hero ---------- */
+.hombro-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 56px;
+  max-width: 1240px;
+  margin: auto;
+  padding: 132px 24px 56px;
+}
+.hombro-hero::before {
+  content: '';
+  position: absolute;
+  inset: 40px -10% auto auto;
+  width: 640px;
+  height: 640px;
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklch, var(--hombro-sun) 30%, transparent),
+    color-mix(in oklch, var(--hombro-red) 18%, transparent) 55%,
+    transparent
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+.hombro-hero > * {
+  position: relative;
+  z-index: 1;
+}
+.hombro-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in oklch, var(--hombro-red) 55%, transparent);
+  border-radius: 999px;
+  color: var(--hombro-sun);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.hombro-hero h1 {
+  margin-top: 22px;
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+.hombro-hero h1 span {
+  display: block;
+  margin-top: 10px;
+  color: var(--hombro-sun);
+  font-size: 0.45em;
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 24px color-mix(in oklch, var(--hombro-red) 60%, transparent);
+}
+.hombro-intro {
+  max-width: 560px;
+  margin-top: 22px;
+  color: var(--muted-foreground);
+  font-size: 17px;
+}
+.hombro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 30px;
+}
+.hombro-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--hombro-red);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0 32px color-mix(in oklch, var(--hombro-red) 45%, transparent);
+  transition:
+    filter 0.2s,
+    transform 0.2s;
+}
+.hombro-button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.hombro-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  text-decoration: none;
+}
+.hombro-text-link:hover {
+  color: var(--foreground);
+}
+.hombro-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 30px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.hombro-facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.hombro-facts svg {
+  color: var(--hombro-sun);
+}
+
+/* Phone-shaped stage with the take on loop. */
+.hombro-stage {
+  justify-self: center;
+  position: relative;
+  width: min(330px, 100%);
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--hombro-red) 45%, var(--border));
+  border-radius: 34px;
+  background: #000;
+  box-shadow:
+    0 0 0 8px color-mix(in oklch, var(--foreground) 6%, transparent),
+    0 30px 90px -20px color-mix(in oklch, var(--hombro-red) 60%, transparent);
+  transform: rotate(-2deg);
+}
+.hombro-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hombro-tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.55);
+  color: #fff;
+  font-family: var(--font-mono-display);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+.hombro-tag::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--hombro-red);
+  box-shadow: 0 0 10px var(--hombro-red);
+  animation: hombro-pulse 1.6s ease-in-out infinite;
+}
+/* The chant, stamped across the bottom of the stage. */
+.hombro-chant {
+  position: absolute;
+  right: 14px;
+  bottom: 18px;
+  left: 14px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: var(--hombro-sun);
+  color: #2a1003;
+  font-family: var(--font-serif-display);
+  font-size: 1.35rem;
+  line-height: 1.1;
+  text-align: center;
+  transform: rotate(2deg);
+  box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.6);
+}
+@keyframes hombro-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- Shoulder divider ---------- */
+.hombro-shoulders {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px;
+  height: 56px;
+  margin: 8px auto;
+}
+.hombro-shoulders span {
+  width: 26px;
+  height: 14px;
+  border: 2px solid color-mix(in oklch, var(--hombro-red) 70%, transparent);
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  animation: hombro-bounce 0.5s ease-in-out infinite alternate;
+}
+.hombro-shoulders span:nth-child(even) {
+  border-color: var(--hombro-sun);
+}
+@keyframes hombro-bounce {
+  to {
+    transform: translateY(-12px);
+  }
+}
+
+/* ---------- Sections ---------- */
+.hombro-studio {
+  max-width: 1336px;
+  margin: auto;
+  padding: 24px 24px 72px;
+  scroll-margin-top: 80px;
+}
+.hombro-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  margin: 0 4px 26px;
+}
+.hombro-section-head p {
+  max-width: 460px;
+  color: var(--muted-foreground);
+  font-size: 15px;
+}
+.hombro-price {
+  margin: 14px 4px 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.hombro-section {
+  max-width: 1180px;
+  margin: auto;
+  padding: 88px 24px;
+  scroll-margin-top: 80px;
+}
+.hombro-note {
+  margin-top: 18px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Examples */
+.hombro-reel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 1180px;
+  margin-inline: auto;
+}
+.hombro-page .reel-card {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--muted);
+  isolation: isolate;
+}
+.hombro-page .reel-card video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.6s ease;
+}
+.hombro-page .reel-card:hover video {
+  transform: scale(1.03);
+}
+.hombro-page .reel-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.85), transparent 50%);
+}
+.hombro-page .reel-card-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+}
+.hombro-page .reel-card[data-playing='true'] .reel-card-play {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+.hombro-page .reel-card figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  color: #fff;
+  pointer-events: none;
+}
+.hombro-page .reel-card-index {
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  color: rgb(255 255 255 / 0.6);
+}
+.hombro-page .reel-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.hombro-page .reel-card figcaption button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--hombro-red);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: auto;
+}
+
+/* About */
+.hombro-about {
+  border-block: 1px solid var(--border);
+  background: color-mix(in oklch, var(--hombro-sun) 7%, var(--background));
+}
+.hombro-about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 56px;
+}
+.hombro-kicker {
+  color: var(--hombro-sun);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.hombro-about-grid h2 {
+  margin-top: 14px;
+}
+.hombro-about-line {
+  margin-top: 20px;
+  color: var(--hombro-red);
+  font-family: var(--font-serif-display);
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+.hombro-prose p + p {
+  margin-top: 16px;
+}
+.hombro-prose p {
+  color: var(--muted-foreground);
+}
+
+/* Steps & checks */
+.hombro-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.hombro-card {
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+}
+.hombro-card h3 {
+  margin-top: 14px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.hombro-card p {
+  margin-top: 8px;
+  color: var(--muted-foreground);
+  font-size: 14.5px;
+}
+.hombro-step-number {
+  font-family: var(--font-mono-display);
+  font-size: 12px;
+  color: var(--hombro-red);
+}
+.hombro-card svg {
+  color: var(--hombro-sun);
+}
+
+/* FAQ */
+.hombro-faq {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: 56px;
+}
+.hombro-faq details {
+  border-bottom: 1px solid var(--border);
+}
+.hombro-faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.hombro-faq summary::-webkit-details-marker {
+  display: none;
+}
+.hombro-faq summary span {
+  color: var(--hombro-red);
+  transition: transform 0.2s;
+}
+.hombro-faq details[open] summary span {
+  transform: rotate(45deg);
+}
+.hombro-faq details p {
+  padding-bottom: 20px;
+  color: var(--muted-foreground);
+}
+
+/* CTA */
+.hombro-cta {
+  padding: 0 24px 96px;
+}
+.hombro-cta-inner {
+  max-width: 1180px;
+  margin: auto;
+  padding: 72px 32px;
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      ellipse at top,
+      color-mix(in oklch, var(--hombro-red) 55%, transparent),
+      transparent 70%
+    ),
+    #1a0b07;
+  color: #fff;
+  text-align: center;
+}
+.hombro-cta-inner p {
+  margin: 14px auto 28px;
+  max-width: 480px;
+  color: rgb(255 255 255 / 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hombro-tag::before,
+  .hombro-shoulders span {
+    animation: none;
+  }
+}
+
+/* Phones swap in a shorter line (see .hombro-short in the block). */
+.hombro-short {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .hombro-hero {
+    grid-template-columns: 1fr;
+    padding: 108px 20px 32px;
+    text-align: center;
+  }
+  .hombro-long {
+    display: none;
+  }
+  .hombro-short {
+    display: inline;
+  }
+  .hombro-intro {
+    margin-inline: auto;
+  }
+  /* Phones go straight from the intro into the generator. */
+  .hombro-actions,
+  .hombro-page .hombro-studio-head {
+    display: none;
+  }
+  .hombro-stage,
+  .hombro-facts,
+  .hombro-actions .hombro-text-link {
+    display: none;
+  }
+  .hombro-studio {
+    padding: 16px 12px 52px;
+  }
+  .hombro-section-head,
+  .hombro-about-grid,
+  .hombro-faq {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .hombro-section {
+    padding: 60px 20px;
+  }
+  .hombro-grid3 {
+    grid-template-columns: 1fr;
+  }
+  .hombro-reel {
+    display: flex;
+    gap: 10px;
+    margin-inline: -20px;
+    padding-inline: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .hombro-page .reel-card {
+    flex: 0 0 62%;
+    scroll-snap-align: center;
+  }
+  .hombro-cta {
+    padding: 0 12px 64px;
+  }
+}

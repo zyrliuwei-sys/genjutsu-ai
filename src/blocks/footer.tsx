@@ -15,6 +15,7 @@ export function Footer() {
         { label: m['bulin.nav'](), href: '/bulin-47-ai' },
         { label: m['kiss.nav'](), href: '/pollo-ai-kissing' },
         { label: m['bridges.nav'](), href: '/burning-bridges-ai' },
+        { label: m['hombro.nav'](), href: '/dame-hombro-ai' },
       ],
     },
     {

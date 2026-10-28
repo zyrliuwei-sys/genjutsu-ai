@@ -4,6 +4,7 @@ import {
   BULIN_THEMES,
   BURNING_BRIDGES_THEMES,
   CRAZY_FROG_THEMES,
+  DAME_HOMBRO_THEMES,
   FLYING_CAR_THEMES,
   KISS_THEMES,
   OZIL_THEMES,
@@ -21,7 +22,14 @@ export function GenjutsuGenerator({
 }: {
   referenceOnly?: boolean;
   returnPath?: string;
-  theme?: 'crazy-frog' | 'flying-car' | 'ozil' | 'bulin' | 'kiss' | 'bridges';
+  theme?:
+    | 'crazy-frog'
+    | 'flying-car'
+    | 'ozil'
+    | 'bulin'
+    | 'kiss'
+    | 'bridges'
+    | 'hombro';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
@@ -95,6 +103,36 @@ export function GenjutsuGenerator({
           clip: `/videos/pollo-kissing/references/${item.slug}.mp4`,
           duration: 5,
           ratios: '16:9',
+          prompt: '',
+        })),
+      };
+    }
+    if (theme === 'hombro') {
+      const names = [
+        m['hombro.examples.crowd'](),
+        m['hombro.examples.dog'](),
+        m['hombro.examples.terrace'](),
+        m['hombro.examples.studio'](),
+      ];
+      return {
+        title: m['hombro.generator.title'](),
+        choose: m['hombro.generator.choose'](),
+        photo: m['hombro.generator.photo'](),
+        photoHint: m['hombro.generator.photo_hint'](),
+        generate: m['hombro.generator.generate'](),
+        loading: m['hombro.generator.loading'](),
+        retry: m['hombro.generator.retry'](),
+        uploadTemplateId: 'dame-hombro-ai',
+        pickerInPanel: true,
+        templates: DAME_HOMBRO_THEMES.map((item, i) => ({
+          id: `hombro-${item.slug}`,
+          name: names[i],
+          asset: `hombro-${item.slug}`,
+          image: `/videos/dame-hombro/${item.slug}.jpg`,
+          thumb: `/videos/dame-hombro/${item.slug}.jpg`,
+          clip: `/videos/dame-hombro/references/${item.slug}.mp4`,
+          duration: item.seconds,
+          ratios: '9:16',
           prompt: '',
         })),
       };

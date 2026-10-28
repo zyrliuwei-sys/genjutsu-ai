@@ -4,8 +4,28 @@
     {
       "name": "dev",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["exec", "vite", "dev", "--port", "3100"],
+      "runtimeArgs": [
+        "exec",
+        "vite",
+        "dev",
+        "--port",
+        "3100"
+      ],
       "port": 3100
+    },
+    {
+      "name": "dev-no-prod-db",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "D1_REMOTE_HTTP=false",
+        "pnpm",
+        "exec",
+        "vite",
+        "dev",
+        "--port",
+        "3101"
+      ],
+      "port": 3101
     }
   ]
 }
