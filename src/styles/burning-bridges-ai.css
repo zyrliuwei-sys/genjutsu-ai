@@ -1,0 +1,593 @@
+/* Burning Bridges AI landing page. A late-night private dining room: champagne
+   gold from the chandeliers, a dark wood glow and a row of swaying crystals as
+   the section motif. */
+.bridges-page {
+  --bridges-gold: oklch(0.74 0.13 78);
+  --bridges-champagne: oklch(0.86 0.06 85);
+  /* The generator follows the page's gold instead of the site's red. */
+  --primary: var(--bridges-gold);
+  --primary-foreground: #1a1206;
+  --primary-text: var(--bridges-champagne);
+  --ring: var(--bridges-gold);
+  background: var(--background);
+  color: var(--foreground);
+  overflow: clip;
+}
+.bridges-page :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--bridges-gold);
+  outline-offset: 4px;
+}
+.bridges-page h2 {
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.bridges-page p {
+  line-height: 1.7;
+}
+
+/* ---------- Hero ---------- */
+.bridges-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 56px;
+  max-width: 1240px;
+  margin: auto;
+  padding: 132px 24px 56px;
+}
+.bridges-hero::before {
+  content: '';
+  position: absolute;
+  inset: 40px -10% auto auto;
+  width: 640px;
+  height: 640px;
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklch, var(--bridges-gold) 32%, transparent),
+    transparent
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+.bridges-hero > * {
+  position: relative;
+  z-index: 1;
+}
+.bridges-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in oklch, var(--bridges-gold) 55%, transparent);
+  border-radius: 999px;
+  color: var(--bridges-champagne);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.bridges-hero h1 {
+  margin-top: 22px;
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+.bridges-hero h1 span {
+  display: block;
+  margin-top: 10px;
+  color: var(--bridges-gold);
+  font-size: 0.45em;
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 24px
+    color-mix(in oklch, var(--bridges-gold) 60%, transparent);
+}
+.bridges-intro {
+  max-width: 560px;
+  margin-top: 22px;
+  color: var(--muted-foreground);
+  font-size: 17px;
+}
+.bridges-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 30px;
+}
+.bridges-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--bridges-gold);
+  color: #1a1206;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0 32px color-mix(in oklch, var(--bridges-gold) 45%, transparent);
+  transition:
+    filter 0.2s,
+    transform 0.2s;
+}
+.bridges-button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.bridges-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  text-decoration: none;
+}
+.bridges-text-link:hover {
+  color: var(--foreground);
+}
+.bridges-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 30px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.bridges-facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.bridges-facts svg {
+  color: var(--bridges-champagne);
+}
+
+/* Widescreen frame with the take on loop. */
+.bridges-stage {
+  justify-self: center;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--bridges-gold) 40%, var(--border));
+  border-radius: 22px;
+  background: #000;
+  box-shadow:
+    0 0 0 8px color-mix(in oklch, var(--foreground) 5%, transparent),
+    0 30px 90px -24px color-mix(in oklch, var(--bridges-gold) 55%, transparent);
+}
+.bridges-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.bridges-tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.55);
+  color: #fff;
+  font-family: var(--font-mono-display);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+.bridges-tag::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--bridges-gold);
+  box-shadow: 0 0 10px var(--bridges-gold);
+  animation: bridges-pulse 1.6s ease-in-out infinite;
+}
+@keyframes bridges-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- Crystal divider ---------- */
+.bridges-crystals {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 9px;
+  height: 56px;
+  margin: 8px auto;
+  border-top: 1px solid
+    color-mix(in oklch, var(--bridges-gold) 35%, transparent);
+  width: min(240px, 60%);
+}
+.bridges-crystals span {
+  position: relative;
+  width: 1px;
+  background: color-mix(in oklch, var(--bridges-gold) 55%, transparent);
+  transform-origin: top center;
+  animation: bridges-sway 2.8s ease-in-out infinite alternate;
+}
+.bridges-crystals span::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: -3px;
+  width: 7px;
+  height: 7px;
+  background: var(--bridges-champagne);
+  box-shadow: 0 0 10px var(--bridges-gold);
+  transform: rotate(45deg);
+}
+@keyframes bridges-sway {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(4deg);
+  }
+}
+
+/* ---------- Sections ---------- */
+.bridges-studio {
+  max-width: 1336px;
+  margin: auto;
+  padding: 24px 24px 72px;
+  scroll-margin-top: 80px;
+}
+.bridges-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  margin: 0 4px 26px;
+}
+.bridges-section-head p {
+  max-width: 460px;
+  color: var(--muted-foreground);
+  font-size: 15px;
+}
+.bridges-price {
+  margin: 14px 4px 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.bridges-section {
+  max-width: 1180px;
+  margin: auto;
+  padding: 88px 24px;
+  scroll-margin-top: 80px;
+}
+.bridges-note {
+  margin-top: 18px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Examples */
+.bridges-reel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 1080px;
+  margin-inline: auto;
+}
+.bridges-page .reel-card {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--muted);
+  isolation: isolate;
+}
+.bridges-page .reel-card video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.6s ease;
+}
+.bridges-page .reel-card:hover video {
+  transform: scale(1.03);
+}
+.bridges-page .reel-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.85), transparent 50%);
+}
+.bridges-page .reel-card-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+}
+.bridges-page .reel-card[data-playing='true'] .reel-card-play {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+.bridges-page .reel-card figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  color: #fff;
+  pointer-events: none;
+}
+.bridges-page .reel-card-index {
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  color: rgb(255 255 255 / 0.6);
+}
+.bridges-page .reel-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.bridges-page .reel-card figcaption button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--bridges-gold);
+  color: #1a1206;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: auto;
+}
+
+/* About */
+.bridges-about {
+  border-block: 1px solid var(--border);
+  background: color-mix(in oklch, var(--bridges-gold) 6%, var(--background));
+}
+.bridges-about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 56px;
+}
+.bridges-kicker {
+  color: var(--bridges-champagne);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.bridges-about-grid h2 {
+  margin-top: 14px;
+}
+.bridges-about-line {
+  margin-top: 20px;
+  color: var(--bridges-gold);
+  font-family: var(--font-serif-display);
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+.bridges-prose p + p {
+  margin-top: 16px;
+}
+.bridges-prose p {
+  color: var(--muted-foreground);
+}
+
+/* Steps & checks */
+.bridges-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.bridges-card {
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+}
+.bridges-card h3 {
+  margin-top: 14px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.bridges-card p {
+  margin-top: 8px;
+  color: var(--muted-foreground);
+  font-size: 14.5px;
+}
+.bridges-step-number {
+  font-family: var(--font-mono-display);
+  font-size: 12px;
+  color: var(--bridges-gold);
+}
+.bridges-card svg {
+  color: var(--bridges-champagne);
+}
+
+/* FAQ */
+.bridges-faq {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: 56px;
+}
+.bridges-faq details {
+  border-bottom: 1px solid var(--border);
+}
+.bridges-faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.bridges-faq summary::-webkit-details-marker {
+  display: none;
+}
+.bridges-faq summary span {
+  color: var(--bridges-gold);
+  transition: transform 0.2s;
+}
+.bridges-faq details[open] summary span {
+  transform: rotate(45deg);
+}
+.bridges-faq details p {
+  padding-bottom: 20px;
+  color: var(--muted-foreground);
+}
+
+/* CTA */
+.bridges-cta {
+  padding: 0 24px 96px;
+}
+.bridges-cta-inner {
+  max-width: 1180px;
+  margin: auto;
+  padding: 72px 32px;
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      ellipse at top,
+      color-mix(in oklch, var(--bridges-gold) 55%, transparent),
+      transparent 70%
+    ),
+    #140f07;
+  color: #fff;
+  text-align: center;
+}
+.bridges-cta-inner p {
+  margin: 14px auto 28px;
+  max-width: 480px;
+  color: rgb(255 255 255 / 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bridges-tag::before,
+  .bridges-crystals span {
+    animation: none;
+  }
+}
+
+/* Phones swap in a shorter line (see .bridges-short in the block). */
+.bridges-short {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .bridges-hero {
+    grid-template-columns: 1fr;
+    padding: 108px 20px 32px;
+    text-align: center;
+  }
+  .bridges-long {
+    display: none;
+  }
+  .bridges-short {
+    display: inline;
+  }
+  .bridges-intro {
+    margin-inline: auto;
+  }
+  /* Phones go straight from the intro into the generator. */
+  .bridges-actions,
+  .bridges-page .bridges-studio-head {
+    display: none;
+  }
+  .bridges-stage,
+  .bridges-facts,
+  .bridges-actions .bridges-text-link {
+    display: none;
+  }
+  .bridges-studio {
+    padding: 16px 12px 52px;
+  }
+  .bridges-section-head,
+  .bridges-about-grid,
+  .bridges-faq {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .bridges-section {
+    padding: 60px 20px;
+  }
+  .bridges-grid3 {
+    grid-template-columns: 1fr;
+  }
+  .bridges-reel {
+    display: flex;
+    gap: 10px;
+    margin-inline: -20px;
+    padding-inline: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .bridges-page .reel-card {
+    flex: 0 0 84%;
+    scroll-snap-align: center;
+  }
+  /* Widescreen cards are short on phones: one caption row along the bottom. */
+  .bridges-page .reel-card figcaption {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+  }
+  .bridges-page .reel-card-index,
+  .bridges-page .reel-card-play {
+    display: none;
+  }
+  .bridges-page .reel-card h3 {
+    font-size: 0.95rem;
+    line-height: 1.25;
+  }
+  .bridges-page .reel-card figcaption button {
+    flex: none;
+    padding: 6px 11px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .bridges-cta {
+    padding: 0 12px 64px;
+  }
+}

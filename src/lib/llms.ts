@@ -51,6 +51,12 @@ const EFFECTS: Entry[] = [
     title: 'AI Kissing (Pollo AI kissing alternative)',
     description: 'Recast a filmed kiss scene with two people, one photo each',
   },
+  {
+    path: '/burning-bridges-ai',
+    title: 'Burning Bridges AI',
+    description:
+      'Host the chandelier party from the Drake Burning Bridges trend from one photo',
+  },
 ];
 
 const RESOURCES: Entry[] = [

@@ -14,6 +14,7 @@ export function Footer() {
         { label: m['frog.nav'](), href: '/crazy-frog-ai' },
         { label: m['bulin.nav'](), href: '/bulin-47-ai' },
         { label: m['kiss.nav'](), href: '/pollo-ai-kissing' },
+        { label: m['bridges.nav'](), href: '/burning-bridges-ai' },
       ],
     },
     {

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 
 import {
   BULIN_THEMES,
+  BURNING_BRIDGES_THEMES,
   CRAZY_FROG_THEMES,
   FLYING_CAR_THEMES,
   KISS_THEMES,
@@ -20,7 +21,7 @@ export function GenjutsuGenerator({
 }: {
   referenceOnly?: boolean;
   returnPath?: string;
-  theme?: 'crazy-frog' | 'flying-car' | 'ozil' | 'bulin' | 'kiss';
+  theme?: 'crazy-frog' | 'flying-car' | 'ozil' | 'bulin' | 'kiss' | 'bridges';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
@@ -93,6 +94,36 @@ export function GenjutsuGenerator({
           thumb: `/videos/pollo-kissing/${item.slug}.jpg`,
           clip: `/videos/pollo-kissing/references/${item.slug}.mp4`,
           duration: 5,
+          ratios: '16:9',
+          prompt: '',
+        })),
+      };
+    }
+    if (theme === 'bridges') {
+      const names = [
+        m['bridges.examples.black_tee'](),
+        m['bridges.examples.tracksuit'](),
+        m['bridges.examples.white_polo'](),
+        m['bridges.examples.teal_blazer'](),
+      ];
+      return {
+        title: m['bridges.generator.title'](),
+        choose: m['bridges.generator.choose'](),
+        photo: m['bridges.generator.photo'](),
+        photoHint: m['bridges.generator.photo_hint'](),
+        generate: m['bridges.generator.generate'](),
+        loading: m['bridges.generator.loading'](),
+        retry: m['bridges.generator.retry'](),
+        uploadTemplateId: 'burning-bridges-ai',
+        pickerInPanel: true,
+        templates: BURNING_BRIDGES_THEMES.map((item, i) => ({
+          id: `bridges-${item.slug}`,
+          name: names[i],
+          asset: `bridges-${item.slug}`,
+          image: `/videos/burning-bridges/${item.slug}.jpg`,
+          thumb: `/videos/burning-bridges/${item.slug}.jpg`,
+          clip: `/videos/burning-bridges/references/${item.slug}.mp4`,
+          duration: 10,
           ratios: '16:9',
           prompt: '',
         })),

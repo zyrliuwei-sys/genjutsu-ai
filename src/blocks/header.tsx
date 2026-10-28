@@ -36,6 +36,12 @@ export function Header() {
           description: m['landing.hero.kiss_tag'](),
           thumb: '/videos/pollo-kissing/spring-park.jpg',
         },
+        {
+          href: '/burning-bridges-ai',
+          label: m['bridges.nav'](),
+          description: m['landing.hero.bridges_tag'](),
+          thumb: '/videos/burning-bridges/black-tee.jpg',
+        },
       ],
     },
     { href: '/create', label: m['landing.nav.create']() },

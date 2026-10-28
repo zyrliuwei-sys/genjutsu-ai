@@ -98,6 +98,32 @@ export const BULIN_THEMES = [
 const bulinDirection = (lead: string) =>
   `Replace only the freestyling rapper${lead ? ` (the ${lead})` : ''} facing the camera with the person from the image, dressed in a pink short-sleeve shirt and dark sunglasses. Keep the fan holding up the portable speaker, the crowd filming on their phones, the red-lit restaurant entrance at night, the hand gestures, the bounce, the pointing at the lens, the handheld vertical camera and the timing exactly as in the reference video. Do not add people, text, logos or new actions.`;
 
+/** Built-in party takes use prepared 10s / 1280×720 generation inputs. */
+export const BURNING_BRIDGES_THEMES = [
+  {
+    slug: 'black-tee',
+    name: 'Black tee and chain',
+    lead: 'man in the black T-shirt and silver chain',
+  },
+  {
+    slug: 'tracksuit',
+    name: 'Blue track jacket',
+    lead: 'man in the black and blue track jacket',
+  },
+  {
+    slug: 'white-polo',
+    name: 'White polo',
+    lead: 'man in the white polo shirt',
+  },
+  {
+    slug: 'teal-blazer',
+    name: 'Teal blazer and shades',
+    lead: 'man in the teal blazer and sunglasses',
+  },
+] as const;
+const burningBridgesDirection = (lead: string) =>
+  `Replace only the host${lead ? ` (the ${lead})` : ''} who walks up to the camera holding a silver cup with the person from the image, keeping the host's outfit. Keep the cup, the walk-up, the raised hand toward the lens, the pointing and arm moves, the friends dancing around the host, the chandeliers, the white-clothed tables, the handheld camera and the timing exactly as in the reference video. Do not add people, text, logos or new actions.`;
+
 /** Built-in kiss takes use prepared 5s / 1280×720 generation inputs. */
 export const KISS_THEMES = [
   {
@@ -174,6 +200,16 @@ export const GENJUTSU_REFERENCES: Record<
     ])
   ),
   'bulin-47-ai': { name: 'Bulin 47 AI', direction: bulinDirection('') },
+  ...Object.fromEntries(
+    BURNING_BRIDGES_THEMES.map((theme) => [
+      `bridges-${theme.slug}`,
+      { name: theme.name, direction: burningBridgesDirection(theme.lead) },
+    ])
+  ),
+  'burning-bridges-ai': {
+    name: 'Burning Bridges AI',
+    direction: burningBridgesDirection(''),
+  },
   ...Object.fromEntries(
     KISS_THEMES.map((theme) => [
       `kiss-${theme.slug}`,

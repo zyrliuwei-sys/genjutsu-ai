@@ -515,6 +515,8 @@ export function GenjutsuGenerator({
 }) {
   const templates = theme?.templates ?? TEMPLATES;
   const panelPicker = Boolean(theme?.pickerInPanel);
+  // Widescreen takes read better as a two-column grid of 16:9 thumbnails.
+  const widePicker = templates.every((template) => template.ratios === '16:9');
   const defaultTemplate = theme?.templates[0] ?? DEFAULT_TEMPLATE;
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -1729,7 +1731,10 @@ export function GenjutsuGenerator({
             <div className="flex flex-col gap-2 max-lg:hidden">
               <span className="text-sm font-medium">{theme?.choose}</span>
               <div
-                className="grid grid-cols-3 gap-2"
+                className={cn(
+                  'grid gap-2',
+                  widePicker ? 'grid-cols-2' : 'grid-cols-3'
+                )}
                 data-testid="panel-template-list"
               >
                 {templates.map((template) => {
@@ -1747,7 +1752,8 @@ export function GenjutsuGenerator({
                     >
                       <span
                         className={cn(
-                          'bg-muted relative block aspect-[9/16] overflow-hidden rounded-lg ring-2 transition-all',
+                          'bg-muted relative block overflow-hidden rounded-lg ring-2 transition-all',
+                          widePicker ? 'aspect-video' : 'aspect-[9/16]',
                           active
                             ? 'ring-primary'
                             : 'group-hover:ring-primary/40 ring-transparent'
