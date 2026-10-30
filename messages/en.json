@@ -821,7 +821,7 @@
   "landing.features.cms.description": "Categories and posts with full CRUD, status management, and admin panel — build your blog or docs.",
   "landing.features.credits.title": "Credit System",
   "landing.features.credits.description": "FIFO consumption, expiration, auto-grant on signup, and revocation — ready for usage-based billing.",
-  "landing.pricing.title": "Generation balance packs",
+  "landing.pricing.title": "Genjutsu Paid",
   "landing.pricing.billing_rules": "Packs add prepaid balance, and larger packs include bonus balance. Each video, from an effect or your own clip, uses $9.90 of balance and runs up to 10 seconds.",
   "landing.pricing.description": "One prepaid balance for all your videos. Packs start at $9.90. No subscription.",
   "landing.pricing.pack_videos": "{count} videos · {price} each · 10s",
