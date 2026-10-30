@@ -2,14 +2,11 @@ import { tDynamic } from '@/core/i18n/dynamic';
 import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
 import { GUIDES } from '@/lib/guides';
-import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
 import { CONTENT_SLUGS } from '@/blocks/content-links';
 import { GuideCard } from '@/components/guide-card';
 
 const MAX_CARDS = 8;
-// Phones get a shorter page: only the first cards are shown there.
-const MOBILE_CARDS = 4;
 
 type Card = { href: string; coverTitle: string; title: string };
 
@@ -29,25 +26,16 @@ export function guideCards(excludeHref?: string): Card[] {
   ].filter((card) => card.href !== excludeHref);
 }
 
-export function GuideGrid({
-  cards,
-  mobileLimit,
-}: {
-  cards: Card[];
-  mobileLimit?: number;
-}) {
+export function GuideGrid({ cards }: { cards: Card[] }) {
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      {cards.map((card, index) => (
+      {cards.map((card) => (
         <GuideCard
           key={card.href}
           {...card}
           brand={envConfigs.app_name}
           label={m['guides.label']()}
           readLabel={m['guides.read']()}
-          className={cn(
-            mobileLimit !== undefined && index >= mobileLimit && 'max-md:hidden'
-          )}
         />
       ))}
     </div>
@@ -56,7 +44,8 @@ export function GuideGrid({
 
 export function Guides() {
   return (
-    <section className="border-border border-t px-4 py-24 sm:py-28">
+    // Hidden on phones to keep the mobile page short; desktop unchanged.
+    <section className="border-border border-t px-4 py-24 max-md:hidden sm:py-28">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h2 className="eg-heading text-4xl leading-[1.05] sm:text-5xl">
@@ -70,10 +59,7 @@ export function Guides() {
           </Link>
         </div>
         <div className="mt-10">
-          <GuideGrid
-            cards={guideCards().slice(0, MAX_CARDS)}
-            mobileLimit={MOBILE_CARDS}
-          />
+          <GuideGrid cards={guideCards().slice(0, MAX_CARDS)} />
         </div>
       </div>
     </section>
