@@ -8,6 +8,53 @@ import type { GuideMeta } from '@/lib/guides';
  * structured data: keep each answer identical to the text on the page.
  */
 export const GUIDE_METAS: Record<string, GuideMeta> = {
+  'apps-similar-to-genjutsu-ai': {
+    title:
+      'What Is Similar to Genjutsu AI? Alternatives Grouped by What They Do',
+    h1: 'What Is Similar to Genjutsu AI?',
+    description:
+      'Tools similar to Genjutsu AI — Runway, Kling, Viggle, Luma, Pika, Higgsfield and Wan 2.2 Animate — grouped by job, plus a ten-minute test to pick one.',
+    card_title: 'Tools similar to Genjutsu AI',
+    published_at: '2026-10-30',
+    updated_at: '2026-10-30',
+    faq: [
+      {
+        q: 'Is there a free app similar to Genjutsu AI?',
+        a: 'The open-source Wan 2.2 Animate is free to run if you have a powerful GPU. Hosted tools usually limit or watermark free use and charge for full-quality renders.',
+      },
+      {
+        q: 'What is the difference between Viggle and Genjutsu AI?',
+        a: 'Viggle moves a character image the way someone in a video moves, usually on a new background. A Genjutsu edit keeps the original video, including its background and camera, and replaces the person in it.',
+      },
+      {
+        q: 'Can one tool do everything?',
+        a: 'Not well. Character swaps, motion transfer, object swaps and restyles are different jobs, and each tool is tuned for one or two of them.',
+      },
+    ],
+  },
+  'higgsfield-genjutsu-local-rtx-5090': {
+    title: 'How to Do Higgsfield Genjutsu on an RTX 5090 with Local AI',
+    h1: 'How to Do Higgsfield Genjutsu Locally on an RTX 5090',
+    description:
+      'Rebuild the Higgsfield Genjutsu workflow on your own RTX 5090 with ComfyUI, Wan 2.2 Animate and Wan VACE: setup, character and object swaps, and limits.',
+    card_title: 'Higgsfield Genjutsu on an RTX 5090',
+    published_at: '2026-10-30',
+    updated_at: '2026-10-30',
+    faq: [
+      {
+        q: 'Can I run Higgsfield Genjutsu itself locally?',
+        a: "No. Higgsfield's models are closed and run only on Higgsfield's servers. Locally you rebuild the same workflow with open models such as Wan 2.2 Animate and Wan VACE.",
+      },
+      {
+        q: 'Is 32 GB of VRAM enough?',
+        a: 'Yes for 14B video models in fp8 at around 720p. Full bf16 weights or 1080p long clips need offloading and get much slower.',
+      },
+      {
+        q: 'Do I need Linux?',
+        a: 'No. ComfyUI runs on Windows with a CUDA 12.8+ PyTorch build; Linux is only slightly faster and makes some speed-up libraries easier to install.',
+      },
+    ],
+  },
   'genjutsu-trend-ideas': {
     title: 'Genjutsu Trend Ideas: 12 Viral Video Ideas for TikTok and Reels',
     h1: 'Genjutsu Trend Ideas That Actually Get Shared',

@@ -1,0 +1,130 @@
+**The short answer:** you cannot run Higgsfield Genjutsu itself on your own GPU — it is a closed, cloud-only product. What you can do on an RTX 5090 is rebuild the same workflow with open models: **Wan 2.2 Animate** in ComfyUI for replacing the person in a clip, and **Wan VACE** with masks or pose/depth control for object swaps and whole-world changes. The 5090's 32 GB of VRAM is enough to run the 14B models at 720p without the heavy compromises smaller cards need. This guide walks through the setup, the three workflows and where local still falls short. This site is independent and not affiliated with Higgsfield.
+
+## What "Higgsfield Genjutsu" actually does
+
+Before picking local tools, split the effect into the jobs it performs. Each job maps to a different open model:
+
+- **Character replacement** — keep the filmed motion and camera, swap the performer for the person in your photo.
+- **Object swap** — change one selected element (a car, a prop, an outfit) and leave the rest untouched.
+- **World / style change** — keep the motion, rebuild the scene around it.
+
+If you are not sure which one you need, [What is Genjutsu AI?](/guides/what-is-genjutsu-ai) explains the difference, and the [Higgsfield Genjutsu alternative](/higgsfield-genjutsu-alternative) page compares the hosted options.
+
+## What you need
+
+- **GPU:** RTX 5090 (32 GB). It is a Blackwell card, so it needs a recent NVIDIA driver and a PyTorch build for **CUDA 12.8 or newer**. Older guides that install a CUDA 12.1 or 12.4 PyTorch will fail with "no kernel image is available" errors.
+- **System RAM:** 64 GB is comfortable. ComfyUI offloads text encoders and VAE to RAM, and 32 GB of RAM is where people hit swapping and crashes.
+- **Disk:** 100 GB or more free on an NVMe SSD. One 14B video model plus its text encoder, VAE and LoRAs is easily 40–60 GB, and you will end up with more than one.
+- **Software:** [ComfyUI](https://github.com/comfyanonymous/ComfyUI) (the Windows portable build or ComfyUI Desktop ship with a CUDA 12.8 PyTorch), plus ComfyUI-Manager to install missing custom nodes.
+
+## Step 1: Set up ComfyUI for the 5090
+
+1. Install the latest NVIDIA Game Ready or Studio driver.
+2. Install ComfyUI Desktop or extract the portable build, then run it once to confirm it sees the GPU (the console prints the device name and VRAM).
+3. Update ComfyUI to the latest version — video model support lands in core ComfyUI first, and old installs will not have the nodes.
+4. Optional but worth it: install **SageAttention** for your PyTorch/CUDA version. It noticeably speeds up Wan sampling on the 5090.
+
+## Step 2: Character replacement with Wan 2.2 Animate
+
+This is the closest local match to the classic Genjutsu "put me in this video" effect. Wan 2.2 Animate has a **replacement mode**: it takes your reference video and one character photo, follows the original body pose and facial expression, and relights the new character to match the scene.
+
+1. Open **Workflow → Browse Templates** and load the Wan 2.2 Animate template. Let ComfyUI-Manager install any missing nodes.
+2. Download the model files the template asks for. On a 5090, use the **fp8** version of the 14B Animate model — the full bf16 weights alone are close to your entire VRAM.
+3. Load your reference clip and your character photo.
+4. Build the **mask** of the person you want to replace. The preprocessing nodes track the subject with points you click on the first frame; check the mask preview on a few frames before you sample.
+5. Start at around 720p and a few seconds of video. Generate a short test first, then the full clip.
+
+**Speed tip:** distilled "lightning" LoRAs (such as LightX2V) cut sampling from 20+ steps to about 4. You trade a little detail for several times the speed — use them while you iterate, and turn them off for the final render if you have the time.
+
+## Step 3: Object swap with VACE and a mask
+
+For "change only the car" or "change only the jacket", use **Wan VACE** in inpainting mode:
+
+1. Create a mask over the object across the clip (a segmentation node such as SAM 2 can track it from a single click).
+2. Give VACE the masked video plus a reference image of the new object.
+3. Write a prompt that names the new object and says what must stay — see the template in [Genjutsu AI prompts](/guides/genjutsu-ai-prompts); the same structure works for local models.
+
+Anything outside the mask is kept from your original footage, which is why object swaps often look cleaner locally than full-frame regeneration.
+
+## Step 4: World or style change with first-frame editing
+
+To keep the motion but rebuild the whole scene:
+
+1. Export the first frame of your clip.
+2. Edit it with a local image editing model (for example Qwen-Image-Edit or FLUX Kontext) into the world you want.
+3. Extract **pose and depth** from the original video with ControlNet preprocessors.
+4. Feed the edited first frame plus the pose/depth video into VACE (or Wan Fun Control). The model carries your new look forward while following the original movement.
+
+The better the edited first frame, the better the whole video — spend your time there.
+
+## What to expect from a 5090
+
+<div className="border-border my-6 overflow-x-auto rounded-xl border">
+  <table className="w-full min-w-[620px] text-left text-sm">
+    <thead>
+      <tr className="border-border border-b">
+        <th className="p-4">Question</th>
+        <th className="p-4">Realistic answer</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="border-border border-b">
+        <td className="p-4">Resolution</td>
+        <td className="p-4">
+          720p is the sweet spot; 1080p is possible but slow and tight on VRAM
+        </td>
+      </tr>
+      <tr className="border-border border-b">
+        <td className="p-4">Clip length</td>
+        <td className="p-4">
+          A few seconds per pass; longer clips are generated in overlapping
+          chunks, where seams can show
+        </td>
+      </tr>
+      <tr className="border-border border-b">
+        <td className="p-4">Render time</td>
+        <td className="p-4">
+          Minutes per short clip with a 4-step LoRA; much longer at full step
+          counts. It depends heavily on resolution, frame count and settings
+        </td>
+      </tr>
+      <tr className="border-border border-b">
+        <td className="p-4">Model precision</td>
+        <td className="p-4">
+          fp8 (or Q8 GGUF) for 14B models; bf16 needs offloading
+        </td>
+      </tr>
+      <tr>
+        <td className="p-4">Hardest shots</td>
+        <td className="p-4">
+          Fast spins, turns away from camera, hands, crowds and hard cuts — the
+          same limits as hosted tools
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+## Common problems and fixes
+
+- **"CUDA error: no kernel image is available"** — your PyTorch was built for an older CUDA. Install a CUDA 12.8+ build, or use the ComfyUI portable/Desktop build that ships one.
+- **Out of memory** — switch to the fp8 or GGUF model, lower the resolution or frame count, and enable model offloading for the text encoder.
+- **Face drifts away from your photo** — use a sharp, front-facing, evenly lit photo, and pick a clip where the face is visible most of the time.
+- **The wrong person is replaced** — your mask is tracking the wrong subject; re-click the points on the first frame and check the mask preview.
+- **Flicker or color shifts between chunks** — increase the overlap between chunks, or keep the clip short enough to render in one pass.
+
+## Is local worth it?
+
+Local makes sense if you already own the 5090, want full control over every setting, need to keep footage on your own machine, or plan to render a lot. It costs you setup time, model downloads, and a lot of trial and error per clip.
+
+If you just want a finished character swap from a clip and a photo, a hosted tool is faster. On this site you pick a scene or upload a 3–10 second clip, add one photo, and download an MP4 — see [How to use Genjutsu AI](/guides/how-to-use-genjutsu-ai) or go straight to [Create](/create).
+
+## FAQ
+
+**Can I run Higgsfield Genjutsu itself locally?** No. Higgsfield's models are closed and run only on Higgsfield's servers. Locally you rebuild the same workflow with open models such as Wan 2.2 Animate and Wan VACE.
+
+**Is 32 GB of VRAM enough?** Yes for 14B video models in fp8 at around 720p. Full bf16 weights or 1080p long clips need offloading and get much slower.
+
+**Do I need Linux?** No. ComfyUI runs on Windows with a CUDA 12.8+ PyTorch build; Linux is only slightly faster and makes some speed-up libraries easier to install.
+
+**Can I use any person's photo?** Only use photos of yourself or of people who have agreed to appear in your video, and label AI-edited videos where the platform asks you to.

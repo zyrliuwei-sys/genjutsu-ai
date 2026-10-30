@@ -1,0 +1,75 @@
+**The short answer:** the tools most similar to Genjutsu AI are the ones that start from a real video and keep its motion — Runway Aleph and Act-Two, Kling's video editing and Motion Control, Viggle, Luma's Modify Video, Pika's swap tools, Higgsfield Genjutsu itself, and the open-source Wan 2.2 Animate if you run models locally. They are not interchangeable: each one is strongest at a different job. Pick by the job, not by the name.
+
+## First, what counts as "similar"
+
+A tool is only a real Genjutsu-style alternative if it does all three of these:
+
+1. **Takes your video as input**, not just a text prompt.
+2. **Keeps the original motion and camera** instead of inventing new movement.
+3. **Changes what is in the shot** — the person, an object or the world.
+
+That rules out most of what shows up when you search for "AI video": plain text-to-video generators, talking-head avatar apps and lip-sync tools don't keep a filmed performance. Classic face swap apps are close, but they only change the face — the [What is Genjutsu AI?](/guides/what-is-genjutsu-ai) guide explains why that looks different.
+
+## Similar tools, grouped by the job they do best
+
+### Recast the person in a clip
+
+The core "put me in this video" effect: same dance, same stunt, different person.
+
+- **Kling video editing** — edits an existing clip from a reference image and instruction. This site's character editor runs on Kling video-edit models, so if you like the results here, that is the model family behind them.
+- **Wan 2.2 Animate** — an open model with a dedicated replacement mode. Free to run, but you need a strong GPU and ComfyUI; see [Higgsfield Genjutsu on an RTX 5090](/guides/higgsfield-genjutsu-local-rtx-5090).
+- **Higgsfield Genjutsu** — the product that named the trend. Compared in detail on the [Higgsfield Genjutsu alternative](/higgsfield-genjutsu-alternative) page.
+
+### Move a character the way someone in a video moves
+
+The opposite direction: you start from a character image and borrow motion from a clip. The background usually comes from the image, not the video.
+
+- **Viggle** — known for meme-style motion templates; fast and playful, best with full-body moves.
+- **Runway Act-Two** — transfers a filmed performance, including face and hands, onto a character image. Strongest for acting and expressions rather than big stunts.
+- **Kling Motion Control** — drives a character image with a reference video's movement.
+
+### Change one object or outfit
+
+- **Pika (Pikaswaps and Pikadditions)** — swap or add an item in your footage with a prompt or reference image. Good for quick, playful edits.
+- **Runway Aleph** — edits an existing clip from a text instruction: change a jacket, remove a person, relight the scene.
+
+### Restyle the whole world
+
+- **Luma Modify Video** — keeps the motion and composition, re-renders the look: a street becomes a jungle, live action becomes animation.
+- **Runway Aleph** — also handles scene and style changes by instruction.
+
+Feature names and plans change often, so check each tool's own site for current limits and pricing.
+
+## How to test any of them in ten minutes
+
+Marketing reels are cherry-picked. Run the same test on every tool you are considering:
+
+1. **Use the same clip everywhere** — 5 to 10 seconds, one clear main person, at least one fast moment.
+2. **Use the same photo everywhere** — front-facing, sharp, evenly lit.
+3. **Watch three spots at full screen:** the face in the fastest moment, the hands, and the hair and clothing edges.
+4. **Check the background** — did anything you didn't ask to change move, melt or disappear?
+5. **Compare the real cost** — what one usable clip costs, counting failed renders, not the advertised per-second price.
+6. **Read the content rules** — some tools block real-person likenesses or watermark the free tier.
+
+The tool that wins this test on _your_ kind of footage is the right one; a tool that wins on dance clips can lose on sports clips.
+
+## Quick picks
+
+- **You want the viral "me in this scene" swap with the least effort** → a hosted character editor (Kling-based tools, Higgsfield, this site).
+- **You want a character to copy a meme dance** → Viggle or Kling Motion Control.
+- **You need an actor's facial performance on a character** → Runway Act-Two.
+- **You want to change one prop or outfit** → Pika or Runway Aleph.
+- **You want a new look for the whole shot** → Luma Modify Video or Runway Aleph.
+- **You have a big GPU and want full control** → Wan 2.2 Animate locally.
+
+## Where this site fits
+
+Genjutsu AI is an independent tool focused on one job: recasting the person in a short clip. Pick a ready-made scene or upload a 3–10 second clip, add one photo, and download the MP4. It does not do motion-to-image animation, prop swaps or full restyles — for those, use one of the tools above. To try it, read [How to use Genjutsu AI](/guides/how-to-use-genjutsu-ai) or go straight to [Create](/create).
+
+## FAQ
+
+**Is there a free app similar to Genjutsu AI?** The open-source Wan 2.2 Animate is free to run if you have a powerful GPU. Hosted tools usually limit or watermark free use and charge for full-quality renders.
+
+**What is the difference between Viggle and Genjutsu AI?** Viggle moves a character image the way someone in a video moves, usually on a new background. A Genjutsu edit keeps the original video, including its background and camera, and replaces the person in it.
+
+**Can one tool do everything?** Not well. Character swaps, motion transfer, object swaps and restyles are different jobs, and each tool is tuned for one or two of them.
