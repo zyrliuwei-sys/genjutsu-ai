@@ -47,7 +47,8 @@ export type PricingProduct = {
  *
  * Packs grant shared balance at 1 internal credit = $0.01. The visible packs
  * are sized in whole 10-second Genjutsu videos (990 credits each, see
- * ./genjutsu.ts): 1 / 3 / 5 videos, larger packs carrying a bonus.
+ * ./genjutsu.ts): 1 / 2 / 3 / 5 / 7 / 10 / 20 / 50 / 100 / 200
+ * videos, larger packs carrying a bonus.
  * Each generation charges at least 7× its provider list cost. Existing balances
  * and already-created orders are unchanged; legacy subscriptions remain below.
  * Keys MUST match what the pricing UI sends as product_id.
@@ -126,6 +127,87 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     currency: 'usd',
     credits: 4950,
     bonusCredits: 960,
+  },
+  // In-between packs. Not `pack_2`: that id still maps to a retired cheap
+  // Waffo product from the 2026-10-14 experiment.
+  pack_2v: {
+    productId: 'pack_2v',
+    productName: '2-Video Pack',
+    planName: '2-Video Pack',
+    description: '$17.90 for two 10-second videos ($19.80 balance)',
+    type: PaymentType.ONE_TIME,
+    priceInCents: 1790,
+    currency: 'usd',
+    credits: 1980,
+    bonusCredits: 190,
+  },
+  pack_7v: {
+    productId: 'pack_7v',
+    productName: '7-Video Pack',
+    planName: '7-Video Pack',
+    description: '$52.90 for seven 10-second videos ($69.30 balance)',
+    type: PaymentType.ONE_TIME,
+    priceInCents: 5290,
+    currency: 'usd',
+    credits: 6930,
+    bonusCredits: 1640,
+  },
+  // Volume packs: the per-video price falls to $6.99 / $6.00 / $5.00 /
+  // $4.50 / $4.00.
+  pack_10: {
+    productId: 'pack_10',
+    productName: '10-Video Pack',
+    planName: '10-Video Pack',
+    description: '$69.90 for ten 10-second videos ($99.00 balance)',
+    type: PaymentType.ONE_TIME,
+    priceInCents: 6990,
+    currency: 'usd',
+    credits: 9900,
+    bonusCredits: 2910,
+  },
+  pack_20: {
+    productId: 'pack_20',
+    productName: '20-Video Pack',
+    planName: '20-Video Pack',
+    description: '$119.90 for twenty 10-second videos ($198.00 balance)',
+    type: PaymentType.ONE_TIME,
+    priceInCents: 11990,
+    currency: 'usd',
+    credits: 19800,
+    bonusCredits: 7810,
+  },
+  pack_50: {
+    productId: 'pack_50',
+    productName: '50-Video Pack',
+    planName: '50-Video Pack',
+    description: '$249.90 for fifty 10-second videos ($495.00 balance)',
+    type: PaymentType.ONE_TIME,
+    priceInCents: 24990,
+    currency: 'usd',
+    credits: 49500,
+    bonusCredits: 24510,
+  },
+  pack_100: {
+    productId: 'pack_100',
+    productName: '100-Video Pack',
+    planName: '100-Video Pack',
+    description: '$449.90 for one hundred 10-second videos ($990.00 balance)',
+    type: PaymentType.ONE_TIME,
+    priceInCents: 44990,
+    currency: 'usd',
+    credits: 99000,
+    bonusCredits: 54010,
+  },
+  pack_200: {
+    productId: 'pack_200',
+    productName: '200-Video Pack',
+    planName: '200-Video Pack',
+    description: '$799.90 for two hundred 10-second videos ($1,980.00 balance)',
+    type: PaymentType.ONE_TIME,
+    priceInCents: 79990,
+    currency: 'usd',
+    credits: 198000,
+    bonusCredits: 118010,
   },
   pack_studio: {
     available: false,

@@ -1096,7 +1096,7 @@
   "landing.faq.prompt.question": "什么样的照片效果最好？",
   "landing.faq.prompt.answer": "使用清晰、光线好、只有一个人且脸部清楚的照片。避免合照、重滤镜和墨镜，并且只上传同意出现在视频里的人。",
   "landing.pricing.meta_title": "Genjutsu AI 价格：视频生成次数套餐",
-  "landing.pricing.meta_description": "Genjutsu AI 视频套餐：$9.90 一条 10 秒视频，$24.90 三条，$39.90 五条。一次性付费，无订阅。",
+  "landing.pricing.meta_description": "Genjutsu AI 积分套餐：$9.90 起一条 10 秒视频，200 条视频包低至每条 $4。一次性付费，无订阅。",
   "landing.guide.eyebrow": "One name, two tools",
   "landing.guide.title": "Genjutsu AI vs Higgsfield Genjutsu",
   "landing.guide.p1": "Higgsfield Genjutsu 从已有视频出发，提供动作迁移和指定元素替换。",
@@ -1797,5 +1797,17 @@
   "hombro.generator.photo_hint": "单人正脸，肩膀入镜",
   "hombro.generator.generate": "生成我的 Dame Hombro",
   "hombro.generator.loading": "正在加载舞蹈镜头…",
-  "hombro.generator.retry": "镜头加载失败，点击重试。"
+  "hombro.generator.retry": "镜头加载失败，点击重试。",
+  "landing.pricing.credits_amount": "{credits} 积分",
+  "landing.pricing.buy_selected": "立即购买 · {price}",
+  "landing.pricing.pack_10": "10 条视频包",
+  "landing.pricing.pack_20": "20 条视频包",
+  "landing.pricing.pack_50": "50 条视频包",
+  "landing.pricing.tag_popular": "最受欢迎",
+  "landing.pricing.tag_best_value": "最优惠",
+  "landing.pricing.credits_footnote": "990 积分生成一条 10 秒视频，积分适用于所有特效和你自己的视频。",
+  "landing.pricing.pack_2v": "2 条视频包",
+  "landing.pricing.pack_7v": "7 条视频包",
+  "landing.pricing.pack_100": "100 条视频包",
+  "landing.pricing.pack_200": "200 条视频包"
 }

@@ -9,6 +9,7 @@ import {
   Infinity as InfinityIcon,
   Lock,
   MonitorPlay,
+  RotateCcw,
   Video,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -23,13 +24,13 @@ import { track } from '@/lib/track';
 import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
 import { usePublicConfig } from '@/hooks/use-public-config';
+import { CreditPackList, type CreditPack } from '@/components/credit-pack-list';
 import {
   PaymentProviderModal,
   PaymentProviderOptions,
   type PaymentProvider,
 } from '@/components/payment-provider-modal';
 import {
-  PricingTable,
   type PricingGroup,
   type PricingPlan,
 } from '@/components/pricing-table';
@@ -185,6 +186,48 @@ export function Pricing({
         plan('pack_pro', m['landing.pricing.pack_pro']()),
       ],
     },
+  ];
+
+  // The pricing page lists every pack as credits, media.io style; the
+  // paywall dialog keeps the three small packs above.
+  function creditPack(
+    productId: string,
+    name: string,
+    tag?: string
+  ): CreditPack {
+    const product = pricingCatalog[productId];
+    // Saving against the 1 credit = $0.01 face value of the balance.
+    const off = Math.floor((1 - product.priceInCents / product.credits) * 100);
+    return {
+      ...plan(productId, name, productId === 'pack_plus'),
+      amount: m['landing.pricing.credits_amount']({
+        credits: product.credits.toLocaleString('en-US'),
+      }),
+      detail: packVideos(productId),
+      discount: off > 0 ? `-${off}%` : undefined,
+      originalPrice: off > 0 ? usd(product.credits) : undefined,
+      tag,
+    };
+  }
+  const creditPacks: CreditPack[] = [
+    creditPack('pack_starter', m['landing.pricing.pack_starter']()),
+    creditPack('pack_2v', m['landing.pricing.pack_2v']()),
+    creditPack(
+      'pack_plus',
+      m['landing.pricing.pack_plus'](),
+      m['landing.pricing.tag_popular']()
+    ),
+    creditPack('pack_pro', m['landing.pricing.pack_pro']()),
+    creditPack('pack_7v', m['landing.pricing.pack_7v']()),
+    creditPack('pack_10', m['landing.pricing.pack_10']()),
+    creditPack('pack_20', m['landing.pricing.pack_20']()),
+    creditPack('pack_50', m['landing.pricing.pack_50']()),
+    creditPack('pack_100', m['landing.pricing.pack_100']()),
+    creditPack(
+      'pack_200',
+      m['landing.pricing.pack_200'](),
+      m['landing.pricing.tag_best_value']()
+    ),
   ];
 
   const checkoutMutation = useMutation({
@@ -383,7 +426,32 @@ export function Pricing({
             onCheckout={handleCheckout}
           />
         ) : (
-          <PricingTable groups={groups} onCheckout={handleCheckout} />
+          <CreditPackList
+            packs={creditPacks}
+            busy={checkoutMutation.isPending || !!loadingProvider}
+            buyLabel={(pack) =>
+              m['landing.pricing.buy_selected']({ price: pack.price })
+            }
+            processingLabel={m['common.pricing.processing']()}
+            footnote={m['landing.pricing.credits_footnote']()}
+            perks={[
+              {
+                icon: <Lock className="size-3.5 shrink-0" aria-hidden />,
+                label: m['landing.pricing.secure_checkout'](),
+              },
+              {
+                icon: <RotateCcw className="size-3.5 shrink-0" aria-hidden />,
+                label: m['landing.pricing.failure_policy_short'](),
+              },
+              {
+                icon: (
+                  <InfinityIcon className="size-3.5 shrink-0" aria-hidden />
+                ),
+                label: m['landing.pricing.feature_no_subscription'](),
+              },
+            ]}
+            onCheckout={handleCheckout}
+          />
         )}
         {dialog && (
           <p className="text-muted-foreground mt-5 flex items-center justify-center gap-1.5 text-center text-xs">

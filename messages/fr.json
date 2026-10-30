@@ -472,7 +472,7 @@
   "landing.faq.prompt.question": "Quelle photo fonctionne le mieux ?",
   "landing.faq.prompt.answer": "Utilisez une photo nette et bien éclairée d’une seule personne, au visage bien visible. Évitez les photos de groupe, les filtres prononcés et les lunettes de soleil, et n’importez que des personnes qui ont accepté d’apparaître dans votre vidéo.",
   "landing.pricing.meta_title": "Tarifs Genjutsu AI : packs de génération vidéo",
-  "landing.pricing.meta_description": "Packs vidéo Genjutsu AI : $9.90 pour une vidéo de 10 secondes, $24.90 pour trois et $39.90 pour cinq. Paiement unique, sans abonnement.",
+  "landing.pricing.meta_description": "Packs de crédits Genjutsu AI dès $9.90 pour une vidéo de 10 secondes, jusqu’à $4 par vidéo avec le pack 200 vidéos. Paiement unique, sans abonnement.",
   "landing.guide.title": "Genjutsu AI vs Higgsfield Genjutsu",
   "landing.guide.p1": "Higgsfield Genjutsu modifie des séquences existantes par transfert de mouvement ou remplacement ciblé d’objets.",
   "landing.guide.p2": "Ce site est un outil indépendant, non affilié à Higgsfield ; comparez les workflows avant de choisir.",
@@ -1043,5 +1043,17 @@
   "hombro.generator.photo_hint": "Un visage, épaules dans le cadre",
   "hombro.generator.generate": "Générer mon Dame Hombro",
   "hombro.generator.loading": "Chargement de la prise de danse…",
-  "hombro.generator.retry": "La prise n’a pas pu se charger. Clique pour réessayer."
+  "hombro.generator.retry": "La prise n’a pas pu se charger. Clique pour réessayer.",
+  "landing.pricing.credits_amount": "{credits} crédits",
+  "landing.pricing.buy_selected": "Acheter · {price}",
+  "landing.pricing.pack_10": "Pack 10 vidéos",
+  "landing.pricing.pack_20": "Pack 20 vidéos",
+  "landing.pricing.pack_50": "Pack 50 vidéos",
+  "landing.pricing.tag_popular": "Le plus populaire",
+  "landing.pricing.tag_best_value": "Meilleur prix",
+  "landing.pricing.credits_footnote": "990 crédits = une vidéo de 10 s. Les crédits fonctionnent avec tous les effets et vos propres vidéos.",
+  "landing.pricing.pack_2v": "Pack 2 vidéos",
+  "landing.pricing.pack_7v": "Pack 7 vidéos",
+  "landing.pricing.pack_100": "Pack 100 vidéos",
+  "landing.pricing.pack_200": "Pack 200 vidéos"
 }

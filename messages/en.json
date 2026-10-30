@@ -1096,7 +1096,7 @@
   "landing.faq.prompt.question": "Which photo works best?",
   "landing.faq.prompt.answer": "Use a sharp, well-lit photo of one person with the face clearly visible. Avoid group photos, heavy filters and sunglasses, and only upload people who have agreed to appear in your video.",
   "landing.pricing.meta_title": "Genjutsu AI Pricing: Video Generation Packs",
-  "landing.pricing.meta_description": "Genjutsu AI video packs: $9.90 for one 10-second video, $24.90 for three and $39.90 for five. One-time payment, no subscription.",
+  "landing.pricing.meta_description": "Genjutsu AI credit packs from $9.90 for one 10-second video, down to $4 per video in the 200-video pack. One-time payment, no subscription.",
   "landing.guide.eyebrow": "One name, two tools",
   "landing.guide.title": "Genjutsu AI vs Higgsfield Genjutsu",
   "landing.guide.p1": "Higgsfield Genjutsu edits existing footage through motion transfer or targeted object swaps.",
@@ -1797,5 +1797,17 @@
   "hombro.generator.photo_hint": "One face, shoulders in frame",
   "hombro.generator.generate": "Generate my Dame Hombro",
   "hombro.generator.loading": "Loading the dance take…",
-  "hombro.generator.retry": "Take could not load. Click to retry."
+  "hombro.generator.retry": "Take could not load. Click to retry.",
+  "landing.pricing.credits_amount": "{credits} credits",
+  "landing.pricing.buy_selected": "Buy now · {price}",
+  "landing.pricing.pack_10": "10-Video Pack",
+  "landing.pricing.pack_20": "20-Video Pack",
+  "landing.pricing.pack_50": "50-Video Pack",
+  "landing.pricing.tag_popular": "Most popular",
+  "landing.pricing.tag_best_value": "Best value",
+  "landing.pricing.credits_footnote": "990 credits make one 10s video. Credits work with every effect and your own videos.",
+  "landing.pricing.pack_2v": "2-Video Pack",
+  "landing.pricing.pack_7v": "7-Video Pack",
+  "landing.pricing.pack_100": "100-Video Pack",
+  "landing.pricing.pack_200": "200-Video Pack"
 }

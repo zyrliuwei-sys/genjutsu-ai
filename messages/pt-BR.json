@@ -472,7 +472,7 @@
   "landing.faq.prompt.question": "Qual foto funciona melhor?",
   "landing.faq.prompt.answer": "Use uma foto nítida e bem iluminada de uma pessoa, com o rosto bem visível. Evite fotos em grupo, filtros pesados e óculos escuros, e só envie pessoas que concordaram em aparecer no seu vídeo.",
   "landing.pricing.meta_title": "Preços do Genjutsu AI: pacotes de geração de vídeo",
-  "landing.pricing.meta_description": "Pacotes de vídeo do Genjutsu AI: $9.90 por um vídeo de 10 segundos, $24.90 por três e $39.90 por cinco. Pagamento único, sem assinatura.",
+  "landing.pricing.meta_description": "Pacotes de créditos do Genjutsu AI a partir de $9.90 por um vídeo de 10 segundos, até $4 por vídeo no pacote de 200. Pagamento único, sem assinatura.",
   "landing.guide.title": "Genjutsu AI vs Higgsfield Genjutsu",
   "landing.guide.p1": "O Higgsfield Genjutsu edita gravações existentes por transferência de movimento ou troca direcionada de objetos.",
   "landing.guide.p2": "Este site é uma ferramenta independente e não é afiliado à Higgsfield; compare os fluxos antes de escolher.",
@@ -1043,5 +1043,17 @@
   "hombro.generator.photo_hint": "Um rosto, ombros no quadro",
   "hombro.generator.generate": "Gerar meu Dame Hombro",
   "hombro.generator.loading": "Carregando o take de dança…",
-  "hombro.generator.retry": "Não foi possível carregar o take. Clique para tentar de novo."
+  "hombro.generator.retry": "Não foi possível carregar o take. Clique para tentar de novo.",
+  "landing.pricing.credits_amount": "{credits} créditos",
+  "landing.pricing.buy_selected": "Comprar · {price}",
+  "landing.pricing.pack_10": "Pacote de 10 vídeos",
+  "landing.pricing.pack_20": "Pacote de 20 vídeos",
+  "landing.pricing.pack_50": "Pacote de 50 vídeos",
+  "landing.pricing.tag_popular": "Mais popular",
+  "landing.pricing.tag_best_value": "Melhor preço",
+  "landing.pricing.credits_footnote": "990 créditos = um vídeo de 10 s. Os créditos valem para todos os efeitos e seus próprios vídeos.",
+  "landing.pricing.pack_2v": "Pacote de 2 vídeos",
+  "landing.pricing.pack_7v": "Pacote de 7 vídeos",
+  "landing.pricing.pack_100": "Pacote de 100 vídeos",
+  "landing.pricing.pack_200": "Pacote de 200 vídeos"
 }
