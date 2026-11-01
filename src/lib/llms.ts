@@ -63,6 +63,12 @@ const EFFECTS: Entry[] = [
     description:
       'Do the Dame Hombro shoulder dance from the Bulin 47 trend from one photo, in four scenes including a dog take',
   },
+  {
+    path: '/tiny-desk-ai',
+    title: 'Tiny Desk AI',
+    description:
+      'Take a seat at the tiny desk concert trend from one photo: lead mic, big laugh close-up or sax solo',
+  },
 ];
 
 const RESOURCES: Entry[] = [

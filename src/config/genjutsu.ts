@@ -128,6 +128,36 @@ export const DAME_HOMBRO_THEMES = [
 const dameHombroDirection = (lead: string) =>
   `Replace only the dancer${lead ? ` (the ${lead})` : ''} with the person from the image, dressed in a red short-sleeve T-shirt and grey trousers. Keep the shoulder bounce, the fists and the hands pulling at the shirt, the pointing, the people around the dancer, the portable speaker if one is held up, the background, the camera and the timing exactly as in the reference video. Do not add people, text, logos or new actions.`;
 
+/** Built-in tiny-desk takes cut from the trend clip: 3–6s / 720×1280 inputs. */
+export const TINY_DESK_THEMES = [
+  {
+    slug: 'band',
+    name: 'The band shot',
+    lead: 'bald lead singer in the yellow T-shirt at the microphone',
+    seconds: 5.25,
+  },
+  {
+    slug: 'laugh',
+    name: 'The big laugh',
+    lead: 'bald lead singer in the yellow T-shirt in the close-up',
+    seconds: 6.2,
+  },
+  {
+    slug: 'sax',
+    name: 'The sax solo',
+    lead: 'saxophone player in the solo close-up',
+    seconds: 3.45,
+  },
+  {
+    slug: 'finale',
+    name: 'Full-band finale',
+    lead: 'bald lead singer in the yellow T-shirt in the final band shot',
+    seconds: 3.67,
+  },
+] as const;
+const tinyDeskDirection = (lead: string) =>
+  `Replace only the ${lead} with the person from the image. Keep the tiny desk with its books, magazines and props, the red keyboard, the other musicians and their instruments, the packed shelves, the warm office lights, the microphone contact, the lip-sync and the timing exactly as in the reference video. Do not add people, instruments, text, logos or new actions.`;
+
 /** Built-in party takes use prepared 10s / 1280×720 generation inputs. */
 export const BURNING_BRIDGES_THEMES = [
   {
@@ -239,6 +269,16 @@ export const GENJUTSU_REFERENCES: Record<
   'dame-hombro-ai': {
     name: 'Dame Hombro AI',
     direction: dameHombroDirection(''),
+  },
+  ...Object.fromEntries(
+    TINY_DESK_THEMES.map((theme) => [
+      `tinydesk-${theme.slug}`,
+      { name: theme.name, direction: tinyDeskDirection(theme.lead) },
+    ])
+  ),
+  'tiny-desk-ai': {
+    name: 'Tiny Desk AI',
+    direction: tinyDeskDirection('main singer'),
   },
   ...Object.fromEntries(
     BURNING_BRIDGES_THEMES.map((theme) => [

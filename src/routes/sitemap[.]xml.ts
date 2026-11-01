@@ -14,6 +14,7 @@ const STATIC_PATHS = [
   '/pollo-ai-kissing',
   '/burning-bridges-ai',
   '/dame-hombro-ai',
+  '/tiny-desk-ai',
   '/pricing',
   '/privacy-policy',
   '/terms-of-service',

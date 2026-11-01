@@ -8,6 +8,7 @@ import {
   FLYING_CAR_THEMES,
   KISS_THEMES,
   OZIL_THEMES,
+  TINY_DESK_THEMES,
 } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
 import { m } from '@/paraglide/messages.js';
@@ -29,7 +30,8 @@ export function GenjutsuGenerator({
     | 'bulin'
     | 'kiss'
     | 'bridges'
-    | 'hombro';
+    | 'hombro'
+    | 'tinydesk';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
@@ -131,6 +133,36 @@ export function GenjutsuGenerator({
           image: `/videos/dame-hombro/${item.slug}.jpg`,
           thumb: `/videos/dame-hombro/${item.slug}.jpg`,
           clip: `/videos/dame-hombro/references/${item.slug}.mp4`,
+          duration: item.seconds,
+          ratios: '9:16',
+          prompt: '',
+        })),
+      };
+    }
+    if (theme === 'tinydesk') {
+      const names = [
+        m['tinydesk.examples.band'](),
+        m['tinydesk.examples.laugh'](),
+        m['tinydesk.examples.sax'](),
+        m['tinydesk.examples.finale'](),
+      ];
+      return {
+        title: m['tinydesk.generator.title'](),
+        choose: m['tinydesk.generator.choose'](),
+        photo: m['tinydesk.generator.photo'](),
+        photoHint: m['tinydesk.generator.photo_hint'](),
+        generate: m['tinydesk.generator.generate'](),
+        loading: m['tinydesk.generator.loading'](),
+        retry: m['tinydesk.generator.retry'](),
+        uploadTemplateId: 'tiny-desk-ai',
+        pickerInPanel: true,
+        templates: TINY_DESK_THEMES.map((item, i) => ({
+          id: `tinydesk-${item.slug}`,
+          name: names[i],
+          asset: `tinydesk-${item.slug}`,
+          image: `/videos/tiny-desk/${item.slug}.jpg`,
+          thumb: `/videos/tiny-desk/${item.slug}.jpg`,
+          clip: `/videos/tiny-desk/references/${item.slug}.mp4`,
           duration: item.seconds,
           ratios: '9:16',
           prompt: '',

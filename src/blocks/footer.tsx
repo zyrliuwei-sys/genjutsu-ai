@@ -16,6 +16,7 @@ export function Footer() {
         { label: m['kiss.nav'](), href: '/pollo-ai-kissing' },
         { label: m['bridges.nav'](), href: '/burning-bridges-ai' },
         { label: m['hombro.nav'](), href: '/dame-hombro-ai' },
+        { label: m['tinydesk.nav'](), href: '/tiny-desk-ai' },
       ],
     },
     {

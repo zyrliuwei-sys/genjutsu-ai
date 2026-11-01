@@ -1,0 +1,604 @@
+/* Tiny Desk AI landing page. An office concert after hours: the mahogany red
+   of the keyboard, the amber of the desk lamps, and a row of bouncing VU
+   meter bars as the section motif. */
+.desk-page {
+  --desk-red: oklch(0.55 0.17 28);
+  --desk-amber: oklch(0.8 0.13 75);
+  /* The generator follows the page's mahogany red and amber. */
+  --primary: var(--desk-red);
+  --primary-foreground: #fff;
+  --primary-text: var(--desk-amber);
+  --ring: var(--desk-red);
+  background: var(--background);
+  color: var(--foreground);
+  overflow: clip;
+}
+.desk-page :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--desk-red);
+  outline-offset: 4px;
+}
+.desk-page h2 {
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.desk-page p {
+  line-height: 1.7;
+}
+
+/* ---------- Hero ---------- */
+.desk-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 56px;
+  max-width: 1240px;
+  margin: auto;
+  padding: 132px 24px 56px;
+}
+.desk-hero::before {
+  content: '';
+  position: absolute;
+  inset: 40px -10% auto auto;
+  width: 640px;
+  height: 640px;
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklch, var(--desk-amber) 28%, transparent),
+    color-mix(in oklch, var(--desk-red) 18%, transparent) 55%,
+    transparent
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+.desk-hero > * {
+  position: relative;
+  z-index: 1;
+}
+.desk-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in oklch, var(--desk-red) 55%, transparent);
+  border-radius: 999px;
+  color: var(--desk-amber);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.desk-hero h1 {
+  margin-top: 22px;
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+.desk-hero h1 span {
+  display: block;
+  margin-top: 10px;
+  color: var(--desk-amber);
+  font-size: 0.45em;
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 24px color-mix(in oklch, var(--desk-red) 60%, transparent);
+}
+.desk-intro {
+  max-width: 560px;
+  margin-top: 22px;
+  color: var(--muted-foreground);
+  font-size: 17px;
+}
+.desk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 30px;
+}
+.desk-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--desk-red);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0 32px color-mix(in oklch, var(--desk-red) 45%, transparent);
+  transition:
+    filter 0.2s,
+    transform 0.2s;
+}
+.desk-button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.desk-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  text-decoration: none;
+}
+.desk-text-link:hover {
+  color: var(--foreground);
+}
+.desk-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 30px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.desk-facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.desk-facts svg {
+  color: var(--desk-amber);
+}
+
+/* Phone-shaped stage with the take on loop. */
+.desk-stage {
+  justify-self: center;
+  position: relative;
+  width: min(330px, 100%);
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--desk-red) 45%, var(--border));
+  border-radius: 34px;
+  background: #000;
+  box-shadow:
+    0 0 0 8px color-mix(in oklch, var(--foreground) 6%, transparent),
+    0 30px 90px -20px color-mix(in oklch, var(--desk-red) 60%, transparent);
+  transform: rotate(-2deg);
+}
+.desk-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.desk-tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.55);
+  color: #fff;
+  font-family: var(--font-mono-display);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+.desk-tag::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--desk-red);
+  box-shadow: 0 0 10px var(--desk-red);
+  animation: desk-pulse 1.6s ease-in-out infinite;
+}
+/* The stamp, slapped across the bottom of the stage. */
+.desk-chant {
+  position: absolute;
+  right: 14px;
+  bottom: 18px;
+  left: 14px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: var(--desk-amber);
+  color: #33200a;
+  font-family: var(--font-serif-display);
+  font-size: 1.35rem;
+  line-height: 1.1;
+  text-align: center;
+  transform: rotate(2deg);
+  box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.6);
+}
+@keyframes desk-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- VU meter divider ---------- */
+.desk-meter {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+  height: 56px;
+  margin: 8px auto;
+}
+.desk-meter span {
+  width: 14px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(
+    to top,
+    var(--desk-amber),
+    color-mix(in oklch, var(--desk-red) 80%, transparent)
+  );
+  animation: desk-level 0.6s ease-in-out infinite alternate;
+}
+.desk-meter span:nth-child(1) {
+  height: 18px;
+}
+.desk-meter span:nth-child(2) {
+  height: 34px;
+  animation-delay: 0.1s;
+}
+.desk-meter span:nth-child(3) {
+  height: 24px;
+  animation-delay: 0.25s;
+}
+.desk-meter span:nth-child(4) {
+  height: 44px;
+  animation-delay: 0.05s;
+}
+.desk-meter span:nth-child(5) {
+  height: 28px;
+  animation-delay: 0.3s;
+}
+.desk-meter span:nth-child(6) {
+  height: 38px;
+  animation-delay: 0.15s;
+}
+.desk-meter span:nth-child(7) {
+  height: 20px;
+  animation-delay: 0.2s;
+}
+@keyframes desk-level {
+  to {
+    transform: scaleY(0.45);
+    transform-origin: bottom;
+  }
+}
+
+/* ---------- Sections ---------- */
+.desk-studio {
+  max-width: 1336px;
+  margin: auto;
+  padding: 24px 24px 72px;
+  scroll-margin-top: 80px;
+}
+.desk-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  margin: 0 4px 26px;
+}
+.desk-section-head p {
+  max-width: 460px;
+  color: var(--muted-foreground);
+  font-size: 15px;
+}
+.desk-price {
+  margin: 14px 4px 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.desk-section {
+  max-width: 1180px;
+  margin: auto;
+  padding: 88px 24px;
+  scroll-margin-top: 80px;
+}
+.desk-note {
+  margin-top: 18px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Examples */
+.desk-reel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 1180px;
+  margin-inline: auto;
+}
+.desk-page .reel-card {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--muted);
+  isolation: isolate;
+}
+.desk-page .reel-card video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.6s ease;
+}
+.desk-page .reel-card:hover video {
+  transform: scale(1.03);
+}
+.desk-page .reel-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.85), transparent 50%);
+}
+.desk-page .reel-card-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+}
+.desk-page .reel-card[data-playing='true'] .reel-card-play {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+.desk-page .reel-card figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  color: #fff;
+  pointer-events: none;
+}
+.desk-page .reel-card-index {
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  color: rgb(255 255 255 / 0.6);
+}
+.desk-page .reel-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.desk-page .reel-card figcaption button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--desk-red);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: auto;
+}
+
+/* About */
+.desk-about {
+  border-block: 1px solid var(--border);
+  background: color-mix(in oklch, var(--desk-amber) 7%, var(--background));
+}
+.desk-about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 56px;
+}
+.desk-kicker {
+  color: var(--desk-amber);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.desk-about-grid h2 {
+  margin-top: 14px;
+}
+.desk-about-line {
+  margin-top: 20px;
+  color: var(--desk-red);
+  font-family: var(--font-serif-display);
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+.desk-prose p + p {
+  margin-top: 16px;
+}
+.desk-prose p {
+  color: var(--muted-foreground);
+}
+
+/* Steps & checks */
+.desk-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.desk-card {
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+}
+.desk-card h3 {
+  margin-top: 14px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.desk-card p {
+  margin-top: 8px;
+  color: var(--muted-foreground);
+  font-size: 14.5px;
+}
+.desk-step-number {
+  font-family: var(--font-mono-display);
+  font-size: 12px;
+  color: var(--desk-red);
+}
+.desk-card svg {
+  color: var(--desk-amber);
+}
+
+/* FAQ */
+.desk-faq {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: 56px;
+}
+.desk-faq details {
+  border-bottom: 1px solid var(--border);
+}
+.desk-faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.desk-faq summary::-webkit-details-marker {
+  display: none;
+}
+.desk-faq summary span {
+  color: var(--desk-red);
+  transition: transform 0.2s;
+}
+.desk-faq details[open] summary span {
+  transform: rotate(45deg);
+}
+.desk-faq details p {
+  padding-bottom: 20px;
+  color: var(--muted-foreground);
+}
+
+/* CTA */
+.desk-cta {
+  padding: 0 24px 96px;
+}
+.desk-cta-inner {
+  max-width: 1180px;
+  margin: auto;
+  padding: 72px 32px;
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      ellipse at top,
+      color-mix(in oklch, var(--desk-red) 55%, transparent),
+      transparent 70%
+    ),
+    #1c1208;
+  color: #fff;
+  text-align: center;
+}
+.desk-cta-inner p {
+  margin: 14px auto 28px;
+  max-width: 480px;
+  color: rgb(255 255 255 / 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-tag::before,
+  .desk-meter span {
+    animation: none;
+  }
+}
+
+/* Phones swap in a shorter line (see .desk-short in the block). */
+.desk-short {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .desk-hero {
+    grid-template-columns: 1fr;
+    padding: 108px 20px 32px;
+    text-align: center;
+  }
+  .desk-long {
+    display: none;
+  }
+  .desk-short {
+    display: inline;
+  }
+  .desk-intro {
+    margin-inline: auto;
+  }
+  /* Phones go straight from the intro into the generator. */
+  .desk-actions,
+  .desk-page .desk-studio-head {
+    display: none;
+  }
+  .desk-stage,
+  .desk-facts,
+  .desk-actions .desk-text-link {
+    display: none;
+  }
+  .desk-studio {
+    padding: 16px 12px 52px;
+  }
+  .desk-section-head,
+  .desk-about-grid,
+  .desk-faq {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .desk-section {
+    padding: 60px 20px;
+  }
+  .desk-grid3 {
+    grid-template-columns: 1fr;
+  }
+  .desk-reel {
+    display: flex;
+    gap: 10px;
+    margin-inline: -20px;
+    padding-inline: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .desk-page .reel-card {
+    flex: 0 0 62%;
+    scroll-snap-align: center;
+  }
+  .desk-cta {
+    padding: 0 12px 64px;
+  }
+}

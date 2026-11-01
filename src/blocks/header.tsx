@@ -48,6 +48,12 @@ export function Header() {
           description: m['landing.hero.hombro_tag'](),
           thumb: '/videos/dame-hombro/crowd.jpg',
         },
+        {
+          href: '/tiny-desk-ai',
+          label: m['tinydesk.nav'](),
+          description: m['landing.hero.tinydesk_tag'](),
+          thumb: '/videos/tiny-desk/laugh.jpg',
+        },
       ],
     },
     { href: '/create', label: m['landing.nav.create']() },
