@@ -7,6 +7,12 @@ export function Header() {
       label: m['landing.nav.trending'](),
       items: [
         {
+          href: '/dime-dime-baby-ai',
+          label: m['dime.nav'](),
+          description: m['dime.nav_description'](),
+          thumb: '/videos/dime-dime-baby/black-shirt.jpg',
+        },
+        {
           href: '/flying-car-ai',
           label: m['flycar.nav'](),
           description: m['landing.hero.flycar_tag'](),

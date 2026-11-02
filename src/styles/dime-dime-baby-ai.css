@@ -1,0 +1,618 @@
+/* Dime Dime Baby: warm coral, party-film frames, and an editor-first mobile layout. */
+.dime-page {
+  --dime-gold: oklch(0.76 0.14 35);
+  --dime-champagne: oklch(0.83 0.09 35);
+  /* Scoped controls share the page accent. */
+  --primary: var(--dime-gold);
+  --primary-foreground: #24100b;
+  --primary-text: var(--dime-champagne);
+  --ring: var(--dime-gold);
+  background: var(--background);
+  color: var(--foreground);
+  overflow: clip;
+}
+.dime-page :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--dime-gold);
+  outline-offset: 4px;
+}
+.dime-page h2 {
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.dime-page p {
+  line-height: 1.7;
+}
+
+/* ---------- Hero ---------- */
+.dime-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 56px;
+  max-width: 1240px;
+  margin: auto;
+  padding: 132px 24px 56px;
+}
+.dime-hero::before {
+  content: '';
+  position: absolute;
+  inset: 40px -10% auto auto;
+  width: 640px;
+  height: 640px;
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklch, var(--dime-gold) 32%, transparent),
+    transparent
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+.dime-hero > * {
+  position: relative;
+  z-index: 1;
+}
+.dime-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in oklch, var(--dime-gold) 55%, transparent);
+  border-radius: 999px;
+  color: var(--dime-champagne);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.dime-hero h1 {
+  margin-top: 22px;
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 6vw, 5.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+.dime-hero h1 span {
+  display: block;
+  margin-top: 10px;
+  color: var(--dime-gold);
+  font-size: 0.45em;
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 24px color-mix(in oklch, var(--dime-gold) 60%, transparent);
+}
+.dime-intro {
+  max-width: 560px;
+  margin-top: 22px;
+  color: var(--muted-foreground);
+  font-size: 17px;
+}
+.dime-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 30px;
+}
+.dime-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--dime-gold);
+  color: #24100b;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0 32px color-mix(in oklch, var(--dime-gold) 45%, transparent);
+  transition:
+    filter 0.2s,
+    transform 0.2s;
+}
+.dime-button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.dime-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  text-decoration: none;
+}
+.dime-text-link:hover {
+  color: var(--foreground);
+}
+.dime-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 30px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.dime-facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.dime-facts svg {
+  color: var(--dime-champagne);
+}
+
+/* Widescreen frame with the take on loop. */
+.dime-stage {
+  justify-self: center;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--dime-gold) 40%, var(--border));
+  border-radius: 22px;
+  background: #000;
+  box-shadow:
+    0 0 0 8px color-mix(in oklch, var(--foreground) 5%, transparent),
+    0 30px 90px -24px color-mix(in oklch, var(--dime-gold) 55%, transparent);
+}
+.dime-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dime-tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.55);
+  color: #fff;
+  font-family: var(--font-mono-display);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+.dime-tag::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--dime-gold);
+  box-shadow: 0 0 10px var(--dime-gold);
+  animation: dime-pulse 1.6s ease-in-out infinite;
+}
+@keyframes dime-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- Sections ---------- */
+.dime-studio {
+  max-width: 1336px;
+  margin: auto;
+  padding: 24px 24px 72px;
+  scroll-margin-top: 80px;
+}
+.dime-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  margin: 0 4px 26px;
+}
+.dime-section-head p {
+  max-width: 460px;
+  color: var(--muted-foreground);
+  font-size: 15px;
+}
+.dime-price {
+  margin: 14px 4px 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.dime-section {
+  max-width: 1180px;
+  margin: auto;
+  padding: 88px 24px;
+  scroll-margin-top: 80px;
+}
+.dime-note {
+  margin-top: 18px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Examples */
+.dime-reel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 1180px;
+  margin-inline: auto;
+}
+.dime-page .reel-card {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--muted);
+  isolation: isolate;
+}
+.dime-page .reel-card video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.6s ease;
+}
+.dime-page .reel-card:hover video {
+  transform: scale(1.03);
+}
+.dime-page .reel-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.85), transparent 50%);
+}
+.dime-page .reel-card-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+}
+.dime-page .reel-card[data-playing='true'] .reel-card-play {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+.dime-page .reel-card figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  color: #fff;
+  pointer-events: none;
+}
+.dime-page .reel-card-index {
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  color: rgb(255 255 255 / 0.6);
+}
+.dime-page .reel-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.dime-page .reel-card figcaption button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--dime-gold);
+  color: #24100b;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: auto;
+}
+
+/* About */
+.dime-about {
+  border-block: 1px solid var(--border);
+  background: color-mix(in oklch, var(--dime-gold) 6%, var(--background));
+}
+.dime-about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 56px;
+}
+.dime-kicker {
+  color: var(--dime-champagne);
+  font-family: var(--font-mono-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.dime-about-grid h2 {
+  margin-top: 14px;
+}
+.dime-about-line {
+  margin-top: 20px;
+  color: var(--dime-gold);
+  font-family: var(--font-serif-display);
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+.dime-prose p + p {
+  margin-top: 16px;
+}
+.dime-prose p {
+  color: var(--muted-foreground);
+}
+
+/* Steps & checks */
+.dime-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.dime-card {
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+}
+.dime-card h3 {
+  margin-top: 14px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.dime-card p {
+  margin-top: 8px;
+  color: var(--muted-foreground);
+  font-size: 14.5px;
+}
+.dime-step-number {
+  font-family: var(--font-mono-display);
+  font-size: 12px;
+  color: var(--dime-gold);
+}
+.dime-card svg {
+  color: var(--dime-champagne);
+}
+
+/* FAQ */
+.dime-faq {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: 56px;
+}
+.dime-faq details {
+  border-bottom: 1px solid var(--border);
+}
+.dime-faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.dime-faq summary::-webkit-details-marker {
+  display: none;
+}
+.dime-faq summary span {
+  color: var(--dime-gold);
+  transition: transform 0.2s;
+}
+.dime-faq details[open] summary span {
+  transform: rotate(45deg);
+}
+.dime-faq details p {
+  padding-bottom: 20px;
+  color: var(--muted-foreground);
+}
+
+/* CTA */
+.dime-cta {
+  padding: 0 24px 96px;
+}
+.dime-cta-inner {
+  max-width: 1180px;
+  margin: auto;
+  padding: 72px 32px;
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      ellipse at top,
+      color-mix(in oklch, var(--dime-gold) 55%, transparent),
+      transparent 70%
+    ),
+    #201314;
+  color: #fff;
+  text-align: center;
+}
+.dime-cta-inner p {
+  margin: 14px auto 28px;
+  max-width: 480px;
+  color: rgb(255 255 255 / 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dime-tag::before {
+    animation: none;
+  }
+}
+
+/* Phones swap in a shorter line (see .dime-short in the block). */
+.dime-short {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .dime-hero {
+    grid-template-columns: 1fr;
+    padding: 108px 20px 32px;
+    text-align: center;
+  }
+  .dime-long {
+    display: none;
+  }
+  .dime-short {
+    display: inline;
+  }
+  .dime-intro {
+    margin-inline: auto;
+  }
+  /* Phones go straight from the intro into the generator. */
+  .dime-actions,
+  .dime-page .dime-studio-head {
+    display: none;
+  }
+  .dime-stage,
+  .dime-facts,
+  .dime-actions .dime-text-link {
+    display: none;
+  }
+  .dime-studio {
+    padding: 16px 12px 52px;
+  }
+  .dime-section-head,
+  .dime-about-grid,
+  .dime-faq {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .dime-section {
+    padding: 60px 20px;
+  }
+  .dime-grid3 {
+    grid-template-columns: 1fr;
+  }
+  .dime-reel {
+    display: flex;
+    gap: 10px;
+    margin-inline: -20px;
+    padding-inline: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .dime-page .reel-card {
+    flex: 0 0 84%;
+    scroll-snap-align: center;
+  }
+  /* Widescreen cards are short on phones: one caption row along the bottom. */
+  .dime-page .reel-card figcaption {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+  }
+  .dime-page .reel-card-index,
+  .dime-page .reel-card-play {
+    display: none;
+  }
+  .dime-page .reel-card h3 {
+    font-size: 0.95rem;
+    line-height: 1.25;
+  }
+  .dime-page .reel-card figcaption button {
+    flex: none;
+    padding: 6px 11px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .dime-cta {
+    padding: 0 12px 64px;
+  }
+}
+
+/* Keep captions below the footage so the close-up stays visible. */
+.dime-page .reel-card {
+  aspect-ratio: auto;
+  border-radius: 12px;
+}
+.dime-page .reel-card video {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+.dime-page .reel-card::after {
+  display: none;
+}
+.dime-page .reel-card figcaption {
+  position: relative;
+  color: var(--foreground);
+  padding: 18px;
+}
+.dime-page .reel-card-index {
+  color: var(--muted-foreground);
+}
+.dime-page .reel-card-play {
+  top: 30%;
+}
+.dime-note a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.dime-hero::before {
+  opacity: 0.35;
+}
+.dime-hero h1 span {
+  text-shadow: none;
+}
+.dime-button {
+  box-shadow: none;
+}
+.dime-card {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  padding: 24px 0;
+}
+:root:not(.dark) .dime-page {
+  --dime-champagne: oklch(0.46 0.12 35);
+  --primary-text: var(--dime-champagne);
+}
+:root:not(.dark) .dime-hero h1 span,
+:root:not(.dark) .dime-about-line,
+:root:not(.dark) .dime-step-number {
+  color: var(--dime-champagne);
+}
+@media (max-width: 899px) {
+  .dime-hero {
+    padding-top: 60px;
+  }
+  .dime-hero h1 {
+    margin-top: 12px;
+    font-size: clamp(2.65rem, 11vw, 4rem);
+  }
+  .dime-page .reel-card figcaption {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

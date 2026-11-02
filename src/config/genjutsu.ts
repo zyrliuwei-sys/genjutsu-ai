@@ -217,6 +217,30 @@ export const FLYING_CAR_THEMES = [
 const FLYING_CAR_DIRECTION =
   'Replace only the silver minivan with the vehicle from the image, keeping its exact body shape, paint colour, wheels, lights and badges from every angle. Keep the curved ramp with its red edge lights, the climb until the vehicle is upside down, the launch off the top, the mid-air flip, the smoke-filled landing, the night setting, every camera angle and every cut exactly as in the reference video. Do not add people, text, logos or new actions.';
 
+/** Complete, silent party references, normalized to 1280×720. See docs/dime-dime-baby-examples.md. */
+export const DIME_DIME_BABY_THEMES = [
+  {
+    slug: 'black-shirt',
+    name: 'Black shirt, deadpan stare',
+    lead: 'long-haired woman in the black shirt',
+    seconds: 9,
+  },
+  {
+    slug: 'navy-shirt',
+    name: 'Navy shirt, wide-eyed look',
+    lead: 'short-haired woman in the navy shirt',
+    seconds: 9,
+  },
+  {
+    slug: 'suit',
+    name: 'Suit and tie, concha bite',
+    lead: 'moustached man in the brown suit and tie',
+    seconds: 8.7,
+  },
+] as const;
+const dimeDimeBabyDirection = (lead: string) =>
+  `Replace only the lead dancer${lead ? ` (the ${lead})` : ''} with the person from the image. Keep the dance toward the camera, the hand holding the concha sweet bread, the bite, the puffed cheeks and deadpan look into the lens, the turn and dance back into the party, the other guests, chairs, flowers, party lighting, camera framing and timing exactly as in the reference video. Preserve natural hand-to-mouth contact and the bread. Do not add people, text, logos or actions absent from the reference.`;
+
 export type GenjutsuSubject = 'person' | 'vehicle' | 'couple';
 
 /** Trusted reference context: never transform scenery when replacing a performer. */
@@ -224,6 +248,16 @@ export const GENJUTSU_REFERENCES: Record<
   string,
   { name: string; direction: string; subject?: GenjutsuSubject }
 > = {
+  ...Object.fromEntries(
+    DIME_DIME_BABY_THEMES.map((theme) => [
+      `dime-${theme.slug}`,
+      { name: theme.name, direction: dimeDimeBabyDirection(theme.lead) },
+    ])
+  ),
+  'dime-dime-baby-ai': {
+    name: 'Dime Dime Baby AI',
+    direction: dimeDimeBabyDirection(''),
+  },
   ...Object.fromEntries(
     FLYING_CAR_THEMES.map((theme) => [
       `flying-car-${theme.slug}`,

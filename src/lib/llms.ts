@@ -26,6 +26,12 @@ const PAGES: Entry[] = [
 
 const EFFECTS: Entry[] = [
   {
+    path: '/dime-dime-baby-ai',
+    title: 'Dime Dime Baby AI',
+    description:
+      'Recast the BbY WOW concha party meme from one photo: dance in, bite, stare and dance away. Three silent reference takes, about nine seconds each.',
+  },
+  {
     path: '/crazy-frog-ai',
     title: 'Crazy Frog AI',
     description: 'Become the rider in the Crazy Frog chase from one photo',

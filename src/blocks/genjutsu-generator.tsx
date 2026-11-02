@@ -5,6 +5,7 @@ import {
   BURNING_BRIDGES_THEMES,
   CRAZY_FROG_THEMES,
   DAME_HOMBRO_THEMES,
+  DIME_DIME_BABY_THEMES,
   FLYING_CAR_THEMES,
   KISS_THEMES,
   OZIL_THEMES,
@@ -31,12 +32,42 @@ export function GenjutsuGenerator({
     | 'kiss'
     | 'bridges'
     | 'hombro'
-    | 'tinydesk';
+    | 'tinydesk'
+    | 'dime';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
   const locale = getLocale();
   const themed = useMemo(() => {
+    if (theme === 'dime') {
+      const names = [
+        m['dime.examples.black_shirt'](),
+        m['dime.examples.navy_shirt'](),
+        m['dime.examples.suit'](),
+      ];
+      return {
+        title: m['dime.generator.title'](),
+        choose: m['dime.generator.choose'](),
+        photo: m['dime.generator.photo'](),
+        photoHint: m['dime.generator.photo_hint'](),
+        generate: m['dime.generator.generate'](),
+        loading: m['dime.generator.loading'](),
+        retry: m['dime.generator.retry'](),
+        uploadTemplateId: 'dime-dime-baby-ai',
+        pickerInPanel: true,
+        templates: DIME_DIME_BABY_THEMES.map((item, i) => ({
+          id: `dime-${item.slug}`,
+          name: names[i],
+          asset: `dime-${item.slug}`,
+          image: `/videos/dime-dime-baby/${item.slug}.jpg`,
+          thumb: `/videos/dime-dime-baby/${item.slug}.jpg`,
+          clip: `/videos/dime-dime-baby/references/${item.slug}.mp4`,
+          duration: item.seconds,
+          ratios: '16:9',
+          prompt: '',
+        })),
+      };
+    }
     if (theme === 'flying-car') {
       const names = [m['flycar.examples.ramp_flip']()];
       return {
