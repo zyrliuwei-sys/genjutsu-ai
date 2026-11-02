@@ -2462,7 +2462,7 @@ export function GenjutsuGenerator({
           <div
             style={{ '--media-ratio': mediaRatio } as React.CSSProperties}
             data-empty={referenceOnly && !referenceVideo && !showWork}
-            className="eg-generator-screen relative flex items-center justify-center overflow-hidden rounded-xl bg-black max-lg:aspect-(--media-ratio) lg:mx-auto lg:h-[min(560px,calc(100cqw/var(--media-ratio)))] lg:w-[min(100cqw,calc(560px*var(--media-ratio)))]"
+            className="eg-generator-screen relative flex items-center justify-center overflow-hidden rounded-xl bg-black max-lg:aspect-video lg:mx-auto lg:h-[min(560px,calc(100cqw/var(--media-ratio)))] lg:w-[min(100cqw,calc(560px*var(--media-ratio)))]"
           >
             {!referenceOnly && (
               <img
