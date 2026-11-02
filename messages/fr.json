@@ -584,7 +584,7 @@
   "landing.generator.ui.select_effect": "Choisir un effet",
   "landing.generator.ui.your_photo": "Votre photo",
   "landing.generator.ui.photo_hint": "Une seule personne, visage bien visible",
-  "landing.generator.ui.upload_photo": "Importer une photo",
+  "landing.generator.ui.upload_photo": "Essayer avec ma photo",
   "landing.generator.ui.generate_now": "Générer maintenant",
   "landing.generator.ui.video_size": "Format de la vidéo",
   "landing.generator.ui.reference_example": "Exemple de référence",

@@ -20,7 +20,7 @@ import {
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
-import { useSession } from '@/core/auth/client';
+import { authClient, useSession } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
 import {
   GENJUTSU_ASPECTS,
@@ -1083,6 +1083,14 @@ export function GenjutsuGenerator({
     setPreviewMode('example');
   };
 
+  // Discards the kept own video from the effects strip.
+  const removeOwnVideo = () => {
+    if (ownVideo?.preview.startsWith('blob:'))
+      URL.revokeObjectURL(ownVideo.preview);
+    setOwnVideo(undefined);
+    if (referenceSource === 'upload') chooseTemplate(templates[0]);
+  };
+
   const selectAsset = async (
     file: File | undefined,
     type: 'image' | 'video',
@@ -1591,18 +1599,29 @@ export function GenjutsuGenerator({
       setSavingDraft(false);
     }
     if (!user) {
-      if (draftSaved) {
-        try {
-          sessionStorage.setItem(RESUME_KEY, 'generate');
-        } catch {
-          /* Storage unavailable — the user can click again. */
-        }
-      } else {
-        toast.warning(copy.ui.saveMediaSignIn);
+      // New visitors skip the sign-in page: create a guest session so the
+      // balance check below opens the paywall directly. Payment lands on the
+      // guest account and the saved draft auto-generates after checkout
+      // returns. Falls back to the sign-in redirect if guests are refused.
+      let guestSignedIn = false;
+      try {
+        const { error } = await authClient.signIn.anonymous();
+        guestSignedIn = !error;
+        if (error) track('guest_signin_failed', { error: String(error) });
+      } catch {
+        track('guest_signin_failed', { error: 'throw' });
       }
-      track('signin_redirect');
-      router.push(`/sign-in?callbackUrl=${encodeURIComponent(returnPath)}`);
-      return;
+      try {
+        sessionStorage.setItem(RESUME_KEY, 'generate');
+      } catch {
+        /* Storage unavailable — the user can click again. */
+      }
+      if (!guestSignedIn) {
+        if (!draftSaved) toast.warning(copy.ui.saveMediaSignIn);
+        track('signin_redirect');
+        router.push(`/sign-in?callbackUrl=${encodeURIComponent(returnPath)}`);
+        return;
+      }
     }
     setCheckingGeneration(true);
     try {
@@ -2192,7 +2211,7 @@ export function GenjutsuGenerator({
                 data-selected={referenceSource === 'upload' && !ownVideo}
                 onClick={() => track('effect_select', { effect: 'own_video' })}
                 className={cn(
-                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[4/3] w-32 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed p-1.5 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 lg:w-48',
+                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[4/3] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed p-1.5 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 lg:w-48',
                   referenceSource === 'upload' && !ownVideo
                     ? 'ring-primary'
                     : 'ring-transparent'
@@ -2209,50 +2228,63 @@ export function GenjutsuGenerator({
                 </span>
               </label>
               {ownVideo ? (
-                <button
-                  type="button"
-                  data-testid="template-saved-video"
-                  aria-pressed={referenceSource === 'upload'}
-                  disabled={
-                    running ||
-                    checkingGeneration ||
-                    validatingMedia ||
-                    savingDraft
-                  }
-                  onClick={selectOwnVideo}
-                  className={cn(
-                    'group bg-muted relative aspect-[4/3] w-32 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-48',
-                    referenceSource === 'upload'
-                      ? 'ring-primary'
-                      : 'ring-transparent'
-                  )}
-                >
-                  <video
-                    src={ownVideo.preview}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="auto"
-                    className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
-                  {referenceSource === 'upload' ? (
-                    <span className="bg-primary text-primary-foreground absolute top-2 right-2 flex size-6 items-center justify-center rounded-full">
-                      <Check className="size-4" />
-                    </span>
-                  ) : null}
-                  <span className="absolute inset-x-1.5 bottom-1.5 lg:inset-x-2 lg:bottom-2">
-                    <span className="block text-[10px] leading-tight font-semibold [overflow-wrap:anywhere] hyphens-auto text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)] lg:text-sm">
-                      {copy.customReference}
-                    </span>
-                    {ownVideo.duration ? (
-                      <span className="block text-[9px] text-white/70 lg:text-[11px]">
-                        {Math.round(ownVideo.duration)}s
+                <div className="relative w-32 shrink-0 snap-start lg:w-48">
+                  <button
+                    type="button"
+                    data-testid="template-saved-video"
+                    aria-pressed={referenceSource === 'upload'}
+                    disabled={
+                      running ||
+                      checkingGeneration ||
+                      validatingMedia ||
+                      savingDraft
+                    }
+                    onClick={selectOwnVideo}
+                    className={cn(
+                      'group bg-muted relative block aspect-[4/3] w-full overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed',
+                      referenceSource === 'upload'
+                        ? 'ring-primary'
+                        : 'ring-transparent'
+                    )}
+                  >
+                    <video
+                      src={ownVideo.preview}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="auto"
+                      className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                    <span className="absolute inset-x-1.5 bottom-1.5 lg:inset-x-2 lg:bottom-2">
+                      <span className="block text-[10px] leading-tight font-semibold [overflow-wrap:anywhere] hyphens-auto text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)] lg:text-sm">
+                        {copy.customReference}
                       </span>
-                    ) : null}
-                  </span>
-                </button>
+                      {ownVideo.duration ? (
+                        <span className="block text-[9px] text-white/70 lg:text-[11px]">
+                          {Math.round(ownVideo.duration)}s
+                        </span>
+                      ) : null}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="remove-own-video"
+                    aria-label={copy.removeReference}
+                    title={copy.removeReference}
+                    disabled={
+                      running ||
+                      checkingGeneration ||
+                      validatingMedia ||
+                      savingDraft
+                    }
+                    onClick={removeOwnVideo}
+                    className="hover:bg-destructive absolute top-1.5 right-1.5 z-10 flex size-6 items-center justify-center rounded-full bg-black/80 text-white transition-colors focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
+                  >
+                    <X className="size-3.5" aria-hidden="true" />
+                  </button>
+                </div>
               ) : null}
               {templates.map((template) => (
                 <button

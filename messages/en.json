@@ -1319,7 +1319,7 @@
   "landing.generator.ui.select_effect": "Select Effect",
   "landing.generator.ui.your_photo": "Your photo",
   "landing.generator.ui.photo_hint": "One person, face clearly visible",
-  "landing.generator.ui.upload_photo": "Upload photo",
+  "landing.generator.ui.upload_photo": "Try my photo",
   "landing.generator.ui.generate_now": "Generate Now",
   "landing.generator.ui.video_size": "Video size",
   "landing.generator.ui.reference_example": "Reference Example",

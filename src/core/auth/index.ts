@@ -1,6 +1,6 @@
 import { betterAuth, type BetterAuthOptions } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { oneTap } from 'better-auth/plugins';
+import { anonymous, oneTap } from 'better-auth/plugins';
 
 import { db } from '@/core/db';
 import type { EmailProvider } from '@/core/email';
@@ -299,7 +299,10 @@ export function getAuth(configs?: Record<string, string>) {
       schema,
     }),
     socialProviders,
-    plugins: getAuthPlugins(configs),
+    // Guest sessions: a new visitor can generate and pay before ever seeing
+    // the sign-in page; the guest account links to a real identity on a later
+    // social/email sign-in.
+    plugins: [...getAuthPlugins(configs), anonymous()],
     user: {
       additionalFields: {
         utmSource: {
