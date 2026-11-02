@@ -26,6 +26,8 @@ export const user = table(
     name: text('name').notNull(),
     email: text('email').notNull().unique(),
     emailVerified: boolean('email_verified').default(false).notNull(),
+    // better-auth anonymous plugin: guest sessions created before sign-up.
+    isAnonymous: boolean('is_anonymous').default(false).notNull(),
     image: text('image'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')

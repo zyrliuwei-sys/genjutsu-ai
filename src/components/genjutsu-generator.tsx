@@ -120,6 +120,32 @@ const effect = (
 
 const TEMPLATES: GeneratorTemplate[] = [
   effect('street-runway', 'Street Runway', 'runway', 10, '16:9', 'New'),
+  // Landing-page before/after demos, offered as effects; their clips live
+  // under /videos/swap instead of /videos/effect-clips.
+  {
+    id: 'into-the-crowd',
+    name: 'Into the Crowd',
+    image: '/videos/swap/crowd-before.jpg',
+    thumb: '/videos/swap/crowd-before.jpg',
+    clip: '/videos/swap/crowd-before.mp4',
+    asset: 'crowd',
+    duration: 10,
+    ratios: '16:9',
+    tag: 'New',
+    prompt: GENJUTSU_DIRECTIONS.crowd ?? '',
+  },
+  {
+    id: 'dance-swap',
+    name: 'Dance Swap',
+    image: '/videos/swap/dance-before.jpg',
+    thumb: '/videos/swap/dance-before.jpg',
+    clip: '/videos/swap/dance-before.mp4',
+    asset: 'dance',
+    duration: 9,
+    ratios: '9:16',
+    tag: 'New',
+    prompt: GENJUTSU_DIRECTIONS.dance ?? '',
+  },
   effect('moonlit-walk', 'Moonlit Walk', 'moonwalk', 5, '16:9', 'New'),
   effect('colonial-stroll', 'Colonial Stroll', 'colonial', 10, '16:9', 'New'),
   effect(
@@ -181,10 +207,12 @@ const TEMPLATES: GeneratorTemplate[] = [
 const DEFAULT_TEMPLATE =
   TEMPLATES.find((template) => template.id === 'street-runway') ?? TEMPLATES[0];
 
-// Effects with a finished sample (16:9, `.mp4` + `.jpg` poster): the Reference
+// Effects with a finished sample (`.mp4` + `.jpg` poster): the Reference
 // Example tab shows it as a drag-to-compare slider over the effect clip.
 const EFFECT_RESULTS: Partial<Record<string, string>> = {
   runway: '/videos/swap/runway-after-10s',
+  crowd: '/videos/swap/crowd-after',
+  dance: '/videos/swap/dance-after',
 };
 
 const isDone = (task?: GenjutsuTask) =>
@@ -2211,7 +2239,7 @@ export function GenjutsuGenerator({
                 data-selected={referenceSource === 'upload' && !ownVideo}
                 onClick={() => track('effect_select', { effect: 'own_video' })}
                 className={cn(
-                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[4/3] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed p-1.5 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 lg:w-48',
+                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[4/3] w-24 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed p-1.5 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 lg:w-48',
                   referenceSource === 'upload' && !ownVideo
                     ? 'ring-primary'
                     : 'ring-transparent'
@@ -2532,8 +2560,8 @@ export function GenjutsuGenerator({
                   poster: `${effectResult}.jpg`,
                 }}
                 labels={copy.compare}
-                width={1280}
-                height={720}
+                width={selected.ratios === '9:16' ? 720 : 1280}
+                height={selected.ratios === '9:16' ? 1280 : 720}
                 muted={muted}
                 className="absolute inset-0 size-full rounded-none"
               />

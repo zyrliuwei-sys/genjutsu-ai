@@ -23,6 +23,10 @@ export const user = table(
     emailVerified: integer('email_verified', { mode: 'boolean' })
       .default(false)
       .notNull(),
+    // better-auth anonymous plugin: guest sessions created before sign-up.
+    isAnonymous: integer('is_anonymous', { mode: 'boolean' })
+      .default(false)
+      .notNull(),
     image: text('image'),
     createdAt: integer('created_at', { mode: 'timestamp_ms' })
       .default(sqliteNowMs)

@@ -88,7 +88,7 @@ export function BeforeAfterVideo({
     preload: load ? 'auto' : 'none',
     width,
     height,
-    className: 'absolute inset-0 size-full object-cover',
+    className: 'absolute inset-0 size-full object-contain',
   } as const;
 
   return (

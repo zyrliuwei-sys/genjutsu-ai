@@ -425,6 +425,16 @@ export const GENJUTSU_REFERENCES: Record<
     direction:
       'Preserve the run-up, the ollie over the rail, the landing, the dust and the low-angle slow-motion camera.',
   },
+  'into-the-crowd': {
+    name: 'Into the Crowd',
+    direction:
+      'Replace only the person at the center; keep the surrounding crowd, the cinematic lighting, the camera move and the original timing.',
+  },
+  'dance-swap': {
+    name: 'Dance Swap',
+    direction:
+      'Replace only the dancer; keep the choreography, the setting and the camera framing.',
+  },
 };
 
 /** Directions describe the actual references, not the legacy card names. */
@@ -475,6 +485,10 @@ export const GENJUTSU_DIRECTIONS: Record<string, string> = {
     'Replace the young man putting on the glowing visor using the supplied character image. Preserve the green cockpit HUD, the jump into deep space, the flight over the blocky green world and the dive toward the planet, with the original camera motion. Consistent face, no flicker.',
   skate:
     'Replace the skater in the green jacket using the supplied character image. Preserve the push, the ollie over the metal rail, the landing, the kicked-up dust, the city skyline and the low-angle slow-motion camera. Golden-hour light, realistic board and fabric motion, consistent face.',
+  crowd:
+    'Replace the person at the center using the supplied character image. Preserve the surrounding crowd, the cinematic lighting, the camera move and the original timing. Consistent identity, no flicker.',
+  dance:
+    'Replace the dancer using the supplied character image. Preserve the choreography, the setting and the camera framing. Consistent face, natural body and fabric motion, no flicker.',
 };
 
 export const GENJUTSU_ASPECTS = ['16:9', '9:16'] as const;
