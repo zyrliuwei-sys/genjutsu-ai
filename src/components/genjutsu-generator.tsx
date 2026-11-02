@@ -1661,11 +1661,6 @@ export function GenjutsuGenerator({
         setPreviewMode('work');
         return;
       }
-      const current = await readinessQuery.refetch();
-      if (current.isError || !current.data?.ready)
-        throw new Error(copy.serviceUnavailable);
-      if (!current.data.aspects.includes(aspect))
-        throw new Error(copy.ui.unsupportedSize);
       const credits = await creditsQuery.refetch();
       if (credits.isError || !credits.data)
         throw new Error(copy.ui.verifyBalanceFailed);
@@ -1678,6 +1673,15 @@ export function GenjutsuGenerator({
         setPaywall(true);
         return;
       }
+      // Service readiness only matters once the visitor can actually
+      // generate; until then the paywall leads. Credits bought during an
+      // outage survive it, the server re-validates before generating, and
+      // failed generations refund automatically.
+      const current = await readinessQuery.refetch();
+      if (current.isError || !current.data?.ready)
+        throw new Error(copy.serviceUnavailable);
+      if (!current.data.aspects.includes(aspect))
+        throw new Error(copy.ui.unsupportedSize);
       generate.mutate();
     } catch (error) {
       track('generate_error', {
@@ -2819,9 +2823,6 @@ export function GenjutsuGenerator({
           <Pricing
             variant="dialog"
             beforeCheckout={async () => {
-              const current = await readinessQuery.refetch();
-              if (current.isError || !current.data?.ready)
-                throw new Error(copy.serviceUnavailable);
               // The draft only restores media after checkout returns; a failed
               // save must not block payment.
               await persistDraft().catch((error) => {
