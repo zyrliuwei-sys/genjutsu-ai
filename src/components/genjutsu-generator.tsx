@@ -453,6 +453,9 @@ export function GenjutsuGenerator({
     uploadTemplateId: string;
     /** Desktop: pick takes inside the side panel instead of a strip under the preview. */
     pickerInPanel?: boolean;
+    /** Visitor uploads keep the uniform landscape preview box instead of
+     *  resizing it to the clip's own aspect. */
+    uniformPreviewBox?: boolean;
     /** Finished results shown after the templates; a tap plays one in the preview. */
     samples?: { id: string; name: string; clip: string; poster: string }[];
     sampleLabel?: string;
@@ -2523,9 +2526,11 @@ export function GenjutsuGenerator({
                 muted={muted}
                 playsInline
                 onLoadedMetadata={(event) => {
-                  // Uploaded clips resize the box; effect previews always
-                  // keep the landscape box and letterbox portrait clips.
-                  if (referenceSource !== 'upload') return;
+                  // Uploaded clips resize the box unless the theme keeps the
+                  // uniform landscape box; effect previews always letterbox
+                  // portrait clips instead of stretching the box taller.
+                  if (referenceSource !== 'upload' || theme?.uniformPreviewBox)
+                    return;
                   fitMedia(
                     event.currentTarget.videoWidth,
                     event.currentTarget.videoHeight

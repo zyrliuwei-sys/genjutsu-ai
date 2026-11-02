@@ -156,6 +156,7 @@ export function GenjutsuGenerator({
         retry: m['tinydesk.generator.retry'](),
         uploadTemplateId: 'tiny-desk-ai',
         pickerInPanel: true,
+        uniformPreviewBox: true,
         templates: TINY_DESK_THEMES.map((item, i) => ({
           id: `tinydesk-${item.slug}`,
           name: names[i],
