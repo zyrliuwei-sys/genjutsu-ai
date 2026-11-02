@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -268,6 +268,27 @@ export function Pricing({
       setLoadingProvider(null);
     },
   });
+
+  // Leaving for a provider page and coming back without paying (bfcache
+  // restore, tab refocus) must re-enable provider selection: the spinner
+  // state freezes with the page and would otherwise stay forever.
+  useEffect(() => {
+    const release = () => setLoadingProvider(null);
+    const onPageshow = (event: PageTransitionEvent) => {
+      if (event.persisted) release();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') release();
+    };
+    window.addEventListener('pageshow', onPageshow);
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', release);
+    return () => {
+      window.removeEventListener('pageshow', onPageshow);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', release);
+    };
+  }, []);
 
   async function startCheckout(plan: PricingPlan, provider?: PaymentProvider) {
     // Repeat clicks while a checkout is in flight would create duplicate orders.
