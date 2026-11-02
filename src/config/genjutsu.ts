@@ -568,7 +568,7 @@ export function buildGenjutsuPrompt(
       : `Replace only the two people who kiss with the two people in ${provider === 'fal' ? '@Element1' : 'reference image 1'}, keeping each person on the same side of the frame as in the image.`;
     const base = [
       'Edit the input video, do not invent an unrelated new shot. Preserve the original background, environment, scenery, props, lighting and all bystanders. Do not replace or restyle the background.',
-      `${swap} Preserve the original lean-in, kiss, hand placement, timing, cuts, camera path and perspective.`,
+      `${swap} The replacement is mandatory: each replaced person must visibly carry the facial features, hair and skin tone of their reference photo — never keep or approximate the original faces, and the output must clearly differ from the input video. Preserve the original lean-in, kiss, hand placement, timing, cuts, camera path and perspective.`,
       'Photoreal live-action footage of two adults: consistent faces, hair and wardrobe across frames, natural head contact and occlusion, coherent lighting. No merged faces, swapped identities, extra limbs, flicker or unrelated cuts.',
     ].join(' ');
     return extra ? `${base}\nAdditional direction: ${extra}` : base;
@@ -577,7 +577,7 @@ export function buildGenjutsuPrompt(
     provider === 'fal' ? '@Element1' : 'the person in reference image 1';
   const base = [
     'Edit the input video, do not invent an unrelated new shot. Preserve the original background, environment, scenery, props, lighting and all non-target people. Do not replace or restyle the background.',
-    `Replace only the main performer with ${character}. Preserve the original choreography, action trajectory, timing, cuts, camera path and perspective.`,
+    `Replace only the main performer with ${character}. The replacement is mandatory: the new performer must visibly carry the facial features, hair and skin tone of the person in the reference photo — never keep or approximate the original performer's face, and the output must clearly differ from the input video. Preserve the original choreography, action trajectory, timing, cuts, camera path and perspective.`,
     hasCrowd
       ? `Use ${crowd} for the surrounding scene while preserving the original performance.`
       : 'Keep all non-target people, objects and background motion unchanged unless the additional direction explicitly transforms the scene.',

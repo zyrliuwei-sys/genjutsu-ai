@@ -41,6 +41,7 @@ import {
 } from '@/lib/api-client';
 import { warmVideoTools } from '@/lib/browser-video-engine';
 import { trimMiddleVideo } from '@/lib/browser-video-trim';
+import { cropPortraitPhoto } from '@/lib/face-detect/portrait';
 import {
   loadGenjutsuDraft,
   saveGenjutsuDraft,
@@ -1148,6 +1149,15 @@ export function GenjutsuGenerator({
       return;
     }
 
+    // Iron rule: the swap model must receive a usable close-up of the person,
+    // so zoom the photo in on the detected face no matter how small the
+    // person is in the original frame. Keeps the file as-is when no confident
+    // face is found or the photo is already a close-up.
+    if (type === 'image') {
+      const cropped = await cropPortraitPhoto(file).catch(() => null);
+      if (cropped) file = cropped;
+    }
+
     const jobUrl = isVideo ? URL.createObjectURL(file) : undefined;
     if (jobUrl) {
       setVideoJob(jobUrl);
@@ -1892,23 +1902,20 @@ export function GenjutsuGenerator({
           </div>
           <div
             className={cn(
-              'eg-generator-assets grid grid-cols-1 gap-4',
+              // Phones/tablets: video and photo uploads side by side, equal
+              // squares; reference-only pages keep the single stacked tile.
+              'eg-generator-assets grid grid-cols-2 gap-3',
+              referenceOnly && 'grid-cols-1 gap-4',
               panelPicker
                 ? 'grid-cols-2 gap-3'
-                : 'lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2',
-              // Themed (phones/tablets): video and photo uploads side by side;
-              // with the in-panel picker they stay paired on desktop too.
-              theme && 'grid-cols-2 gap-3'
+                : 'lg:flex lg:min-h-0 lg:flex-1 lg:flex-col-reverse lg:gap-2'
             )}
           >
             <div
               className={cn(
                 'flex min-w-0 flex-col gap-2',
                 theme && !panelPicker && 'lg:hidden',
-                needsPartner && 'hidden',
-                // Mobile: uploading lives in the pinned card at the left of
-                // the effects strip; the input stays mounted for its label.
-                !referenceOnly && !needsPartner && 'max-lg:hidden'
+                needsPartner && 'hidden'
               )}
             >
               <div
@@ -1931,7 +1938,7 @@ export function GenjutsuGenerator({
                 className={cn(
                   'eg-generator-upload border-border bg-muted hover:border-primary/70 relative overflow-hidden rounded-xl border border-dashed transition-colors',
                   !panelPicker && 'lg:hidden',
-                  theme ? 'aspect-square' : 'aspect-[2/1] sm:aspect-[4/3]',
+                  'aspect-square',
                   panelPicker && 'lg:aspect-[3/4]'
                 )}
               >
@@ -1976,11 +1983,14 @@ export function GenjutsuGenerator({
                     </span>
                     <span
                       className={cn(
-                        'text-muted-foreground text-[11px]',
+                        'text-muted-foreground text-[11px] max-lg:hidden',
                         theme && 'hidden'
                       )}
                     >
                       {copy.referenceEmpty}
+                    </span>
+                    <span className="text-muted-foreground text-[11px] lg:hidden">
+                      MP4, MOV
                     </span>
                   </div>
                 ) : referenceVideo ? (
@@ -2041,13 +2051,10 @@ export function GenjutsuGenerator({
               onRemove={() => setLead(undefined)}
               removeLabel={copy.removePhoto}
               testId="upload-lead"
-              rootClassName={cn(
-                panelPicker ? undefined : 'lg:min-h-0 lg:flex-1',
-                !needsPartner && 'max-lg:col-span-2'
-              )}
+              rootClassName={panelPicker ? undefined : 'lg:min-h-0 lg:flex-1'}
               frameClassName={cn(
                 !panelPicker && 'lg:aspect-auto lg:min-h-48 lg:flex-1',
-                theme ? 'aspect-square' : 'aspect-[2/1] sm:aspect-[4/3]',
+                'aspect-square',
                 panelPicker && 'lg:aspect-[3/4]'
               )}
             />
@@ -2243,7 +2250,7 @@ export function GenjutsuGenerator({
                 data-selected={referenceSource === 'upload' && !ownVideo}
                 onClick={() => track('effect_select', { effect: 'own_video' })}
                 className={cn(
-                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[4/3] w-24 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed p-1.5 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 lg:w-48',
+                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[4/3] w-24 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed p-1.5 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 max-lg:hidden lg:w-48',
                   referenceSource === 'upload' && !ownVideo
                     ? 'ring-primary'
                     : 'ring-transparent'
