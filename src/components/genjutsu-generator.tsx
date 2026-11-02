@@ -1093,33 +1093,6 @@ export function GenjutsuGenerator({
     )[0];
   };
 
-  // Re-selects the kept own video from the effects strip.
-  const selectOwnVideo = () => {
-    if (!ownVideo) return;
-    track('effect_select', { effect: 'own_video_saved' });
-    setReferenceSource('upload');
-    setReferenceClosed(false);
-    setReferenceVideo({
-      ...ownVideo,
-      preview: ownVideo.file
-        ? URL.createObjectURL(ownVideo.file)
-        : ownVideo.url!,
-    });
-    if (ownVideo.width && ownVideo.height) {
-      const closest = closestAspect(ownVideo.width, ownVideo.height);
-      if (closest) setAspect(closest);
-    }
-    setPreviewMode('example');
-  };
-
-  // Discards the kept own video from the effects strip.
-  const removeOwnVideo = () => {
-    if (ownVideo?.preview.startsWith('blob:'))
-      URL.revokeObjectURL(ownVideo.preview);
-    setOwnVideo(undefined);
-    if (referenceSource === 'upload') chooseTemplate(templates[0]);
-  };
-
   const selectAsset = async (
     file: File | undefined,
     type: 'image' | 'video',
@@ -2266,65 +2239,6 @@ export function GenjutsuGenerator({
                   MP4, MOV
                 </span>
               </label>
-              {ownVideo ? (
-                <div className="relative w-32 shrink-0 snap-start lg:w-48">
-                  <button
-                    type="button"
-                    data-testid="template-saved-video"
-                    aria-pressed={referenceSource === 'upload'}
-                    disabled={
-                      running ||
-                      checkingGeneration ||
-                      validatingMedia ||
-                      savingDraft
-                    }
-                    onClick={selectOwnVideo}
-                    className={cn(
-                      'group bg-muted relative block aspect-[4/3] w-full overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed',
-                      referenceSource === 'upload'
-                        ? 'ring-primary'
-                        : 'ring-transparent'
-                    )}
-                  >
-                    <video
-                      src={ownVideo.preview}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      preload="auto"
-                      className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
-                    <span className="absolute inset-x-1.5 bottom-1.5 lg:inset-x-2 lg:bottom-2">
-                      <span className="block text-[10px] leading-tight font-semibold [overflow-wrap:anywhere] hyphens-auto text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)] lg:text-sm">
-                        {copy.customReference}
-                      </span>
-                      {ownVideo.duration ? (
-                        <span className="block text-[9px] text-white/70 lg:text-[11px]">
-                          {Math.round(ownVideo.duration)}s
-                        </span>
-                      ) : null}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    data-testid="remove-own-video"
-                    aria-label={copy.removeReference}
-                    title={copy.removeReference}
-                    disabled={
-                      running ||
-                      checkingGeneration ||
-                      validatingMedia ||
-                      savingDraft
-                    }
-                    onClick={removeOwnVideo}
-                    className="hover:bg-destructive absolute top-1.5 right-1.5 z-10 flex size-6 items-center justify-center rounded-full bg-black/80 text-white transition-colors focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
-                  >
-                    <X className="size-3.5" aria-hidden="true" />
-                  </button>
-                </div>
-              ) : null}
               {templates.map((template) => (
                 <button
                   key={template.id}
@@ -2471,7 +2385,9 @@ export function GenjutsuGenerator({
             data-empty={referenceOnly && !referenceVideo && !showWork}
             className="eg-generator-screen relative flex items-center justify-center overflow-hidden rounded-xl bg-black max-lg:aspect-video lg:mx-auto lg:h-[min(560px,calc(100cqw/var(--media-ratio)))] lg:w-[min(100cqw,calc(560px*var(--media-ratio)))]"
           >
-            {!referenceOnly && (
+            {/* While an own video is being prepared or previewed, keep the
+                box a solid color instead of the last effect's backdrop. */}
+            {!referenceOnly && !videoJob && referenceSource !== 'upload' && (
               <img
                 src={example.image}
                 alt=""
