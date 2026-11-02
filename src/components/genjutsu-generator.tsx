@@ -397,7 +397,9 @@ function UploadSlot({
                 {uploadLabel}
               </span>
               <span className="text-muted-foreground relative text-[11px]">
-                {kind === 'video' ? 'MP4, MOV · 30MB' : 'JPG, PNG, WEBP · 10MB'}
+                {kind === 'video'
+                  ? `MP4, MOV · ${MAX_REFERENCE_VIDEO_MB}MB`
+                  : 'JPG, PNG, WEBP · 10MB'}
               </span>
             </>
           )}
@@ -1471,6 +1473,9 @@ export function GenjutsuGenerator({
     setFailure(undefined);
     setReferenceSource('effect');
     setReferenceClosed(false);
+    // The preview box always stays landscape; portrait clips letterbox
+    // inside it with side gaps instead of stretching the box taller.
+    setMediaRatio(16 / 9);
     if (selectedId !== template.id || referenceSource === 'upload')
       setReferenceVideo(undefined);
     setSelectedId(template.id);
@@ -1846,7 +1851,10 @@ export function GenjutsuGenerator({
               className={cn(
                 'flex min-w-0 flex-col gap-2',
                 theme && !panelPicker && 'lg:hidden',
-                needsPartner && 'hidden'
+                needsPartner && 'hidden',
+                // Mobile: uploading lives in the pinned card at the left of
+                // the effects strip; the input stays mounted for its label.
+                !referenceOnly && !needsPartner && 'max-lg:hidden'
               )}
             >
               <div
@@ -1979,7 +1987,10 @@ export function GenjutsuGenerator({
               onRemove={() => setLead(undefined)}
               removeLabel={copy.removePhoto}
               testId="upload-lead"
-              rootClassName={panelPicker ? undefined : 'lg:min-h-0 lg:flex-1'}
+              rootClassName={cn(
+                panelPicker ? undefined : 'lg:min-h-0 lg:flex-1',
+                !needsPartner && 'max-lg:col-span-2'
+              )}
               frameClassName={cn(
                 !panelPicker && 'lg:aspect-auto lg:min-h-48 lg:flex-1',
                 theme ? 'aspect-square' : 'aspect-[2/1] sm:aspect-[4/3]',
@@ -2167,7 +2178,7 @@ export function GenjutsuGenerator({
                 effectsLastScroll.current = performance.now();
                 if (effectsReturnPending.current) returnToSelectedEffect();
               }}
-              className="eg-generator-template-list flex snap-x scroll-pl-1 gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:scroll-pl-[9rem]"
+              className="eg-generator-template-list flex snap-x scroll-pl-1 gap-3 overflow-x-auto overscroll-x-contain p-1 [scrollbar-color:rgb(255_255_255/0.2)_transparent] [scrollbar-width:thin] lg:scroll-pl-[12.75rem]"
             >
               {/* Opens the reference-video input kept in the Create column.
                   Pinned to the left edge so uploading stays one tap away while
@@ -2178,19 +2189,19 @@ export function GenjutsuGenerator({
                 data-selected={referenceSource === 'upload' && !ownVideo}
                 onClick={() => track('effect_select', { effect: 'own_video' })}
                 className={cn(
-                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[3/4] w-28 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-2 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 max-lg:hidden lg:w-32',
+                  'border-border bg-muted hover:border-primary/70 before:bg-card sticky left-0 z-10 flex aspect-[4/3] w-32 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed p-1.5 text-center ring-2 transition-colors before:absolute before:inset-y-[-0.25rem] before:right-[-0.75rem] before:left-[-1rem] before:-z-10 lg:w-48',
                   referenceSource === 'upload' && !ownVideo
                     ? 'ring-primary'
                     : 'ring-transparent'
                 )}
               >
-                <span className="bg-primary/15 text-primary-text ring-primary/40 flex size-10 items-center justify-center rounded-full ring-1">
-                  <Video className="size-5" aria-hidden="true" />
+                <span className="bg-primary/15 text-primary-text ring-primary/40 flex size-6 items-center justify-center rounded-full ring-1">
+                  <Video className="size-4" aria-hidden="true" />
                 </span>
-                <span className="text-sm leading-tight font-semibold">
+                <span className="text-xs leading-none font-semibold">
                   {copy.uploadReference}
                 </span>
-                <span className="text-muted-foreground text-[11px]">
+                <span className="text-muted-foreground text-[10px] leading-none">
                   MP4, MOV
                 </span>
               </label>
@@ -2207,7 +2218,7 @@ export function GenjutsuGenerator({
                   }
                   onClick={selectOwnVideo}
                   className={cn(
-                    'group bg-muted relative aspect-[3/4] w-20 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
+                    'group bg-muted relative aspect-[4/3] w-32 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-48',
                     referenceSource === 'upload'
                       ? 'ring-primary'
                       : 'ring-transparent'
@@ -2249,7 +2260,7 @@ export function GenjutsuGenerator({
                   }
                   data-testid={`template-${template.id}`}
                   className={cn(
-                    'group relative aspect-[3/4] w-20 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-32',
+                    'group relative aspect-[4/3] w-32 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all disabled:cursor-not-allowed lg:w-48',
                     referenceSource === 'effect' && selected.id === template.id
                       ? 'ring-primary'
                       : 'ring-transparent'
@@ -2300,7 +2311,7 @@ export function GenjutsuGenerator({
                   aria-pressed={sample?.id === item.id}
                   data-testid={`sample-${item.id}`}
                   className={cn(
-                    'group relative aspect-[3/4] w-20 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all lg:w-32',
+                    'group relative aspect-[4/3] w-32 shrink-0 snap-start overflow-hidden rounded-xl text-left ring-2 transition-all lg:w-48',
                     sample?.id === item.id
                       ? 'ring-primary/70'
                       : 'hover:ring-primary/40 ring-transparent'
@@ -2335,7 +2346,7 @@ export function GenjutsuGenerator({
               <div
                 aria-hidden="true"
                 className={cn(
-                  'w-[calc(100%-5rem-0.75rem)] shrink-0 lg:w-[calc(100%-16rem-1.5rem)]',
+                  'w-[calc(100%-8rem-0.75rem)] shrink-0 lg:w-[calc(100%-24rem-1.5rem)]',
                   theme && 'hidden'
                 )}
               />
@@ -2511,12 +2522,15 @@ export function GenjutsuGenerator({
                 loop
                 muted={muted}
                 playsInline
-                onLoadedMetadata={(event) =>
+                onLoadedMetadata={(event) => {
+                  // Uploaded clips resize the box; effect previews always
+                  // keep the landscape box and letterbox portrait clips.
+                  if (referenceSource !== 'upload') return;
                   fitMedia(
                     event.currentTarget.videoWidth,
                     event.currentTarget.videoHeight
-                  )
-                }
+                  );
+                }}
                 className="absolute inset-0 size-full object-contain"
               />
             )}

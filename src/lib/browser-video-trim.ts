@@ -2,7 +2,11 @@ import { withVideoEngine } from './browser-video-engine';
 import { nativeVideoTrim, supportsNativeTrim } from './native-video-trim';
 import { referenceVideoPlan } from './reference-video-plan';
 import { mp4Duration } from './video-duration';
-import { MAX_REFERENCE_VIDEO_BYTES, middleClipPlan } from './video-trim-plan';
+import {
+  MAX_REFERENCE_VIDEO_BYTES,
+  MAX_REFERENCE_VIDEO_MB,
+  middleClipPlan,
+} from './video-trim-plan';
 
 export async function trimMiddleVideo(
   source: File,
@@ -14,7 +18,7 @@ export async function trimMiddleVideo(
 ) {
   signal?.throwIfAborted();
   if (source.size > MAX_REFERENCE_VIDEO_BYTES)
-    throw new Error('Video exceeds the 30MB limit');
+    throw new Error(`Video exceeds the ${MAX_REFERENCE_VIDEO_MB}MB limit`);
   const plan = middleClipPlan(sourceSeconds, tier);
   const resize = dimensions
     ? referenceVideoPlan(dimensions.width, dimensions.height, dimensions.aspect)
@@ -33,7 +37,9 @@ export async function trimMiddleVideo(
         signal
       );
       if (result.file.size > MAX_REFERENCE_VIDEO_BYTES)
-        throw new Error('Trimmed video exceeds the 30MB limit');
+        throw new Error(
+          `Trimmed video exceeds the ${MAX_REFERENCE_VIDEO_MB}MB limit`
+        );
       onProgress?.(100);
       return result;
     } catch (error) {
@@ -95,7 +101,9 @@ export async function trimMiddleVideo(
         { type: 'video/mp4' }
       );
       if (file.size > MAX_REFERENCE_VIDEO_BYTES)
-        throw new Error('Trimmed video exceeds the 30MB limit');
+        throw new Error(
+          `Trimmed video exceeds the ${MAX_REFERENCE_VIDEO_MB}MB limit`
+        );
       onProgress?.(100);
       return { file, start: plan.start, duration };
     } finally {

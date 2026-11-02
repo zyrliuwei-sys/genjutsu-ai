@@ -1,4 +1,4 @@
-export const MAX_REFERENCE_VIDEO_MB = 30;
+export const MAX_REFERENCE_VIDEO_MB = 40;
 export const MAX_REFERENCE_VIDEO_BYTES = MAX_REFERENCE_VIDEO_MB * 1024 * 1024;
 
 export function middleClipPlan(sourceSeconds: number, tier: 5 | 10) {
