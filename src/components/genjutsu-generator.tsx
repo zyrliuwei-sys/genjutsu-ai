@@ -1991,8 +1991,13 @@ export function GenjutsuGenerator({
                         validatingMedia
                       }
                       onClick={() => {
-                        setReferenceClosed(true);
-                        setReferenceVideo(undefined);
+                        // Deleting the uploaded clip also drops the kept
+                        // copy, then falls back to the first effect's
+                        // preview instead of an empty box.
+                        if (ownVideo?.preview.startsWith('blob:'))
+                          URL.revokeObjectURL(ownVideo.preview);
+                        setOwnVideo(undefined);
+                        chooseTemplate(templates[0]);
                       }}
                       className="hover:bg-destructive focus-visible:ring-primary absolute top-2 right-2 z-30 flex size-7 items-center justify-center rounded-full bg-black/80 text-white transition-colors focus-visible:ring-2 disabled:opacity-50"
                     >
@@ -2611,18 +2616,10 @@ export function GenjutsuGenerator({
             {videoJob ? (
               <div
                 role="status"
-                className="absolute inset-0 z-30 flex items-center justify-center overflow-hidden"
+                // Fully opaque: the previously previewed video must not
+                // bleed through while an upload is being processed.
+                className="absolute inset-0 z-30 flex items-center justify-center overflow-hidden bg-black"
               >
-                <video
-                  src={videoJob}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  aria-hidden="true"
-                  className="absolute inset-0 size-full scale-110 object-cover opacity-70 blur-2xl"
-                />
-                <div className="absolute inset-0 bg-black/45" />
                 <ProgressPanel
                   onMedia
                   icon={<Video className="size-5" />}
