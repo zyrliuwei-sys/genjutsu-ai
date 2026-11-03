@@ -1,15 +1,23 @@
+import { getRouteApi } from '@tanstack/react-router';
 import { DEFAULT_FOOTER_BADGES } from '@/features/footer-badges/defaults';
 import { parseStoredFooterBadges } from '@/features/footer-badges/validation';
 
 import { cn } from '@/lib/utils';
 import { usePublicConfig } from '@/hooks/use-public-config';
 
+const rootRoute = getRouteApi('__root__');
+
 export function FooterBadgeList({ className }: { className?: string }) {
   const { data } = usePublicConfig();
+  // Include badges in the initial HTML for directory verifiers without JavaScript.
+  const ssrStored = rootRoute.useLoaderData({
+    select: (data) => data.footerBadges,
+  });
+  const stored = data ? data.footer_badges : (ssrStored ?? undefined);
   const badges =
-    data?.footer_badges === undefined
+    stored === undefined
       ? DEFAULT_FOOTER_BADGES
-      : parseStoredFooterBadges(data.footer_badges);
+      : parseStoredFooterBadges(stored);
 
   if (badges.length === 0) return null;
 
@@ -20,19 +28,23 @@ export function FooterBadgeList({ className }: { className?: string }) {
         key={`${copy ? 'b' : 'a'}:${badge.href}:${badge.src}`}
         href={badge.href}
         target="_blank"
-        rel="noopener noreferrer"
+        rel={badge.rel ?? 'noopener noreferrer'}
         aria-hidden={copy || undefined}
         tabIndex={copy ? -1 : undefined}
         className="mr-4 shrink-0 py-2 opacity-70 transition-opacity hover:opacity-100"
       >
-        <img
-          src={badge.src}
-          alt={copy ? '' : badge.alt}
-          width={badge.width ?? 250}
-          height={badge.height}
-          loading="lazy"
-          className="h-7 w-auto max-w-none"
-        />
+        {badge.src ? (
+          <img
+            src={badge.src}
+            alt={copy ? '' : badge.alt}
+            width={badge.width ?? 250}
+            height={badge.height}
+            loading="lazy"
+            className="h-7 w-auto max-w-none"
+          />
+        ) : (
+          <span className="px-3 text-sm font-medium">{badge.alt}</span>
+        )}
       </a>
     ));
 
