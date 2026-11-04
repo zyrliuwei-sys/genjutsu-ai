@@ -215,37 +215,43 @@ export function SiteHeader({
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-border mx-auto max-w-7xl border-t px-4 pt-2 pb-4 md:hidden">
+        <div className="border-border mx-auto max-h-[calc(100dvh-4rem)] max-w-7xl overflow-y-auto overscroll-contain border-t px-4 pt-2 pb-4 md:hidden">
           <nav className="flex flex-col gap-2">
             {navLinks?.map((link) =>
               isGroup(link) ? (
-                <div key={link.label} className="flex flex-col gap-1">
-                  <span className="text-primary inline-flex items-center gap-1.5 px-3 pt-1 text-xs font-semibold tracking-wide uppercase">
+                <details key={link.label} className="group/mobile-nav">
+                  <summary className="text-primary hover:bg-accent focus-visible:ring-ring flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold tracking-wide uppercase focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
                     <Flame aria-hidden className="size-3.5" />
                     {link.label}
-                  </span>
-                  {link.items.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      {item.thumb && (
-                        <img
-                          src={item.thumb}
-                          alt=""
-                          aria-hidden
-                          width={28}
-                          height={28}
-                          loading="lazy"
-                          className="size-7 shrink-0 rounded-md object-cover"
-                        />
-                      )}
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
+                    <ChevronDown
+                      aria-hidden
+                      className="ml-auto size-4 shrink-0 transition-transform group-open/mobile-nav:rotate-180 motion-reduce:transition-none"
+                    />
+                  </summary>
+                  <div className="mt-1 flex flex-col gap-1">
+                    {link.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {item.thumb && (
+                          <img
+                            src={item.thumb}
+                            alt=""
+                            aria-hidden
+                            width={28}
+                            height={28}
+                            loading="lazy"
+                            className="size-7 shrink-0 rounded-md object-cover"
+                          />
+                        )}
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
               ) : isExternalHref(link.href) ? (
                 <a
                   key={link.href}

@@ -2,6 +2,7 @@ import handler from '@tanstack/react-start/server-entry';
 
 import { canonicalPagePath } from './lib/canonical-page-path';
 import { getCookieFromHeader } from './lib/cookie';
+import { mutableResponse } from './lib/mutable-response';
 import { paraglideMiddleware } from './paraglide/server.js';
 
 // On Cloudflare Workers, stash the binding env (D1, ASSETS, …) on globalThis
@@ -85,7 +86,9 @@ export default {
       reqUrl.pathname = guidesMatch[1];
       return Response.redirect(reqUrl.toString(), 301);
     }
-    const response = await paraglideMiddleware(req, () => handler.fetch(req));
+    const response = mutableResponse(
+      await paraglideMiddleware(req, () => handler.fetch(req))
+    );
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     response.headers.set(
