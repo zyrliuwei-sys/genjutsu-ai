@@ -18,6 +18,7 @@ import { currentPathWithQuery } from '@/lib/redirect';
 import { track } from '@/lib/track';
 import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
+import { getLocale } from '@/paraglide/runtime.js';
 import { usePublicConfig } from '@/hooks/use-public-config';
 import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { CreditPackList, type CreditPack } from '@/components/credit-pack-list';
@@ -184,6 +185,7 @@ export function Pricing({
       apiPost<{ checkout_url?: string }>('/api/payment/checkout', {
         product_id: plan.productId,
         payment_provider: provider,
+        locale: getLocale(),
         // Come back to the page the user paid from.
         redirect: currentPathWithQuery('/settings/billing'),
       }),

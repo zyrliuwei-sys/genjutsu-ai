@@ -9,6 +9,7 @@ import {
   type WebhookEventData,
 } from '@waffo/pancake-ts';
 
+import { waffoCheckoutLanguage } from './locale';
 import {
   PaymentEventType,
   PaymentInterval,
@@ -197,6 +198,7 @@ export class WaffoProvider implements PaymentProvider {
     if (!order.orderNo) throw new Error('orderNo is required');
 
     const currency = order.price.currency.toUpperCase();
+    const language = waffoCheckoutLanguage(order.locale);
     const taxCategory = (this.configs.taxCategory ||
       TaxCategory.SaaS) as TaxCategory;
     const metadata = metadataFrom(order.metadata);
@@ -210,6 +212,7 @@ export class WaffoProvider implements PaymentProvider {
       {
         productId: order.productId,
         currency,
+        language,
         buyerIdentity,
         buyerEmail: order.customer?.email,
         priceSnapshot: {
@@ -233,6 +236,7 @@ export class WaffoProvider implements PaymentProvider {
         productType:
           order.type === PaymentType.SUBSCRIPTION ? 'subscription' : 'onetime',
         currency,
+        language,
         orderMerchantExternalId: order.orderNo,
       },
       checkoutInfo: {

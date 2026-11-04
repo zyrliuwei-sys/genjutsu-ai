@@ -1,3 +1,4 @@
+import { paypalCheckoutLocale } from './locale';
 import {
   CheckoutSession,
   PaymentBilling,
@@ -120,6 +121,7 @@ export class PayPalProvider implements PaymentProvider {
         },
       ],
       application_context: {
+        locale: paypalCheckoutLocale(order.locale),
         return_url: order.successUrl,
         cancel_url: order.cancelUrl,
         user_action: 'PAY_NOW',
@@ -146,9 +148,7 @@ export class PayPalProvider implements PaymentProvider {
       payload
     );
 
-    const approvalUrl = result.links?.find(
-      (link: any) => link.rel === 'approve'
-    )?.href;
+    const approvalUrl = this.getApprovalUrl(result.links, order.locale);
 
     return {
       provider: this.name,
@@ -248,7 +248,7 @@ export class PayPalProvider implements PaymentProvider {
       custom_id: order.metadata ? JSON.stringify(order.metadata) : undefined,
       application_context: {
         brand_name: order.description || 'Subscription',
-        locale: 'en-US',
+        locale: paypalCheckoutLocale(order.locale),
         shipping_preference: 'NO_SHIPPING',
         user_action: 'SUBSCRIBE_NOW',
         payment_method: {
@@ -279,9 +279,10 @@ export class PayPalProvider implements PaymentProvider {
       subscriptionPayload
     );
 
-    const approvalUrl = subscriptionResponse.links?.find(
-      (link: any) => link.rel === 'approve'
-    )?.href;
+    const approvalUrl = this.getApprovalUrl(
+      subscriptionResponse.links,
+      order.locale
+    );
 
     return {
       provider: this.name,
@@ -683,6 +684,25 @@ export class PayPalProvider implements PaymentProvider {
 
     this.accessToken = data.access_token;
     this.tokenExpiry = Date.now() + data.expires_in * 1000;
+  }
+
+  private getApprovalUrl(
+    links: { rel: string; href: string }[] | undefined,
+    locale: string | undefined
+  ): string {
+    const href = links?.find((link) => link.rel === 'approve')?.href;
+    if (!href) throw new Error('PayPal did not return an approval URL');
+
+    const url = new URL(href);
+    // PayPal's login page can prefer its saved LANG cookie over the order's
+    // locale. Carry the language through the redirect as well; leave the
+    // buyer's country and all payment parameters untouched.
+    // https://developer.paypal.com/payment-links-buttons/troubleshooting/
+    url.searchParams.set(
+      'locale.x',
+      paypalCheckoutLocale(locale).replace('-', '_')
+    );
+    return url.toString();
   }
 
   private async makeRequest(endpoint: string, method: string, data?: any) {

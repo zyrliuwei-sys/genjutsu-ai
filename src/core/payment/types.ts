@@ -90,6 +90,7 @@ export interface PaymentOrder {
   quantity?: number; // quantity
   customer?: PaymentCustomer;
   description?: string; // checkout description
+  locale?: string; // language selected on the site; providers default to English
   successUrl?: string;
   cancelUrl?: string;
   metadata?: Record<string, any>;

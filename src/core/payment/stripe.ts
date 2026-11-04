@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 
+import { normalizeCheckoutLocale } from './locale';
 import {
   CheckoutSession,
   PaymentBilling,
@@ -30,7 +31,15 @@ export interface StripeConfigs extends PaymentConfigs {
   apiVersion?: string;
   allowedPaymentMethods?: string[];
   allowPromotionCodes?: boolean;
+  managedPayments?: boolean;
+  productTaxCode?: string;
 }
+
+// Supported by our Basil API version, but not yet declared by stripe-node 18.
+// https://docs.stripe.com/payments/managed-payments/update-checkout
+type StripeCheckoutParams = Stripe.Checkout.SessionCreateParams & {
+  managed_payments?: { enabled: boolean };
+};
 
 /**
  * Stripe payment provider implementation
@@ -60,6 +69,12 @@ export class StripeProvider implements PaymentProvider {
         throw new Error('price is required');
       }
 
+      const managedPayments = this.configs.managedPayments === true;
+      const productTaxCode = this.configs.productTaxCode?.trim();
+      if (managedPayments && !productTaxCode) {
+        throw new Error('Managed Payments requires a product tax code');
+      }
+
       // create payment with dynamic product
 
       // build price data
@@ -69,6 +84,7 @@ export class StripeProvider implements PaymentProvider {
           unit_amount: order.price.amount, // unit: cents
           product_data: {
             name: order.description || '',
+            ...(productTaxCode ? { tax_code: productTaxCode } : {}),
           },
         };
 
@@ -110,7 +126,8 @@ export class StripeProvider implements PaymentProvider {
       }
 
       // create payment session params
-      const sessionParams: Stripe.Checkout.SessionCreateParams = {
+      const sessionParams: StripeCheckoutParams = {
+        locale: normalizeCheckoutLocale(order.locale),
         mode:
           order.type === PaymentType.SUBSCRIPTION ? 'subscription' : 'payment',
         line_items: [
@@ -120,6 +137,10 @@ export class StripeProvider implements PaymentProvider {
           },
         ],
       };
+
+      if (this.configs.managedPayments !== undefined) {
+        sessionParams.managed_payments = { enabled: managedPayments };
+      }
 
       // pre-set promotion code
       if (order.discount && order.discount.code) {
@@ -138,7 +159,11 @@ export class StripeProvider implements PaymentProvider {
       // If currency is CNY, enable WeChat Pay and Alipay (only for one-time payments)
       // Note: WeChat Pay and Alipay through Stripe only supports one-time payments, not subscriptions
       const currency = order.price.currency.toLowerCase();
-      if (currency === 'cny' && order.type === PaymentType.ONE_TIME) {
+      if (
+        !managedPayments &&
+        currency === 'cny' &&
+        order.type === PaymentType.ONE_TIME
+      ) {
         // Enable WeChat Pay and Alipay for CNY one-time payments
         sessionParams.payment_method_types = [];
         sessionParams.payment_method_options = {};
@@ -166,7 +191,9 @@ export class StripeProvider implements PaymentProvider {
         }
       }
 
-      if (order.type === PaymentType.ONE_TIME) {
+      // Managed Payments owns invoicing and payment-method selection; sending
+      // invoice_creation or payment_method_types causes Stripe to reject it.
+      if (!managedPayments && order.type === PaymentType.ONE_TIME) {
         sessionParams.invoice_creation = {
           enabled: true,
         };

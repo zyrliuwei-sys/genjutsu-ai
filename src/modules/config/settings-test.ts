@@ -24,6 +24,7 @@ import {
 import { PaymentType, type PaymentOrder } from '@/core/payment/types';
 import { R2Provider } from '@/core/storage/r2';
 import { envConfigs } from '@/config';
+import { STRIPE_CHECKOUT_POLICY } from '@/config/stripe';
 import { getUniSeq } from '@/lib/hash';
 
 import type { TestResult } from './settings-test-specs';
@@ -130,6 +131,7 @@ async function testStripe(
     return { success: false, message: 'Missing config: stripe_secret_key' };
 
   const provider = new StripeProvider({
+    ...STRIPE_CHECKOUT_POLICY,
     secretKey: key,
     publishableKey: configs.stripe_publishable_key || '',
     signingSecret:

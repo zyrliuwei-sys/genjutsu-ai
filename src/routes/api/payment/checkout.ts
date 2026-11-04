@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { getAuth } from '@/core/auth';
+import { normalizeCheckoutLocale } from '@/core/payment/locale';
 import { PaymentType } from '@/core/payment/types';
 import { getPricingProduct } from '@/config/pricing';
 import { getAllConfigs } from '@/modules/config/service';
@@ -106,6 +107,7 @@ async function POST({ request }: { request: Request }) {
         price: { amount: chargeAmount, currency: product.currency },
         type: product.type,
         description: product.description,
+        locale: normalizeCheckoutLocale(body.locale),
         successUrl,
         cancelUrl,
         customer: {

@@ -28,6 +28,7 @@ import {
   subscription,
   userRole,
 } from '@/config/db/schema';
+import { STRIPE_CHECKOUT_POLICY } from '@/config/stripe';
 import { getAllConfigs } from '@/modules/config/service';
 import { calculateCreditExpirationTime } from '@/modules/credits/service';
 import {
@@ -129,6 +130,7 @@ async function getPaymentManager(): Promise<PaymentManager> {
       c('default_payment_provider') === 'stripe';
     manager.addProvider(
       new StripeProvider({
+        ...STRIPE_CHECKOUT_POLICY,
         secretKey: stripeKey,
         publishableKey: c('stripe_publishable_key'),
         signingSecret:
