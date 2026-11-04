@@ -7,6 +7,7 @@ import {
   DAME_HOMBRO_THEMES,
   DIME_DIME_BABY_THEMES,
   FLYING_CAR_THEMES,
+  HIT_THE_ROAD_THEMES,
   KISS_THEMES,
   OZIL_THEMES,
   TINY_DESK_THEMES,
@@ -34,12 +35,43 @@ export function GenjutsuGenerator({
     | 'bridges'
     | 'hombro'
     | 'tinydesk'
+    | 'road'
     | 'dime';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
   const locale = getLocale();
   const themed = useMemo(() => {
+    if (theme === 'road') {
+      const names = [
+        m['road.examples.pickup'](),
+        m['road.examples.cat'](),
+        m['road.examples.dog'](),
+      ];
+      return {
+        title: m['road.generator.title'](),
+        choose: m['road.generator.choose'](),
+        photo: m['road.generator.photo'](),
+        photoHint: m['road.generator.photo_hint'](),
+        generate: m['road.generator.generate'](),
+        loading: m['road.generator.loading'](),
+        retry: m['road.generator.retry'](),
+        uploadTemplateId: 'hit-the-road-dude-ai',
+        pickerInPanel: true,
+        uniformPreviewBox: true,
+        templates: HIT_THE_ROAD_THEMES.map((item, i) => ({
+          id: `road-${item.slug}`,
+          name: names[i],
+          asset: `road-${item.slug}`,
+          image: `/videos/hit-the-road-dude/${item.slug}.jpg`,
+          thumb: `/videos/hit-the-road-dude/${item.slug}.jpg`,
+          clip: `/videos/hit-the-road-dude/references/${item.slug}.mp4`,
+          duration: 10,
+          ratios: item.ratio,
+          prompt: '',
+        })),
+      };
+    }
     if (theme === 'dime') {
       const names = [
         m['dime.examples.black_shirt'](),

@@ -5,6 +5,7 @@ import { promisify } from 'node:util';
 const exec = promisify(execFile);
 const origin = process.env.SEO_TEST_ORIGIN || 'http://127.0.0.1:3003';
 const slugs = [
+  'hit-the-road-dude-ai',
   'dime-dime-baby-ai',
   'ozil-ai',
   'flying-car-ai',
@@ -64,7 +65,7 @@ assertDestinations(
   slugs.map((s) => `/${s}`)
 );
 console.log(
-  'PASS curl homepage: nine static trend cards; protected title and H1 preserved'
+  `PASS curl homepage: ${slugs.length} static trend cards; protected title and H1 preserved`
 );
 
 for (const prefix of locales) {
@@ -79,7 +80,7 @@ for (const prefix of locales) {
   );
 }
 console.log(
-  'PASS curl effects pages: ten linked effect headings plus nine trend destinations per locale'
+  `PASS curl effects pages: ten linked effect headings plus ${slugs.length} trend destinations per locale`
 );
 
 const sitemap = await get('/sitemap.xml');
@@ -127,7 +128,7 @@ for (const prefix of locales) {
 }
 assert.ok(Object.values(incoming).every((count) => count >= 3));
 console.log(
-  'PASS curl 45 trend URLs: direct 200, matching sitemap/canonical/hreflang, related links and incoming coverage'
+  `PASS curl ${slugs.length * locales.length} trend URLs: direct 200, matching sitemap/canonical/hreflang, related links and incoming coverage`
 );
 
 for (const path of ['/dime-dime-baby-ai/', '/fr/crazy-frog-ai/']) {

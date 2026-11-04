@@ -26,6 +26,12 @@ const PAGES: Entry[] = [
 
 const EFFECTS: Entry[] = [
   {
+    path: '/hit-the-road-dude-ai',
+    title: 'Hit the Road Dude AI',
+    description:
+      'Recast the private-property pickup meme with a person or pet photo. Three Media.io reference examples, ten-second editing templates, origin and practical tips.',
+  },
+  {
     path: '/dime-dime-baby-ai',
     title: 'Dime Dime Baby AI',
     description:

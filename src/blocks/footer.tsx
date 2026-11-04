@@ -9,6 +9,7 @@ export function Footer() {
       hideOnMobile: true,
       links: [
         { label: m['landing.footer.video'](), href: '/create' },
+        { label: m['road.nav'](), href: '/hit-the-road-dude-ai' },
         { label: m['dime.nav'](), href: '/dime-dime-baby-ai' },
         { label: m['flycar.nav'](), href: '/flying-car-ai' },
         { label: m['ozil.nav'](), href: '/ozil-ai' },

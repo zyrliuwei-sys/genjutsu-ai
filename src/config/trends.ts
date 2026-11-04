@@ -1,6 +1,11 @@
 /** Public trend destinations shared by the homepage and discovery links. */
 export const TREND_PAGES = [
   {
+    slug: 'hit-the-road-dude-ai',
+    key: 'road',
+    image: '/videos/hit-the-road-dude/dog.jpg',
+  },
+  {
     slug: 'dime-dime-baby-ai',
     key: 'dime',
     image: '/videos/dime-dime-baby/black-shirt.jpg',
@@ -39,7 +44,14 @@ export type TrendSlug = (typeof TREND_PAGES)[number]['slug'];
 
 /** Hand-picked adjacent music, reaction and photo-to-scene workflows. */
 export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
+  'hit-the-road-dude-ai': [
+    'dime-dime-baby-ai',
+    'crazy-frog-ai',
+    'dame-hombro-ai',
+    'flying-car-ai',
+  ],
   'dime-dime-baby-ai': [
+    'hit-the-road-dude-ai',
     'bulin-47-ai',
     'dame-hombro-ai',
     'ozil-ai',
@@ -58,6 +70,7 @@ export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
     'tiny-desk-ai',
   ],
   'crazy-frog-ai': [
+    'hit-the-road-dude-ai',
     'flying-car-ai',
     'ozil-ai',
     'dime-dime-baby-ai',
@@ -82,6 +95,7 @@ export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
     'tiny-desk-ai',
   ],
   'dame-hombro-ai': [
+    'hit-the-road-dude-ai',
     'dime-dime-baby-ai',
     'bulin-47-ai',
     'ozil-ai',

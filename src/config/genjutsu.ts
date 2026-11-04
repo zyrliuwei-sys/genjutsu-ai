@@ -241,13 +241,52 @@ export const DIME_DIME_BABY_THEMES = [
 const dimeDimeBabyDirection = (lead: string) =>
   `Replace only the lead dancer${lead ? ` (the ${lead})` : ''} with the person from the image. Keep the dance toward the camera, the hand holding the concha sweet bread, the bite, the puffed cheeks and deadpan look into the lens, the turn and dance back into the party, the other guests, chairs, flowers, party lighting, camera framing and timing exactly as in the reference video. Preserve natural hand-to-mouth contact and the bread. Do not add people, text, logos or actions absent from the reference.`;
 
-export type GenjutsuSubject = 'person' | 'vehicle' | 'couple';
+/** Ten-second excerpts of the Media.io pickup, cat and dog reference scenes. */
+export const HIT_THE_ROAD_THEMES = [
+  {
+    slug: 'pickup',
+    name: 'The pickup driver',
+    ratio: '9:16',
+    lead: 'man in the black T-shirt',
+  },
+  {
+    slug: 'cat',
+    name: 'The unimpressed cat',
+    ratio: '9:16',
+    lead: 'white cat',
+  },
+  {
+    slug: 'dog',
+    name: 'The dog in the yellow jacket',
+    ratio: '16:9',
+    lead: 'dog in the yellow jacket',
+  },
+] as const;
+const hitTheRoadDirection = (lead: string) =>
+  `Replace only the driver (${lead}) in the pickup window with the subject from the image. Keep the white truck, window frame, steering wheel, pond-side greenery, off-camera speaker, skeptical glances, lean and pointing gestures from the reference. Preserve shot framing, timing and original sound. Keep the replacement seated inside the cab; do not add passengers, text or new actions.`;
+
+export type GenjutsuSubject = 'person' | 'vehicle' | 'couple' | 'character';
 
 /** Trusted reference context: never transform scenery when replacing a performer. */
 export const GENJUTSU_REFERENCES: Record<
   string,
   { name: string; direction: string; subject?: GenjutsuSubject }
 > = {
+  ...Object.fromEntries(
+    HIT_THE_ROAD_THEMES.map((theme) => [
+      `road-${theme.slug}`,
+      {
+        name: theme.name,
+        direction: hitTheRoadDirection(theme.lead),
+        subject: 'character' as const,
+      },
+    ])
+  ),
+  'hit-the-road-dude-ai': {
+    name: 'Hit the Road Dude AI',
+    direction: hitTheRoadDirection('main subject'),
+    subject: 'character',
+  },
   ...Object.fromEntries(
     DIME_DIME_BABY_THEMES.map((theme) => [
       `dime-${theme.slug}`,
@@ -581,6 +620,16 @@ export function buildGenjutsuPrompt(
 ) {
   const crowd = provider === 'fal' ? '@Image1' : 'reference image 2';
   const extra = typeof prompt === 'string' ? prompt.trim().slice(0, 500) : '';
+  if (subject === 'character') {
+    const character =
+      provider === 'fal' ? '@Element1' : 'the subject in reference image 1';
+    const base = [
+      'Edit the input video, preserving the original scene, camera, lighting, timing and non-target subjects.',
+      `Replace only the main performer with ${character}. Match the identity and species in the image: facial features and hair for a person; muzzle, ears, fur markings and natural paws for a pet. Do not keep the original performer or turn a pet into a human.`,
+      'Adapt the reference gestures to the replacement anatomy with stable identity, natural contact and coherent occlusion. No extra limbs, merged faces, new characters, flicker or unrelated cuts.',
+    ].join(' ');
+    return extra ? `${base}\nAdditional direction: ${extra}` : base;
+  }
   if (subject === 'vehicle') {
     const vehicle =
       provider === 'fal' ? '@Element1' : 'the vehicle in reference image 1';

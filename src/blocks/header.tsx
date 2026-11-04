@@ -7,6 +7,12 @@ export function Header() {
       label: m['landing.nav.trending'](),
       items: [
         {
+          href: '/hit-the-road-dude-ai',
+          label: m['road.nav'](),
+          description: m['landing.hero.road_tag'](),
+          thumb: '/videos/hit-the-road-dude/dog.jpg',
+        },
+        {
           href: '/dime-dime-baby-ai',
           label: m['dime.nav'](),
           description: m['dime.nav_description'](),
