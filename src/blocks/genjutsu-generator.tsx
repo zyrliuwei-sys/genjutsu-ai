@@ -12,6 +12,7 @@ import {
   TINY_DESK_THEMES,
 } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
+import { formatUsd } from '@/lib/payment-options';
 import { m } from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
 import { GenjutsuGenerator as Generator } from '@/components/genjutsu-generator';
@@ -383,6 +384,12 @@ export function GenjutsuGenerator({
             videoReading: m['landing.generator.video_reading'](),
             videoPreparing: m['landing.generator.video_preparing'](),
             uploadPhotoCta: m['landing.hero.cta'](),
+            paidUploadPhotoCta: m['landing.generator.paid_upload']({
+              price: formatUsd(pricingCatalog.pack_starter.priceInCents),
+            }),
+            paidGenerate: m['landing.generator.paid_generate']({
+              price: formatUsd(pricingCatalog.pack_starter.priceInCents),
+            }),
             remainingGenerations: (count) =>
               m['landing.generator.remaining_generations']({ count }),
             generationRules: m['landing.pricing.per_video'](),

@@ -73,9 +73,9 @@ export const pricingCatalog: Record<string, PricingProduct> = {
   },
   pack_starter: {
     productId: 'pack_starter',
-    productName: 'Trial Pack',
-    planName: 'Trial Pack',
-    description: '$9.90 for one 10-second video ($9.90 balance)',
+    productName: '1 Video',
+    planName: '1 Video',
+    description: 'One video up to 10 seconds. One-time purchase.',
     type: PaymentType.ONE_TIME,
     priceInCents: 990,
     currency: 'usd',

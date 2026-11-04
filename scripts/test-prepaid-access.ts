@@ -9,7 +9,9 @@ envConfigs.database_auth_token = '';
 const { db } = await import('../src/core/db');
 const client = db().$client;
 await client.executeMultiple(
-  `CREATE TABLE "order" (id TEXT PRIMARY KEY,user_id TEXT NOT NULL,status TEXT NOT NULL,deleted_at INTEGER);`
+  `CREATE TABLE "order" (id TEXT PRIMARY KEY,user_id TEXT NOT NULL,status TEXT NOT NULL,deleted_at INTEGER);
+   CREATE TABLE role (id TEXT PRIMARY KEY,name TEXT NOT NULL,status TEXT NOT NULL);
+   CREATE TABLE user_role (id TEXT PRIMARY KEY,user_id TEXT NOT NULL,role_id TEXT NOT NULL,expires_at INTEGER);`
 );
 const { hasPaidOrder } = await import('../src/modules/payment/service');
 assert.equal(await hasPaidOrder('free-user'), false);
@@ -43,5 +45,5 @@ for (const path of [
 const fal = await readFile('src/routes/api/ai/fal/generate.ts', 'utf8');
 assert.ok(fal.includes("spec.mediaType === 'video'"));
 console.log(
-  'PASS: no paid order / pending / deleted / wrong owner denied; paid order accepted; all video APIs gated before task creation; admin bypass removed'
+  'PASS: no paid order / pending / deleted / wrong owner denied; paid order accepted; all video APIs gated before task creation; no zero-cost admin generation'
 );

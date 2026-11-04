@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 
+import { pricingCatalog } from '@/config/pricing';
+import { formatUsd } from '@/lib/payment-options';
 import { track } from '@/lib/track';
 import { m } from '@/paraglide/messages.js';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
@@ -43,6 +45,7 @@ function useExitTracking() {
  */
 export function Hero() {
   useExitTracking();
+  const entryPrice = formatUsd(pricingCatalog.pack_starter.priceInCents);
 
   return (
     <section className="relative overflow-hidden px-4 pt-10 pb-6 sm:pt-14 sm:pb-20 lg:pt-16 lg:pb-28">
@@ -60,17 +63,29 @@ export function Hero() {
             </span>
           </p>
 
-          {/* Phones go straight into the generator below (sticky CTA there). */}
-          <div className="mt-7 hidden flex-wrap items-center justify-center gap-3 lg:flex">
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <a
               href="#genjutsu-upload"
-              className="eg-pill-primary gap-3"
-              onClick={() => track('hero_cta', { target: 'upload' })}
+              className="eg-pill-primary max-w-full gap-3 px-5 text-center whitespace-normal"
+              data-testid="hero-paid-cta"
+              onClick={() =>
+                track('hero_cta', {
+                  target: 'upload',
+                  price: pricingCatalog.pack_starter.priceInCents,
+                  flow: 'direct_payment_v1',
+                })
+              }
             >
-              {m['landing.hero.cta']()}
+              {m['landing.hero.paid_cta']({ price: entryPrice })}
               <ArrowRight aria-hidden className="size-4" />
             </a>
           </div>
+          <p
+            className="text-muted-foreground mt-3 text-sm"
+            data-testid="hero-price-note"
+          >
+            {m['landing.hero.paid_note']()}
+          </p>
           <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-sm max-md:hidden">
             {m['landing.hero.trust']()}
           </p>

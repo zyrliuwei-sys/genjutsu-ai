@@ -28,6 +28,11 @@ export function CreditPackList({
   footnote,
   perks,
   onCheckout,
+  checkoutActions,
+  selectedId: controlledId,
+  onSelectionChange,
+  visibleCount,
+  moreLabel,
 }: {
   packs: CreditPack[];
   busy?: boolean;
@@ -36,13 +41,87 @@ export function CreditPackList({
   footnote?: ReactNode;
   perks?: { icon: ReactNode; label: string }[];
   onCheckout: (pack: CreditPack) => void;
+  checkoutActions?: (pack: CreditPack) => ReactNode;
+  selectedId?: string;
+  onSelectionChange?: (id: string) => void;
+  visibleCount?: number;
+  moreLabel?: string;
 }) {
   const [selectedId, setSelectedId] = useState(
     (packs.find((pack) => pack.featured) ?? packs[0])?.id
   );
-  const selected = packs.find((pack) => pack.id === selectedId) ?? packs[0];
-  if (!selected) return null;
+  const selected =
+    packs.find((pack) => pack.id === (controlledId ?? selectedId)) ?? packs[0];
 
+  const [expanded, setExpanded] = useState(false);
+  if (!selected) return null;
+  const renderPack = (pack: CreditPack) => {
+    const active = pack.id === selected.id;
+    return (
+      <button
+        key={pack.id}
+        type="button"
+        role="radio"
+        aria-checked={active}
+        disabled={busy}
+        data-testid={`credit-pack-${pack.productId}`}
+        onClick={() => {
+          setSelectedId(pack.id);
+          onSelectionChange?.(pack.id);
+        }}
+        className={cn(
+          'flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors disabled:pointer-events-none disabled:opacity-60 sm:px-4',
+          active
+            ? 'border-primary bg-primary/10 ring-primary/40 ring-1'
+            : 'bg-muted/40 hover:border-foreground/25 border-transparent'
+        )}
+      >
+        <span
+          className={cn(
+            'flex size-7 shrink-0 items-center justify-center rounded-full',
+            active
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-primary/15 text-primary'
+          )}
+          aria-hidden
+        >
+          <Sparkles className="size-3.5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="text-lg font-semibold tabular-nums sm:text-xl">
+              {pack.amount}
+            </span>
+            {pack.discount && (
+              <span className="border-primary/60 text-primary rounded-md border px-1.5 py-0.5 text-xs leading-none font-semibold">
+                {pack.discount}
+              </span>
+            )}
+            {pack.tag && (
+              <span className="bg-primary text-primary-foreground rounded-md px-1.5 py-0.5 text-xs leading-none font-semibold">
+                {pack.tag}
+              </span>
+            )}
+          </span>
+          {pack.detail && (
+            <span className="text-muted-foreground mt-0.5 block truncate text-xs sm:text-sm">
+              {pack.detail}
+            </span>
+          )}
+        </span>
+        <span className="flex shrink-0 flex-col items-end sm:flex-row sm:items-baseline sm:gap-2">
+          {pack.originalPrice && (
+            <span className="text-muted-foreground text-xs tabular-nums line-through sm:text-sm">
+              {pack.originalPrice}
+            </span>
+          )}
+          <span className="text-base font-semibold tabular-nums sm:text-lg">
+            {pack.price}
+          </span>
+        </span>
+      </button>
+    );
+  };
   return (
     <div className="mx-auto max-w-3xl">
       <div
@@ -50,69 +129,25 @@ export function CreditPackList({
         className="border-primary/50 bg-card shadow-primary/40 rounded-2xl border p-3 shadow-[0_30px_80px_-50px] sm:p-5"
       >
         <div className="flex flex-col gap-2.5">
-          {packs.map((pack) => {
-            const active = pack.id === selected.id;
-            return (
-              <button
-                key={pack.id}
-                type="button"
-                role="radio"
-                aria-checked={active}
-                data-testid={`credit-pack-${pack.productId}`}
-                onClick={() => setSelectedId(pack.id)}
-                className={cn(
-                  'flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors sm:px-4',
-                  active
-                    ? 'border-primary bg-primary/10 ring-primary/40 ring-1'
-                    : 'bg-muted/40 hover:border-foreground/25 border-transparent'
-                )}
-              >
-                <span
-                  className={cn(
-                    'flex size-7 shrink-0 items-center justify-center rounded-full',
-                    active
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-primary/15 text-primary'
-                  )}
-                  aria-hidden
-                >
-                  <Sparkles className="size-3.5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="text-lg font-semibold tabular-nums sm:text-xl">
-                      {pack.amount}
-                    </span>
-                    {pack.discount && (
-                      <span className="border-primary/60 text-primary rounded-md border px-1.5 py-0.5 text-xs leading-none font-semibold">
-                        {pack.discount}
-                      </span>
-                    )}
-                    {pack.tag && (
-                      <span className="bg-primary text-primary-foreground rounded-md px-1.5 py-0.5 text-xs leading-none font-semibold">
-                        {pack.tag}
-                      </span>
-                    )}
-                  </span>
-                  {pack.detail && (
-                    <span className="text-muted-foreground mt-0.5 block truncate text-xs sm:text-sm">
-                      {pack.detail}
-                    </span>
-                  )}
-                </span>
-                <span className="flex shrink-0 flex-col items-end sm:flex-row sm:items-baseline sm:gap-2">
-                  {pack.originalPrice && (
-                    <span className="text-muted-foreground text-xs tabular-nums line-through sm:text-sm">
-                      {pack.originalPrice}
-                    </span>
-                  )}
-                  <span className="text-base font-semibold tabular-nums sm:text-lg">
-                    {pack.price}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
+          {packs.slice(0, visibleCount ?? packs.length).map(renderPack)}
+          {visibleCount && packs.length > visibleCount && (
+            <details
+              className="border-border mt-1 border-t pt-3"
+              open={
+                expanded ||
+                packs.findIndex((pack) => pack.id === selected.id) >=
+                  visibleCount
+              }
+              onToggle={(event) => setExpanded(event.currentTarget.open)}
+            >
+              <summary className="text-muted-foreground hover:text-foreground cursor-pointer px-1 py-1 text-sm font-medium">
+                {moreLabel}
+              </summary>
+              <div className="mt-3 grid gap-2.5">
+                {packs.slice(visibleCount).map(renderPack)}
+              </div>
+            </details>
+          )}
         </div>
         {footnote && (
           <p className="text-muted-foreground mt-4 px-1 text-xs sm:text-sm">
@@ -122,13 +157,25 @@ export function CreditPackList({
       </div>
 
       <div className="mx-auto mt-8 max-w-md">
-        <Button
-          className="h-13 w-full rounded-xl text-base font-semibold"
-          disabled={busy || selected.disabled}
-          onClick={() => onCheckout(selected)}
-        >
-          {busy ? processingLabel : buyLabel(selected)}
-        </Button>
+        {checkoutActions ? (
+          <>
+            <div className="mb-4 flex items-baseline justify-between gap-3 text-base font-semibold">
+              <span>{selected.amount}</span>
+              <span className="tabular-nums" data-testid="selected-pack-total">
+                {selected.price}
+              </span>
+            </div>
+            {checkoutActions(selected)}
+          </>
+        ) : (
+          <Button
+            className="h-13 w-full rounded-xl text-base font-semibold"
+            disabled={busy || selected.disabled}
+            onClick={() => onCheckout(selected)}
+          >
+            {busy ? processingLabel : buyLabel(selected)}
+          </Button>
+        )}
       </div>
 
       {perks && perks.length > 0 && (

@@ -521,12 +521,14 @@ export function GenjutsuGenerator({
     videoReading: string;
     videoPreparing: string;
     uploadPhotoCta: string;
+    paidUploadPhotoCta: string;
+    paidGenerate: string;
     remainingGenerations: (count: number) => string;
     generationRules: string;
     contentPolicy: string;
     generationBusy: string;
     generationFailed: string;
-    /** Shown under Generate until the first purchase, so the price is no surprise. */
+    /** Shown before photo upload until the first purchase. */
     firstPrice: string;
     failedTitle: string;
     paywallTitle: string;
@@ -2169,6 +2171,14 @@ export function GenjutsuGenerator({
                   </button>
                 )}
             </div>
+            {!creditsQuery.data?.hasPaidOrder && (
+              <p
+                data-testid="first-price"
+                className="border-primary/30 bg-primary/5 text-foreground rounded-lg border px-3 py-2.5 text-sm font-medium"
+              >
+                {copy.firstPrice}
+              </p>
+            )}
             <UploadSlot
               label={theme?.photo ?? copy.ui.yourPhoto}
               hint={theme?.photoHint ?? copy.ui.photoHint}
@@ -2302,7 +2312,9 @@ export function GenjutsuGenerator({
               )}
               {running
                 ? copy.generatingTitle
-                : (theme?.generate ?? copy.ui.generateNow)}
+                : !creditsQuery.data?.hasPaidOrder
+                  ? copy.paidGenerate
+                  : (theme?.generate ?? copy.ui.generateNow)}
             </button>
             {theme &&
               effectQueryEnabled &&
@@ -2324,17 +2336,6 @@ export function GenjutsuGenerator({
                   )}
                 </div>
               )}
-            {/* 9 in 10 visitors who reached the paywall left without picking
-                a plan (Oct 2026) — state the price before they invest the
-                upload, not after. */}
-            {!creditsQuery.data?.hasPaidOrder && (
-              <p
-                data-testid="first-price"
-                className="text-muted-foreground text-center text-xs"
-              >
-                {copy.firstPrice}
-              </p>
-            )}
           </div>
         </section>
 
@@ -2857,7 +2858,9 @@ export function GenjutsuGenerator({
               className="bg-primary text-primary-foreground inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold disabled:opacity-50"
             >
               <ImageIcon className="size-5" />
-              {copy.uploadPhotoCta}
+              {!creditsQuery.data?.hasPaidOrder
+                ? copy.paidUploadPhotoCta
+                : copy.uploadPhotoCta}
             </button>
           ) : (
             <div className="flex flex-col gap-1.5">
@@ -2875,7 +2878,9 @@ export function GenjutsuGenerator({
                   )}
                   {running
                     ? copy.generatingTitle
-                    : (theme?.generate ?? copy.ui.generateNow)}
+                    : !creditsQuery.data?.hasPaidOrder
+                      ? copy.paidGenerate
+                      : (theme?.generate ?? copy.ui.generateNow)}
                 </button>
               </div>
             </div>
@@ -2923,6 +2928,16 @@ export function GenjutsuGenerator({
               }
             }}
             clipSeconds={referenceVideo?.duration || durationTier}
+            selectedVideo={{
+              name:
+                referenceSource === 'effect'
+                  ? selected.name
+                  : copy.customReference,
+              seconds: Number(
+                (referenceVideo?.duration || durationTier).toFixed(1)
+              ),
+              aspect,
+            }}
             balanceCredits={creditsQuery.data?.balance || 0}
             title={copy.paywallTitle}
             description={
