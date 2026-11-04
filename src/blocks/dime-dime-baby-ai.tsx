@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
 import '@/styles/dime-dime-baby-ai.css';
@@ -281,6 +282,7 @@ export function DimeDimeBabyAi() {
           </div>
         </section>
       </main>
+      <RelatedTrends currentSlug="dime-dime-baby-ai" />
       <Footer />
     </>
   );

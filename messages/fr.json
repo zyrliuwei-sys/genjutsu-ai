@@ -1219,5 +1219,8 @@
   "landing.pricing.preparing_video": "Préparation de votre vidéo…",
   "landing.pricing.complete_current_video": "Terminer cette vidéo avec votre solde existant",
   "landing.pricing.purchase_intro": "Commencez avec une vidéo à {price}. Paiement unique, sans abonnement.",
-  "landing.pricing.video_rules": "Les vidéos Genjutsu durent jusqu’à 10 secondes et se téléchargent en MP4."
+  "landing.pricing.video_rules": "Les vidéos Genjutsu durent jusqu’à 10 secondes et se téléchargent en MP4.",
+  "landing.trends.title": "Effets vidéo IA tendance",
+  "landing.trends.description": "Choisissez une danse, un mème ou une scène à recréer avec votre photo.",
+  "landing.trends.related_title": "Tendances vidéo IA similaires"
 }

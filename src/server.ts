@@ -1,5 +1,6 @@
 import handler from '@tanstack/react-start/server-entry';
 
+import { canonicalPagePath } from './lib/canonical-page-path';
 import { getCookieFromHeader } from './lib/cookie';
 import { paraglideMiddleware } from './paraglide/server.js';
 
@@ -64,6 +65,14 @@ export default {
     }
     // English-only site: permanently redirect legacy /zh URLs to their English path.
     const reqUrl = new URL(req.url);
+    const canonicalPath = canonicalPagePath(reqUrl.pathname);
+    if (
+      (req.method === 'GET' || req.method === 'HEAD') &&
+      canonicalPath !== reqUrl.pathname
+    ) {
+      reqUrl.pathname = canonicalPath;
+      return Response.redirect(reqUrl.toString(), 301);
+    }
     if (reqUrl.pathname === '/zh' || reqUrl.pathname.startsWith('/zh/')) {
       reqUrl.pathname = reqUrl.pathname.slice(3) || '/';
       return Response.redirect(reqUrl.toString(), 301);

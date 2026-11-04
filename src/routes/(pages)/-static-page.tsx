@@ -11,6 +11,7 @@ import {
   localizeUrl,
 } from '@/paraglide/runtime.js';
 import { ContentLinks } from '@/blocks/content-links';
+import { TrendingEffects } from '@/blocks/trending-effects';
 
 type PageMeta = {
   title: string;
@@ -110,6 +111,7 @@ function StaticPage() {
       <div className="text-foreground/90 text-[15px] leading-7">
         <Content />
       </div>
+      {slug === 'genjutsu-video-ai' && <TrendingEffects />}
       {meta.h1 && <ContentLinks currentSlug={slug} />}
     </article>
   );

@@ -1219,5 +1219,8 @@
   "landing.pricing.preparing_video": "Dein Video wird vorbereitet…",
   "landing.pricing.complete_current_video": "Dieses Video mit deinem vorhandenen Guthaben abschließen",
   "landing.pricing.purchase_intro": "Starte mit einem Video für {price}. Einmalzahlung, kein Abo.",
-  "landing.pricing.video_rules": "Genjutsu-Videos sind bis zu 10 Sekunden lang und als MP4 herunterladbar."
+  "landing.pricing.video_rules": "Genjutsu-Videos sind bis zu 10 Sekunden lang und als MP4 herunterladbar.",
+  "landing.trends.title": "Trendige KI-Videoeffekte",
+  "landing.trends.description": "Finde einen Tanz, ein Meme oder eine Szene für dein eigenes Foto.",
+  "landing.trends.related_title": "Ähnliche KI-Videotrends"
 }

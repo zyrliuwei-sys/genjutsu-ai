@@ -1973,5 +1973,8 @@
   "landing.pricing.preparing_video": "正在准备你的视频…",
   "landing.pricing.complete_current_video": "结合已有余额完成这个视频",
   "landing.pricing.purchase_intro": "先用 {price} 制作 1 个视频，一次性付费，无订阅。",
-  "landing.pricing.video_rules": "Genjutsu 视频最长 10 秒，生成后可下载 MP4。"
+  "landing.pricing.video_rules": "Genjutsu 视频最长 10 秒，生成后可下载 MP4。",
+  "landing.trends.title": "热门 AI 视频特效",
+  "landing.trends.description": "选择舞蹈、热门梗或场景，用自己的照片创作。",
+  "landing.trends.related_title": "相关 AI 视频趋势"
 }

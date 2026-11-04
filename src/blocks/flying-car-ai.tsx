@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
 import '@/styles/flying-car-ai.css';
@@ -384,6 +385,7 @@ export function FlyingCarAi() {
           </div>
         </section>
       </main>
+      <RelatedTrends currentSlug="flying-car-ai" />
       <Footer />
     </>
   );

@@ -7,6 +7,7 @@ import { routeTree } from './routeTree.gen';
 export function getRouter() {
   const router = createRouter({
     routeTree,
+    trailingSlash: 'never',
     defaultPreload: 'intent',
     scrollRestoration: true,
     // Paraglide owns locale prefixes: incoming URLs are de-localized before

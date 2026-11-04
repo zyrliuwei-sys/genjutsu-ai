@@ -1973,5 +1973,8 @@
   "landing.pricing.preparing_video": "Preparing your video…",
   "landing.pricing.complete_current_video": "Complete this video with your existing balance",
   "landing.pricing.purchase_intro": "Start with one video for {price}. One-time payment, no subscription.",
-  "landing.pricing.video_rules": "Genjutsu videos run up to 10 seconds and download as MP4."
+  "landing.pricing.video_rules": "Genjutsu videos run up to 10 seconds and download as MP4.",
+  "landing.trends.title": "Trending AI video effects",
+  "landing.trends.description": "Find a dance, meme or scene to recreate with your own photo.",
+  "landing.trends.related_title": "Related AI video trends"
 }

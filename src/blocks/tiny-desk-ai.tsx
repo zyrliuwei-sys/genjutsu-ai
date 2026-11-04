@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
 import '@/styles/tiny-desk-ai.css';
@@ -281,6 +282,7 @@ export function TinyDeskAi() {
           </div>
         </section>
       </main>
+      <RelatedTrends currentSlug="tiny-desk-ai" />
       <Footer />
     </>
   );

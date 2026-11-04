@@ -15,6 +15,7 @@ import { Header } from '@/blocks/header';
 import { Hero } from '@/blocks/hero';
 import { Pricing } from '@/blocks/pricing';
 import { Showcase } from '@/blocks/showcase';
+import { TrendingEffects } from '@/blocks/trending-effects';
 
 export const Route = createFileRoute('/')({
   loader: () => ({ locale: getLocale() }),
@@ -118,6 +119,7 @@ function HomePage() {
       <Header />
       <main>
         <Hero />
+        <TrendingEffects />
         <Features />
         <Showcase />
         <div className="max-md:hidden">

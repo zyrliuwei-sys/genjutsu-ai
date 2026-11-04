@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
 import '@/styles/pollo-ai-kissing.css';
@@ -261,6 +262,7 @@ export function PolloAiKissing() {
           </div>
         </section>
       </main>
+      <RelatedTrends currentSlug="pollo-ai-kissing" />
       <Footer />
     </>
   );

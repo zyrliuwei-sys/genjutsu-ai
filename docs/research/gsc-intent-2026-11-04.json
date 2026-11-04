@@ -1,0 +1,350 @@
+{
+  "reviewed_at": "2026-11-04",
+  "source": "Google Search Console, authenticated URL-prefix property",
+  "property": "https://genjutsu-ai.org/",
+  "search_type": "web",
+  "date_range": {
+    "start": "2026-10-05",
+    "end": "2026-11-01",
+    "days": 28
+  },
+  "queries": {
+    "/ai-genjutsu-generator": {
+      "report_url": "https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fgenjutsu-ai.org%2F&num_of_days=28&page=!https%3A%2F%2Fgenjutsu-ai.org%2Fai-genjutsu-generator&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION",
+      "totals": {
+        "clicks": 2,
+        "impressions": 493,
+        "ctr": "0.4%",
+        "position": 5.2
+      },
+      "rows": [
+        {
+          "query": "genjutsu",
+          "clicks": "1",
+          "impressions": "56",
+          "ctr": "1.8%",
+          "position": "7.9"
+        },
+        {
+          "query": "genjutsu ai",
+          "clicks": "0",
+          "impressions": "347",
+          "ctr": "0%",
+          "position": "4.2"
+        },
+        {
+          "query": "intitle:\"genjutsu ai\"",
+          "clicks": "0",
+          "impressions": "9",
+          "ctr": "0%",
+          "position": "2.2"
+        },
+        {
+          "query": "genjustu ai",
+          "clicks": "0",
+          "impressions": "7",
+          "ctr": "0%",
+          "position": "3.1"
+        },
+        {
+          "query": "genjutsu ai generator",
+          "clicks": "0",
+          "impressions": "6",
+          "ctr": "0%",
+          "position": "12.5"
+        },
+        {
+          "query": "genjutsu free",
+          "clicks": "0",
+          "impressions": "5",
+          "ctr": "0%",
+          "position": "7.4"
+        },
+        {
+          "query": "genjutsuai",
+          "clicks": "0",
+          "impressions": "4",
+          "ctr": "0%",
+          "position": "2.0"
+        },
+        {
+          "query": "gengutsu ai",
+          "clicks": "0",
+          "impressions": "2",
+          "ctr": "0%",
+          "position": "2.0"
+        },
+        {
+          "query": "genjustu",
+          "clicks": "0",
+          "impressions": "2",
+          "ctr": "0%",
+          "position": "7.0"
+        },
+        {
+          "query": "genjutsu generator",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "1.0"
+        },
+        {
+          "query": "genjetsu ai",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "2.0"
+        },
+        {
+          "query": "genjustsu ai",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "2.0"
+        },
+        {
+          "query": "genjusu ai",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "2.0"
+        },
+        {
+          "query": "genjutsi ai",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "3.0"
+        },
+        {
+          "query": "open genjutsu",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "3.0"
+        },
+        {
+          "query": "gengutsu",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "7.0"
+        },
+        {
+          "query": "kenerate genjutsu",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "9.0"
+        },
+        {
+          "query": "genjutso",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "10.0"
+        },
+        {
+          "query": "genjutsu ai free",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "20.0"
+        },
+        {
+          "query": "genjutsu رایگان",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "62.0"
+        },
+        {
+          "query": "genjutsu lite",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "89.0"
+        }
+      ],
+      "decision": "Position as an inputs/limits/workflow reference for the current photo-and-reference editor; link the existing how-to tutorial instead of duplicating it. Brand queries dominate; no observed text-to-video/Seedance demand justifies the former text-to-video headline. The narrower reference intent is an editorial differentiation hypothesis, not a demonstrated high-volume query."
+    },
+    "/higgsfield-genjutsu-alternative": {
+      "report_url": "https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fgenjutsu-ai.org%2F&num_of_days=28&page=!https%3A%2F%2Fgenjutsu-ai.org%2Fhiggsfield-genjutsu-alternative&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION",
+      "totals": {
+        "clicks": 2,
+        "impressions": 475,
+        "ctr": "0.4%",
+        "position": 4.4
+      },
+      "rows": [
+        {
+          "query": "higgsfield genjutsu alternative",
+          "clicks": "1",
+          "impressions": "3",
+          "ctr": "33.3%",
+          "position": "24.0"
+        },
+        {
+          "query": "genjutsu ai",
+          "clicks": "0",
+          "impressions": "364",
+          "ctr": "0%",
+          "position": "3.6"
+        },
+        {
+          "query": "genjutsu",
+          "clicks": "0",
+          "impressions": "39",
+          "ctr": "0%",
+          "position": "7.9"
+        },
+        {
+          "query": "intitle:\"genjutsu ai\"",
+          "clicks": "0",
+          "impressions": "14",
+          "ctr": "0%",
+          "position": "2.9"
+        },
+        {
+          "query": "genjustu ai",
+          "clicks": "0",
+          "impressions": "7",
+          "ctr": "0%",
+          "position": "3.1"
+        },
+        {
+          "query": "genjutsuai",
+          "clicks": "0",
+          "impressions": "4",
+          "ctr": "0%",
+          "position": "2.0"
+        },
+        {
+          "query": "gengutsu ai",
+          "clicks": "0",
+          "impressions": "2",
+          "ctr": "0%",
+          "position": "2.0"
+        },
+        {
+          "query": "genjustsu ai",
+          "clicks": "0",
+          "impressions": "2",
+          "ctr": "0%",
+          "position": "2.0"
+        },
+        {
+          "query": "genjustu",
+          "clicks": "0",
+          "impressions": "2",
+          "ctr": "0%",
+          "position": "7.0"
+        },
+        {
+          "query": "genjetsu ai",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "2.0"
+        },
+        {
+          "query": "genjusu ai",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "2.0"
+        },
+        {
+          "query": "genjutsi ai",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "3.0"
+        },
+        {
+          "query": "gengutsu",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "7.0"
+        },
+        {
+          "query": "alternative to higgsfield genjutsu",
+          "clicks": "0",
+          "impressions": "1",
+          "ctr": "0%",
+          "position": "93.0"
+        }
+      ],
+      "decision": "Keep the exact Higgsfield Genjutsu alternative intent, supported by 3 impressions and 1 click (plus 1 impression for alternative to higgsfield genjutsu). Compare current reference workflows and costs instead of an unavailable text-generation capability."
+    }
+  },
+  "interpretation_limits": [
+    "Shared brand impressions show overlap, but do not prove harmful cannibalization; branded sitelinks may contribute. Differentiation cannot guarantee that Google will stop showing multiple pages for brand queries.",
+    "Query rows may omit anonymized queries and need not sum to page totals.",
+    "Missing pages in the GSC table are recorded as null, not assumed to have exactly zero impressions.",
+    "Only the two English landing pages were retargeted; locale paths and hreflang were preserved."
+  ],
+  "page_report_url": "https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fgenjutsu-ai.org%2F&num_of_days=28&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION&breakdown=page",
+  "trend_page_baseline": {
+    "dime-dime-baby-ai": null,
+    "ozil-ai": {
+      "clicks": "0",
+      "impressions": "8",
+      "ctr": "0%",
+      "position": "10.8"
+    },
+    "flying-car-ai": {
+      "clicks": "0",
+      "impressions": "3",
+      "ctr": "0%",
+      "position": "27.0"
+    },
+    "crazy-frog-ai": {
+      "clicks": "0",
+      "impressions": "4",
+      "ctr": "0%",
+      "position": "5.5"
+    },
+    "bulin-47-ai": {
+      "clicks": "0",
+      "impressions": "1",
+      "ctr": "0%",
+      "position": "9.0"
+    },
+    "pollo-ai-kissing": {
+      "clicks": "0",
+      "impressions": "7",
+      "ctr": "0%",
+      "position": "22.1"
+    },
+    "burning-bridges-ai": {
+      "clicks": "0",
+      "impressions": "2",
+      "ctr": "0%",
+      "position": "5.0"
+    },
+    "dame-hombro-ai": {
+      "clicks": "0",
+      "impressions": "3",
+      "ctr": "0%",
+      "position": "8.0"
+    },
+    "tiny-desk-ai": null
+  },
+  "protected_homepage_baseline": {
+    "clicks": "4,834",
+    "impressions": "37,161",
+    "ctr": "13%",
+    "position": "4.7"
+  },
+  "rollout": {
+    "deployed_at": null,
+    "follow_up": "Review GSC 14–21 days after actual deployment. Compare complete periods of equal length by page, separating English and locale URLs; record impressions, clicks, CTR and query mix. Check whether brand-query overlap declines without reducing homepage traffic.",
+    "status": "Implementation pending release; no SEO uplift claimed."
+  },
+  "comparison_reference": {
+    "url": "https://higgsfield.ai/genjutsu",
+    "checked_at": "2026-11-04"
+  }
+}

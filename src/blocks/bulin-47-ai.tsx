@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
 import '@/styles/bulin-47-ai.css';
@@ -261,6 +262,7 @@ export function Bulin47Ai() {
           </div>
         </section>
       </main>
+      <RelatedTrends currentSlug="bulin-47-ai" />
       <Footer />
     </>
   );

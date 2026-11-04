@@ -1,30 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { PUBLIC_PAGE_PATHS } from '@/config/public-pages';
 import { GUIDES } from '@/lib/guides';
 import { baseLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
-
-const STATIC_PATHS = [
-  '',
-  '/create',
-  '/dime-dime-baby-ai',
-  '/flying-car-ai',
-  '/ozil-ai',
-  '/crazy-frog-ai',
-  '/bulin-47-ai',
-  '/pollo-ai-kissing',
-  '/burning-bridges-ai',
-  '/dame-hombro-ai',
-  '/tiny-desk-ai',
-  '/pricing',
-  '/privacy-policy',
-  '/terms-of-service',
-  '/aup',
-  '/ai-genjutsu-generator',
-  '/genjutsu-video-ai',
-  '/genjutsu-free',
-  '/higgsfield-genjutsu-alternative',
-];
 
 type Entry = {
   path: string;
@@ -87,7 +66,7 @@ export const Route = createFileRoute('/sitemap.xml')({
   server: {
     handlers: {
       GET: async () => {
-        const entries: Entry[] = STATIC_PATHS.map((path) => ({
+        const entries: Entry[] = PUBLIC_PAGE_PATHS.map((path) => ({
           path,
           changeFrequency: 'weekly',
           priority: path === '' ? 1 : 0.8,

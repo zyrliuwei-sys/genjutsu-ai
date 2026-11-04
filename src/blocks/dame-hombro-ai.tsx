@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
 import '@/styles/dame-hombro-ai.css';
@@ -284,6 +285,7 @@ export function DameHombroAi() {
           </div>
         </section>
       </main>
+      <RelatedTrends currentSlug="dame-hombro-ai" />
       <Footer />
     </>
   );

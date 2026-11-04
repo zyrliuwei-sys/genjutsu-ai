@@ -15,6 +15,34 @@ Template:
 - Result: <date judged, numbers, decision: keep / revert>
 ```
 
+## 2026-11-04 — Static trend links and intent separation
+
+- Data read: authenticated GSC URL-prefix property, Web, Oct 5–Nov 1 (28 days).
+  Homepage has 4,834 clicks. `/ai-genjutsu-generator` has 493 impressions and
+  2 clicks; `/higgsfield-genjutsu-alternative` has 475 impressions and 2 clicks.
+  `genjutsu ai` supplies 347 and 364 of those impressions respectively.
+  `higgsfield genjutsu alternative` supplies 3 impressions and 1 click.
+  Exact query rows and trend-page baselines are recorded in
+  `docs/research/gsc-intent-2026-11-04.json`.
+- Observation: homepage footer links already existed in live HTML, and the
+  live sitemap already used slashless URLs. The new work adds prominent body
+  links. Slash variants previously returned temporary 307 redirects.
+- Change, in order: nine server-rendered homepage trend cards; ten linked
+  Effects headings plus nine trend destinations; four related links on each
+  trend page; explicit slashless public routes and permanent slash redirects;
+  GSC-informed input-reference and alternative-comparison positioning for the two
+  English content pages, with body copy aligned to the current editor.
+- Hypothesis: more contextual entrances and clearer intent will improve
+  discovery and qualified clicks. Shared brand impressions alone do not prove
+  harmful cannibalization, and the narrower reference positioning is an editorial test.
+- Validation: use `SEO_TEST_ORIGIN=<origin> node scripts/test-trend-seo.mjs`
+  for curl-only HTML checks of links, canonical/hreflang, redirects, protected
+  homepage title/H1, robots and the revised metadata.
+- Follow-up: 14–21 days after actual deployment, compare equal complete periods
+  in GSC's page report and inspect each trend page's query mix. Some trend pages
+  already have 1–8 impressions; missing rows are not asserted to be zero.
+- Result: pending release and post-release observation.
+
 ## 2026-11-04 — Upfront video pricing and direct payment
 
 - Data read (2026-10-28 through 2026-11-03, Beijing time; known test

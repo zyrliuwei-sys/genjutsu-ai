@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
 import '@/styles/burning-bridges-ai.css';
@@ -287,6 +288,7 @@ export function BurningBridgesAi() {
           </div>
         </section>
       </main>
+      <RelatedTrends currentSlug="burning-bridges-ai" />
       <Footer />
     </>
   );
