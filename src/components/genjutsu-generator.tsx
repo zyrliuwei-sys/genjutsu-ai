@@ -2174,7 +2174,7 @@ export function GenjutsuGenerator({
             {!creditsQuery.data?.hasPaidOrder && (
               <p
                 data-testid="first-price"
-                className="border-primary/30 bg-primary/5 text-foreground rounded-lg border px-3 py-2.5 text-sm font-medium"
+                className="border-primary/30 bg-primary/5 text-foreground rounded-lg border px-3 py-2.5 text-sm font-medium max-lg:col-span-full max-lg:row-start-1"
               >
                 {copy.firstPrice}
               </p>
