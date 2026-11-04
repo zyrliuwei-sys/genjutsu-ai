@@ -6,6 +6,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
@@ -67,6 +68,7 @@ export function CrazyFrog() {
       <Header />
       <main className="frog-page">
         <section className="frog-hero" aria-labelledby="frog-title">
+          <PageBreadcrumbs currentPage={m['frog.nav']()} className="mb-6" />
           <p className="frog-eyebrow">{m['frog.eyebrow']()}</p>
           <h1 id="frog-title">
             {m['frog.hero.title']()} <span>{m['frog.hero.generator']()}</span>

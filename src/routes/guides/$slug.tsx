@@ -7,6 +7,7 @@ import { getGuideBody, preloadGuideBody } from '@/lib/guide-bodies';
 import { getGuide } from '@/lib/guides';
 import { m } from '@/paraglide/messages.js';
 import { guideCards, GuideGrid } from '@/blocks/guides';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 
 export const Route = createFileRoute('/guides/$slug')({
   loader: async ({ params }) => {
@@ -78,7 +79,7 @@ export const Route = createFileRoute('/guides/$slug')({
               {
                 '@type': 'BreadcrumbList',
                 itemListElement: [
-                  { name: 'Home', item: `${envConfigs.app_url}/` },
+                  { name: envConfigs.app_name, item: `${envConfigs.app_url}/` },
                   { name: 'Guides', item: `${envConfigs.app_url}/guides` },
                   { name: meta.card_title, item: url },
                 ].map((crumb, index) => ({
@@ -102,16 +103,11 @@ function GuideArticle() {
   return (
     <>
       <article className="mx-auto max-w-3xl">
-        <nav
-          aria-label="Breadcrumb"
-          className="text-muted-foreground mb-6 flex flex-wrap gap-2 text-sm"
-        >
-          <Link href="/">{m['common.systems.home']()}</Link>
-          <span aria-hidden="true">/</span>
-          <Link href="/guides">{m['guides.title']()}</Link>
-          <span aria-hidden="true">/</span>
-          <span aria-current="page">{meta.card_title}</span>
-        </nav>
+        <PageBreadcrumbs
+          currentPage={meta.card_title}
+          parents={[{ label: m['guides.title'](), href: '/guides' }]}
+          className="mb-6"
+        />
         <header className="border-border mb-6 border-b pb-6">
           <h1 className="eg-heading text-foreground text-4xl leading-[1.08] md:text-5xl">
             {meta.h1}

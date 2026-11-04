@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
@@ -99,6 +100,7 @@ export function PolloAiKissing() {
       <main className="kiss-page">
         <section className="kiss-hero" aria-labelledby="kiss-title">
           <div>
+            <PageBreadcrumbs currentPage={m['kiss.nav']()} className="mb-6" />
             <p className="kiss-eyebrow">{m['kiss.eyebrow']()}</p>
             <h1 id="kiss-title">
               {m['kiss.hero.title']()} <span>{m['kiss.hero.generator']()}</span>

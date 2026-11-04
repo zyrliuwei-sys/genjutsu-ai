@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
@@ -116,6 +117,7 @@ export function DameHombroAi() {
       <main className="hombro-page">
         <section className="hombro-hero" aria-labelledby="hombro-title">
           <div>
+            <PageBreadcrumbs currentPage={m['hombro.nav']()} className="mb-6" />
             <p className="hombro-eyebrow">{m['hombro.eyebrow']()}</p>
             <h1 id="hombro-title">
               {m['hombro.hero.title']()}{' '}

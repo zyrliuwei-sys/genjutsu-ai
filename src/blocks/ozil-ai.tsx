@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
@@ -181,6 +182,7 @@ export function OzilAi() {
       <main className="ozil-page">
         <section className="ozil-hero" aria-labelledby="ozil-title">
           <div className="ozil-hero-copy">
+            <PageBreadcrumbs currentPage={m['ozil.nav']()} className="mb-6" />
             <p className="ozil-eyebrow">{m['ozil.eyebrow']()}</p>
             <h1 id="ozil-title">
               {m['ozil.hero.title']()} <span>{m['ozil.hero.generator']()}</span>

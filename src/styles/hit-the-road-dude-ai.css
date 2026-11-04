@@ -38,17 +38,6 @@
   gap: 60px;
   padding-block: 46px 68px;
 }
-.road-breadcrumb {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 0.75rem;
-  color: var(--road-muted);
-  margin-bottom: 40px;
-}
-.road-breadcrumb a:hover {
-  color: var(--foreground);
-}
 .road-eyebrow,
 .road-kicker {
   font-family: var(--font-mono-display);
@@ -449,9 +438,6 @@
     grid-template-columns: 1fr;
     gap: 32px;
     padding-block: 26px 36px;
-  }
-  .road-breadcrumb {
-    margin-bottom: 28px;
   }
   .road-hero h1 {
     font-size: clamp(4.25rem, 17vw, 6.5rem);

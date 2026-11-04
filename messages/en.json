@@ -1,4 +1,5 @@
 {
+  "common.navigation.breadcrumb": "Breadcrumb",
   "landing.text_video.first_frame": "First frame (optional)",
   "landing.text_video.last_frame": "Last frame (optional)",
   "landing.text_video.frame_hint": "No images: text to video. One image: animate the first frame. Two images: transition from first to last frame. JPG, PNG, WEBP · 10MB each · 300–6000px per side. Different frame ratios may be cropped.",

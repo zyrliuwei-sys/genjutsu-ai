@@ -1,4 +1,5 @@
 {
+  "common.navigation.breadcrumb": "Ruta de navegación",
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "landing.text_video.first_frame": "Primer fotograma (opcional)",
   "landing.text_video.last_frame": "Último fotograma (opcional)",

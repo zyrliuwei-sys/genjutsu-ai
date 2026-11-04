@@ -19,6 +19,7 @@ import { track } from '@/lib/track';
 import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
 import { usePublicConfig } from '@/hooks/use-public-config';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { CreditPackList, type CreditPack } from '@/components/credit-pack-list';
 import { PaymentButtons } from '@/components/payment-buttons';
 import type { PaymentProvider } from '@/components/payment-provider-modal';
@@ -376,6 +377,12 @@ export function Pricing({
       }
     >
       <div className="mx-auto max-w-6xl">
+        {!dialog && Heading === 'h1' && (
+          <PageBreadcrumbs
+            currentPage={m['landing.nav.pricing']()}
+            className="mb-6"
+          />
+        )}
         <div className={dialog ? 'mb-4 text-center' : 'mb-20 text-center'}>
           {dialog && summary}
           <Heading

@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
@@ -116,6 +117,10 @@ export function TinyDeskAi() {
       <main className="desk-page">
         <section className="desk-hero" aria-labelledby="desk-title">
           <div>
+            <PageBreadcrumbs
+              currentPage={m['tinydesk.nav']()}
+              className="mb-6"
+            />
             <p className="desk-eyebrow">{m['tinydesk.eyebrow']()}</p>
             <h1 id="desk-title">
               {m['tinydesk.hero.title']()}{' '}

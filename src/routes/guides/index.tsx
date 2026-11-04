@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
 import { m } from '@/paraglide/messages.js';
 import { guideCards, GuideGrid } from '@/blocks/guides';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 
 export const Route = createFileRoute('/guides/')({
   head: () => {
@@ -35,14 +35,7 @@ export const Route = createFileRoute('/guides/')({
 function GuidesIndex() {
   return (
     <div className="mx-auto max-w-7xl">
-      <nav
-        aria-label="Breadcrumb"
-        className="text-muted-foreground mb-6 flex flex-wrap gap-2 text-sm"
-      >
-        <Link href="/">{m['common.systems.home']()}</Link>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">{m['guides.title']()}</span>
-      </nav>
+      <PageBreadcrumbs currentPage={m['guides.title']()} className="mb-6" />
       <h1 className="eg-heading text-4xl leading-[1.05] sm:text-5xl">
         {m['guides.index.h1']()}
       </h1>

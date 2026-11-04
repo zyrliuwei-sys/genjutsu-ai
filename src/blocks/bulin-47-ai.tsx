@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
@@ -103,6 +104,7 @@ export function Bulin47Ai() {
       <main className="bulin-page">
         <section className="bulin-hero" aria-labelledby="bulin-title">
           <div>
+            <PageBreadcrumbs currentPage={m['bulin.nav']()} className="mb-6" />
             <p className="bulin-eyebrow">{m['bulin.eyebrow']()}</p>
             <h1 id="bulin-title">
               {m['bulin.hero.title']()}{' '}

@@ -6,6 +6,7 @@ import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 
 type Search = {
   kind?: 'video' | 'image';
@@ -78,6 +79,10 @@ function CreatePage() {
           className="eg-glow pointer-events-none absolute inset-x-0 top-0 -z-10 h-[700px] opacity-40"
         />
         <div className="mx-auto max-w-7xl">
+          <PageBreadcrumbs
+            currentPage={m['landing.nav.create']()}
+            className="mb-6"
+          />
           <GenjutsuGenerator />
         </div>
       </main>

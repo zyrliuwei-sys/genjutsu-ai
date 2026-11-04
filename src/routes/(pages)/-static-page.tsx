@@ -1,7 +1,6 @@
 import type { ComponentType } from 'react';
 import { notFound, useLoaderData } from '@tanstack/react-router';
 
-import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
 import { m } from '@/paraglide/messages.js';
 import {
@@ -11,6 +10,7 @@ import {
   localizeUrl,
 } from '@/paraglide/runtime.js';
 import { ContentLinks } from '@/blocks/content-links';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { TrendingEffects } from '@/blocks/trending-effects';
 
 type PageMeta = {
@@ -89,16 +89,10 @@ function StaticPage() {
 
   return (
     <article>
-      {meta.h1 && (
-        <nav
-          aria-label="Breadcrumb"
-          className="text-muted-foreground mb-6 flex flex-wrap gap-2 text-sm"
-        >
-          <Link href="/">{m['common.systems.home']()}</Link>
-          <span aria-hidden="true">/</span>
-          <span aria-current="page">{meta.h1}</span>
-        </nav>
-      )}
+      <PageBreadcrumbs
+        currentPage={meta.h1 ?? meta.title.split(' | ')[0]}
+        className="mb-6"
+      />
       <header className="border-border mb-6 border-b pb-5">
         <h1 className="eg-heading text-foreground text-4xl md:text-5xl">
           {meta.h1 ?? meta.title.split(' | ')[0]}

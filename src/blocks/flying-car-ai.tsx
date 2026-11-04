@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
@@ -210,6 +211,7 @@ export function FlyingCarAi() {
       <main className="fc-page">
         <section className="fc-hero" aria-labelledby="fc-title">
           <div className="fc-hero-copy">
+            <PageBreadcrumbs currentPage={m['flycar.nav']()} className="mb-6" />
             <p className="fc-eyebrow">{m['flycar.eyebrow']()}</p>
             <h1 id="fc-title">
               {m['flycar.hero.title']()}{' '}

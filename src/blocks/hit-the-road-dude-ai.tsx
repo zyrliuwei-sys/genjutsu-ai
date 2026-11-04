@@ -13,6 +13,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { RelatedTrends } from '@/blocks/related-trends';
 
 import '@fontsource/bebas-neue/latin-400.css';
@@ -67,14 +68,10 @@ export function HitTheRoadDudeAi() {
       <main className="road-page">
         <section className="road-hero road-wrap" aria-labelledby="road-title">
           <div className="road-hero-copy">
-            <nav
-              className="road-breadcrumb"
-              aria-label={m['road.breadcrumb']()}
-            >
-              <Link href="/">{envConfigs.app_name}</Link>
-              <span aria-hidden>/</span>
-              <span>{m['road.nav']()}</span>
-            </nav>
+            <PageBreadcrumbs
+              currentPage={m['road.nav']()}
+              className="mb-7 md:mb-10"
+            />
             <p className="road-eyebrow">
               <span aria-hidden />
               {m['road.eyebrow']()}

@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
@@ -106,6 +107,7 @@ export function DimeDimeBabyAi() {
       <main className="dime-page">
         <section className="dime-hero" aria-labelledby="dime-title">
           <div>
+            <PageBreadcrumbs currentPage={m['dime.nav']()} className="mb-6" />
             <p className="dime-eyebrow">{m['dime.eyebrow']()}</p>
             <h1 id="dime-title">
               {m['dime.hero.title']()} <span>{m['dime.hero.generator']()}</span>

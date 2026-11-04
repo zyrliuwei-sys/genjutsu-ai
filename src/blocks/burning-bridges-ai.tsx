@@ -7,6 +7,7 @@ import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
 import { Header } from '@/blocks/header';
+import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { RelatedTrends } from '@/blocks/related-trends';
 import { ThemeReelCard } from '@/components/theme-reel-card';
 
@@ -116,6 +117,10 @@ export function BurningBridgesAi() {
       <main className="bridges-page">
         <section className="bridges-hero" aria-labelledby="bridges-title">
           <div>
+            <PageBreadcrumbs
+              currentPage={m['bridges.nav']()}
+              className="mb-6"
+            />
             <p className="bridges-eyebrow">{m['bridges.eyebrow']()}</p>
             <h1 id="bridges-title">
               {m['bridges.hero.title']()}{' '}

@@ -1,4 +1,5 @@
 {
+  "common.navigation.breadcrumb": "面包屑导航",
   "landing.text_video.first_frame": "首帧图片（可选）",
   "landing.text_video.last_frame": "尾帧图片（可选）",
   "landing.text_video.frame_hint": "不传图片：文字生成；一张图片：首帧生成；两张图片：首尾帧过渡。JPG、PNG、WEBP · 每张最大 10MB · 每边 300–6000px。首尾图片比例不同可能被裁剪。",

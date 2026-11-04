@@ -1,4 +1,5 @@
 {
+  "common.navigation.breadcrumb": "Fil d’Ariane",
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "landing.text_video.first_frame": "Première image (facultatif)",
   "landing.text_video.last_frame": "Dernière image (facultatif)",
