@@ -305,6 +305,37 @@
 .eg-generator[data-themed='true'] .eg-generator-template-list {
   scroll-padding: 0;
 }
+/* Small themed upload tiles still need room for translated labels. Use the
+   tile width, rather than the page width, so nested studios stay readable. */
+.eg-generator[data-themed='true'] .eg-generator-upload {
+  container-type: inline-size;
+}
+@media (max-width: 1023px) {
+  @container (max-width: 150px) {
+    .eg-generator[data-themed='true'] .eg-generator-upload-empty {
+      gap: 6px;
+      padding: 8px;
+    }
+    .eg-generator[data-themed='true'] .eg-generator-upload-icon {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+    .eg-generator[data-themed='true'] .eg-generator-upload-label {
+      font-size: 12px;
+      line-height: 16px;
+    }
+    .eg-generator[data-themed='true'] .eg-generator-upload-formats {
+      font-size: 10px;
+      line-height: 12px;
+    }
+  }
+  @container (max-width: 120px) {
+    .eg-generator[data-themed='true'] .eg-generator-upload-formats {
+      display: none;
+    }
+  }
+}
 /* Theme cards sit in one row: a swipeable strip on small screens, every card
    side by side on desktop. */
 .eg-generator[data-themed='true'] .eg-generator-template-list > button,

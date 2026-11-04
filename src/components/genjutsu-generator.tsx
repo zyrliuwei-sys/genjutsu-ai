@@ -421,24 +421,24 @@ function UploadSlot({
         ) : null}
         <div
           className={cn(
-            'pointer-events-none absolute inset-0 flex size-full flex-col items-center justify-center gap-3 p-3 text-center',
+            'eg-generator-upload-empty pointer-events-none absolute inset-0 flex size-full flex-col items-center justify-center gap-3 p-3 text-center',
             asset &&
               'bg-black/20 opacity-0 transition-opacity hover:opacity-100'
           )}
         >
           {!asset && (
             <>
-              <span className="bg-primary/15 text-primary-text ring-primary/40 relative flex size-11 items-center justify-center rounded-full ring-1 transition-transform duration-300 group-hover:scale-110">
+              <span className="eg-generator-upload-icon bg-primary/15 text-primary-text ring-primary/40 relative flex size-11 items-center justify-center rounded-full ring-1 transition-transform duration-300 group-hover:scale-110">
                 {kind === 'video' ? (
                   <Upload className="size-5" />
                 ) : (
                   <ImageIcon className="size-5" />
                 )}
               </span>
-              <span className="relative text-sm font-medium">
+              <span className="eg-generator-upload-label relative text-sm font-medium">
                 {uploadLabel}
               </span>
-              <span className="text-muted-foreground relative text-[11px]">
+              <span className="eg-generator-upload-formats text-muted-foreground relative text-[11px]">
                 {kind === 'video'
                   ? `MP4, MOV · ${MAX_REFERENCE_VIDEO_MB}MB`
                   : 'JPG, PNG, WEBP · 10MB'}
@@ -528,7 +528,7 @@ export function GenjutsuGenerator({
     contentPolicy: string;
     generationBusy: string;
     generationFailed: string;
-    /** Shown before photo upload until the first purchase. */
+    /** Entry price for visitors who have not purchased a pack yet. */
     firstPrice: string;
     failedTitle: string;
     paywallTitle: string;
@@ -2100,23 +2100,23 @@ export function GenjutsuGenerator({
                 !referenceVideo ? (
                   <div
                     data-testid="reference-video-empty"
-                    className="flex size-full flex-col items-center justify-center gap-3 p-3 text-center"
+                    className="eg-generator-upload-empty flex size-full flex-col items-center justify-center gap-3 p-3 text-center"
                   >
-                    <span className="bg-primary/15 text-primary-text ring-primary/40 relative flex size-11 items-center justify-center rounded-full ring-1">
+                    <span className="eg-generator-upload-icon bg-primary/15 text-primary-text ring-primary/40 relative flex size-11 items-center justify-center rounded-full ring-1">
                       <Video className="size-5" aria-hidden="true" />
                     </span>
-                    <span className="text-sm font-medium">
+                    <span className="eg-generator-upload-label text-sm font-medium">
                       {copy.uploadReference}
                     </span>
                     <span
                       className={cn(
-                        'text-muted-foreground text-[11px] max-lg:hidden',
+                        'eg-generator-upload-formats text-muted-foreground text-[11px] max-lg:hidden',
                         theme && 'hidden'
                       )}
                     >
                       {copy.referenceEmpty}
                     </span>
-                    <span className="text-muted-foreground text-[11px] lg:hidden">
+                    <span className="eg-generator-upload-formats text-muted-foreground text-[11px] lg:hidden">
                       MP4, MOV
                     </span>
                   </div>
@@ -2171,7 +2171,7 @@ export function GenjutsuGenerator({
                   </button>
                 )}
             </div>
-            {!creditsQuery.data?.hasPaidOrder && (
+            {!theme && !creditsQuery.data?.hasPaidOrder && (
               <p
                 data-testid="first-price-desktop"
                 className="border-primary/30 bg-primary/5 text-foreground hidden rounded-lg border px-3 py-2.5 text-sm font-medium lg:block"
@@ -2319,7 +2319,13 @@ export function GenjutsuGenerator({
             {!creditsQuery.data?.hasPaidOrder && (
               <p
                 data-testid="first-price"
-                className="text-muted-foreground -mx-2 text-center text-[10px] leading-4 whitespace-nowrap min-[375px]:text-[11px] sm:text-xs lg:hidden"
+                className={cn(
+                  'text-muted-foreground -mx-2 text-center text-[10px] leading-4 whitespace-nowrap min-[375px]:text-[11px] sm:text-xs',
+                  // Themed side panels use a two-column upload grid. Keep
+                  // the price below the action at every viewport so it
+                  // never takes the photo's place in that grid.
+                  theme ? 'max-[360px]:text-[9px] lg:text-[10px]' : 'lg:hidden'
+                )}
               >
                 {copy.firstPrice}
               </p>
