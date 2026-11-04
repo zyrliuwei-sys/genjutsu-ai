@@ -2173,8 +2173,8 @@ export function GenjutsuGenerator({
             </div>
             {!creditsQuery.data?.hasPaidOrder && (
               <p
-                data-testid="first-price"
-                className="border-primary/30 bg-primary/5 text-foreground rounded-lg border px-3 py-2.5 text-sm font-medium max-lg:col-span-full max-lg:row-start-1"
+                data-testid="first-price-desktop"
+                className="border-primary/30 bg-primary/5 text-foreground hidden rounded-lg border px-3 py-2.5 text-sm font-medium lg:block"
               >
                 {copy.firstPrice}
               </p>
@@ -2316,6 +2316,14 @@ export function GenjutsuGenerator({
                   ? copy.paidGenerate
                   : (theme?.generate ?? copy.ui.generateNow)}
             </button>
+            {!creditsQuery.data?.hasPaidOrder && (
+              <p
+                data-testid="first-price"
+                className="text-muted-foreground -mx-2 text-center text-[10px] leading-4 whitespace-nowrap min-[375px]:text-[11px] sm:text-xs lg:hidden"
+              >
+                {copy.firstPrice}
+              </p>
+            )}
             {theme &&
               effectQueryEnabled &&
               (effectQuery.isPending || effectQuery.isError) && (
