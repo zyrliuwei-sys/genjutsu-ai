@@ -38,7 +38,14 @@ import {
   apiGetMedia,
   apiPost,
   apiUpload,
+  apiUploadImages,
+  MediaUploadError,
 } from '@/lib/api-client';
+import {
+  readSessionValue,
+  removeSessionValue,
+  writeSessionValue,
+} from '@/lib/browser-session';
 import { warmVideoTools } from '@/lib/browser-video-engine';
 import { trimMiddleVideo } from '@/lib/browser-video-trim';
 import { cropPortraitPhoto } from '@/lib/face-detect/portrait';
@@ -46,7 +53,12 @@ import {
   loadGenjutsuDraft,
   saveGenjutsuDraft,
   type DraftAsset,
+  type GenjutsuDraft,
 } from '@/lib/genjutsu-draft';
+import {
+  MediaFileUnavailableError,
+  stabilizeMediaFile,
+} from '@/lib/media-file';
 import { readMediaMetadata } from '@/lib/media-metadata';
 import { parallelMediaUpload } from '@/lib/parallel-media-upload';
 import { referenceVideoPlan } from '@/lib/reference-video-plan';
@@ -85,6 +97,7 @@ type Asset = {
   height?: number;
   duration?: number;
   videoReceipt?: { payload: string; signature: string };
+  sourceUrl?: string;
 };
 
 type GenjutsuTask = {
@@ -462,6 +475,8 @@ export type GeneratorUiCopy = {
   verifyBalanceFailed: string;
   saveMediaSignIn: string;
   saveMediaCheckout: string;
+  uploadInterrupted: string;
+  fileUnavailable: string;
   generationCanceled: string;
   noGeneratedVideo: string;
   closeVideo: string;
@@ -712,14 +727,27 @@ export function GenjutsuGenerator({
     queryKey: ['genjutsu-recover', user?.id],
     enabled: Boolean(user),
     queryFn: async () => {
-      const saved = sessionStorage.getItem(submissionStorageKey);
+      const saved = readSessionValue(submissionStorageKey);
       if (!saved) return null;
-      const { requestId } = JSON.parse(saved);
-      return (
+      let requestId: string;
+      try {
+        requestId = JSON.parse(saved).requestId;
+      } catch {
+        removeSessionValue(submissionStorageKey);
+        return null;
+      }
+      const recovered = (
         await apiGet<{ task: GenjutsuTask | null }>(
           `/api/genjutsu/generate?requestId=${encodeURIComponent(requestId)}`
         )
       ).task;
+      // A failed/refunded task is terminal. A retry needs a fresh request id,
+      // otherwise server deduplication keeps returning the same failed run.
+      if (recovered?.status === 'failed' || recovered?.status === 'canceled') {
+        removeSessionValue(submissionStorageKey);
+        return null;
+      }
+      return recovered;
     },
   });
   useEffect(() => {
@@ -791,7 +819,6 @@ export function GenjutsuGenerator({
           ) {
             setReferenceSource('effect');
             setReferenceClosed(false);
-            setReferenceVideo(undefined);
           }
           const saved = templates.find((t) => t.id === draft?.selectedId);
           setSelectedId(saved?.id ?? defaultTemplate.id);
@@ -806,10 +833,20 @@ export function GenjutsuGenerator({
         if (linked && !referenceOnly) {
           setReferenceSource('effect');
           setReferenceClosed(false);
-          setReferenceVideo(undefined);
+          if (
+            draft?.selectedId !== linked.id ||
+            draft?.referenceSource !== 'effect'
+          )
+            setReferenceVideo(undefined);
           setSelectedId(linked.id);
           setExampleId(linked.id);
-          setPreviewMode('example');
+          // A checkout/reload can restore an existing render before this
+          // asynchronous draft load finishes. Keep that result visible.
+          if (
+            !readSessionValue(`genjutsu-task:${user?.id}`) ||
+            linked.id !== draft?.selectedId
+          )
+            setPreviewMode('example');
         }
       })
       .catch(() => {
@@ -839,10 +876,10 @@ export function GenjutsuGenerator({
     needsPartner,
   ]);
 
-  function persistDraft() {
+  function persistDraft(overrides: Partial<GenjutsuDraft> = {}) {
     if (!draftReady || draftOwner !== (user?.id || 'anonymous'))
       return Promise.reject(new Error('Wait for media recovery to finish'));
-    const store = (asset?: Asset): DraftAsset | undefined =>
+    const store = (asset?: DraftAsset): DraftAsset | undefined =>
       asset && {
         kind: asset.kind,
         // The original picker File (sourceFile) is never read after trimming;
@@ -856,8 +893,9 @@ export function GenjutsuGenerator({
         height: asset.height,
         duration: asset.duration,
         videoReceipt: asset.videoReceipt,
+        sourceUrl: asset.sourceUrl,
       };
-    return saveGenjutsuDraft({
+    const snapshot: GenjutsuDraft = {
       owner: user?.id,
       selectedId,
       aspect,
@@ -869,6 +907,14 @@ export function GenjutsuGenerator({
       referenceVideo: store(referenceVideo),
       ownVideo: store(ownVideo),
       savedAt: Date.now(),
+      ...overrides,
+    };
+    return saveGenjutsuDraft({
+      ...snapshot,
+      lead: store(snapshot.lead),
+      partner: store(snapshot.partner),
+      referenceVideo: store(snapshot.referenceVideo),
+      ownVideo: store(snapshot.ownVideo),
     });
   }
   // Autosave reruns on every input change; report its failure once per visit.
@@ -998,17 +1044,23 @@ export function GenjutsuGenerator({
       setReferenceVideo(undefined);
       return;
     }
-    setReferenceVideo({
-      ...effectQuery.data,
-      kind: 'video',
-      preview: URL.createObjectURL(effectQuery.data.file),
-      uploading: false,
-    });
-    // The editing API keeps the input framing, so the size follows the clip.
-    const closest = closestAspect(
-      effectQuery.data.width,
-      effectQuery.data.height
+    setReferenceVideo((current) =>
+      current?.sourceUrl === effectClip && current.url
+        ? current
+        : {
+            ...effectQuery.data,
+            kind: 'video',
+            sourceUrl: effectClip,
+            preview: URL.createObjectURL(effectQuery.data.file),
+            uploading: false,
+          }
     );
+    // The editing API keeps the input framing, so the size follows the clip.
+    const restoredInput =
+      referenceVideo?.sourceUrl === effectClip && referenceVideo.url
+        ? referenceVideo
+        : effectQuery.data;
+    const closest = closestAspect(restoredInput.width!, restoredInput.height!);
     if (closest) setAspect(closest);
   }, [
     effectQuery.data,
@@ -1046,15 +1098,12 @@ export function GenjutsuGenerator({
     referenceVideo?.duration || durationTier
   );
   useEffect(() => {
-    const saved = user
-      ? sessionStorage.getItem(`genjutsu-task:${user.id}`)
-      : null;
+    const saved = user ? readSessionValue(`genjutsu-task:${user.id}`) : null;
     setTaskId(saved || undefined);
     if (saved) setPreviewMode('work');
   }, [user?.id]);
   useEffect(() => {
-    if (taskId && user)
-      sessionStorage.setItem(`genjutsu-task:${user.id}`, taskId);
+    if (taskId && user) writeSessionValue(`genjutsu-task:${user.id}`, taskId);
   }, [taskId, user?.id]);
   const creditsQuery = useQuery({
     queryKey: ['credits'],
@@ -1074,8 +1123,8 @@ export function GenjutsuGenerator({
   const task = taskQuery.data;
   useEffect(() => {
     if (taskQuery.isError && taskQuery.error.message === 'Task not found') {
-      sessionStorage.removeItem(`genjutsu-task:${user?.id}`);
-      sessionStorage.removeItem(submissionStorageKey);
+      removeSessionValue(`genjutsu-task:${user?.id}`);
+      removeSessionValue(submissionStorageKey);
       setTaskId(undefined);
       toast.error(taskQuery.error.message);
     }
@@ -1122,12 +1171,28 @@ export function GenjutsuGenerator({
       return;
     }
 
+    const setValidating = isVideo ? setValidatingMedia : setValidatingPhoto;
+    setValidating(true);
+    try {
+      file = await stabilizeMediaFile(file);
+    } catch {
+      toast.error(copy.ui.fileUnavailable);
+      setValidating(false);
+      return;
+    }
+
     // Iron rule: the swap model must receive a usable close-up of the person,
     // so zoom the photo in on the detected face no matter how small the
     // person is in the original frame. Keeps the file as-is when no confident
     // face is found or the photo is already a close-up.
     if (type === 'image') {
-      const cropped = await cropPortraitPhoto(file).catch(() => null);
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      const cropped = await Promise.race([
+        cropPortraitPhoto(file).catch(() => null),
+        new Promise<null>((resolve) => {
+          timeout = setTimeout(() => resolve(null), 3500);
+        }),
+      ]).finally(() => clearTimeout(timeout));
       if (cropped) file = cropped;
     }
 
@@ -1139,8 +1204,6 @@ export function GenjutsuGenerator({
     let preview = URL.createObjectURL(file);
     const controller = new AbortController();
     if (isVideo) clipController.current = controller;
-    const setValidating = isVideo ? setValidatingMedia : setValidatingPhoto;
-    setValidating(true);
     try {
       let metadata = await readMediaMetadata(
         preview,
@@ -1238,6 +1301,8 @@ export function GenjutsuGenerator({
         asset.videoReceipt && JSON.parse(asset.videoReceipt.payload);
       receiptValid = Boolean(
         receipt &&
+        receipt.owner === user?.id &&
+        receipt.url === asset.url &&
         receipt.expires > Date.now() + 60000 &&
         receipt.width === asset.width &&
         receipt.height === asset.height
@@ -1271,141 +1336,183 @@ export function GenjutsuGenerator({
     };
   };
 
-  const generate = useMutation({
-    mutationFn: async () => {
-      if (!lead || !referenceVideo || (needsPartner && !partner))
-        throw new Error(copy.ui.needAssets);
-      const current = await readinessQuery.refetch();
-      if (current.isError) throw new Error(copy.serviceUnavailable);
-      if (!current.data?.provider)
-        throw new Error(
-          'Configure an EvoLink or fal API key in Admin Settings'
-        );
-      if (!current.data.storageReady)
-        throw new Error(
-          'Configure public R2 storage in Admin Settings before generating'
-        );
-      if (!current.data.safetyReady)
-        throw new Error(
-          'Configure prompt safety screening in Admin Settings before generating'
-        );
-      if (!current.data.aspects.includes(aspect))
-        throw new Error(copy.ui.unsupportedSize);
-      // Editing models preserve source framing: prepare the actual input, not
-      // only the API's aspect_ratio flag. Pad to keep the entire performance.
-      let preparedReference = referenceVideo;
-      if (!referenceVideo.width || !referenceVideo.height)
-        throw new Error(
-          'Select the reference video again to verify its dimensions'
-        );
-      const plan = referenceVideoPlan(
-        referenceVideo.width,
-        referenceVideo.height,
-        aspect
+  async function prepareGenerationMedia() {
+    if (!lead || !referenceVideo || (needsPartner && !partner))
+      throw new Error(copy.ui.needAssets);
+    const current = await readinessQuery.refetch();
+    if (current.isError) throw new Error(copy.serviceUnavailable);
+    if (!current.data?.provider)
+      throw new Error('Configure an EvoLink or fal API key in Admin Settings');
+    if (!current.data.storageReady)
+      throw new Error(
+        'Configure public R2 storage in Admin Settings before generating'
       );
-      if (plan.needsResize) {
-        if (!referenceVideo.file)
-          throw new Error(
-            'Select the reference video again to change its ratio'
-          );
-        const controller = new AbortController();
-        clipController.current = controller;
-        setTrimProgress(0);
+    if (!current.data.safetyReady)
+      throw new Error(
+        'Configure prompt safety screening in Admin Settings before generating'
+      );
+    if (!current.data.aspects.includes(aspect))
+      throw new Error(copy.ui.unsupportedSize);
+    // Editing models preserve source framing: prepare the actual input, not
+    // only the API's aspect_ratio flag. Pad to keep the entire performance.
+    let preparedReference = referenceVideo;
+    if (!referenceVideo.width || !referenceVideo.height)
+      throw new Error(
+        'Select the reference video again to verify its dimensions'
+      );
+    const plan = referenceVideoPlan(
+      referenceVideo.width,
+      referenceVideo.height,
+      aspect
+    );
+    if (plan.needsResize) {
+      if (!referenceVideo.file)
+        throw new Error('Select the reference video again to change its ratio');
+      const controller = new AbortController();
+      clipController.current = controller;
+      setTrimProgress(0);
+      try {
+        const result = await trimMiddleVideo(
+          referenceVideo.file,
+          referenceVideo.duration!,
+          durationTier,
+          setTrimProgress,
+          controller.signal,
+          {
+            width: referenceVideo.width,
+            height: referenceVideo.height,
+            aspect,
+          }
+        );
+        const preview = URL.createObjectURL(result.file);
+        let metadata;
         try {
-          const result = await trimMiddleVideo(
-            referenceVideo.file,
-            referenceVideo.duration!,
-            durationTier,
-            setTrimProgress,
-            controller.signal,
-            {
-              width: referenceVideo.width,
-              height: referenceVideo.height,
-              aspect,
-            }
+          metadata = await readMediaMetadata(preview, 'video', result.file);
+        } catch (error) {
+          URL.revokeObjectURL(preview);
+          throw error;
+        }
+        if (!matchesVideoAspect(metadata.width, metadata.height, aspect)) {
+          URL.revokeObjectURL(preview);
+          throw new Error(
+            'Could not prepare the selected video ratio. Please retry.'
           );
-          const preview = URL.createObjectURL(result.file);
-          let metadata;
-          try {
-            metadata = await readMediaMetadata(preview, 'video', result.file);
-          } catch (error) {
-            URL.revokeObjectURL(preview);
-            throw error;
-          }
-          if (!matchesVideoAspect(metadata.width, metadata.height, aspect)) {
-            URL.revokeObjectURL(preview);
-            throw new Error(
-              'Could not prepare the selected video ratio. Please retry.'
+        }
+        preparedReference = {
+          ...referenceVideo,
+          ...metadata,
+          file: result.file,
+          preview,
+          url: undefined,
+          videoReceipt: undefined,
+          uploading: false,
+        };
+        setReferenceVideo(preparedReference);
+      } finally {
+        if (clipController.current === controller)
+          clipController.current = undefined;
+        setTrimProgress(undefined);
+      }
+    }
+    setLead({ ...lead, uploading: true });
+    if (partner) setPartner({ ...partner, uploading: true });
+    setReferenceVideo({ ...preparedReference, uploading: true });
+    let leadImage: string;
+    let crowdImage: string | undefined;
+    let videoUrl: string;
+    let videoReceipt: Asset['videoReceipt'];
+    let uploadedLead = lead;
+    let uploadedPartner = partner;
+    let uploadedReference = preparedReference;
+    try {
+      // Parallel transfer; each successful asset is retained even if the other fails.
+      const [imageUpload, videoUpload] = await parallelMediaUpload(
+        async () => {
+          // Two-photo effects use one request; separate simultaneous image
+          // requests would hit the endpoint's per-IP upload rate limit.
+          const missing = [lead, needsPartner ? partner : undefined].filter(
+            (asset): asset is Asset => Boolean(asset && !asset.url)
+          );
+          if (missing.length > 1) {
+            const result = await apiUploadImages<{ urls: string[] }>(
+              missing.map((asset) => {
+                if (!asset.file) throw new MediaFileUnavailableError();
+                return asset.file;
+              })
             );
+            if (
+              result.urls.length !== missing.length ||
+              result.urls.some((url) => !url.startsWith('https://'))
+            )
+              throw new Error('Upload failed');
+            uploadedLead = { ...lead, url: result.urls[0], uploading: false };
+            uploadedPartner = {
+              ...partner!,
+              url: result.urls[1],
+              uploading: false,
+            };
+            setLead(uploadedLead);
+            setPartner(uploadedPartner);
+          } else {
+            const image = await uploadAsset(lead);
+            uploadedLead = { ...lead, url: image.url, uploading: false };
+            setLead(uploadedLead);
+            if (needsPartner && partner) {
+              const image = await uploadAsset(partner);
+              uploadedPartner = {
+                ...partner,
+                url: image.url,
+                uploading: false,
+              };
+              setPartner(uploadedPartner);
+            }
           }
-          preparedReference = {
-            ...referenceVideo,
-            ...metadata,
-            file: result.file,
-            preview,
-            url: undefined,
-            videoReceipt: undefined,
+          crowdImage = needsPartner ? uploadedPartner?.url : undefined;
+          return { url: uploadedLead.url! };
+        },
+        async () => {
+          const uploaded = await uploadAsset(preparedReference);
+          uploadedReference = {
+            ...preparedReference,
+            url: uploaded.url,
+            videoReceipt: uploaded.videoReceipt,
             uploading: false,
           };
-          setReferenceVideo(preparedReference);
-        } finally {
-          if (clipController.current === controller)
-            clipController.current = undefined;
-          setTrimProgress(undefined);
+          setReferenceVideo(uploadedReference);
+          return uploaded;
         }
-      }
-      setLead({ ...lead, uploading: true });
-      if (partner) setPartner({ ...partner, uploading: true });
-      setReferenceVideo({ ...preparedReference, uploading: true });
-      let leadImage: string;
-      let crowdImage: string | undefined;
-      let videoUrl: string;
-      let videoReceipt: Asset['videoReceipt'];
-      try {
-        // Parallel transfer; each successful asset is retained even if the other fails.
-        const [imageUpload, videoUpload] = await parallelMediaUpload(
-          async () => {
-            const [uploaded, partnerUpload] = await Promise.all([
-              uploadAsset(lead).then((result) => {
-                setLead({ ...lead, url: result.url, uploading: false });
-                return result;
-              }),
-              needsPartner && partner
-                ? uploadAsset(partner).then((result) => {
-                    setPartner({
-                      ...partner,
-                      url: result.url,
-                      uploading: false,
-                    });
-                    return result;
-                  })
-                : undefined,
-            ]);
-            crowdImage = partnerUpload?.url;
-            return uploaded;
-          },
-          async () => {
-            const uploaded = await uploadAsset(preparedReference);
-            setReferenceVideo({
-              ...preparedReference,
-              url: uploaded.url,
-              videoReceipt: uploaded.videoReceipt,
-              uploading: false,
-            });
-            return uploaded;
-          }
-        );
-        leadImage = imageUpload.url;
-        videoUrl = videoUpload.url;
-        videoReceipt = videoUpload.videoReceipt;
-      } catch (error) {
-        setLead((value) => (value ? { ...value, uploading: false } : value));
-        setPartner((value) => (value ? { ...value, uploading: false } : value));
-        setReferenceVideo((value) =>
-          value ? { ...value, uploading: false } : value
-        );
-        throw error;
-      }
+      );
+      leadImage = imageUpload.url;
+      videoUrl = videoUpload.url;
+      videoReceipt = videoUpload.videoReceipt;
+    } catch (error) {
+      setLead((value) => (value ? { ...value, uploading: false } : value));
+      setPartner((value) => (value ? { ...value, uploading: false } : value));
+      setReferenceVideo((value) =>
+        value ? { ...value, uploading: false } : value
+      );
+      throw error;
+    }
+    return {
+      lead: uploadedLead,
+      partner: uploadedPartner,
+      referenceVideo: uploadedReference,
+      leadImage,
+      crowdImage,
+      videoUrl,
+      videoReceipt,
+    };
+  }
+
+  const generate = useMutation({
+    mutationFn: async () => {
+      const {
+        leadImage,
+        crowdImage,
+        videoUrl,
+        videoReceipt,
+        referenceVideo: preparedReference,
+      } = await prepareGenerationMedia();
       const signature = JSON.stringify([
         leadImage,
         crowdImage,
@@ -1416,7 +1523,7 @@ export function GenjutsuGenerator({
       let submission: { signature: string; requestId: string } | undefined;
       try {
         submission = JSON.parse(
-          sessionStorage.getItem(submissionStorageKey) || 'null'
+          readSessionValue(submissionStorageKey) || 'null'
         );
       } catch {
         /* New submission. */
@@ -1424,10 +1531,7 @@ export function GenjutsuGenerator({
       if (!submission || submission.signature !== signature) {
         // uuid falls back to getRandomValues where crypto.randomUUID is missing.
         submission = { signature, requestId: uuidv4() };
-        sessionStorage.setItem(
-          submissionStorageKey,
-          JSON.stringify(submission)
-        );
+        writeSessionValue(submissionStorageKey, JSON.stringify(submission));
       }
       return apiPost<GenjutsuTask>('/api/genjutsu/generate', {
         requestId: submission.requestId,
@@ -1461,8 +1565,26 @@ export function GenjutsuGenerator({
         track('paywall_shown', { reason: 'low_balance' });
         setPaywall(true);
       } else {
-        track('generate_error', { stage: 'submit', error: error.message });
-        showFailure(error.message);
+        track('generate_error', {
+          stage:
+            error instanceof MediaUploadError
+              ? 'upload'
+              : error instanceof MediaFileUnavailableError
+                ? 'file_read'
+                : 'submit',
+          error: error.message,
+          ...(error instanceof MediaUploadError && {
+            endpoint: error.endpoint,
+            attempts: error.attempts,
+          }),
+        });
+        showFailure(
+          error instanceof MediaFileUnavailableError
+            ? copy.ui.fileUnavailable
+            : error instanceof MediaUploadError
+              ? copy.ui.uploadInterrupted
+              : error.message
+        );
       }
     },
   });
@@ -1480,7 +1602,7 @@ export function GenjutsuGenerator({
 
   useEffect(() => {
     if (!task || !isDone(task)) return;
-    sessionStorage.removeItem(submissionStorageKey);
+    removeSessionValue(submissionStorageKey);
     queryClient.invalidateQueries({ queryKey: ['credits'] });
     if (task.status === 'failed') {
       track('generate_failed', { kind: task.error || 'unknown' });
@@ -1623,7 +1745,7 @@ export function GenjutsuGenerator({
         track('guest_signin_failed', { error: 'throw' });
       }
       try {
-        sessionStorage.setItem(RESUME_KEY, 'generate');
+        writeSessionValue(RESUME_KEY, 'generate');
       } catch {
         /* Storage unavailable — the user can click again. */
       }
@@ -1682,9 +1804,26 @@ export function GenjutsuGenerator({
   // The visitor clicked Generate before signing in: once the saved draft is
   // restored under their account, continue straight to the balance check
   // (paywall or generation) instead of making them click again.
-  const resumed = useRef(false);
+  const resumeBusy = useRef(false);
+  const [returnTick, setReturnTick] = useState(0);
   useEffect(() => {
-    if (resumed.current || !user || !canGenerate) return;
+    const returned = () => {
+      if (document.visibilityState === 'visible') {
+        if (readSessionValue(RESUME_KEY) === 'checkout') setPaywall(false);
+        setReturnTick((tick) => tick + 1);
+      }
+    };
+    window.addEventListener('pageshow', returned);
+    window.addEventListener('focus', returned);
+    document.addEventListener('visibilitychange', returned);
+    return () => {
+      window.removeEventListener('pageshow', returned);
+      window.removeEventListener('focus', returned);
+      document.removeEventListener('visibilitychange', returned);
+    };
+  }, []);
+  useEffect(() => {
+    if (resumeBusy.current || !user || !canGenerate || paywall) return;
     if (!assetIsReady(lead) || partnerMissing || !assetIsReady(referenceVideo))
       return;
     // Wait for the restored reference effect to load; resuming earlier trips
@@ -1697,15 +1836,28 @@ export function GenjutsuGenerator({
       return;
     let pending: string | null = null;
     try {
-      pending = sessionStorage.getItem(RESUME_KEY);
-      sessionStorage.removeItem(RESUME_KEY);
+      pending = readSessionValue(RESUME_KEY);
     } catch {
       /* Storage unavailable — the user can click again. */
     }
-    resumed.current = true;
     if (!pending) return;
-    track('signin_resume', { action: pending });
-    if (pending === 'generate') void startGeneration();
+    resumeBusy.current = true;
+    removeSessionValue(RESUME_KEY);
+    void (async () => {
+      try {
+        if (pending === 'checkout') {
+          const credits = await creditsQuery.refetch();
+          // Cancelled checkouts leave the saved material available for a
+          // manual retry; returning must not reopen a paywall in a loop.
+          if (!credits.data?.hasPaidOrder || credits.data.balance < costCredits)
+            return;
+        }
+        track('signin_resume', { action: pending, returnTick });
+        await startGeneration();
+      } finally {
+        resumeBusy.current = false;
+      }
+    })();
   });
 
   const workUrl = task?.status === 'success' ? task.url : null;
@@ -2564,9 +2716,8 @@ export function GenjutsuGenerator({
                 title={copy.ui.closeVideo}
                 onClick={() => {
                   // The result stays in My videos; this only clears the panel.
-                  if (user)
-                    sessionStorage.removeItem(`genjutsu-task:${user.id}`);
-                  sessionStorage.removeItem(submissionStorageKey);
+                  if (user) removeSessionValue(`genjutsu-task:${user.id}`);
+                  removeSessionValue(submissionStorageKey);
                   setTaskId(undefined);
                   setPreviewMode('example');
                 }}
@@ -2743,12 +2894,33 @@ export function GenjutsuGenerator({
           <Pricing
             variant="dialog"
             beforeCheckout={async () => {
-              // The draft only restores media after checkout returns; a failed
-              // save must not block payment.
-              await persistDraft().catch((error) => {
-                trackDraftError('draft_checkout', error);
-                toast.warning(copy.ui.saveMediaCheckout);
-              });
+              try {
+                const media = await prepareGenerationMedia();
+                await persistDraft({
+                  lead: media.lead,
+                  partner: needsPartner ? media.partner : undefined,
+                  referenceVideo: media.referenceVideo,
+                  ownVideo:
+                    referenceSource === 'upload'
+                      ? media.referenceVideo
+                      : ownVideo,
+                });
+                writeSessionValue(RESUME_KEY, 'checkout');
+              } catch (error) {
+                track('generate_error', {
+                  stage: 'checkout_prepare',
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                setPaywall(false);
+                showFailure(
+                  error instanceof MediaFileUnavailableError
+                    ? copy.ui.fileUnavailable
+                    : error instanceof MediaUploadError
+                      ? copy.ui.uploadInterrupted
+                      : copy.ui.saveMediaCheckout
+                );
+                throw error;
+              }
             }}
             clipSeconds={referenceVideo?.duration || durationTier}
             balanceCredits={creditsQuery.data?.balance || 0}

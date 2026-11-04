@@ -36,7 +36,7 @@ assert.equal(
 );
 assert.equal(ready.provider, 'evolink');
 assert.deepEqual(ready.aspects, ['16:9', '9:16']);
-assert.equal(ready.maxVideoMB, 30);
+assert.equal(ready.maxVideoMB, 40);
 assert.equal(
   genjutsuReadiness({ ...storage, fal_api_key: 'test' }).provider,
   'fal'

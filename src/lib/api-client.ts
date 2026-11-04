@@ -1,11 +1,14 @@
 // Typed client for the app's REST endpoints (src/routes/api/**).
 // Unwraps the resp.ts envelope: { code: 0 | -1, message, data? }.
 
+import { stabilizeMediaFile } from './media-file';
+
 export class ApiError extends Error {
   constructor(
     public code: number,
     message: string,
-    public data?: unknown
+    public data?: unknown,
+    public status?: number
   ) {
     super(message);
     this.name = 'ApiError';
@@ -38,11 +41,12 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const json = await res
     .json()
     .catch(() => ({ code: -1, message: res.statusText || 'Request failed' }));
-  if (json.code !== 0) {
+  if (!res.ok || json.code !== 0) {
     throw new ApiError(
       json.code ?? -1,
       json.message || 'Request failed',
-      json.data
+      json.data,
+      res.status
     );
   }
   // respOk() omits data entirely — callers expecting void get undefined.
@@ -92,16 +96,61 @@ export const apiDelete = <T = void>(url: string) =>
   request<T>(url, { method: 'DELETE' });
 
 export async function apiUpload<T>(url: string, file: File, field = 'files') {
-  const body = new FormData();
-  body.append(field, file);
-  return request<T>(url, { method: 'POST', body });
+  return uploadFiles<T>(url, [file], field);
 }
 
-// Query-string builder for paginated list endpoints.
 export async function apiUploadImages<T>(files: File[]) {
-  const body = new FormData();
-  files.forEach((file) => body.append('files', file));
-  return request<T>('/api/storage/upload-image', { method: 'POST', body });
+  return uploadFiles<T>('/api/storage/upload-image', files);
+}
+
+export class MediaUploadError extends Error {
+  constructor(
+    public endpoint: string,
+    public attempts: number,
+    public cause: unknown
+  ) {
+    super(cause instanceof Error ? cause.message : 'Upload failed');
+    this.name = 'MediaUploadError';
+  }
+}
+
+async function uploadFiles<T>(
+  url: string,
+  files: File[],
+  field = 'files'
+): Promise<T> {
+  // A fresh body per attempt; a picker/file-system handle must never be reused
+  // after checkout, a navigation, or a failed request body read.
+  const stable = await Promise.all(files.map(stabilizeMediaFile));
+  for (let attempt = 1; ; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120000);
+    try {
+      const body = new FormData();
+      stable.forEach((file) => body.append(field, file));
+      return await request<T>(url, {
+        method: 'POST',
+        body,
+        signal: controller.signal,
+      });
+    } catch (error) {
+      const transient =
+        error instanceof ApiError
+          ? error.status === 429 ||
+            (error.status ?? 0) >= 500 ||
+            /^(Upload failed|Failed to fetch|Network error)/i.test(
+              error.message
+            )
+          : error instanceof TypeError ||
+            (error instanceof Error &&
+              /AbortError|TimeoutError|NetworkError/.test(error.name));
+      if (!transient || attempt >= 3)
+        throw new MediaUploadError(url, attempt, error);
+    } finally {
+      clearTimeout(timeout);
+    }
+    await new Promise((resolve) => setTimeout(resolve, attempt * 1200));
+  }
 }
 
 // Query-string builder for paginated list endpoints.

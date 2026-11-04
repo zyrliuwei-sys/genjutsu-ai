@@ -1193,5 +1193,7 @@
   "dime.generator.photo_hint": "Un visage net, bouche et joues visibles",
   "dime.generator.generate": "Essayer avec ma photo",
   "dime.generator.loading": "Chargement de la scène…",
-  "dime.generator.retry": "Échec du chargement. Cliquez pour réessayer."
+  "dime.generator.retry": "Échec du chargement. Cliquez pour réessayer.",
+  "landing.generator.ui.upload_interrupted": "Envoi interrompu. Votre solde n’a pas été débité. Réessayez ; les fichiers déjà envoyés seront réutilisés.",
+  "landing.generator.ui.file_unavailable": "Ce fichier n’est plus disponible. Sélectionnez à nouveau votre photo ou vidéo ; votre solde est inchangé."
 }

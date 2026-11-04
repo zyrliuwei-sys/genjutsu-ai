@@ -1,5 +1,16 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import {
+  readSessionValue,
+  removeSessionValue,
+  writeSessionValue,
+} from './browser-session';
+import {
+  mediaFileBytes,
+  restoreMediaFile,
+  type StoredMediaFile,
+} from './media-file';
+
 /** Tab-scoped binary drafts survive auth/checkout navigation without uploading
  * private media before consent. Never persist temporary blob: preview URLs. */
 export type DraftAsset = {
@@ -12,6 +23,8 @@ export type DraftAsset = {
   height?: number;
   duration?: number;
   videoReceipt?: { payload: string; signature: string };
+  /** Identifies a built-in effect, so its uploaded copy can survive a reload. */
+  sourceUrl?: string;
 };
 export type GenjutsuDraft = {
   owner?: string;
@@ -30,24 +43,59 @@ export type GenjutsuDraft = {
 };
 const TTL = 24 * 60 * 60 * 1000;
 let queue: Promise<unknown> = Promise.resolve();
+let currentDraft: GenjutsuDraft | undefined;
+const FALLBACK_KEY = 'genjutsu-draft-remote';
+type StoredAsset = Omit<DraftAsset, 'file'> & {
+  file?: File;
+  data?: StoredMediaFile;
+};
+type StoredDraft = Omit<
+  GenjutsuDraft,
+  'lead' | 'partner' | 'referenceVideo' | 'ownVideo'
+> & {
+  lead?: StoredAsset;
+  partner?: StoredAsset;
+  referenceVideo?: StoredAsset;
+  ownVideo?: StoredAsset;
+};
 
 function draftKey() {
-  let key = sessionStorage.getItem('genjutsu-draft-tab');
+  let key = readSessionValue('genjutsu-draft-tab');
   if (!key) {
     // uuid falls back to getRandomValues where crypto.randomUUID is missing.
     key = uuidv4();
-    sessionStorage.setItem('genjutsu-draft-tab', key);
   }
+  if (!writeSessionValue('genjutsu-draft-tab', key))
+    throw new Error('This browser cannot retain media across checkout');
   return key;
 }
 
 async function database() {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open('genjutsu-drafts', 1);
+    let stopped = false;
+    const timeout = setTimeout(() => {
+      stopped = true;
+      reject(new Error('Draft storage timed out'));
+    }, 3000);
     request.onupgradeneeded = () => request.result.createObjectStore('drafts');
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-    request.onblocked = () => reject(new Error('Draft storage is blocked'));
+    request.onsuccess = () => {
+      clearTimeout(timeout);
+      if (stopped) {
+        request.result.close();
+        return;
+      }
+      resolve(request.result);
+    };
+    request.onerror = () => {
+      clearTimeout(timeout);
+      reject(request.error);
+    };
+    request.onblocked = () => {
+      clearTimeout(timeout);
+      stopped = true;
+      reject(new Error('Draft storage is blocked'));
+    };
   });
 }
 
@@ -61,9 +109,19 @@ async function transact<T>(
     return await new Promise<T>((resolve, reject) => {
       const tx = db.transaction('drafts', mode);
       const request = operation(tx.objectStore('drafts'), key);
-      tx.oncomplete = () => resolve(request.result);
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
+      const timeout = setTimeout(() => tx.abort(), 8000);
+      tx.oncomplete = () => {
+        clearTimeout(timeout);
+        resolve(request.result);
+      };
+      tx.onerror = () => {
+        clearTimeout(timeout);
+        reject(tx.error ?? request.error);
+      };
+      tx.onabort = () => {
+        clearTimeout(timeout);
+        reject(tx.error ?? new Error('Draft save interrupted'));
+      };
     });
   } finally {
     db.close();
@@ -72,9 +130,36 @@ async function transact<T>(
 
 export async function loadGenjutsuDraft(owner?: string) {
   await queue.catch(() => undefined);
-  const draft = await transact<GenjutsuDraft | undefined>('readonly', (s, k) =>
-    s.get(k)
-  );
+  let stored: StoredDraft | undefined;
+  try {
+    stored = await transact<StoredDraft | undefined>('readonly', (s, k) =>
+      s.get(k)
+    );
+  } catch {
+    // URL-only drafts also work when IndexedDB is unavailable/private.
+  }
+  let fallback: GenjutsuDraft | undefined;
+  try {
+    fallback =
+      JSON.parse(readSessionValue(FALLBACK_KEY) || 'null') ?? undefined;
+  } catch {
+    /* Ignore an incomplete old draft. */
+  }
+  const latest = [stored, fallback, currentDraft]
+    .filter((d): d is StoredDraft => Boolean(d))
+    .sort((a, b) => b.savedAt - a.savedAt)[0];
+  const restore = (asset?: StoredAsset): DraftAsset | undefined => {
+    if (!asset) return;
+    const { data, ...rest } = asset;
+    return { ...rest, file: data ? restoreMediaFile(data) : rest.file };
+  };
+  const draft = latest && {
+    ...latest,
+    lead: restore(latest.lead),
+    partner: restore(latest.partner),
+    referenceVideo: restore(latest.referenceVideo),
+    ownVideo: restore(latest.ownVideo),
+  };
   if (!draft) return;
   if (
     Date.now() - draft.savedAt > TTL ||
@@ -86,42 +171,7 @@ export async function loadGenjutsuDraft(owner?: string) {
   return draft;
 }
 
-// Some Chromium builds (mostly Android, files picked through a content://
-// provider or cloud gallery) refuse to store a picker File, failing the whole
-// transaction with "DataError: Failed to write blobs (InvalidBlob)", although
-// the bytes still read fine. Retry with in-memory copies, cached so autosaves
-// don't reread the file, and keep copying for the rest of the page's life.
-const memoryCopies = new WeakMap<File, File>();
-let copyBlobs = false;
-
-async function memoryCopy(file: File) {
-  let copy = memoryCopies.get(file);
-  if (!copy) {
-    const bytes = await (file.arrayBuffer
-      ? file.arrayBuffer()
-      : new Response(file).arrayBuffer());
-    copy = new File([bytes], file.name, {
-      type: file.type,
-      lastModified: file.lastModified,
-    });
-    memoryCopies.set(file, copy);
-  }
-  return copy;
-}
-
-async function withMemoryCopies(draft: GenjutsuDraft): Promise<GenjutsuDraft> {
-  const copyAsset = async (asset?: DraftAsset) =>
-    asset?.file ? { ...asset, file: await memoryCopy(asset.file) } : asset;
-  return {
-    ...draft,
-    lead: await copyAsset(draft.lead),
-    partner: await copyAsset(draft.partner),
-    referenceVideo: await copyAsset(draft.referenceVideo),
-    ownVideo: await copyAsset(draft.ownVideo),
-  };
-}
-
-function writeDraft(draft: GenjutsuDraft) {
+function writeDraft(draft: StoredDraft) {
   return transact('readwrite', (s, k) => {
     // Prune expired drafts from closed tabs too; don't retain private blobs
     // indefinitely merely because their originating tab no longer exists.
@@ -137,21 +187,52 @@ function writeDraft(draft: GenjutsuDraft) {
 }
 
 async function storeDraft(draft: GenjutsuDraft) {
-  if (copyBlobs) return writeDraft(await withMemoryCopies(draft));
+  currentDraft = draft;
+  const store = async (
+    asset?: DraftAsset
+  ): Promise<StoredAsset | undefined> => {
+    if (!asset) return;
+    const { file, ...rest } = asset;
+    return {
+      ...rest,
+      data:
+        file && (!asset.url || asset.kind === 'video')
+          ? await mediaFileBytes(file)
+          : undefined,
+    };
+  };
+  const remote = (asset?: DraftAsset) => {
+    if (!asset?.url || asset.url.startsWith('blob:')) return;
+    const { file: _file, ...rest } = asset;
+    return rest;
+  };
+  const remoteDraft: GenjutsuDraft = {
+    ...draft,
+    lead: remote(draft.lead),
+    partner: remote(draft.partner),
+    referenceVideo: remote(draft.referenceVideo),
+    ownVideo: remote(draft.ownVideo),
+  };
+  // Never claim a recoverable checkout if either person's photo was lost.
+  const remotelyRecoverable = Boolean(
+    remoteDraft.lead &&
+    remoteDraft.referenceVideo &&
+    (!draft.partner || remoteDraft.partner)
+  );
+  const fallbackSaved =
+    remotelyRecoverable &&
+    writeSessionValue(FALLBACK_KEY, JSON.stringify(remoteDraft));
+  if (!remotelyRecoverable) removeSessionValue(FALLBACK_KEY);
   try {
-    return await writeDraft(draft);
+    return await writeDraft({
+      ...draft,
+      lead: await store(draft.lead),
+      partner: await store(draft.partner),
+      referenceVideo: await store(draft.referenceVideo),
+      ownVideo: await store(draft.ownVideo),
+    });
   } catch (error) {
-    const hasFiles = [
-      draft.lead,
-      draft.partner,
-      draft.referenceVideo,
-      draft.ownVideo,
-    ].some((asset) => asset?.file);
-    if (!hasFiles) throw error;
-    copyBlobs = true;
-    // A failure here (e.g. NotReadableError) replaces the original error, so
-    // the funnel shows whether the file itself had become unreadable.
-    return writeDraft(await withMemoryCopies(draft));
+    if (!fallbackSaved) throw error;
   }
 }
 
@@ -163,6 +244,8 @@ export function saveGenjutsuDraft(draft: GenjutsuDraft) {
 }
 
 export function clearGenjutsuDraft() {
+  currentDraft = undefined;
+  removeSessionValue(FALLBACK_KEY);
   const result = queue
     .catch(() => undefined)
     .then(() => transact('readwrite', (s, k) => s.delete(k)));

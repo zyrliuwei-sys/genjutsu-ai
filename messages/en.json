@@ -1947,5 +1947,7 @@
   "dime.generator.photo_hint": "One clear face, mouth and cheeks visible",
   "dime.generator.generate": "Try it with my photo",
   "dime.generator.loading": "Loading the party take…",
-  "dime.generator.retry": "Take could not load. Click to retry."
+  "dime.generator.retry": "Take could not load. Click to retry.",
+  "landing.generator.ui.upload_interrupted": "Upload interrupted. Your balance has not been charged. Try again; uploaded files will be reused.",
+  "landing.generator.ui.file_unavailable": "This file is no longer available. Select your photo or video again; your balance is unchanged."
 }

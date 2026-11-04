@@ -1193,5 +1193,7 @@
   "dime.generator.photo_hint": "Un rostro nítido, boca y mejillas visibles",
   "dime.generator.generate": "Probar con mi foto",
   "dime.generator.loading": "Cargando la escena…",
-  "dime.generator.retry": "No se pudo cargar. Haz clic para reintentar."
+  "dime.generator.retry": "No se pudo cargar. Haz clic para reintentar.",
+  "landing.generator.ui.upload_interrupted": "La carga se interrumpió. No se ha descontado saldo. Reintenta; se reutilizarán los archivos ya cargados.",
+  "landing.generator.ui.file_unavailable": "El archivo ya no está disponible. Vuelve a seleccionar tu foto o vídeo; tu saldo no ha cambiado."
 }

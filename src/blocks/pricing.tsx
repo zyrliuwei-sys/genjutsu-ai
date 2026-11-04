@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -95,6 +95,8 @@ export function Pricing({
   const [pendingPlan, setPendingPlan] = useState<PricingPlan | null>(null);
   const [loadingProvider, setLoadingProvider] =
     useState<PaymentProvider | null>(null);
+  const [preparingCheckout, setPreparingCheckout] = useState(false);
+  const checkoutStarting = useRef(false);
   const dialog = variant === 'dialog';
 
   const enabledProviders = useMemo<PaymentProvider[]>(
@@ -292,15 +294,33 @@ export function Pricing({
 
   async function startCheckout(plan: PricingPlan, provider?: PaymentProvider) {
     // Repeat clicks while a checkout is in flight would create duplicate orders.
-    if (checkoutMutation.isPending || loadingProvider) return;
+    if (
+      checkoutStarting.current ||
+      checkoutMutation.isPending ||
+      loadingProvider
+    )
+      return;
+    checkoutStarting.current = true;
+    setPreparingCheckout(true);
+    setLoadingProvider(provider ?? null);
     try {
       await beforeCheckout?.();
     } catch {
       toast.error(m['landing.pricing.save_media_failed']());
+      checkoutStarting.current = false;
+      setPreparingCheckout(false);
+      setLoadingProvider(null);
       return;
     }
+    setPreparingCheckout(false);
     setLoadingProvider(provider ?? null);
-    checkoutMutation.mutate({ plan, provider });
+    try {
+      await checkoutMutation.mutateAsync({ plan, provider });
+    } catch {
+      // The mutation's onError reports the failure and releases the picker.
+    } finally {
+      checkoutStarting.current = false;
+    }
   }
 
   async function handleCheckout(plan: PricingPlan) {
@@ -419,7 +439,7 @@ export function Pricing({
               <button
                 type="button"
                 className="text-muted-foreground hover:text-foreground mt-auto inline-flex items-center gap-1 self-start pt-6 text-sm disabled:opacity-50"
-                disabled={!!loadingProvider}
+                disabled={preparingCheckout || !!loadingProvider}
                 onClick={() => setPendingPlan(null)}
               >
                 <ArrowLeft className="size-4" />
@@ -432,7 +452,11 @@ export function Pricing({
               </p>
               <PaymentProviderOptions
                 providers={enabledProviders}
-                loadingProvider={loadingProvider}
+                loadingProvider={
+                  preparingCheckout
+                    ? (loadingProvider ?? enabledProviders[0])
+                    : loadingProvider
+                }
                 onSelect={handleProviderSelect}
               />
             </div>
@@ -443,13 +467,21 @@ export function Pricing({
             quantity={(plan) =>
               packVideos(plan.productId) || plan.description || ''
             }
-            busy={checkoutMutation.isPending || !!loadingProvider}
+            busy={
+              preparingCheckout ||
+              checkoutMutation.isPending ||
+              !!loadingProvider
+            }
             onCheckout={handleCheckout}
           />
         ) : (
           <CreditPackList
             packs={creditPacks}
-            busy={checkoutMutation.isPending || !!loadingProvider}
+            busy={
+              preparingCheckout ||
+              checkoutMutation.isPending ||
+              !!loadingProvider
+            }
             buyLabel={(pack) =>
               m['landing.pricing.buy_selected']({ price: pack.price })
             }
@@ -492,7 +524,11 @@ export function Pricing({
           }
         }}
         providers={enabledProviders.length ? enabledProviders : ['stripe']}
-        loadingProvider={loadingProvider}
+        loadingProvider={
+          preparingCheckout
+            ? (loadingProvider ?? enabledProviders[0])
+            : loadingProvider
+        }
         onSelect={handleProviderSelect}
         planName={pendingPlan?.name}
         price={pendingPlan?.price}

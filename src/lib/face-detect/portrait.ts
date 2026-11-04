@@ -31,7 +31,9 @@ let classifierPromise: Promise<ClassifyRegion | null> | null = null;
 
 function loadClassifier() {
   if (!classifierPromise) {
-    classifierPromise = fetch(CASCADE_URL)
+    classifierPromise = fetch(CASCADE_URL, {
+      signal: AbortSignal.timeout(5000),
+    })
       .then((response) => {
         if (!response.ok) throw new Error(`cascade ${response.status}`);
         return response.arrayBuffer();

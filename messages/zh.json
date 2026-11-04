@@ -1947,5 +1947,7 @@
   "dime.generator.photo_hint": "一张清晰人脸，嘴部和脸颊可见",
   "dime.generator.generate": "用我的照片试试",
   "dime.generator.loading": "正在加载派对片段…",
-  "dime.generator.retry": "片段加载失败，点击重试。"
+  "dime.generator.retry": "片段加载失败，点击重试。",
+  "landing.generator.ui.upload_interrupted": "上传中断，未扣除余额。请重试，已上传成功的素材会直接复用。",
+  "landing.generator.ui.file_unavailable": "文件已失效，请重新选择照片或视频。你的余额未受影响。"
 }

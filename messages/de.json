@@ -1193,5 +1193,7 @@
   "dime.generator.photo_hint": "Ein klares Gesicht, Mund und Wangen sichtbar",
   "dime.generator.generate": "Mit meinem Foto testen",
   "dime.generator.loading": "Partyszene wird geladen…",
-  "dime.generator.retry": "Laden fehlgeschlagen. Zum Wiederholen klicken."
+  "dime.generator.retry": "Laden fehlgeschlagen. Zum Wiederholen klicken.",
+  "landing.generator.ui.upload_interrupted": "Upload unterbrochen. Es wurde kein Guthaben abgezogen. Versuche es erneut; bereits hochgeladene Dateien werden wiederverwendet.",
+  "landing.generator.ui.file_unavailable": "Diese Datei ist nicht mehr verfügbar. Wähle dein Foto oder Video erneut aus; dein Guthaben ist unverändert."
 }

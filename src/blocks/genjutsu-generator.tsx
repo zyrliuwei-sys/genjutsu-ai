@@ -439,6 +439,8 @@ export function GenjutsuGenerator({
               download: m['landing.generator.ui.download'](),
               loadVideoFailed: m['landing.generator.ui.load_video_failed'](),
               restoreFailed: m['landing.generator.ui.restore_failed'](),
+              uploadInterrupted: m['landing.generator.ui.upload_interrupted'](),
+              fileUnavailable: m['landing.generator.ui.file_unavailable'](),
               onlyImages: m['landing.generator.ui.only_images'](),
               onlyVideos: m['landing.generator.ui.only_videos'](),
               imageTooSmall: m['landing.generator.ui.image_too_small'](),
