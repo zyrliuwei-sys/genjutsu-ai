@@ -13,12 +13,18 @@ import {
   removeSessionValue,
   writeSessionValue,
 } from '@/lib/browser-session';
+import {
+  checkoutReturnPath,
+  withoutCheckoutReturn,
+  type CheckoutReturnTarget,
+} from '@/lib/checkout-return';
 import { paymentOptions, formatUsd as usd } from '@/lib/payment-options';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { track } from '@/lib/track';
 import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
+import { useCheckoutReturn } from '@/hooks/use-checkout-return';
 import { usePublicConfig } from '@/hooks/use-public-config';
 import { PageBreadcrumbs } from '@/blocks/page-breadcrumbs';
 import { CreditPackList, type CreditPack } from '@/components/credit-pack-list';
@@ -38,6 +44,7 @@ export function Pricing({
   description,
   summary,
   selectedVideo,
+  returnTarget = variant === 'dialog' ? 'genjutsu' : 'pricing',
 }: {
   title?: string;
   /** Replaces the default description line under the title. */
@@ -53,6 +60,7 @@ export function Pricing({
   clipSeconds?: number;
   balanceCredits?: number;
   singleVideo?: PricingProduct;
+  returnTarget?: CheckoutReturnTarget;
 } = {}) {
   const router = useRouter();
   const { data: session, isPending: sessionPending } = useSession();
@@ -69,7 +77,10 @@ export function Pricing({
     if (!saved) return;
     try {
       const choice = JSON.parse(saved);
-      if (choice.path !== currentPathWithQuery('/pricing')) return;
+      if (
+        choice.path !== withoutCheckoutReturn(currentPathWithQuery('/pricing'))
+      )
+        return;
       if (
         Date.now() - choice.savedAt < 10 * 60 * 1000 &&
         pricingCatalog[choice.productId]?.available !== false &&
@@ -88,6 +99,22 @@ export function Pricing({
   const checkoutStarting = useRef(false);
   const checkoutRedirected = useRef(false);
   const dialog = variant === 'dialog';
+  useCheckoutReturn(
+    'pricing',
+    () => {
+      document.getElementById('pricing')?.scrollIntoView({ block: 'start' });
+    },
+    !dialog
+  );
+
+  function returnPaths() {
+    // Keep the locale, effect query and hash on provider redirects.
+    const path = withoutCheckoutReturn(window.location.href);
+    return {
+      redirect: path,
+      cancel_redirect: checkoutReturnPath(path, returnTarget),
+    };
+  }
 
   const enabledProviders = useMemo(
     () => (configsData ? paymentOptions(configsData) : []),
@@ -192,8 +219,7 @@ export function Pricing({
         product_id: plan.productId,
         payment_provider: provider,
         locale: getLocale(),
-        // Come back to the page the user paid from.
-        redirect: currentPathWithQuery('/settings/billing'),
+        ...returnPaths(),
       }),
     onSuccess: (data, variables) => {
       if (!data?.checkout_url) {
@@ -207,7 +233,22 @@ export function Pricing({
         provider: variables.provider || '',
         flow: directStripe ? 'stripe_pack_click_v1' : 'direct_payment_v1',
       });
+      writeSessionValue(
+        'genjutsu-checkout-choice',
+        JSON.stringify({
+          productId: variables.plan.productId,
+          path: withoutCheckoutReturn(currentPathWithQuery('/pricing')),
+          savedAt: Date.now(),
+        })
+      );
       checkoutRedirected.current = true;
+      // Back/swipe-back must restore the same panel even when the browser
+      // discards this document. Stripe's cancel link uses the same destination.
+      window.history.replaceState(
+        window.history.state,
+        '',
+        returnPaths().cancel_redirect
+      );
       window.location.href = data.checkout_url;
     },
     onError: (err: any) => {

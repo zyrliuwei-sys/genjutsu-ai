@@ -66,6 +66,7 @@ import { track } from '@/lib/track';
 import { cn } from '@/lib/utils';
 import { matchesVideoAspect } from '@/lib/video-dimensions';
 import { MAX_REFERENCE_VIDEO_MB } from '@/lib/video-trim-plan';
+import { useCheckoutReturn } from '@/hooks/use-checkout-return';
 import { Pricing } from '@/blocks/pricing';
 import { BeforeAfterVideo } from '@/components/before-after-video';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -1808,10 +1809,19 @@ export function GenjutsuGenerator({
   // (paywall or generation) instead of making them click again.
   const resumeBusy = useRef(false);
   const [returnTick, setReturnTick] = useState(0);
+  useCheckoutReturn(
+    'genjutsu',
+    () => {
+      // An unpaid return restores package selection; it must never resume a
+      // generation or automatically send the visitor back to checkout.
+      removeSessionValue(RESUME_KEY);
+      setPaywall(true);
+    },
+    draftReady && !sessionPending
+  );
   useEffect(() => {
     const returned = () => {
       if (document.visibilityState === 'visible') {
-        if (readSessionValue(RESUME_KEY) === 'checkout') setPaywall(false);
         setReturnTick((tick) => tick + 1);
       }
     };

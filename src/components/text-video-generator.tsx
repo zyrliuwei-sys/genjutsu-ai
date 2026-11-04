@@ -22,6 +22,7 @@ import {
   type FrameAsset,
   type TextVideoDraft,
 } from '@/lib/text-video-draft';
+import { useCheckoutReturn } from '@/hooks/use-checkout-return';
 import { Pricing } from '@/blocks/pricing';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -99,6 +100,7 @@ export function TextVideoGenerator({
   const [taskId, setTaskId] = useState<string>();
   const [restored, setRestored] = useState(false);
   const [paywall, setPaywall] = useState(false);
+  useCheckoutReturn('text-video', () => setPaywall(true), restored);
   const [checking, setChecking] = useState(false);
   const failedShown = useRef<string | undefined>(undefined);
   const generationLock = useRef(false);
@@ -586,6 +588,7 @@ export function TextVideoGenerator({
         <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5 sm:max-w-6xl">
           <Pricing
             variant="dialog"
+            returnTarget="text-video"
             singleVideo={product}
             balanceCredits={balance.data?.balance || 0}
             beforeCheckout={async () => {

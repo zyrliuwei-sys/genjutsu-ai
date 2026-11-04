@@ -7,24 +7,9 @@ import { getPricingProduct } from '@/config/pricing';
 import { getAllConfigs } from '@/modules/config/service';
 import { createCheckout, hasPaidPurchase } from '@/modules/payment/service';
 import { hasPermission } from '@/modules/rbac/service';
+import { paymentReturnUrls } from '@/lib/checkout-return';
 import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respData, respErr } from '@/lib/resp';
-
-function safeSameOriginPath(
-  input: string | undefined | null,
-  fallbackPath: string,
-  baseUrl: string
-): string {
-  if (!input) return fallbackPath;
-  try {
-    const appUrl = new URL(baseUrl);
-    const candidate = new URL(input, appUrl);
-    if (candidate.origin !== appUrl.origin) return fallbackPath;
-    return candidate.pathname + candidate.search + candidate.hash;
-  } catch {
-    return fallbackPath;
-  }
-}
 
 async function POST({ request }: { request: Request }) {
   const limited = enforceMinIntervalRateLimit(request, {
@@ -42,7 +27,7 @@ async function POST({ request }: { request: Request }) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { product_id, payment_provider, redirect } = body;
+    const { product_id, payment_provider, redirect, cancel_redirect } = body;
 
     if (!product_id || typeof product_id !== 'string') {
       return respErr('Missing product_id');
@@ -82,18 +67,11 @@ async function POST({ request }: { request: Request }) {
 
     // Build success/cancel URLs — only accept same-origin redirects.
     const baseUrl = configs.app_url || 'http://localhost:3000';
-    const safeRedirectPath = safeSameOriginPath(
+    const { successUrl, cancelUrl } = paymentReturnUrls(
+      baseUrl,
       redirect,
-      '/settings/billing',
-      baseUrl
+      cancel_redirect
     );
-    // Straight to the destination: safeSameOriginPath has already reduced it
-    // to a path on this site. The old detour through /auth-callback exists to
-    // hand a session token to a desktop client — a browser coming back from
-    // checkout is already signed in, and that page isn't part of this app.
-    const finalRedirect = `${baseUrl}${safeRedirectPath}`;
-    const successUrl = `${baseUrl}/api/payment/callback?redirect=${encodeURIComponent(finalRedirect)}`;
-    const cancelUrl = `${baseUrl}/pricing`;
 
     const checkout = await createCheckout({
       userId: session.user.id,
