@@ -1303,5 +1303,7 @@
   "road.faq.six.a": "No. Las tres vistas proceden de la colección enlazada de Media.io y sirven de referencia. Este editor independiente no es una aplicación oficial del meme ni un producto de Media.io. El resultado depende de tu foto y de la escena.",
   "road.cta.kicker": "Tu turno en la ventanilla",
   "road.cta.title": "Dale al conductor una cara conocida.",
-  "landing.hero.road_tag": "El meme de la camioneta y la propiedad privada"
+  "landing.hero.road_tag": "El meme de la camioneta y la propiedad privada",
+  "landing.pricing.continue_stripe": "Continuar a Stripe · {price}",
+  "landing.pricing.stripe_pack_hint": "Elige un paquete para continuar al pago en Stripe."
 }

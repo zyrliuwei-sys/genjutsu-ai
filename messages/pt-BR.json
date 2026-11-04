@@ -1303,5 +1303,7 @@
   "road.faq.six.a": "Não. As três prévias vêm da coleção do Media.io indicada no link e servem de referência. Este editor independente não é um aplicativo oficial do meme nem um produto do Media.io. O resultado depende da sua foto e da cena escolhida.",
   "road.cta.kicker": "Sua vez na janela",
   "road.cta.title": "Dê ao motorista um rosto conhecido.",
-  "landing.hero.road_tag": "O meme da picape e da propriedade privada"
+  "landing.hero.road_tag": "O meme da picape e da propriedade privada",
+  "landing.pricing.continue_stripe": "Continuar no Stripe · {price}",
+  "landing.pricing.stripe_pack_hint": "Escolha um pacote para continuar ao pagamento no Stripe."
 }

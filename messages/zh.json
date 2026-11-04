@@ -2057,5 +2057,7 @@
   "road.faq.six.a": "不是。这三个预览来自链接中的 Media.io 案例集，用作参考场景。本站是独立编辑工具，不是这个梗的官方应用或 Media.io 产品。实际生成结果取决于你的照片和所选场景。",
   "road.cta.kicker": "轮到你坐在车窗边",
   "road.cta.title": "给司机换一张熟悉的脸。",
-  "landing.hero.road_tag": "私人领地皮卡司机梗"
+  "landing.hero.road_tag": "私人领地皮卡司机梗",
+  "landing.pricing.continue_stripe": "前往 Stripe 支付 · {price}",
+  "landing.pricing.stripe_pack_hint": "点击套餐，直接进入 Stripe 结账页面。"
 }

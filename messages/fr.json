@@ -1303,5 +1303,7 @@
   "road.faq.six.a": "Non. Les trois aperçus viennent de la collection Media.io indiquée et servent de références. Cet éditeur indépendant n’est ni une application officielle du mème ni un produit Media.io. Le résultat dépend de votre photo et de la scène choisie.",
   "road.cta.kicker": "À vous de prendre la fenêtre",
   "road.cta.title": "Donnez au conducteur un visage familier.",
-  "landing.hero.road_tag": "Le mème du pick-up et du terrain privé"
+  "landing.hero.road_tag": "Le mème du pick-up et du terrain privé",
+  "landing.pricing.continue_stripe": "Continuer vers Stripe · {price}",
+  "landing.pricing.stripe_pack_hint": "Choisissez un pack pour passer au paiement Stripe."
 }

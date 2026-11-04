@@ -1303,5 +1303,7 @@
   "road.faq.six.a": "Nein. Die drei Vorschauen stammen aus der verlinkten Media.io-Sammlung und dienen als Referenz. Dieser unabhängige Editor ist weder eine offizielle Meme-App noch ein Media.io-Produkt. Dein Ergebnis hängt von Foto und Szene ab.",
   "road.cta.kicker": "Dein Platz am Fenster",
   "road.cta.title": "Gib dem Fahrer ein vertrautes Gesicht.",
-  "landing.hero.road_tag": "Das Pickup-Meme vom Privatgrundstück"
+  "landing.hero.road_tag": "Das Pickup-Meme vom Privatgrundstück",
+  "landing.pricing.continue_stripe": "Weiter zu Stripe · {price}",
+  "landing.pricing.stripe_pack_hint": "Wähle ein Paket, um zum Stripe-Checkout zu gelangen."
 }

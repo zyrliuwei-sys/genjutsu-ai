@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Sparkles } from 'lucide-react';
+import { ArrowRight, Loader2, Sparkles } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import type { PricingPlan } from '@/components/pricing-table';
@@ -17,7 +17,7 @@ export type CreditPack = PricingPlan & {
 };
 
 /**
- * Selectable credit pack list: pick a row, then one checkout button.
+ * Credit packs can select a plan or start checkout directly from the row.
  * The `featured` pack starts selected.
  */
 export function CreditPackList({
@@ -33,6 +33,8 @@ export function CreditPackList({
   onSelectionChange,
   visibleCount,
   moreLabel,
+  checkoutOnSelect = false,
+  loadingId,
 }: {
   packs: CreditPack[];
   busy?: boolean;
@@ -46,6 +48,8 @@ export function CreditPackList({
   onSelectionChange?: (id: string) => void;
   visibleCount?: number;
   moreLabel?: string;
+  checkoutOnSelect?: boolean;
+  loadingId?: string;
 }) {
   const [selectedId, setSelectedId] = useState(
     (packs.find((pack) => pack.featured) ?? packs[0])?.id
@@ -57,20 +61,26 @@ export function CreditPackList({
   if (!selected) return null;
   const renderPack = (pack: CreditPack) => {
     const active = pack.id === selected.id;
+    const pending = busy && pack.id === loadingId;
     return (
       <button
         key={pack.id}
         type="button"
-        role="radio"
-        aria-checked={active}
-        disabled={busy}
+        role={checkoutOnSelect ? undefined : 'radio'}
+        aria-checked={checkoutOnSelect ? undefined : active}
+        aria-label={
+          checkoutOnSelect ? `${pack.amount}: ${buyLabel(pack)}` : undefined
+        }
+        aria-busy={pending || undefined}
+        disabled={busy || pack.disabled}
         data-testid={`credit-pack-${pack.productId}`}
         onClick={() => {
           setSelectedId(pack.id);
           onSelectionChange?.(pack.id);
+          if (checkoutOnSelect) onCheckout(pack);
         }}
         className={cn(
-          'flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors disabled:pointer-events-none disabled:opacity-60 sm:px-4',
+          'focus-visible:ring-ring flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60 sm:px-4',
           active
             ? 'border-primary bg-primary/10 ring-primary/40 ring-1'
             : 'bg-muted/40 hover:border-foreground/25 border-transparent'
@@ -85,7 +95,11 @@ export function CreditPackList({
           )}
           aria-hidden
         >
-          <Sparkles className="size-3.5" />
+          {pending ? (
+            <Loader2 className="size-3.5 animate-spin motion-reduce:animate-none" />
+          ) : (
+            <Sparkles className="size-3.5" />
+          )}
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -103,9 +117,9 @@ export function CreditPackList({
               </span>
             )}
           </span>
-          {pack.detail && (
+          {(pack.detail || pending) && (
             <span className="text-muted-foreground mt-0.5 block truncate text-xs sm:text-sm">
-              {pack.detail}
+              {pending ? processingLabel : pack.detail}
             </span>
           )}
         </span>
@@ -119,13 +133,16 @@ export function CreditPackList({
             {pack.price}
           </span>
         </span>
+        {checkoutOnSelect && (
+          <ArrowRight className="size-4 shrink-0" aria-hidden />
+        )}
       </button>
     );
   };
   return (
     <div className="mx-auto max-w-3xl">
       <div
-        role="radiogroup"
+        role={checkoutOnSelect ? 'group' : 'radiogroup'}
         className="border-primary/50 bg-card shadow-primary/40 rounded-2xl border p-3 shadow-[0_30px_80px_-50px] sm:p-5"
       >
         <div className="flex flex-col gap-2.5">
@@ -156,27 +173,39 @@ export function CreditPackList({
         )}
       </div>
 
-      <div className="mx-auto mt-8 max-w-md">
-        {checkoutActions ? (
-          <>
-            <div className="mb-4 flex items-baseline justify-between gap-3 text-base font-semibold">
-              <span>{selected.amount}</span>
-              <span className="tabular-nums" data-testid="selected-pack-total">
-                {selected.price}
-              </span>
-            </div>
-            {checkoutActions(selected)}
-          </>
-        ) : (
-          <Button
-            className="h-13 w-full rounded-xl text-base font-semibold"
-            disabled={busy || selected.disabled}
-            onClick={() => onCheckout(selected)}
-          >
-            {busy ? processingLabel : buyLabel(selected)}
-          </Button>
-        )}
-      </div>
+      {checkoutOnSelect ? (
+        <p
+          role="status"
+          className="text-muted-foreground mt-3 text-center text-sm"
+        >
+          {busy && loadingId ? processingLabel : null}
+        </p>
+      ) : (
+        <div className="mx-auto mt-8 max-w-md">
+          {checkoutActions ? (
+            <>
+              <div className="mb-4 flex items-baseline justify-between gap-3 text-base font-semibold">
+                <span>{selected.amount}</span>
+                <span
+                  className="tabular-nums"
+                  data-testid="selected-pack-total"
+                >
+                  {selected.price}
+                </span>
+              </div>
+              {checkoutActions(selected)}
+            </>
+          ) : (
+            <Button
+              className="h-13 w-full rounded-xl text-base font-semibold"
+              disabled={busy || selected.disabled}
+              onClick={() => onCheckout(selected)}
+            >
+              {busy ? processingLabel : buyLabel(selected)}
+            </Button>
+          )}
+        </div>
+      )}
 
       {perks && perks.length > 0 && (
         <ul className="text-muted-foreground mt-5 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs sm:text-sm">

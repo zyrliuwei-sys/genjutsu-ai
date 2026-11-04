@@ -84,13 +84,19 @@ export function Pricing({
   const [loadingProvider, setLoadingProvider] =
     useState<PaymentProvider | null>(null);
   const [preparingCheckout, setPreparingCheckout] = useState(false);
+  const [loadingPlanId, setLoadingPlanId] = useState<string>();
   const checkoutStarting = useRef(false);
+  const checkoutRedirected = useRef(false);
   const dialog = variant === 'dialog';
 
   const enabledProviders = useMemo(
     () => (configsData ? paymentOptions(configsData) : []),
     [configsData]
   );
+  const directStripe =
+    !configsError &&
+    enabledProviders.length === 1 &&
+    enabledProviders[0] === 'stripe';
   // One shared prepaid balance for every generation API.
   const clipCost =
     singleVideo?.credits ?? (clipSeconds ? genjutsuCredits(clipSeconds) : 0);
@@ -193,19 +199,22 @@ export function Pricing({
       if (!data?.checkout_url) {
         toast.error(m['landing.pricing.checkout_failed']());
         setLoadingProvider(null);
+        setLoadingPlanId(undefined);
         return;
       }
       track('checkout_redirect', {
         plan: variables.plan.productId || '',
         provider: variables.provider || '',
-        flow: 'direct_payment_v1',
+        flow: directStripe ? 'stripe_pack_click_v1' : 'direct_payment_v1',
       });
+      checkoutRedirected.current = true;
       window.location.href = data.checkout_url;
     },
     onError: (err: any) => {
       track('checkout_failed', { error: String(err?.message || '') });
       toast.error(err?.message || m['landing.pricing.checkout_failed']());
       setLoadingProvider(null);
+      setLoadingPlanId(undefined);
     },
   });
 
@@ -214,8 +223,13 @@ export function Pricing({
   // state freezes with the page and would otherwise stay forever.
   useEffect(() => {
     const release = () => {
+      // Refocusing during draft preparation or the request must not unlock
+      // checkout. Only a return from an actual redirect releases this state.
+      if (!checkoutRedirected.current) return;
+      checkoutRedirected.current = false;
       checkoutStarting.current = false;
       setLoadingProvider(null);
+      setLoadingPlanId(undefined);
     };
     const onPageshow = (event: PageTransitionEvent) => {
       if (event.persisted) release();
@@ -234,14 +248,7 @@ export function Pricing({
   }, []);
 
   async function startCheckout(plan: PricingPlan, provider?: PaymentProvider) {
-    // Repeat clicks while a checkout is in flight would create duplicate orders.
-    if (
-      checkoutStarting.current ||
-      checkoutMutation.isPending ||
-      loadingProvider
-    )
-      return;
-    checkoutStarting.current = true;
+    // handleCheckout acquires the lock before any asynchronous work.
     setPreparingCheckout(true);
     setLoadingProvider(provider ?? null);
     try {
@@ -251,6 +258,7 @@ export function Pricing({
       checkoutStarting.current = false;
       setPreparingCheckout(false);
       setLoadingProvider(null);
+      setLoadingPlanId(undefined);
       return;
     }
     setPreparingCheckout(false);
@@ -274,28 +282,34 @@ export function Pricing({
       sessionPending
     )
       return;
+    // Lock synchronously, including configuration loading and draft saving.
+    checkoutStarting.current = true;
+    setLoadingProvider(provider);
+    setLoadingPlanId(plan.id);
     track('plan_click', {
       plan: plan.productId || '',
       signedIn: Boolean(session?.user),
       provider,
       surface: dialog ? 'paywall' : 'pricing',
-      flow: 'direct_payment_v1',
+      flow: directStripe ? 'stripe_pack_click_v1' : 'direct_payment_v1',
     });
     if (!session?.user) {
-      checkoutStarting.current = true;
-      setLoadingProvider(provider);
       const path = currentPathWithQuery('/pricing');
       writeSessionValue(
         'genjutsu-checkout-choice',
         JSON.stringify({ productId: plan.productId, path, savedAt: Date.now() })
       );
       const callbackUrl = encodeURIComponent(path);
+      checkoutRedirected.current = true;
       router.push(`/sign-in?callbackUrl=${callbackUrl}`);
       return;
     }
     const cfg = configsData ?? (await refetchConfigs()).data;
     if (!cfg || !paymentOptions(cfg).includes(provider)) {
       toast.error(m['landing.pricing.payment_unavailable']());
+      checkoutStarting.current = false;
+      setLoadingProvider(null);
+      setLoadingPlanId(undefined);
       void refetchConfigs();
       return;
     }
@@ -368,6 +382,70 @@ export function Pricing({
       />
     );
   }
+
+  const purchaseList = (
+    <>
+      {directStripe && (
+        <p className="text-muted-foreground mb-3 text-center text-sm">
+          {m['landing.pricing.stripe_pack_hint']()}
+        </p>
+      )}
+      <CreditPackList
+        packs={
+          singleVideo
+            ? creditPacks.map((pack) => ({
+                ...pack,
+                amount: pack.description ?? pack.amount,
+                detail: m['landing.pricing.feature_no_subscription'](),
+              }))
+            : creditPacks
+        }
+        visibleCount={3}
+        moreLabel={m['landing.pricing.more_videos']()}
+        selectedId={selectedPlan.id}
+        onSelectionChange={setSelectedDialogId}
+        busy={busy || sessionPending || configsPending}
+        checkoutOnSelect={directStripe}
+        loadingId={loadingPlanId}
+        buyLabel={(pack) =>
+          directStripe
+            ? m['landing.pricing.continue_stripe']({ price: pack.price })
+            : m['landing.pricing.buy_selected']({ price: pack.price })
+        }
+        processingLabel={
+          preparingCheckout
+            ? m['landing.pricing.preparing_video']()
+            : m['common.pricing.processing']()
+        }
+        footnote={dialog ? undefined : m['landing.pricing.video_count_note']()}
+        checkoutActions={paymentActions}
+        perks={
+          dialog
+            ? undefined
+            : [
+                {
+                  icon: <Lock className="size-3.5 shrink-0" aria-hidden />,
+                  label: m['landing.pricing.secure_checkout'](),
+                },
+                {
+                  icon: <RotateCcw className="size-3.5 shrink-0" aria-hidden />,
+                  label: m['landing.pricing.failure_policy_short'](),
+                },
+                {
+                  icon: (
+                    <InfinityIcon className="size-3.5 shrink-0" aria-hidden />
+                  ),
+                  label: m['landing.pricing.feature_no_subscription'](),
+                },
+              ]
+        }
+        onCheckout={(pack) => {
+          if (enabledProviders[0])
+            void handleCheckout(pack, enabledProviders[0]);
+        }}
+      />
+    </>
+  );
 
   const Wrapper = dialog ? 'div' : 'section';
 
@@ -465,112 +543,87 @@ export function Pricing({
                 )}
               </div>
             )}
-            <div
-              className="border-primary/50 bg-primary/[0.04] rounded-2xl border p-4 sm:p-5"
-              data-testid={`paywall-plan-${selectedPlan.productId}`}
-            >
-              <div className="mb-4 flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-base font-medium">
-                    {singleVideo
-                      ? selectedPlan.description
-                      : selectedPlan.amount}
-                  </p>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    {m['landing.pricing.feature_no_subscription']()}
-                  </p>
+            {directStripe ? (
+              purchaseList
+            ) : (
+              <>
+                <div
+                  className="border-primary/50 bg-primary/[0.04] rounded-2xl border p-4 sm:p-5"
+                  data-testid={`paywall-plan-${selectedPlan.productId}`}
+                >
+                  <div className="mb-4 flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-base font-medium">
+                        {singleVideo
+                          ? selectedPlan.description
+                          : selectedPlan.amount}
+                      </p>
+                      <p className="text-muted-foreground mt-1 text-xs">
+                        {m['landing.pricing.feature_no_subscription']()}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-muted-foreground text-xs">
+                        {m['landing.pricing.order_total']()}
+                      </p>
+                      <p
+                        className="mt-1 text-3xl font-semibold tracking-tight tabular-nums"
+                        data-testid="purchase-total"
+                      >
+                        {selectedPlan.price}
+                      </p>
+                    </div>
+                  </div>
+                  {selectedPlan.disabled && (
+                    <p className="text-destructive mb-3 text-sm">
+                      {m['landing.pricing.insufficient_selected_clip']()}
+                    </p>
+                  )}
+                  {paymentActions(selectedPlan)}
                 </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-muted-foreground text-xs">
-                    {m['landing.pricing.order_total']()}
-                  </p>
-                  <p
-                    className="mt-1 text-3xl font-semibold tracking-tight tabular-nums"
-                    data-testid="purchase-total"
+                <details className="group border-border mt-4 rounded-xl border px-4 py-3">
+                  <summary className="cursor-pointer text-sm font-medium">
+                    {m['landing.pricing.more_videos']()}
+                  </summary>
+                  <div
+                    role="radiogroup"
+                    aria-label={m['landing.pricing.choose_videos']()}
+                    className="mt-3 grid gap-2"
                   >
-                    {selectedPlan.price}
-                  </p>
-                </div>
-              </div>
-              {selectedPlan.disabled && (
-                <p className="text-destructive mb-3 text-sm">
-                  {m['landing.pricing.insufficient_selected_clip']()}
-                </p>
-              )}
-              {paymentActions(selectedPlan)}
-            </div>
-            <details className="group border-border mt-4 rounded-xl border px-4 py-3">
-              <summary className="cursor-pointer text-sm font-medium">
-                {m['landing.pricing.more_videos']()}
-              </summary>
-              <div
-                role="radiogroup"
-                aria-label={m['landing.pricing.choose_videos']()}
-                className="mt-3 grid gap-2"
-              >
-                {creditPacks.map((pack) => (
-                  <button
-                    key={pack.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={pack.id === selectedPlan.id}
-                    data-testid={`paywall-choice-${pack.productId}`}
-                    disabled={busy || pack.disabled}
-                    onClick={() => setSelectedDialogId(pack.id)}
-                    className={cn(
-                      'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors disabled:opacity-50',
-                      pack.id === selectedPlan.id
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border hover:border-primary/50'
-                    )}
-                  >
-                    <span>{singleVideo ? pack.description : pack.amount}</span>
-                    <span className="font-medium tabular-nums">
-                      {pack.price}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </details>
+                    {creditPacks.map((pack) => (
+                      <button
+                        key={pack.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={pack.id === selectedPlan.id}
+                        data-testid={`paywall-choice-${pack.productId}`}
+                        disabled={busy || pack.disabled}
+                        onClick={() => setSelectedDialogId(pack.id)}
+                        className={cn(
+                          'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors disabled:opacity-50',
+                          pack.id === selectedPlan.id
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary/50'
+                        )}
+                      >
+                        <span>
+                          {singleVideo ? pack.description : pack.amount}
+                        </span>
+                        <span className="font-medium tabular-nums">
+                          {pack.price}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </details>
+              </>
+            )}
             <p className="text-muted-foreground mt-3 text-center text-xs">
               {m['landing.pricing.failure_policy_short']()}
             </p>
           </div>
         ) : (
-          <CreditPackList
-            packs={creditPacks}
-            visibleCount={3}
-            moreLabel={m['landing.pricing.more_videos']()}
-            selectedId={selectedDialogId}
-            onSelectionChange={setSelectedDialogId}
-            busy={busy}
-            buyLabel={(pack) =>
-              m['landing.pricing.buy_selected']({ price: pack.price })
-            }
-            processingLabel={m['common.pricing.processing']()}
-            footnote={m['landing.pricing.video_count_note']()}
-            checkoutActions={paymentActions}
-            perks={[
-              {
-                icon: <Lock className="size-3.5 shrink-0" aria-hidden />,
-                label: m['landing.pricing.secure_checkout'](),
-              },
-              {
-                icon: <RotateCcw className="size-3.5 shrink-0" aria-hidden />,
-                label: m['landing.pricing.failure_policy_short'](),
-              },
-              {
-                icon: (
-                  <InfinityIcon className="size-3.5 shrink-0" aria-hidden />
-                ),
-                label: m['landing.pricing.feature_no_subscription'](),
-              },
-            ]}
-            onCheckout={(pack) => {
-              if (enabledProviders[0])
-                void handleCheckout(pack, enabledProviders[0]);
-            }}
-          />
+          purchaseList
         )}
         {dialog && (
           <p className="text-muted-foreground mt-5 flex items-center justify-center gap-1.5 text-center text-xs">

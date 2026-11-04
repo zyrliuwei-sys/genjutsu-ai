@@ -2057,5 +2057,7 @@
   "road.faq.six.a": "No. The three previews are sourced from the linked Media.io collection and used as reference scenes. This is an independent editor, not an official app for the meme or a Media.io product. Your generated result depends on your photo and the selected scene.",
   "road.cta.kicker": "Your turn at the window",
   "road.cta.title": "Give the driver a familiar face.",
-  "landing.hero.road_tag": "The private-property pickup meme"
+  "landing.hero.road_tag": "The private-property pickup meme",
+  "landing.pricing.continue_stripe": "Continue to Stripe · {price}",
+  "landing.pricing.stripe_pack_hint": "Choose a pack to continue to Stripe Checkout."
 }
