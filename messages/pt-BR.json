@@ -1305,5 +1305,6 @@
   "road.cta.title": "Dê ao motorista um rosto conhecido.",
   "landing.hero.road_tag": "O meme da picape e da propriedade privada",
   "landing.pricing.continue_stripe": "Continuar no Stripe · {price}",
-  "landing.pricing.stripe_pack_hint": "Escolha um pacote para continuar ao pagamento no Stripe."
+  "landing.pricing.stripe_pack_hint": "Escolha um pacote para continuar ao pagamento no Stripe.",
+  "landing.trends.floor_guide": "Entenda a tendência 58th Floor AI"
 }

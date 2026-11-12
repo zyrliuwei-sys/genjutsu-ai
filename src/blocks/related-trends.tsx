@@ -1,5 +1,6 @@
 import { tDynamic } from '@/core/i18n/dynamic';
 import {
+  FLOOR_GUIDE_PATH,
   RELATED_TRENDS,
   TREND_HUB_LABEL,
   TREND_HUB_PATH,
@@ -38,13 +39,23 @@ export function RelatedTrends({ currentSlug }: { currentSlug: TrendSlug }) {
           }),
         ]}
       />
-      <div className="mx-auto max-w-7xl px-4 pb-12">
+      <div className="mx-auto flex max-w-7xl flex-wrap gap-x-8 gap-y-3 px-4 pb-12">
         <a
           href={TREND_HUB_PATH}
           className="text-primary text-sm font-medium underline underline-offset-4"
         >
           {TREND_HUB_LABEL}
         </a>
+        {['tiny-desk-ai', 'bulin-47-ai', 'burning-bridges-ai'].includes(
+          currentSlug
+        ) && (
+          <a
+            href={FLOOR_GUIDE_PATH}
+            className="text-primary text-sm font-medium underline underline-offset-4"
+          >
+            {m['landing.trends.floor_guide']()}
+          </a>
+        )}
       </div>
     </>
   );

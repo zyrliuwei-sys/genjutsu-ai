@@ -1305,5 +1305,6 @@
   "road.cta.title": "Dale al conductor una cara conocida.",
   "landing.hero.road_tag": "El meme de la camioneta y la propiedad privada",
   "landing.pricing.continue_stripe": "Continuar a Stripe · {price}",
-  "landing.pricing.stripe_pack_hint": "Elige un paquete para continuar al pago en Stripe."
+  "landing.pricing.stripe_pack_hint": "Elige un paquete para continuar al pago en Stripe.",
+  "landing.trends.floor_guide": "La tendencia 58th Floor AI explicada"
 }

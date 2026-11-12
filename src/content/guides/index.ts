@@ -8,6 +8,37 @@ import type { GuideMeta } from '@/lib/guides';
  * structured data: keep each answer identical to the text on the page.
  */
 export const GUIDE_METAS: Record<string, GuideMeta> = {
+  '58th-floor': {
+    title: '58th Floor: The COLORS Performance and AI Video Trend Explained',
+    h1: '58th Floor: The Song, the COLORS Show and the AI Trend',
+    description:
+      'What is the 58th Floor trend? Watch Anderson .Paak and Cordae’s original COLORS performance, understand the two-photo AI remakes, and plan your own edit.',
+    card_title: '58th Floor AI trend explained',
+    published_at: '2026-11-12',
+    updated_at: '2026-11-12',
+    faq: [
+      {
+        q: 'What is the 58th Floor trend?',
+        a: 'It is a music-performance trend based on Anderson .Paak and Cordae’s 58th Floor COLORS session. AI remakes put other people into the teal studio, with two performers sharing a hanging microphone.',
+      },
+      {
+        q: 'Is 58th Floor a song or an AI effect?',
+        a: '58th Floor is the song title. The AI effect is a separate remake format inspired by the performance; the original COLORS upload shows the artists performing.',
+      },
+      {
+        q: 'Do I need one photo or two for a 58th Floor AI video?',
+        a: 'A template that recasts both performers needs a separate reference for each role, usually two individual photos. A single-person character swap changes one lead and should not be mistaken for a two-person template.',
+      },
+      {
+        q: 'Does this site have a dedicated 58th Floor template?',
+        a: 'Not currently. This page explains the trend and links to the original. The custom video editor supports a 3–10-second reference clip and a lead photo; it does not offer a tested two-photo 58th Floor preset.',
+      },
+      {
+        q: 'Is creating a video free?',
+        a: 'Reading this guide and watching the original performance do not use generation credits. Creating a personalized video on this site requires paid credits; check the displayed price before starting.',
+      },
+    ],
+  },
   'apps-similar-to-genjutsu-ai': {
     title:
       'What Is Similar to Genjutsu AI? Alternatives Grouped by What They Do',

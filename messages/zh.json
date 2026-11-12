@@ -2059,5 +2059,6 @@
   "road.cta.title": "给司机换一张熟悉的脸。",
   "landing.hero.road_tag": "私人领地皮卡司机梗",
   "landing.pricing.continue_stripe": "前往 Stripe 支付 · {price}",
-  "landing.pricing.stripe_pack_hint": "点击套餐，直接进入 Stripe 结账页面。"
+  "landing.pricing.stripe_pack_hint": "点击套餐，直接进入 Stripe 结账页面。",
+  "landing.trends.floor_guide": "58th Floor AI 热门趋势解读"
 }

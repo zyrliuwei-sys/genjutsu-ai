@@ -2059,5 +2059,6 @@
   "road.cta.title": "Give the driver a familiar face.",
   "landing.hero.road_tag": "The private-property pickup meme",
   "landing.pricing.continue_stripe": "Continue to Stripe · {price}",
-  "landing.pricing.stripe_pack_hint": "Choose a pack to continue to Stripe Checkout."
+  "landing.pricing.stripe_pack_hint": "Choose a pack to continue to Stripe Checkout.",
+  "landing.trends.floor_guide": "58th Floor AI trend explained"
 }
