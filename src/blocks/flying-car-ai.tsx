@@ -3,6 +3,7 @@ import { ArrowDown, ArrowRight, Check } from 'lucide-react';
 
 import { FLYING_CAR_THEMES } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
+import { TREND_HUB_PARENT } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
@@ -211,7 +212,11 @@ export function FlyingCarAi() {
       <main className="fc-page">
         <section className="fc-hero" aria-labelledby="fc-title">
           <div className="fc-hero-copy">
-            <PageBreadcrumbs currentPage={m['flycar.nav']()} className="mb-6" />
+            <PageBreadcrumbs
+              parents={[TREND_HUB_PARENT]}
+              currentPage={m['flycar.nav']()}
+              className="mb-6"
+            />
             <p className="fc-eyebrow">{m['flycar.eyebrow']()}</p>
             <h1 id="fc-title">
               {m['flycar.hero.title']()}{' '}

@@ -24,6 +24,14 @@ for (const path of [
   assert.equal(canonicalPagePath(path), path, path);
 }
 assert.equal(canonicalPagePath('/guides/'), '/guides');
+for (const prefix of ['', '/de', '/fr', '/es', '/pt-br']) {
+  for (const slash of ['', '/']) {
+    assert.equal(
+      canonicalPagePath(`${prefix}/genjutsu-trends${slash}`),
+      '/genjutsu-trends'
+    );
+  }
+}
 console.log(
   'PASS public page slash normalization and protected locale roots/API/app/asset paths'
 );

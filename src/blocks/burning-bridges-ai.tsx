@@ -3,6 +3,7 @@ import { ArrowDown, ArrowRight, Check } from 'lucide-react';
 
 import { BURNING_BRIDGES_THEMES } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
+import { TREND_HUB_PARENT } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
@@ -118,6 +119,7 @@ export function BurningBridgesAi() {
         <section className="bridges-hero" aria-labelledby="bridges-title">
           <div>
             <PageBreadcrumbs
+              parents={[TREND_HUB_PARENT]}
               currentPage={m['bridges.nav']()}
               className="mb-6"
             />

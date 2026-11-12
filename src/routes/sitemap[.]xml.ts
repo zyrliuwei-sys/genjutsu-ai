@@ -1,7 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
-import { PUBLIC_PAGE_PATHS } from '@/config/public-pages';
+import {
+  ENGLISH_ONLY_PAGE_PATHS,
+  PUBLIC_PAGE_PATHS,
+} from '@/config/public-pages';
 import { GUIDES } from '@/lib/guides';
 import { baseLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 
@@ -10,6 +13,7 @@ type Entry = {
   lastModified?: string;
   changeFrequency: string;
   priority: number;
+  englishOnly?: boolean;
 };
 
 function urlFor(path: string, locale: string): string {
@@ -21,6 +25,14 @@ function urlFor(path: string, locale: string): string {
 // One <url> per locale, each listing the full hreflang set (incl. x-default),
 // so every translated page is discoverable on its own.
 function entryXml(e: Entry): string {
+  if (e.englishOnly)
+    return [
+      '  <url>',
+      `    <loc>${envConfigs.app_url}${e.path}</loc>`,
+      `    <changefreq>${e.changeFrequency}</changefreq>`,
+      `    <priority>${e.priority}</priority>`,
+      '  </url>',
+    ].join('\n');
   const alternates = [
     ...locales.map(
       (loc) =>
@@ -76,6 +88,14 @@ export const Route = createFileRoute('/sitemap.xml')({
           '<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
           ...entries.map(entryXml),
+          ...ENGLISH_ONLY_PAGE_PATHS.map((path) =>
+            entryXml({
+              path,
+              changeFrequency: 'weekly',
+              priority: 0.8,
+              englishOnly: true,
+            })
+          ),
           guideXml('/guides', GUIDES[0]?.meta.updated_at),
           ...GUIDES.map((guide) => guideXml(guide.href, guide.meta.updated_at)),
           '</urlset>',

@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { trendBreadcrumbSchema } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { OzilAi } from '@/blocks/ozil-ai';
@@ -64,6 +65,11 @@ export const Route = createFileRoute('/ozil-ai')({
                 inLanguage: locale,
                 primaryImageOfPage: `${envConfigs.app_url}/imgs/ozil/og.jpg`,
               },
+              trendBreadcrumbSchema(
+                'Ozil AI',
+                urlFor(locale),
+                localizeUrl(envConfigs.app_url, { locale }).href
+              ),
               {
                 '@type': 'FAQPage',
                 mainEntity: faq.map((item) => ({

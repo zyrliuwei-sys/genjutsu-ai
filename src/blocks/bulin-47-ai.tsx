@@ -3,6 +3,7 @@ import { ArrowDown, ArrowRight, Check } from 'lucide-react';
 
 import { BULIN_THEMES } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
+import { TREND_HUB_PARENT } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
@@ -104,7 +105,11 @@ export function Bulin47Ai() {
       <main className="bulin-page">
         <section className="bulin-hero" aria-labelledby="bulin-title">
           <div>
-            <PageBreadcrumbs currentPage={m['bulin.nav']()} className="mb-6" />
+            <PageBreadcrumbs
+              parents={[TREND_HUB_PARENT]}
+              currentPage={m['bulin.nav']()}
+              className="mb-6"
+            />
             <p className="bulin-eyebrow">{m['bulin.eyebrow']()}</p>
             <h1 id="bulin-title">
               {m['bulin.hero.title']()}{' '}

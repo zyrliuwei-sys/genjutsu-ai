@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { trendBreadcrumbSchema } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { BurningBridgesAi } from '@/blocks/burning-bridges-ai';
@@ -65,6 +66,11 @@ export const Route = createFileRoute('/burning-bridges-ai')({
                 inLanguage: locale,
                 primaryImageOfPage: `${envConfigs.app_url}/imgs/burning-bridges/og.jpg`,
               },
+              trendBreadcrumbSchema(
+                'Burning Bridges AI',
+                urlFor(locale),
+                localizeUrl(envConfigs.app_url, { locale }).href
+              ),
               {
                 '@type': 'FAQPage',
                 mainEntity: faq.map((item) => ({

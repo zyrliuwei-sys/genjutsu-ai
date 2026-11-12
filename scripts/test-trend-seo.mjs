@@ -115,15 +115,23 @@ for (const prefix of locales) {
       assert.equal(new URL(a[2]).pathname, `${expectedPrefix}/${slug}`);
     }
     const related = anchors(section(html, 'related-trends'));
-    assert.ok(related.length >= 3 && related.length <= 5, path);
+    assert.ok(related.length >= 4 && related.length <= 6, path);
+    assert.equal(related[0].href, '/genjutsu-trends');
+    assert.equal(
+      related[0].text,
+      'All trending AI video memesExplore all 10 trends, photo tips and templates.'
+    );
     assert.equal(new Set(related.map((a) => a.href)).size, related.length);
     assert.ok(
-      related.every(
-        (a) => a.href !== path && slugs.some((s) => a.href === `${prefix}/${s}`)
-      ),
+      related
+        .slice(1)
+        .every(
+          (a) =>
+            a.href !== path && slugs.some((s) => a.href === `${prefix}/${s}`)
+        ),
       path
     );
-    if (!prefix) for (const a of related) incoming[a.href.slice(1)]++;
+    if (!prefix) for (const a of related.slice(1)) incoming[a.href.slice(1)]++;
   }
 }
 assert.ok(Object.values(incoming).every((count) => count >= 3));

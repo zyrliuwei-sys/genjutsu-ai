@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { trendBreadcrumbSchema } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { PolloAiKissing } from '@/blocks/pollo-ai-kissing';
@@ -65,6 +66,11 @@ export const Route = createFileRoute('/pollo-ai-kissing')({
                 inLanguage: locale,
                 primaryImageOfPage: `${envConfigs.app_url}/imgs/pollo-kissing/og.jpg`,
               },
+              trendBreadcrumbSchema(
+                'Pollo AI Kissing',
+                urlFor(locale),
+                localizeUrl(envConfigs.app_url, { locale }).href
+              ),
               {
                 '@type': 'FAQPage',
                 mainEntity: faq.map((item) => ({

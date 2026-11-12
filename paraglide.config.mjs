@@ -30,6 +30,17 @@ export const paraglideConfig = {
       ],
     },
     {
+      // A single English trend index, including links from translated pages.
+      pattern: '/genjutsu-trends',
+      localized: [
+        ['en', '/genjutsu-trends'],
+        ['de', '/genjutsu-trends'],
+        ['fr', '/genjutsu-trends'],
+        ['es', '/genjutsu-trends'],
+        ['pt-BR', '/genjutsu-trends'],
+      ],
+    },
+    {
       pattern: '/',
       localized: [
         ['de', '/de'],

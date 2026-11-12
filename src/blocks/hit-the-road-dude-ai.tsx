@@ -9,6 +9,7 @@ import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
 import { HIT_THE_ROAD_THEMES } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
+import { TREND_HUB_PARENT } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
@@ -69,6 +70,7 @@ export function HitTheRoadDudeAi() {
         <section className="road-hero road-wrap" aria-labelledby="road-title">
           <div className="road-hero-copy">
             <PageBreadcrumbs
+              parents={[TREND_HUB_PARENT]}
               currentPage={m['road.nav']()}
               className="mb-7 md:mb-10"
             />

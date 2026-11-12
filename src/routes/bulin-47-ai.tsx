@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { trendBreadcrumbSchema } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { Bulin47Ai } from '@/blocks/bulin-47-ai';
@@ -64,6 +65,11 @@ export const Route = createFileRoute('/bulin-47-ai')({
                 inLanguage: locale,
                 primaryImageOfPage: `${envConfigs.app_url}/imgs/bulin/og.jpg`,
               },
+              trendBreadcrumbSchema(
+                'Bulin 47 AI',
+                urlFor(locale),
+                localizeUrl(envConfigs.app_url, { locale }).href
+              ),
               {
                 '@type': 'FAQPage',
                 mainEntity: faq.map((item) => ({

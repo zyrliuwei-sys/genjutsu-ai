@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { trendBreadcrumbSchema } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { FlyingCarAi } from '@/blocks/flying-car-ai';
@@ -64,6 +65,11 @@ export const Route = createFileRoute('/flying-car-ai')({
                 inLanguage: locale,
                 primaryImageOfPage: `${envConfigs.app_url}/imgs/flying-car/og.jpg`,
               },
+              trendBreadcrumbSchema(
+                'Flying Car AI',
+                urlFor(locale),
+                localizeUrl(envConfigs.app_url, { locale }).href
+              ),
               {
                 '@type': 'FAQPage',
                 mainEntity: faq.map((item) => ({

@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { trendBreadcrumbSchema } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
 import { HitTheRoadDudeAi } from '@/blocks/hit-the-road-dude-ai';
@@ -65,23 +66,11 @@ export const Route = createFileRoute('/hit-the-road-dude-ai')({
                 inLanguage: locale,
                 primaryImageOfPage: `${envConfigs.app_url}/imgs/hit-the-road-dude/og.jpg`,
               },
-              {
-                '@type': 'BreadcrumbList',
-                itemListElement: [
-                  {
-                    '@type': 'ListItem',
-                    position: 1,
-                    name: envConfigs.app_name,
-                    item: localizeUrl(envConfigs.app_url, { locale }).href,
-                  },
-                  {
-                    '@type': 'ListItem',
-                    position: 2,
-                    name: 'Hit the Road Dude AI',
-                    item: urlFor(locale),
-                  },
-                ],
-              },
+              trendBreadcrumbSchema(
+                'Hit the Road Dude AI',
+                urlFor(locale),
+                localizeUrl(envConfigs.app_url, { locale }).href
+              ),
               {
                 '@type': 'FAQPage',
                 mainEntity: faq.map((item) => ({

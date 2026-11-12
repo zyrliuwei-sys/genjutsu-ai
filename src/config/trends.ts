@@ -1,3 +1,31 @@
+export const TREND_HUB_PATH = '/genjutsu-trends';
+export const TREND_HUB_URL = 'https://genjutsu-ai.org/genjutsu-trends';
+export const TREND_HUB_LABEL = 'All trending AI video memes';
+export const TREND_HUB_PARENT = {
+  label: TREND_HUB_LABEL,
+  href: TREND_HUB_PATH,
+};
+
+export function trendBreadcrumbSchema(
+  name: string,
+  url: string,
+  homeUrl: string
+) {
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: homeUrl },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: TREND_HUB_LABEL,
+        item: TREND_HUB_URL,
+      },
+      { '@type': 'ListItem', position: 3, name, item: url },
+    ],
+  };
+}
+
 /** Public trend destinations shared by the homepage and discovery links. */
 export const TREND_PAGES = [
   {

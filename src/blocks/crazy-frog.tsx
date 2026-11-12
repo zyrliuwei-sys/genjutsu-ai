@@ -2,6 +2,7 @@ import { ArrowDown, ArrowRight, Check } from 'lucide-react';
 
 import { CRAZY_FROG_THEMES } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
+import { TREND_HUB_PARENT } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { Footer } from '@/blocks/footer';
 import { GenjutsuGenerator } from '@/blocks/genjutsu-generator';
@@ -68,7 +69,11 @@ export function CrazyFrog() {
       <Header />
       <main className="frog-page">
         <section className="frog-hero" aria-labelledby="frog-title">
-          <PageBreadcrumbs currentPage={m['frog.nav']()} className="mb-6" />
+          <PageBreadcrumbs
+            parents={[TREND_HUB_PARENT]}
+            currentPage={m['frog.nav']()}
+            className="mb-6"
+          />
           <p className="frog-eyebrow">{m['frog.eyebrow']()}</p>
           <h1 id="frog-title">
             {m['frog.hero.title']()} <span>{m['frog.hero.generator']()}</span>
