@@ -1,0 +1,57 @@
+/* Uses the same layout and controls as the existing trend landing pages. */
+.floor-page .dime-hero {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+}
+.floor-page .dime-hero::before {
+  display: none;
+}
+.floor-stage {
+  width: min(100%, 310px);
+  margin-inline: auto;
+}
+.floor-stage video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--muted);
+}
+.floor-stage figcaption,
+.floor-role-note {
+  margin-top: 12px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.floor-reel {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 760px;
+  gap: 24px;
+}
+.floor-page .reel-card video {
+  aspect-ratio: 9 / 16;
+}
+.floor-page .reel-card-play {
+  top: 42%;
+}
+.floor-page .dime-prose a {
+  color: var(--primary-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (max-width: 899px) {
+  .floor-page .dime-hero {
+    grid-template-columns: 1fr;
+  }
+  .floor-stage {
+    display: none;
+  }
+  .floor-reel > div {
+    flex: 0 0 74%;
+    min-width: 0;
+    scroll-snap-align: center;
+  }
+  .floor-reel .reel-card {
+    width: 100%;
+  }
+}

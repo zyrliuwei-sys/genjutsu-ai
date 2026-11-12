@@ -181,11 +181,11 @@ for (const { slug } of TREND_PAGES) {
     /<section\b[^>]*id="related-trends"[^>]*>([\s\S]*?)<\/section>/
   )![1];
   assert.equal(links(related)[0].href, '/genjutsu-trends', slug);
-  const section = trendSections.find((s) => s.href === `/${slug}`)!;
-  assert.ok(
-    child.includes(`id="${section.studio}"`),
-    `${slug}: CTA target exists`
-  );
+  const studio =
+    slug === '58th-floor-ai'
+      ? 'floor-studio'
+      : trendSections.find((s) => s.href === `/${slug}`)!.studio;
+  assert.ok(child.includes(`id="${studio}"`), `${slug}: CTA target exists`);
 }
 const home = markup(await get('/'));
 assert.ok(

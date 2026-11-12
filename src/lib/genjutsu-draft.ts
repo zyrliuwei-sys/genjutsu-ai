@@ -34,7 +34,7 @@ export type GenjutsuDraft = {
   referenceClosed?: boolean;
   referenceSource?: 'effect' | 'upload';
   lead?: DraftAsset;
-  /** Second person's photo on two-photo themes (the AI kissing page). */
+  /** Second person's photo on two-photo themes (kissing and studio duets). */
   partner?: DraftAsset;
   referenceVideo?: DraftAsset;
   /** Last uploaded own video, kept selectable after switching effects. */

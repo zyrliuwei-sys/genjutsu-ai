@@ -31,7 +31,7 @@ export const GUIDE_METAS: Record<string, GuideMeta> = {
       },
       {
         q: 'Does this site have a dedicated 58th Floor template?',
-        a: 'Not currently. This page explains the trend and links to the original. The custom video editor supports a 3–10-second reference clip and a lead photo; it does not offer a tested two-photo 58th Floor preset.',
+        a: 'Yes. The dedicated 58th Floor AI generator at /58th-floor-ai offers two 10-second vertical reference takes with separate photo slots for the opening-left and opening-right performers. Generation uses paid credits, and the result should be reviewed for likeness and lip timing.',
       },
       {
         q: 'Is creating a video free?',

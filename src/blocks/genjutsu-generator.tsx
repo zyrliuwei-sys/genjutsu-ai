@@ -6,6 +6,7 @@ import {
   CRAZY_FROG_THEMES,
   DAME_HOMBRO_THEMES,
   DIME_DIME_BABY_THEMES,
+  FLOOR_THEMES,
   FLYING_CAR_THEMES,
   HIT_THE_ROAD_THEMES,
   KISS_THEMES,
@@ -36,12 +37,41 @@ export function GenjutsuGenerator({
     | 'hombro'
     | 'tinydesk'
     | 'road'
-    | 'dime';
+    | 'dime'
+    | 'floor';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
   const locale = getLocale();
   const themed = useMemo(() => {
+    if (theme === 'floor') {
+      return {
+        title: 'Make your 58th Floor video',
+        choose: 'Choose your studio take',
+        photo: 'Photo 1 · Left',
+        photoHint: 'Left at clip start',
+        generate: 'Generate my 58th Floor video',
+        loading: 'Making your studio duet…',
+        retry: 'Try this duet again',
+        uploadTemplateId: '58th-floor-ai',
+        pickerInPanel: true,
+        partner: {
+          photo: 'Photo 2 · Right',
+          photoHint: 'Right at clip start',
+        },
+        templates: FLOOR_THEMES.map((item) => ({
+          id: `floor-${item.slug}`,
+          name: item.name,
+          asset: `floor-${item.slug}`,
+          image: `/videos/58th-floor/${item.slug}.jpg`,
+          thumb: `/videos/58th-floor/${item.slug}.jpg`,
+          clip: `/videos/58th-floor/references/${item.slug}.mp4`,
+          duration: item.seconds,
+          ratios: '9:16',
+          prompt: '',
+        })),
+      };
+    }
     if (theme === 'road') {
       const names = [
         m['road.examples.pickup'](),

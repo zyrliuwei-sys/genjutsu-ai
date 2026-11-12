@@ -1,5 +1,6 @@
 export const TREND_HUB_PATH = '/genjutsu-trends';
 export const FLOOR_GUIDE_PATH = '/guides/58th-floor';
+export const FLOOR_PAGE_PATH = '/58th-floor-ai';
 export const TREND_HUB_URL = 'https://genjutsu-ai.org/genjutsu-trends';
 export const TREND_HUB_LABEL = 'All trending AI video memes';
 export const TREND_HUB_PARENT = {
@@ -29,6 +30,11 @@ export function trendBreadcrumbSchema(
 
 /** Public trend destinations shared by the homepage and discovery links. */
 export const TREND_PAGES = [
+  {
+    slug: '58th-floor-ai',
+    key: 'floor',
+    image: '/videos/58th-floor/handoff.jpg',
+  },
   {
     slug: 'hit-the-road-dude-ai',
     key: 'road',
@@ -73,6 +79,12 @@ export type TrendSlug = (typeof TREND_PAGES)[number]['slug'];
 
 /** Hand-picked adjacent music, reaction and photo-to-scene workflows. */
 export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
+  '58th-floor-ai': [
+    'tiny-desk-ai',
+    'bulin-47-ai',
+    'burning-bridges-ai',
+    'pollo-ai-kissing',
+  ],
   'hit-the-road-dude-ai': [
     'dime-dime-baby-ai',
     'crazy-frog-ai',
@@ -106,6 +118,7 @@ export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
     'bulin-47-ai',
   ],
   'bulin-47-ai': [
+    '58th-floor-ai',
     'dime-dime-baby-ai',
     'dame-hombro-ai',
     'burning-bridges-ai',
@@ -131,6 +144,7 @@ export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
     'pollo-ai-kissing',
   ],
   'tiny-desk-ai': [
+    '58th-floor-ai',
     'burning-bridges-ai',
     'pollo-ai-kissing',
     'flying-car-ai',

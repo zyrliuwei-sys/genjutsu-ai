@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowRight } from 'lucide-react';
 
-import { FLOOR_GUIDE_PATH } from '@/config/trends';
+import { FLOOR_PAGE_PATH } from '@/config/trends';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
 import { SiteBreadcrumbs } from '@/components/site-breadcrumbs';
@@ -52,14 +52,14 @@ export function GenjutsuTrends() {
         </header>
 
         <aside className="trends-wrap border-border mb-10 border-y py-6">
-          <p className="trends-kicker">New trend guide</p>
-          <a className="trends-text-link" href={FLOOR_GUIDE_PATH}>
-            58th Floor: the COLORS performance and AI video trend
+          <p className="trends-kicker">New studio template</p>
+          <a className="trends-text-link" href={FLOOR_PAGE_PATH}>
+            58th Floor AI: make your two-photo studio duet
             <ArrowRight size={17} aria-hidden />
           </a>
           <p className="text-muted-foreground mt-2 max-w-2xl">
-            Watch the original teal-studio duet, understand the two-photo
-            remakes and check what an editor needs to recreate the exchange.
+            Pick a 10-second teal-studio take, upload one portrait for each
+            performer and generate your own version.
           </p>
         </aside>
 

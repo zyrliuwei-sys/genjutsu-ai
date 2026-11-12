@@ -173,6 +173,8 @@ async function POST({ request }: { request: Request }) {
       Object.hasOwn(GENJUTSU_REFERENCES, body.templateId)
         ? GENJUTSU_REFERENCES[body.templateId]
         : undefined;
+    if (reference?.subject === 'duo' && !crowdImage)
+      return respErr('Two performer photos are required');
     const prompt = buildGenjutsuPrompt(
       reference?.direction ?? '',
       Boolean(crowdImage),

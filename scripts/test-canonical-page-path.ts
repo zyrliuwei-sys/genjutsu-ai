@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 
-import { PUBLIC_PAGE_PATHS } from '../src/config/public-pages';
+import {
+  ENGLISH_ONLY_PAGE_PATHS,
+  PUBLIC_PAGE_PATHS,
+} from '../src/config/public-pages';
 import { canonicalPagePath } from '../src/lib/canonical-page-path';
 
 for (const prefix of ['', '/de', '/fr', '/es', '/pt-br']) {
@@ -26,10 +29,8 @@ for (const path of [
 assert.equal(canonicalPagePath('/guides/'), '/guides');
 for (const prefix of ['', '/de', '/fr', '/es', '/pt-br']) {
   for (const slash of ['', '/']) {
-    assert.equal(
-      canonicalPagePath(`${prefix}/genjutsu-trends${slash}`),
-      '/genjutsu-trends'
-    );
+    for (const path of ENGLISH_ONLY_PAGE_PATHS)
+      assert.equal(canonicalPagePath(`${prefix}${path}${slash}`), path);
   }
 }
 console.log(

@@ -60,12 +60,12 @@ assert.equal(
     .replace(/<!--.*?-->/g, ''),
   'Put yourself in any viral video with Genjutsu AI'
 );
-assertDestinations(
-  section(home, 'trending-ai-video-effects'),
-  slugs.map((s) => `/${s}`)
-);
+assertDestinations(section(home, 'trending-ai-video-effects'), [
+  ...slugs.map((s) => `/${s}`),
+  '/58th-floor-ai',
+]);
 console.log(
-  `PASS curl homepage: ${slugs.length} static trend cards; protected title and H1 preserved`
+  `PASS curl homepage: ${slugs.length + 1} static trend cards; protected title and H1 preserved`
 );
 
 for (const prefix of locales) {
@@ -74,10 +74,10 @@ for (const prefix of locales) {
   const links = headings.flatMap((h) => anchors(h[1]));
   assert.equal(links.length, 10, `${prefix}: effect-title links`);
   assert.ok(links.every((a) => a.href === `${prefix}/create#genjutsu-effects`));
-  assertDestinations(
-    section(effects, 'trending-ai-video-effects'),
-    slugs.map((s) => `${prefix}/${s}`)
-  );
+  assertDestinations(section(effects, 'trending-ai-video-effects'), [
+    ...slugs.map((s) => `${prefix}/${s}`),
+    '/58th-floor-ai',
+  ]);
 }
 console.log(
   `PASS curl effects pages: ten linked effect headings plus ${slugs.length} trend destinations per locale`
@@ -127,11 +127,17 @@ for (const prefix of locales) {
         .slice(1)
         .every(
           (a) =>
-            a.href !== path && slugs.some((s) => a.href === `${prefix}/${s}`)
+            a.href !== path &&
+            (a.href === '/58th-floor-ai' ||
+              slugs.some((s) => a.href === `${prefix}/${s}`))
         ),
       path
     );
-    if (!prefix) for (const a of related.slice(1)) incoming[a.href.slice(1)]++;
+    if (!prefix)
+      for (const a of related.slice(1)) {
+        if (Object.hasOwn(incoming, a.href.slice(1)))
+          incoming[a.href.slice(1)]++;
+      }
   }
 }
 assert.ok(Object.values(incoming).every((count) => count >= 3));

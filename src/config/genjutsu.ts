@@ -265,13 +265,54 @@ export const HIT_THE_ROAD_THEMES = [
 const hitTheRoadDirection = (lead: string) =>
   `Replace only the driver (${lead}) in the pickup window with the subject from the image. Keep the white truck, window frame, steering wheel, pond-side greenery, off-camera speaker, skeptical glances, lean and pointing gestures from the reference. Preserve shot framing, timing and original sound. Keep the replacement seated inside the cab; do not add passengers, text or new actions.`;
 
-export type GenjutsuSubject = 'person' | 'vehicle' | 'couple' | 'character';
+/** Two 10-second cuts; photo roles follow the opening shot, not later cuts. */
+export const FLOOR_THEMES = [
+  {
+    slug: 'handoff',
+    name: 'The mic handoff',
+    left: 'performer in the pink suit',
+    right: 'performer in the black sleeveless top',
+    seconds: 10,
+  },
+  {
+    slug: 'wide-duet',
+    name: 'The wide studio duet',
+    left: 'performer in the black sleeveless top',
+    right: 'performer in the pink suit',
+    seconds: 10,
+  },
+] as const;
+
+const floorDirection = (left: string, right: string) =>
+  `Photo 1 replaces the opening-left ${left}; photo 2 replaces the opening-right ${right}. Follow these same two performers through every close-up and camera cut, even if their screen positions change. Keep the teal studio, single hanging microphone, alternating performance, listening reactions, hand gestures, timing and original sound. Do not add a kiss, extra people, text or new actions.`;
+
+export type GenjutsuSubject =
+  | 'person'
+  | 'vehicle'
+  | 'couple'
+  | 'character'
+  | 'duo';
 
 /** Trusted reference context: never transform scenery when replacing a performer. */
 export const GENJUTSU_REFERENCES: Record<
   string,
   { name: string; direction: string; subject?: GenjutsuSubject }
 > = {
+  ...Object.fromEntries(
+    FLOOR_THEMES.map((theme) => [
+      `floor-${theme.slug}`,
+      {
+        name: theme.name,
+        direction: floorDirection(theme.left, theme.right),
+        subject: 'duo' as const,
+      },
+    ])
+  ),
+  '58th-floor-ai': {
+    name: '58th Floor AI',
+    direction: floorDirection('performer', 'performer'),
+    subject: 'duo',
+  },
   ...Object.fromEntries(
     HIT_THE_ROAD_THEMES.map((theme) => [
       `road-${theme.slug}`,
@@ -620,6 +661,17 @@ export function buildGenjutsuPrompt(
 ) {
   const crowd = provider === 'fal' ? '@Image1' : 'reference image 2';
   const extra = typeof prompt === 'string' ? prompt.trim().slice(0, 500) : '';
+  if (subject === 'duo') {
+    if (!hasCrowd) throw new Error('Two performer photos are required');
+    const left = provider === 'fal' ? '@Element1' : 'reference image 1';
+    const right = provider === 'fal' ? '@Image1' : 'reference image 2';
+    const base = [
+      'Edit the input video. Preserve the original studio, microphone, lighting, framing, timing, camera moves and cuts.',
+      `Replace the performer on the left in the opening shot with the person in ${left}, and the performer on the right with the person in ${right}. Keep each assigned identity throughout close-ups, wide shots and changes of screen position.`,
+      'Use each photo for its own facial features, hair and skin tone. Preserve the performance handoff, mouth movements, gestures and reactions from the reference. Do not merge faces, swap roles, duplicate a performer or add people or actions.',
+    ].join(' ');
+    return extra ? `${base}\nAdditional direction: ${extra}` : base;
+  }
   if (subject === 'character') {
     const character =
       provider === 'fal' ? '@Element1' : 'the subject in reference image 1';

@@ -1,4 +1,4 @@
-import { TREND_HUB_PATH } from '@/config/trends';
+import { FLOOR_PAGE_PATH, TREND_HUB_PATH } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { SiteHeader, type NavItem } from '@/components/site-header';
 
@@ -8,6 +8,12 @@ export function Header() {
       label: m['landing.nav.trending'](),
       items: [
         { href: TREND_HUB_PATH, label: 'All trends' },
+        {
+          href: FLOOR_PAGE_PATH,
+          label: m['floor.nav'](),
+          description: m['landing.hero.floor_tag'](),
+          thumb: '/videos/58th-floor/handoff.jpg',
+        },
         {
           href: '/hit-the-road-dude-ai',
           label: m['road.nav'](),
