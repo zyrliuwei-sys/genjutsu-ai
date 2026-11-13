@@ -8,6 +8,37 @@ import type { GuideMeta } from '@/lib/guides';
  * structured data: keep each answer identical to the text on the page.
  */
 export const GUIDE_METAS: Record<string, GuideMeta> = {
+  'who-started-sheru-bhai-trend': {
+    title: 'Who Started Sheru Bhai Trend? Origins & Video Examples',
+    h1: 'Who started the Sheru Bhai trend?',
+    description:
+      'Who started Sheru Bhai trend? Separate Digital Sheru’s origin story from the wider AI lion meme, watch two video examples, and check the evidence.',
+    card_title: 'Who started the Sheru Bhai trend?',
+    published_at: '2026-11-13',
+    updated_at: '2026-11-13',
+    faq: [
+      {
+        q: 'Who started Sheru Bhai trend?',
+        a: 'We could not verify a single originator of the wider Sheru Bhai trend. Digital Tools attributes its own Digital Sheru project to an idea suggested by Abdul Rahim and videos made by his friend. That account covers one project, not every Sheru Bhai video.',
+      },
+      {
+        q: 'Is Sheru Bhai a real person?',
+        a: 'In these videos, Sheru Bhai is a fictional AI lion character with a human-like body. A creator, narrator or person appearing beside the lion is separate from that character.',
+      },
+      {
+        q: 'Is the October 8 auction video the original Sheru Bhai video?',
+        a: 'It is a dated example uploaded by PixelBot | Matrix on October 8, 2026. Its publication date establishes when that upload appeared, but does not prove that it was the first Sheru Bhai video.',
+      },
+      {
+        q: 'Are a Sheru photo, a lion-head entrance and an auction story the same effect?',
+        a: 'They share a character idea but need different workflows. A photo is a still image; an entrance needs motion; an auction story also needs multiple shots, reactions and often dialogue. Check which result a tool actually offers.',
+      },
+      {
+        q: 'Were these examples generated on this website?',
+        a: 'No. The palace clip is credited to Vismuse and the auction video to PixelBot | Matrix. They are external references. This guide does not offer a dedicated Sheru preset; the custom editor accepts your own 3–10 second reference clip and a subject photo, with paid generation.',
+      },
+    ],
+  },
   '58th-floor': {
     title: '58th Floor: The COLORS Performance and AI Video Trend Explained',
     h1: '58th Floor: The Song, the COLORS Show and the AI Trend',

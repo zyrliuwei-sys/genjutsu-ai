@@ -5,6 +5,10 @@ import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
 import { mdxComponents } from '@/components/mdx-components';
 
+// Load article styling with the route so the server-rendered body is styled
+// before its lazy MDX module hydrates. Selectors are scoped to this guide.
+import '@/styles/sheru-guide.css';
+
 export const Route = createFileRoute('/guides')({
   component: GuidesLayout,
 });

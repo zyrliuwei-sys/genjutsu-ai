@@ -1,5 +1,6 @@
 export const TREND_HUB_PATH = '/genjutsu-trends';
 export const FLOOR_GUIDE_PATH = '/guides/58th-floor';
+export const SHERU_GUIDE_PATH = '/guides/who-started-sheru-bhai-trend';
 export const FLOOR_PAGE_PATH = '/58th-floor-ai';
 export const TREND_HUB_URL = 'https://genjutsu-ai.org/genjutsu-trends';
 export const TREND_HUB_LABEL = 'All trending AI video memes';

@@ -2,6 +2,7 @@ import { tDynamic } from '@/core/i18n/dynamic';
 import {
   FLOOR_GUIDE_PATH,
   RELATED_TRENDS,
+  SHERU_GUIDE_PATH,
   TREND_HUB_LABEL,
   TREND_HUB_PATH,
   TREND_PAGES,
@@ -54,6 +55,16 @@ export function RelatedTrends({ currentSlug }: { currentSlug: TrendSlug }) {
             className="text-primary text-sm font-medium underline underline-offset-4"
           >
             {m['landing.trends.floor_guide']()}
+          </a>
+        )}
+        {['hit-the-road-dude-ai', 'crazy-frog-ai', 'flying-car-ai'].includes(
+          currentSlug
+        ) && (
+          <a
+            href={SHERU_GUIDE_PATH}
+            className="text-primary text-sm font-medium underline underline-offset-4"
+          >
+            {m['landing.trends.sheru_guide']()}
           </a>
         )}
       </div>

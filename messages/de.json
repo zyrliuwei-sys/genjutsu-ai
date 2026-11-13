@@ -1306,5 +1306,6 @@
   "landing.hero.road_tag": "Das Pickup-Meme vom Privatgrundstück",
   "landing.pricing.continue_stripe": "Weiter zu Stripe · {price}",
   "landing.pricing.stripe_pack_hint": "Wähle ein Paket, um zum Stripe-Checkout zu gelangen.",
-  "landing.trends.floor_guide": "Der 58th Floor AI-Trend erklärt"
+  "landing.trends.floor_guide": "Der 58th Floor AI-Trend erklärt",
+  "landing.trends.sheru_guide": "Wer hat den Sheru-Bhai-Trend gestartet?"
 }

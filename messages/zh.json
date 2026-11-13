@@ -2061,6 +2061,7 @@
   "landing.pricing.continue_stripe": "前往 Stripe 支付 · {price}",
   "landing.pricing.stripe_pack_hint": "点击套餐，直接进入 Stripe 结账页面。",
   "landing.trends.floor_guide": "58th Floor AI 热门趋势解读",
+  "landing.trends.sheru_guide": "Sheru Bhai 热潮是谁发起的？",
   "floor.nav": "58th Floor AI",
   "landing.hero.floor_tag": "两张照片，一段双人录音室表演"
 }

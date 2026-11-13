@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowRight } from 'lucide-react';
 
-import { FLOOR_PAGE_PATH } from '@/config/trends';
+import { FLOOR_PAGE_PATH, SHERU_GUIDE_PATH } from '@/config/trends';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
 import { SiteBreadcrumbs } from '@/components/site-breadcrumbs';
@@ -60,6 +60,18 @@ export function GenjutsuTrends() {
           <p className="text-muted-foreground mt-2 max-w-2xl">
             Pick a 10-second teal-studio take, upload one portrait for each
             performer and generate your own version.
+          </p>
+        </aside>
+
+        <aside className="trends-wrap border-border mb-10 border-b pb-6">
+          <p className="trends-kicker">Trend origins</p>
+          <a className="trends-text-link" href={SHERU_GUIDE_PATH}>
+            Who started the Sheru Bhai trend?
+            <ArrowRight size={17} aria-hidden />
+          </a>
+          <p className="text-muted-foreground mt-2 max-w-2xl">
+            Follow the Digital Sheru origin story, compare two video examples
+            and see what the available sources actually establish.
           </p>
         </aside>
 
