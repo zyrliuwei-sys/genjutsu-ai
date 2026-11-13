@@ -1,6 +1,7 @@
 export const TREND_HUB_PATH = '/genjutsu-trends';
 export const FLOOR_GUIDE_PATH = '/guides/58th-floor';
 export const SHERU_GUIDE_PATH = '/guides/who-started-sheru-bhai-trend';
+export const SHERU_PAGE_PATH = '/sheru-bhai-ai';
 export const FLOOR_PAGE_PATH = '/58th-floor-ai';
 export const TREND_HUB_URL = 'https://genjutsu-ai.org/genjutsu-trends';
 export const TREND_HUB_LABEL = 'All trending AI video memes';
@@ -74,12 +75,23 @@ export const TREND_PAGES = [
     key: 'tinydesk',
     image: '/videos/tiny-desk/laugh.jpg',
   },
+  {
+    slug: 'sheru-bhai-ai',
+    key: 'sheru',
+    image: '/videos/sheru/palace.jpg',
+  },
 ] as const;
 
 export type TrendSlug = (typeof TREND_PAGES)[number]['slug'];
 
 /** Hand-picked adjacent music, reaction and photo-to-scene workflows. */
 export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
+  'sheru-bhai-ai': [
+    'hit-the-road-dude-ai',
+    'crazy-frog-ai',
+    'flying-car-ai',
+    'dime-dime-baby-ai',
+  ],
   '58th-floor-ai': [
     'tiny-desk-ai',
     'bulin-47-ai',
@@ -87,6 +99,7 @@ export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
     'pollo-ai-kissing',
   ],
   'hit-the-road-dude-ai': [
+    'sheru-bhai-ai',
     'dime-dime-baby-ai',
     'crazy-frog-ai',
     'dame-hombro-ai',
@@ -106,17 +119,18 @@ export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
     'tiny-desk-ai',
   ],
   'flying-car-ai': [
+    'sheru-bhai-ai',
     'crazy-frog-ai',
     'ozil-ai',
     'pollo-ai-kissing',
     'tiny-desk-ai',
   ],
   'crazy-frog-ai': [
+    'sheru-bhai-ai',
     'hit-the-road-dude-ai',
     'flying-car-ai',
     'ozil-ai',
     'dime-dime-baby-ai',
-    'bulin-47-ai',
   ],
   'bulin-47-ai': [
     '58th-floor-ai',

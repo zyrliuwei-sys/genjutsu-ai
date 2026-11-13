@@ -286,11 +286,20 @@ export const FLOOR_THEMES = [
 const floorDirection = (left: string, right: string) =>
   `Photo 1 replaces the opening-left ${left}; photo 2 replaces the opening-right ${right}. Follow these same two performers through every close-up and camera cut, even if their screen positions change. Keep the teal studio, single hanging microphone, alternating performance, listening reactions, hand gestures, timing and original sound. Do not add a kiss, extra people, text or new actions.`;
 
+/** Prepared silent 10-second palace reference, normalized to 720×1280. */
+export const SHERU_THEMES = [
+  { slug: 'palace', name: 'Palace entrance', seconds: 10 },
+] as const;
+
+const SHERU_DIRECTION =
+  'Transform only the main walking figure into a pale lion-headed adult using the photo for body build, clothing and shoes. Keep the palace columns, floor reflections, forward walk, side glance, final stance, camera and timing of the reference. Keep the mane attached naturally above the collar. Do not copy the original brown jacket unless it appears in the photo. Do not add an auction, dialogue, extra people, text or new actions.';
+
 export type GenjutsuSubject =
   | 'person'
   | 'vehicle'
   | 'couple'
   | 'character'
+  | 'lion'
   | 'duo';
 
 /** Trusted reference context: never transform scenery when replacing a performer. */
@@ -298,6 +307,22 @@ export const GENJUTSU_REFERENCES: Record<
   string,
   { name: string; direction: string; subject?: GenjutsuSubject }
 > = {
+  ...Object.fromEntries(
+    SHERU_THEMES.map((theme) => [
+      `sheru-${theme.slug}`,
+      {
+        name: theme.name,
+        direction: SHERU_DIRECTION,
+        subject: 'lion' as const,
+      },
+    ])
+  ),
+  'sheru-bhai-ai': {
+    name: 'Sheru Bhai AI',
+    direction:
+      'Transform only the main adult into a pale lion-headed character. Use the photo for body build, clothing and shoes; preserve the uploaded clip’s setting, walk, gestures, framing and timing. Keep the mane naturally above the collar. Do not add people, dialogue, text, logos or new actions.',
+    subject: 'lion',
+  },
   ...Object.fromEntries(
     FLOOR_THEMES.map((theme) => [
       `floor-${theme.slug}`,
@@ -661,6 +686,15 @@ export function buildGenjutsuPrompt(
 ) {
   const crowd = provider === 'fal' ? '@Image1' : 'reference image 2';
   const extra = typeof prompt === 'string' ? prompt.trim().slice(0, 500) : '';
+  if (subject === 'lion') {
+    const person = provider === 'fal' ? '@Element1' : 'reference image 1';
+    const base = [
+      'Edit the input video. Preserve the original background, lighting, camera motion, framing and timing.',
+      `Use the adult in ${person} as the reference for the main figure’s body proportions, outfit, colors and shoes. Replace the head with a realistic pale lion head and full mane, naturally joined to the clothed human body. The head must be a lion, not the original human face.`,
+      'Keep one consistent lion-headed character, two human arms and legs, grounded footsteps and coherent shadows. Preserve the reference performance. No extra limbs, duplicate people, face merging, text, logos or unrelated cuts.',
+    ].join(' ');
+    return extra ? `${base}\nAdditional direction: ${extra}` : base;
+  }
   if (subject === 'duo') {
     if (!hasCrowd) throw new Error('Two performer photos are required');
     const left = provider === 'fal' ? '@Element1' : 'reference image 1';

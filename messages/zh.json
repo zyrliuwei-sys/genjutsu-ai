@@ -2063,5 +2063,14 @@
   "landing.trends.floor_guide": "58th Floor AI 热门趋势解读",
   "landing.trends.sheru_guide": "Sheru Bhai 热潮是谁发起的？",
   "floor.nav": "58th Floor AI",
-  "landing.hero.floor_tag": "两张照片，一段双人录音室表演"
+  "landing.hero.floor_tag": "两张照片，一段双人录音室表演",
+  "sheru.nav": "Sheru Bhai AI",
+  "landing.hero.sheru_tag": "一张照片，狮头角色出场",
+  "sheru.generator.title": "制作你的 Sheru Bhai 视频",
+  "sheru.generator.choose": "选择出场场景",
+  "sheru.generator.photo": "你的全身照片",
+  "sheru.generator.photo_hint": "单人成人，服装和鞋子清晰可见",
+  "sheru.generator.generate": "生成我的 Sheru 视频",
+  "sheru.generator.loading": "正在制作狮头角色出场视频…",
+  "sheru.generator.retry": "重新尝试这个出场场景"
 }

@@ -1307,5 +1307,14 @@
   "landing.pricing.continue_stripe": "Continuer vers Stripe · {price}",
   "landing.pricing.stripe_pack_hint": "Choisissez un pack pour passer au paiement Stripe.",
   "landing.trends.floor_guide": "Comprendre la tendance 58th Floor AI",
-  "landing.trends.sheru_guide": "Qui a lancé la tendance Sheru Bhai ?"
+  "landing.trends.sheru_guide": "Qui a lancé la tendance Sheru Bhai ?",
+  "sheru.nav": "Sheru Bhai AI",
+  "landing.hero.sheru_tag": "Une photo, une entrée à tête de lion",
+  "sheru.generator.title": "Créez votre vidéo Sheru Bhai",
+  "sheru.generator.choose": "Choisissez votre entrée",
+  "sheru.generator.photo": "Votre photo en pied",
+  "sheru.generator.photo_hint": "Un adulte, vêtements et chaussures visibles",
+  "sheru.generator.generate": "Créer ma vidéo Sheru",
+  "sheru.generator.loading": "Création de votre entrée de lion…",
+  "sheru.generator.retry": "Réessayer cette entrée"
 }

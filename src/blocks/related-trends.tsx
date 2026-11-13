@@ -22,7 +22,7 @@ export function RelatedTrends({ currentSlug }: { currentSlug: TrendSlug }) {
           {
             href: TREND_HUB_PATH,
             label: TREND_HUB_LABEL,
-            description: 'Explore all 10 trends, photo tips and templates.',
+            description: 'Explore trends, photo tips and templates.',
             image: '/videos/dime-dime-baby/black-shirt.jpg',
           },
           ...RELATED_TRENDS[currentSlug].map((slug) => {

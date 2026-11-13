@@ -1,0 +1,39 @@
+.sheru-page .dime-hero {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+}
+.sheru-page .dime-hero::before {
+  display: none;
+}
+.sheru-stage {
+  width: min(100%, 310px);
+  margin-inline: auto;
+}
+.sheru-stage video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--muted);
+}
+.sheru-stage figcaption {
+  margin-top: 12px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.sheru-page .dime-prose a,
+.sheru-stage a {
+  color: var(--primary-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (max-width: 899px) {
+  .sheru-page .dime-hero {
+    grid-template-columns: 1fr;
+  }
+  /* The same playable reference is shown in the generator on phones. */
+  .sheru-stage {
+    display: none;
+  }
+}

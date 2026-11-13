@@ -1,6 +1,10 @@
 import { ArrowDown, ArrowRight } from 'lucide-react';
 
-import { FLOOR_PAGE_PATH, SHERU_GUIDE_PATH } from '@/config/trends';
+import {
+  FLOOR_PAGE_PATH,
+  SHERU_GUIDE_PATH,
+  SHERU_PAGE_PATH,
+} from '@/config/trends';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
 import { SiteBreadcrumbs } from '@/components/site-breadcrumbs';
@@ -64,7 +68,15 @@ export function GenjutsuTrends() {
         </aside>
 
         <aside className="trends-wrap border-border mb-10 border-b pb-6">
-          <p className="trends-kicker">Trend origins</p>
+          <p className="trends-kicker">New lion-head template</p>
+          <a className="trends-text-link" href={SHERU_PAGE_PATH}>
+            Sheru Bhai AI: make your lion-head entrance
+            <ArrowRight size={17} aria-hidden />
+          </a>
+          <p className="text-muted-foreground my-2 max-w-2xl">
+            Upload one full-body photo for the 10-second palace walk, then
+            explore the character’s origin story below.
+          </p>
           <a className="trends-text-link" href={SHERU_GUIDE_PATH}>
             Who started the Sheru Bhai trend?
             <ArrowRight size={17} aria-hidden />

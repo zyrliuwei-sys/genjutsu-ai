@@ -11,6 +11,7 @@ import {
   HIT_THE_ROAD_THEMES,
   KISS_THEMES,
   OZIL_THEMES,
+  SHERU_THEMES,
   TINY_DESK_THEMES,
 } from '@/config/genjutsu';
 import { pricingCatalog } from '@/config/pricing';
@@ -38,12 +39,38 @@ export function GenjutsuGenerator({
     | 'tinydesk'
     | 'road'
     | 'dime'
+    | 'sheru'
     | 'floor';
 } = {}) {
   // Mode switcher (Video Character Swap / Text to Video) is hidden for now.
   const [mode] = useState<'text' | 'edit'>('edit');
   const locale = getLocale();
   const themed = useMemo(() => {
+    if (theme === 'sheru') {
+      return {
+        title: m['sheru.generator.title'](),
+        choose: m['sheru.generator.choose'](),
+        photo: m['sheru.generator.photo'](),
+        photoHint: m['sheru.generator.photo_hint'](),
+        generate: m['sheru.generator.generate'](),
+        loading: m['sheru.generator.loading'](),
+        retry: m['sheru.generator.retry'](),
+        uploadTemplateId: 'sheru-bhai-ai',
+        pickerInPanel: true,
+        preserveFullPhoto: true,
+        templates: SHERU_THEMES.map((item) => ({
+          id: `sheru-${item.slug}`,
+          name: item.name,
+          asset: `sheru-${item.slug}`,
+          image: `/videos/sheru/${item.slug}.jpg`,
+          thumb: `/videos/sheru/${item.slug}.jpg`,
+          clip: `/videos/sheru/references/${item.slug}.mp4`,
+          duration: item.seconds,
+          ratios: '9:16',
+          prompt: '',
+        })),
+      };
+    }
     if (theme === 'floor') {
       return {
         title: 'Make your 58th Floor video',

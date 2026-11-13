@@ -35,7 +35,7 @@ export const GUIDE_METAS: Record<string, GuideMeta> = {
       },
       {
         q: 'Were these examples generated on this website?',
-        a: 'No. The palace clip is credited to Vismuse and the auction video to PixelBot | Matrix. They are external references. This guide does not offer a dedicated Sheru preset; the custom editor accepts your own 3–10 second reference clip and a subject photo, with paid generation.',
+        a: 'No. The palace clip is credited to Vismuse and the auction video to PixelBot | Matrix. They are external references. Our dedicated Sheru Bhai AI generator uses the 10-second palace clip as a prepared reference and your full-body photo to request a lion-headed character with your outfit. Personalized generation requires paid credits.',
       },
     ],
   },

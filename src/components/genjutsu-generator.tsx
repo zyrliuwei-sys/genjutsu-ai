@@ -498,6 +498,8 @@ export function GenjutsuGenerator({
     uploadTemplateId: string;
     /** Desktop: pick takes inside the side panel instead of a strip under the preview. */
     pickerInPanel?: boolean;
+    /** Keep clothing and shoes when the effect needs the whole subject. */
+    preserveFullPhoto?: boolean;
     /** Visitor uploads keep the uniform landscape preview box instead of
      *  resizing it to the clip's own aspect. */
     uniformPreviewBox?: boolean;
@@ -1184,11 +1186,9 @@ export function GenjutsuGenerator({
       return;
     }
 
-    // Iron rule: the swap model must receive a usable close-up of the person,
-    // so zoom the photo in on the detected face no matter how small the
-    // person is in the original frame. Keeps the file as-is when no confident
-    // face is found or the photo is already a close-up.
-    if (type === 'image') {
+    // Face swaps benefit from a close-up. Body/outfit effects need the
+    // original framing, including the clothes and shoes.
+    if (type === 'image' && !theme?.preserveFullPhoto) {
       let timeout: ReturnType<typeof setTimeout> | undefined;
       const cropped = await Promise.race([
         cropPortraitPhoto(file).catch(() => null),

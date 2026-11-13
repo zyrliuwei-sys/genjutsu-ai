@@ -2063,5 +2063,14 @@
   "landing.trends.floor_guide": "58th Floor AI trend explained",
   "landing.trends.sheru_guide": "Who started the Sheru Bhai trend?",
   "floor.nav": "58th Floor AI",
-  "landing.hero.floor_tag": "Two photos, one teal-studio duet"
+  "landing.hero.floor_tag": "Two photos, one teal-studio duet",
+  "sheru.nav": "Sheru Bhai AI",
+  "landing.hero.sheru_tag": "One photo, a lion-head entrance",
+  "sheru.generator.title": "Make your Sheru Bhai video",
+  "sheru.generator.choose": "Choose your entrance",
+  "sheru.generator.photo": "Your full-body photo",
+  "sheru.generator.photo_hint": "One adult, outfit and shoes visible",
+  "sheru.generator.generate": "Generate my Sheru video",
+  "sheru.generator.loading": "Making your lion entrance…",
+  "sheru.generator.retry": "Try this entrance again"
 }

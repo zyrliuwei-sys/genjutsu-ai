@@ -31,13 +31,13 @@ export const paraglideConfig = {
     },
     {
       // A single English trend index, including links from translated pages.
-      pattern: '/:page(genjutsu-trends|58th-floor-ai)',
+      pattern: '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)',
       localized: [
-        ['en', '/:page(genjutsu-trends|58th-floor-ai)'],
-        ['de', '/:page(genjutsu-trends|58th-floor-ai)'],
-        ['fr', '/:page(genjutsu-trends|58th-floor-ai)'],
-        ['es', '/:page(genjutsu-trends|58th-floor-ai)'],
-        ['pt-BR', '/:page(genjutsu-trends|58th-floor-ai)'],
+        ['en', '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)'],
+        ['de', '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)'],
+        ['fr', '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)'],
+        ['es', '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)'],
+        ['pt-BR', '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)'],
       ],
     },
     {

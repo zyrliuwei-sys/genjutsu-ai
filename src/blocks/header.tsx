@@ -1,4 +1,8 @@
-import { FLOOR_PAGE_PATH, TREND_HUB_PATH } from '@/config/trends';
+import {
+  FLOOR_PAGE_PATH,
+  SHERU_PAGE_PATH,
+  TREND_HUB_PATH,
+} from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { SiteHeader, type NavItem } from '@/components/site-header';
 
@@ -73,6 +77,12 @@ export function Header() {
           label: m['tinydesk.nav'](),
           description: m['landing.hero.tinydesk_tag'](),
           thumb: '/videos/tiny-desk/laugh.jpg',
+        },
+        {
+          href: SHERU_PAGE_PATH,
+          label: m['sheru.nav'](),
+          description: m['landing.hero.sheru_tag'](),
+          thumb: '/videos/sheru/palace.jpg',
         },
       ],
     },
