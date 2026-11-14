@@ -31,13 +31,29 @@ export const paraglideConfig = {
     },
     {
       // A single English trend index, including links from translated pages.
-      pattern: '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)',
+      pattern:
+        '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai|higgsfield-katana)',
       localized: [
-        ['en', '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)'],
-        ['de', '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)'],
-        ['fr', '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)'],
-        ['es', '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)'],
-        ['pt-BR', '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai)'],
+        [
+          'en',
+          '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai|higgsfield-katana)',
+        ],
+        [
+          'de',
+          '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai|higgsfield-katana)',
+        ],
+        [
+          'fr',
+          '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai|higgsfield-katana)',
+        ],
+        [
+          'es',
+          '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai|higgsfield-katana)',
+        ],
+        [
+          'pt-BR',
+          '/:page(genjutsu-trends|58th-floor-ai|sheru-bhai-ai|higgsfield-katana)',
+        ],
       ],
     },
     {

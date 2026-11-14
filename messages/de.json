@@ -1316,5 +1316,7 @@
   "sheru.generator.photo_hint": "Eine erwachsene Person, Kleidung und Schuhe sichtbar",
   "sheru.generator.generate": "Mein Sheru-Video erstellen",
   "sheru.generator.loading": "Dein Löwenauftritt entsteht…",
-  "sheru.generator.retry": "Diesen Auftritt erneut versuchen"
+  "sheru.generator.retry": "Diesen Auftritt erneut versuchen",
+  "katana.nav": "Higgsfield Katana",
+  "landing.hero.katana_tag": "Referenz-Edits, Ablauf und Kosten"
 }

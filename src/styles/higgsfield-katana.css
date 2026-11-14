@@ -1,0 +1,400 @@
+.katana-page {
+  background: var(--background);
+  color: var(--foreground);
+}
+.katana-wrap {
+  width: min(1200px, calc(100% - 48px));
+  margin-inline: auto;
+}
+.katana-page :is(a, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 5px;
+}
+.katana-page :is(section, header)[id] {
+  scroll-margin-top: 88px;
+}
+.katana-page h2 {
+  font-family: var(--font-serif-display);
+  font-size: clamp(2.1rem, 4vw, 3.3rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.katana-page h3 {
+  font-size: 1.12rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.katana-page p {
+  line-height: 1.8;
+}
+.katana-page p a,
+.katana-source {
+  color: var(--primary-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.katana-kicker {
+  font-family: var(--font-mono-display);
+  font-size: 0.65rem;
+  line-height: 1.6;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary-text);
+}
+.katana-hero {
+  padding-top: 110px;
+}
+.katana-hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  align-items: center;
+  gap: 50px;
+  padding-block: 46px 48px;
+}
+.katana-hero h1 {
+  font-family: var(--font-serif-display);
+  font-weight: 400;
+  font-size: clamp(3.25rem, 5.5vw, 5.6rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  margin-top: 18px;
+}
+.katana-hero h1 span {
+  display: block;
+  color: var(--primary-text);
+  font-size: 0.43em;
+  line-height: 1.3;
+  margin-top: 18px;
+  letter-spacing: -0.01em;
+}
+.katana-lead {
+  margin-top: 24px;
+  font-size: 1.03rem;
+  color: var(--muted-foreground);
+}
+.katana-independent {
+  margin-top: 16px;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+}
+.katana-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 28px;
+  align-items: center;
+}
+.katana-actions .eg-pill-primary {
+  gap: 10px;
+  font-size: 0.88rem;
+}
+.katana-link,
+.katana-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+}
+.katana-hero-film {
+  min-width: 0;
+}
+.katana-hero-film video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: contain;
+  background: #090909;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.katana-page figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+  margin-block: 12px 6px;
+}
+.katana-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 30px;
+  padding-block: 20px;
+  border-block: 1px solid var(--border);
+  font-size: 0.82rem;
+}
+.katana-index a:hover,
+.katana-link:hover {
+  color: var(--primary-text);
+}
+.katana-section {
+  padding-block: 64px;
+  border-bottom: 1px solid var(--border);
+}
+.katana-section-head {
+  max-width: 780px;
+  margin-bottom: 36px;
+}
+.katana-section-head h2,
+.katana-copy h2,
+.katana-cost h2,
+.katana-faq h2 {
+  margin-top: 12px;
+}
+.katana-section-head > p:last-child:not(.katana-kicker) {
+  margin-top: 18px;
+  color: var(--muted-foreground);
+}
+.katana-three {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+.katana-three article {
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+}
+.katana-number {
+  font-family: var(--font-mono-display);
+  color: var(--primary-text);
+  font-size: 0.7rem;
+}
+.katana-three h3 {
+  margin-top: 18px;
+}
+.katana-three p {
+  margin-top: 10px;
+  color: var(--muted-foreground);
+  font-size: 0.92rem;
+}
+.katana-note {
+  margin-top: 24px;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+.katana-example-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 64px;
+  align-items: center;
+}
+.katana-square-film {
+  min-width: 0;
+  max-width: 390px;
+}
+.katana-square-film video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #090909;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.katana-copy > p:not(.katana-kicker) {
+  color: var(--muted-foreground);
+  margin-top: 18px;
+}
+.katana-checks {
+  list-style: decimal;
+  margin: 20px 0 0 22px;
+  font-size: 0.91rem;
+  line-height: 1.7;
+}
+.katana-checks li {
+  padding-left: 6px;
+  margin-block: 7px;
+}
+.katana-steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 30px 48px;
+}
+.katana-steps li {
+  display: flex;
+  gap: 18px;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+.katana-steps p {
+  overflow-wrap: anywhere;
+  color: var(--muted-foreground);
+  font-size: 0.92rem;
+  margin-block: 10px;
+}
+.katana-briefs {
+  margin-top: 44px;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+.katana-briefs > p {
+  color: var(--muted-foreground);
+  font-size: 0.86rem;
+  margin-top: 8px;
+}
+.katana-page summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 24px;
+  list-style: none;
+  padding-block: 19px;
+  cursor: pointer;
+  font-size: 0.96rem;
+  font-weight: 500;
+}
+.katana-page summary::-webkit-details-marker {
+  display: none;
+}
+.katana-page summary span {
+  color: var(--primary-text);
+}
+.katana-page details[open] > summary span {
+  transform: rotate(45deg);
+}
+.katana-briefs details {
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
+}
+.katana-briefs pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.82rem;
+  line-height: 1.85;
+  color: var(--muted-foreground);
+  padding-bottom: 12px;
+}
+.katana-cost,
+.katana-faq {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 64px;
+}
+.katana-cost .katana-copy p:first-child {
+  margin-top: 0;
+}
+.katana-table-scroll {
+  overflow-x: auto;
+  border-block: 1px solid var(--border);
+}
+.katana-table-scroll table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: left;
+  line-height: 1.7;
+}
+.katana-table-scroll :is(th, td) {
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.katana-table-scroll th {
+  font-weight: 500;
+}
+.katana-table-scroll thead {
+  background: var(--card);
+}
+.katana-table-scroll td {
+  color: var(--muted-foreground);
+  width: 38%;
+}
+.katana-editor-wrap {
+  max-width: 1320px;
+  padding: 64px 24px;
+  margin-inline: auto;
+}
+.katana-editor-note {
+  margin: 22px auto 0;
+  max-width: 780px;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+.katana-faq details {
+  border-bottom: 1px solid var(--border);
+}
+.katana-faq details p {
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  padding-bottom: 16px;
+}
+.katana-faq .katana-source {
+  margin-bottom: 20px;
+}
+.katana-sources {
+  padding-block: 30px 64px;
+}
+.katana-sources p {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  margin-block: 10px;
+}
+@media (max-width: 899px) {
+  .katana-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .katana-hero-film {
+    max-width: 620px;
+  }
+  .katana-example-grid {
+    gap: 32px;
+  }
+  .katana-cost,
+  .katana-faq {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+@media (max-width: 599px) {
+  .katana-wrap {
+    width: calc(100% - 32px);
+  }
+  .katana-hero {
+    padding-top: 92px;
+  }
+  .katana-hero-grid {
+    padding-block: 28px 30px;
+  }
+  .katana-hero h1 {
+    font-size: clamp(2.8rem, 12vw, 4rem);
+  }
+  .katana-lead {
+    font-size: 0.94rem;
+  }
+  .katana-index {
+    gap: 14px 22px;
+  }
+  .katana-section {
+    padding-block: 40px;
+  }
+  .katana-section-head {
+    margin-bottom: 25px;
+  }
+  .katana-three,
+  .katana-example-grid,
+  .katana-steps {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .katana-square-film {
+    width: min(100%, 320px);
+    margin-inline: auto;
+  }
+  .katana-briefs {
+    padding: 20px;
+  }
+  .katana-editor-wrap {
+    padding: 40px 12px;
+  }
+  .katana-editor-wrap > .katana-section-head {
+    padding-inline: 4px;
+  }
+  .katana-page figcaption {
+    flex-wrap: wrap;
+  }
+}

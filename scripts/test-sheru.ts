@@ -73,7 +73,7 @@ for (const id of ['sheru-palace', 'sheru-bhai-ai']) {
     else assert.doesNotMatch(prompt, /palace columns|brown jacket/);
   }
 }
-assert.equal(TREND_PAGES.at(-1)?.slug, 'sheru-bhai-ai');
+assert.equal(TREND_PAGES[11]?.slug, 'sheru-bhai-ai');
 assert.ok(
   Object.values(RELATED_TRENDS).filter((links) =>
     links.includes('sheru-bhai-ai')
@@ -131,8 +131,8 @@ if (process.env.SEO_TEST_ORIGIN) {
       /<section id="trending-ai-video-effects"[\s\S]*?<\/section>/
     )?.[0] || '';
   const cards = [...grid.matchAll(/<a href="([^"]+)"/g)];
-  assert.equal(cards.length, 12);
-  assert.equal(cards.at(-1)?.[1], '/sheru-bhai-ai');
+  assert.equal(cards.length, TREND_PAGES.length);
+  assert.equal(cards[11]?.[1], '/sheru-bhai-ai');
   assert.match(home, /<title>Genjutsu AI - AI Video Generator<\/title>/);
   assert.match(
     await get('/guides/who-started-sheru-bhai-trend'),

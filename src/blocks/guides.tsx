@@ -5,6 +5,7 @@ import { GUIDES } from '@/lib/guides';
 import { m } from '@/paraglide/messages.js';
 import { CONTENT_SLUGS } from '@/blocks/content-links';
 import { GuideCard } from '@/components/guide-card';
+import { KATANA_PATH, katanaMeta } from '@/content/katana';
 
 const MAX_CARDS = 8;
 
@@ -13,6 +14,11 @@ type Card = { href: string; coverTitle: string; title: string };
 /** Every guide plus the evergreen content pages, newest guides first. */
 export function guideCards(excludeHref?: string): Card[] {
   return [
+    {
+      href: KATANA_PATH,
+      coverTitle: 'Higgsfield Katana',
+      title: katanaMeta.title,
+    },
     ...GUIDES.map((guide) => ({
       href: guide.href,
       coverTitle: guide.meta.h1,

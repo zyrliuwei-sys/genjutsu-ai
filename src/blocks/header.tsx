@@ -5,6 +5,7 @@ import {
 } from '@/config/trends';
 import { m } from '@/paraglide/messages.js';
 import { SiteHeader, type NavItem } from '@/components/site-header';
+import { KATANA_PATH, katanaExamples } from '@/content/katana';
 
 export function Header() {
   const navLinks: NavItem[] = [
@@ -83,6 +84,12 @@ export function Header() {
           label: m['sheru.nav'](),
           description: m['landing.hero.sheru_tag'](),
           thumb: '/videos/sheru/palace.jpg',
+        },
+        {
+          href: KATANA_PATH,
+          label: m['katana.nav'](),
+          description: m['landing.hero.katana_tag'](),
+          thumb: katanaExamples[0].poster,
         },
       ],
     },

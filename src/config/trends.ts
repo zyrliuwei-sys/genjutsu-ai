@@ -1,3 +1,5 @@
+import { katanaExamples } from '@/content/katana';
+
 export const TREND_HUB_PATH = '/genjutsu-trends';
 export const FLOOR_GUIDE_PATH = '/guides/58th-floor';
 export const SHERU_GUIDE_PATH = '/guides/who-started-sheru-bhai-trend';
@@ -80,19 +82,32 @@ export const TREND_PAGES = [
     key: 'sheru',
     image: '/videos/sheru/palace.jpg',
   },
+  {
+    slug: 'higgsfield-katana',
+    key: 'katana',
+    image: katanaExamples[0].poster,
+  },
 ] as const;
 
 export type TrendSlug = (typeof TREND_PAGES)[number]['slug'];
 
 /** Hand-picked adjacent music, reaction and photo-to-scene workflows. */
 export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
+  'higgsfield-katana': [
+    '58th-floor-ai',
+    'tiny-desk-ai',
+    'dime-dime-baby-ai',
+    'sheru-bhai-ai',
+  ],
   'sheru-bhai-ai': [
+    'higgsfield-katana',
     'hit-the-road-dude-ai',
     'crazy-frog-ai',
     'flying-car-ai',
     'dime-dime-baby-ai',
   ],
   '58th-floor-ai': [
+    'higgsfield-katana',
     'tiny-desk-ai',
     'bulin-47-ai',
     'burning-bridges-ai',
@@ -159,10 +174,10 @@ export const RELATED_TRENDS: Record<TrendSlug, readonly TrendSlug[]> = {
     'pollo-ai-kissing',
   ],
   'tiny-desk-ai': [
+    'higgsfield-katana',
     '58th-floor-ai',
     'burning-bridges-ai',
     'pollo-ai-kissing',
     'flying-car-ai',
-    'crazy-frog-ai',
   ],
 };

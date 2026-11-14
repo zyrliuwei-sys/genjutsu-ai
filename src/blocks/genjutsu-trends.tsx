@@ -13,6 +13,7 @@ import {
   trendsFaq,
   trendsIntro,
 } from '@/content/genjutsu-trends';
+import { KATANA_PATH } from '@/content/katana';
 
 import '@/styles/genjutsu-trends.css';
 
@@ -84,6 +85,18 @@ export function GenjutsuTrends() {
           <p className="text-muted-foreground mt-2 max-w-2xl">
             Follow the Digital Sheru origin story, compare two video examples
             and see what the available sources actually establish.
+          </p>
+        </aside>
+
+        <aside className="trends-wrap border-border mb-10 border-b pb-6">
+          <p className="trends-kicker">Reference editing guide</p>
+          <a className="trends-text-link" href={KATANA_PATH}>
+            Higgsfield Katana: workflow, examples and costs
+            <ArrowRight size={17} aria-hidden />
+          </a>
+          <p className="text-muted-foreground mt-2 max-w-2xl">
+            Learn how reference edits work in Claude and compare them with a
+            short character edit in this browser.
           </p>
         </aside>
 

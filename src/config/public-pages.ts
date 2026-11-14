@@ -1,3 +1,5 @@
+import { KATANA_PATH } from '@/content/katana';
+
 import {
   FLOOR_PAGE_PATH,
   SHERU_PAGE_PATH,
@@ -10,6 +12,7 @@ export const ENGLISH_ONLY_PAGE_PATHS = [
   TREND_HUB_PATH,
   FLOOR_PAGE_PATH,
   SHERU_PAGE_PATH,
+  KATANA_PATH,
 ];
 
 /** Canonical public paths use no trailing slash, except the site root. */

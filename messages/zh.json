@@ -2072,5 +2072,7 @@
   "sheru.generator.photo_hint": "单人成人，服装和鞋子清晰可见",
   "sheru.generator.generate": "生成我的 Sheru 视频",
   "sheru.generator.loading": "正在制作狮头角色出场视频…",
-  "sheru.generator.retry": "重新尝试这个出场场景"
+  "sheru.generator.retry": "重新尝试这个出场场景",
+  "katana.nav": "Higgsfield Katana",
+  "landing.hero.katana_tag": "参考视频重剪、使用方法与费用"
 }

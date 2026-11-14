@@ -1316,5 +1316,7 @@
   "sheru.generator.photo_hint": "Un adulte, vêtements et chaussures visibles",
   "sheru.generator.generate": "Créer ma vidéo Sheru",
   "sheru.generator.loading": "Création de votre entrée de lion…",
-  "sheru.generator.retry": "Réessayer cette entrée"
+  "sheru.generator.retry": "Réessayer cette entrée",
+  "katana.nav": "Higgsfield Katana",
+  "landing.hero.katana_tag": "Montages de référence, méthode et coûts"
 }

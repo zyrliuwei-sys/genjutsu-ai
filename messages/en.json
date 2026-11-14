@@ -2072,5 +2072,7 @@
   "sheru.generator.photo_hint": "One adult, outfit and shoes visible",
   "sheru.generator.generate": "Generate my Sheru video",
   "sheru.generator.loading": "Making your lion entrance…",
-  "sheru.generator.retry": "Try this entrance again"
+  "sheru.generator.retry": "Try this entrance again",
+  "katana.nav": "Higgsfield Katana",
+  "landing.hero.katana_tag": "Reference edits, workflow and costs"
 }
